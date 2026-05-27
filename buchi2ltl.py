@@ -99,7 +99,7 @@ def reconstruct_ltl(aut):
                         or_self = f"({or_self})"
 
                     stay = f"G({or_self}) & GF({or_acc})"
-                    phi = f"({stay}) | ({or_self} U {or_ex})"
+                    phi = f"({stay}) | ({or_self} U ({or_ex}))"
                 else:
                     if self_loops:
                         or_self = " | ".join(f"({c})" for c, _ in self_loops)
