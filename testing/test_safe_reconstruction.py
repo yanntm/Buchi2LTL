@@ -1,60 +1,33 @@
+#!/usr/bin/env python3
+"""
+Temporary test script (in testing/ folder).
+
+Verifies whether the safe finite-recursion version preserves the behavior
+on the exact cases that previously worked.
+
+Key fix in this version: the "bad SCC" detector is now much more precise.
+We only reject SCCs that have more than one state (multi-state SCCs).
+This matches the original assumption "Accepting SCCs are single states with only self-loops"
+and "no complex cycles inside SCCs", while still allowing states to have
+exit edges to *other* SCCs (which is normal and was present in all the
+cases that used to work).
+"""
+
 import spot
 
-# =============================================================================
-# PROTOTYPE: Backward LTL reconstruction from TGBA
-# =============================================================================
-#
-# This is an experimental prototype, not a complete algorithm.
-#
-# Core idea (from manual reconstruction rules):
-#   - Process states backward (from accepting sinks toward the initial state).
-#   - For pure self-loop accepting SCCs:
-#         G(OR of all self-loop labels) & GF(OR of labels on accepting edges)
-#   - For states with exits:
-#         (G(self) & GF(acc)) | (self U exit)     when staying forever is possible
-#         or plain (self U exit)                  otherwise
-#
-# Current limitations / design decisions:
-#   - We only handle "linear-ish" TGBAs (the kind produced by many simple LTL
-#     formulas). We explicitly reject automata containing multi-state SCCs.
-#   - Recursion is made safe via an explicit `visiting` set (recursion stack)
-#     plus an upfront multi-state SCC filter. This guarantees finite recursion.
-#   - Trivial acceptance (`Acceptance: t`, 0 acceptance sets) is normalized
-#     by treating every transition as accepting. This allows the existing
-#     rules to handle very-weak automata (e.g. those coming from W, R, M).
-#   - The procedure is INCOMPLETE BY DESIGN. Many formulas will produce
-#     "UNSUPPORTED" or semantically incorrect results.
-#
-# The goal is to explore the space of what can be recovered by simple
-# backward labeling rules before moving to more sophisticated techniques
-# (cycle extraction + linearization, etc.).
-# =============================================================================
-
-
-def ltl_to_tgba(ltl_str):
-    """Translate LTL → TGBA using the same settings as the reconstruction."""
-    f = spot.formula(ltl_str)
-    aut = f.translate("GeneralizedBuchi", "Small", "High")
-    return aut, f
-
-
-def reconstruct_ltl(aut):
+def reconstruct_ltl_safe(aut):
     """
-    Backward LTL reconstruction from a TGBA.
+    Safe version with guaranteed finite recursion.
 
-    Returns:
-        (final_formula, state_formulas)
-
-    The reconstruction uses explicit recursion with memoization.
-    - `state_formula` acts as the memoization table.
-    - A pre-pass marks any state belonging to a multi-state SCC as unsupported.
-    - A visiting set + hard depth limit guarantees that recursion is finite.
-    - When the automaton has zero acceptance sets (trivial acceptance),
-      every transition is treated as carrying acceptance. This is a pragmatic
-      normalization that lets the existing rules handle very-weak automata.
+    Detects non-trivial structure using SCCs:
+      - Any SCC with more than 1 state is considered unsupported for now.
+      - We also keep the visiting-set guard and a hard depth limit.
     """
-    # --- Pre-pass: detect multi-state SCCs (our main structural limitation) ---
     si = spot.scc_info(aut)
+
+    # A "bad" state lives in an SCC that has multiple states.
+    # This is the main source of non-self-loop cycles that can cause
+    # deep or infinite recursion under the current rules.
     bad_states = set()
     for scc_idx in range(si.scc_count()):
         states = list(si.states_of(scc_idx))
@@ -62,11 +35,8 @@ def reconstruct_ltl(aut):
             for q in states:
                 bad_states.add(q)
 
-    # --- Pragmatic normalization for trivial acceptance ---
-    treat_all_transitions_as_accepting = (aut.acc().num_sets() == 0)
-
-    state_formula = {}   # memoization: state id -> LTL string
-    visiting = set()     # current recursion stack (for cycle detection)
+    state_formula = {}
+    visiting = set()
     MAX_DEPTH = 10000
     depth = [0]
 
@@ -81,7 +51,6 @@ def reconstruct_ltl(aut):
             return UNSUPPORTED
 
         if q in visiting:
-            # Back-edge into the current recursion stack
             state_formula[q] = UNSUPPORTED
             return UNSUPPORTED
 
@@ -97,11 +66,7 @@ def reconstruct_ltl(aut):
 
         for e in aut.out(q):
             cond = spot.bdd_format_formula(aut.get_dict(), e.cond)
-
-            if treat_all_transitions_as_accepting:
-                carries = True
-            else:
-                carries = bool(list(e.acc.sets()))
+            carries = bool(list(e.acc.sets()))
 
             if e.src == e.dst:
                 self_loops.append((cond, carries))
@@ -124,13 +89,11 @@ def reconstruct_ltl(aut):
                 else:
                     exit_terms.append(f"({cond}) & X({succ_phi})")
 
-        # --- Apply the reconstruction rules ---
+        # Apply the user's reconstruction rules (only reached on supported structure)
         if not exit_terms and self_loops:
-            # Pure self-loop state
             or_all = " | ".join(f"({c})" for c, _ in self_loops)
             if len(self_loops) > 1:
                 or_all = f"({or_all})"
-
             acc_cs = [c for c, carries in self_loops if carries]
             if acc_cs:
                 or_acc = " | ".join(f"({c})" for c in acc_cs)
@@ -144,7 +107,6 @@ def reconstruct_ltl(aut):
             or_ex = " | ".join(exit_terms)
             if len(exit_terms) > 1:
                 or_ex = f"({or_ex})"
-
             has_acc = any(carries for _, carries in self_loops)
 
             if has_acc:
@@ -176,7 +138,6 @@ def reconstruct_ltl(aut):
     init = aut.get_init_state_number()
     final = label(init)
 
-    # Light syntactic cleanup + Spot simplification (only on real formulas)
     if not (isinstance(final, str) and final.startswith("UNSUPPORTED")):
         final = final.replace(" & X(true)", " X true")
         final = final.replace("X(true)", "X true")
@@ -191,29 +152,93 @@ def reconstruct_ltl(aut):
 
 
 # =============================================================================
-# Minimal manual testing entry point
+# The exact cases that had worked before
 # =============================================================================
-if __name__ == "__main__":
-    test_cases = [
-        "(p U q) & GF r",
-        "FG a",
-        "a U b",
-        "G (p -> X p) & GF q",
-    ]
 
-    for original_str in test_cases:
-        print("\n" + "=" * 80)
-        aut, _ = ltl_to_tgba(original_str)
-        recovered, per_state = reconstruct_ltl(aut)
+KNOWN_LTL_CASES = [
+    "(p U q) & GF r",
+    "FG a",
+    "a U b",
+    "G (p -> X p) & GF q",
+]
 
-        print(f"Original LTL : {original_str}")
-        print(f"States       : {aut.num_states()}")
-        print(f"Recovered    : {recovered}")
+USER_FIRST_HOA = """HOA: v1
+name: "(p U q) & GFr"
+States: 2
+Start: 0
+AP: 3 "p" "q" "r"
+acc-name: Buchi
+Acceptance: 1 Inf(0)
+properties: trans-labels explicit-labels trans-acc deterministic
+properties: stutter-invariant
+--BODY--
+State: 0
+[0&!1] 0
+[1] 1
+State: 1
+[!2] 1
+[2] 1 {0}
+--END--
+"""
+
+USER_SECOND_HOA = """HOA: v1
+name: "G(Fq & (!p | Xp))"
+States: 2
+Start: 0
+AP: 2 "q" "p"
+acc-name: Buchi
+Acceptance: 1 Inf(0)
+properties: trans-labels explicit-labels trans-acc deterministic
+--BODY--
+State: 0
+[!0&!1] 0
+[0&!1] 0 {0}
+[1] 1
+State: 1
+[!0&1] 1
+[0&1] 1 {0}
+--END--
+"""
+
+
+def main():
+    print("=== Verification: safe reconstruct_ltl on previously working cases ===\n")
+
+    passed = 0
+    for ltl in KNOWN_LTL_CASES:
+        print(f"LTL: {ltl}")
+        aut = spot.formula(ltl).translate("GeneralizedBuchi", "Small", "High")
+        recovered, _ = reconstruct_ltl_safe(aut)
+        orig = spot.formula(ltl)
 
         if recovered.startswith("UNSUPPORTED"):
-            print("Status       : UNSUPPORTED")
+            print(f"  -> UNSUPPORTED (would have broken a previously good case)")
         else:
-            orig_f = spot.formula(original_str)
-            rec_f = spot.formula(recovered)
-            eq = spot.are_equivalent(orig_f, rec_f)
-            print(f"Equivalent?  : {eq}")
+            eq = spot.are_equivalent(orig, spot.formula(recovered))
+            print(f"  Recovered: {recovered}")
+            print(f"  Equivalent? {eq}")
+            if eq:
+                passed += 1
+
+    print("\n" + "="*70)
+    print("HOA 1 (user's original motivating example): (p U q) & GF r")
+    aut = spot.automaton(USER_FIRST_HOA)
+    rec, _ = reconstruct_ltl_safe(aut)
+    print(f"  Recovered: {rec}")
+    if not rec.startswith("UNSUPPORTED"):
+        # We know from history this one used to be equivalent
+        orig = spot.formula("(p U q) & GF r")
+        print(f"  Equivalent to original? {spot.are_equivalent(orig, spot.formula(rec))}")
+
+    print("\n" + "="*70)
+    print("HOA 2 (the second one user gave): G (p -> X p) & GF q")
+    aut = spot.automaton(USER_SECOND_HOA)
+    rec, _ = reconstruct_ltl_safe(aut)
+    print(f"  Recovered: {rec}")
+
+    print("\n" + "="*70)
+    print(f"Result: {passed} / {len(KNOWN_LTL_CASES)} simple LTL cases still fully equivalent and not rejected.")
+
+
+if __name__ == "__main__":
+    main()

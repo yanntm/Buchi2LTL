@@ -1,60 +1,27 @@
+#!/usr/bin/env python3
+"""
+Quick debug script for the "empty acceptance sets" idea.
+
+Idea from user:
+  If the automaton has 0 acceptance sets (Acceptance: t),
+  reinterpret it as if there is one acceptance set and EVERY transition carries it.
+  This makes self-loops look "accepting", so our existing G/GF rules can fire
+  and allow "stay forever" options, which is needed for very-weak automata like W.
+
+This is a pragmatic normalization to avoid special-casing 0-acc automata
+everywhere in the reconstruction logic.
+"""
+
 import spot
 
-# =============================================================================
-# PROTOTYPE: Backward LTL reconstruction from TGBA
-# =============================================================================
-#
-# This is an experimental prototype, not a complete algorithm.
-#
-# Core idea (from manual reconstruction rules):
-#   - Process states backward (from accepting sinks toward the initial state).
-#   - For pure self-loop accepting SCCs:
-#         G(OR of all self-loop labels) & GF(OR of labels on accepting edges)
-#   - For states with exits:
-#         (G(self) & GF(acc)) | (self U exit)     when staying forever is possible
-#         or plain (self U exit)                  otherwise
-#
-# Current limitations / design decisions:
-#   - We only handle "linear-ish" TGBAs (the kind produced by many simple LTL
-#     formulas). We explicitly reject automata containing multi-state SCCs.
-#   - Recursion is made safe via an explicit `visiting` set (recursion stack)
-#     plus an upfront multi-state SCC filter. This guarantees finite recursion.
-#   - Trivial acceptance (`Acceptance: t`, 0 acceptance sets) is normalized
-#     by treating every transition as accepting. This allows the existing
-#     rules to handle very-weak automata (e.g. those coming from W, R, M).
-#   - The procedure is INCOMPLETE BY DESIGN. Many formulas will produce
-#     "UNSUPPORTED" or semantically incorrect results.
-#
-# The goal is to explore the space of what can be recovered by simple
-# backward labeling rules before moving to more sophisticated techniques
-# (cycle extraction + linearization, etc.).
-# =============================================================================
-
-
-def ltl_to_tgba(ltl_str):
-    """Translate LTL → TGBA using the same settings as the reconstruction."""
-    f = spot.formula(ltl_str)
-    aut = f.translate("GeneralizedBuchi", "Small", "High")
-    return aut, f
-
-
-def reconstruct_ltl(aut):
+def reconstruct_ltl_with_empty_acc_hack(aut):
     """
-    Backward LTL reconstruction from a TGBA.
-
-    Returns:
-        (final_formula, state_formulas)
-
-    The reconstruction uses explicit recursion with memoization.
-    - `state_formula` acts as the memoization table.
-    - A pre-pass marks any state belonging to a multi-state SCC as unsupported.
-    - A visiting set + hard depth limit guarantees that recursion is finite.
-    - When the automaton has zero acceptance sets (trivial acceptance),
-      every transition is treated as carrying acceptance. This is a pragmatic
-      normalization that lets the existing rules handle very-weak automata.
+    Version of the safe reconstructor with the proposed hack:
+    If aut has 0 acceptance sets, treat every transition as carrying acc.
     """
-    # --- Pre-pass: detect multi-state SCCs (our main structural limitation) ---
     si = spot.scc_info(aut)
+
+    # Bad = multi-state SCCs (unchanged safety net)
     bad_states = set()
     for scc_idx in range(si.scc_count()):
         states = list(si.states_of(scc_idx))
@@ -62,29 +29,25 @@ def reconstruct_ltl(aut):
             for q in states:
                 bad_states.add(q)
 
-    # --- Pragmatic normalization for trivial acceptance ---
-    treat_all_transitions_as_accepting = (aut.acc().num_sets() == 0)
+    # === THE HACK ===
+    num_acc_sets = aut.acc().num_sets()
+    treat_all_as_accepting = (num_acc_sets == 0)
 
-    state_formula = {}   # memoization: state id -> LTL string
-    visiting = set()     # current recursion stack (for cycle detection)
+    state_formula = {}
+    visiting = set()
     MAX_DEPTH = 10000
     depth = [0]
-
     UNSUPPORTED = "UNSUPPORTED: non-trivial cycle or complex SCC"
 
     def label(q):
         if q in state_formula:
             return state_formula[q]
-
         if q in bad_states:
             state_formula[q] = UNSUPPORTED
             return UNSUPPORTED
-
         if q in visiting:
-            # Back-edge into the current recursion stack
             state_formula[q] = UNSUPPORTED
             return UNSUPPORTED
-
         if depth[0] > MAX_DEPTH:
             state_formula[q] = UNSUPPORTED
             return UNSUPPORTED
@@ -98,7 +61,8 @@ def reconstruct_ltl(aut):
         for e in aut.out(q):
             cond = spot.bdd_format_formula(aut.get_dict(), e.cond)
 
-            if treat_all_transitions_as_accepting:
+            # === THE KEY CHANGE ===
+            if treat_all_as_accepting:
                 carries = True
             else:
                 carries = bool(list(e.acc.sets()))
@@ -124,13 +88,11 @@ def reconstruct_ltl(aut):
                 else:
                     exit_terms.append(f"({cond}) & X({succ_phi})")
 
-        # --- Apply the reconstruction rules ---
+        # Apply rules (now self-loops in 0-acc automata will have carries=True)
         if not exit_terms and self_loops:
-            # Pure self-loop state
             or_all = " | ".join(f"({c})" for c, _ in self_loops)
             if len(self_loops) > 1:
                 or_all = f"({or_all})"
-
             acc_cs = [c for c, carries in self_loops if carries]
             if acc_cs:
                 or_acc = " | ".join(f"({c})" for c in acc_cs)
@@ -144,7 +106,6 @@ def reconstruct_ltl(aut):
             or_ex = " | ".join(exit_terms)
             if len(exit_terms) > 1:
                 or_ex = f"({or_ex})"
-
             has_acc = any(carries for _, carries in self_loops)
 
             if has_acc:
@@ -176,7 +137,6 @@ def reconstruct_ltl(aut):
     init = aut.get_init_state_number()
     final = label(init)
 
-    # Light syntactic cleanup + Spot simplification (only on real formulas)
     if not (isinstance(final, str) and final.startswith("UNSUPPORTED")):
         final = final.replace(" & X(true)", " X true")
         final = final.replace("X(true)", "X true")
@@ -187,33 +147,55 @@ def reconstruct_ltl(aut):
         except Exception:
             pass
 
-    return final, state_formula
+    return final, dict(state_formula), treat_all_as_accepting
 
 
 # =============================================================================
-# Minimal manual testing entry point
+# Test on the problematic example
 # =============================================================================
-if __name__ == "__main__":
-    test_cases = [
-        "(p U q) & GF r",
-        "FG a",
-        "a U b",
-        "G (p -> X p) & GF q",
-    ]
 
-    for original_str in test_cases:
-        print("\n" + "=" * 80)
-        aut, _ = ltl_to_tgba(original_str)
-        recovered, per_state = reconstruct_ltl(aut)
+hoa_text = """HOA: v1
+name: "!p1 W p0"
+States: 2
+Start: 1
+AP: 2 "p1" "p0"
+acc-name: all
+Acceptance: 0 t
+properties: trans-labels explicit-labels trans-acc deterministic
+properties: stutter-invariant very-weak
+--BODY--
+State: 0
+[t] 0
+State: 1
+[1] 0
+[!0&!1] 1
+--END--
+"""
 
-        print(f"Original LTL : {original_str}")
-        print(f"States       : {aut.num_states()}")
-        print(f"Recovered    : {recovered}")
+print("=== Testing the 'empty acc sets → treat everything as accepting' hack ===\n")
 
-        if recovered.startswith("UNSUPPORTED"):
-            print("Status       : UNSUPPORTED")
-        else:
-            orig_f = spot.formula(original_str)
-            rec_f = spot.formula(recovered)
-            eq = spot.are_equivalent(orig_f, rec_f)
-            print(f"Equivalent?  : {eq}")
+aut = spot.automaton(hoa_text)
+print("Acceptance condition:", aut.get_acceptance())
+print("Number of acc sets :", aut.acc().num_sets())
+print()
+
+final, per_state, used_hack = reconstruct_ltl_with_empty_acc_hack(aut)
+
+print("Hack was triggered (0 acc sets):", used_hack)
+print()
+
+print("Per-state labels (raw):")
+for q in sorted(per_state):
+    print(f"  state {q}: {per_state[q]}")
+
+print("\nFinal recovered formula:")
+print(final)
+
+orig = spot.formula("!p1 W p0")
+rec_f = spot.formula(final) if not final.startswith("UNSUPPORTED") else None
+print(f"\nEquivalent to !p1 W p0 ? {spot.are_equivalent(orig, rec_f) if rec_f else False}")
+
+print("\n--- User's expected ---")
+print("state 0 : True")
+print("state 1 : (!p0 & !p1) U (p0 & X True)")
+print("Expected top-level: something equivalent to !p1 W p0 (allows staying in 1 forever)")
