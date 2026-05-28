@@ -28,7 +28,34 @@ import spot
 # The goal is to explore the space of what can be recovered by simple
 # backward labeling rules before moving to more sophisticated techniques
 # (cycle extraction + linearization, etc.).
+#
+# Heuristic layer (new):
+#   - Before the main backward labeling, we attempt the "fusion test":
+#     absorption of size-2 non-accepting SCCs into a pseudo-linear form.
+#     This is a practical, example-driven transformation that "unfolds"
+#     the most common small cycle pattern seen in LTL-derived automata
+#     so that the existing U/G-based rules can be applied.
 # =============================================================================
+
+
+def try_absorb_size2_nonaccepting_scc(aut):
+    """
+    Programmatic "fusion test" (absorption heuristic) for size-2 non-accepting SCCs.
+
+    Follows the concrete algorithm:
+      1. Detect non-accepting SCC with exactly two states {A, B}.
+      2. Unfold once: create fresh copies (B' of B, A' of A).
+      3. Relabel self-loop on the "first return" copy (A') to true.
+      4. Drop the return edge B' → A'.
+      5. Redirect the return-condition from B' directly to the accepting sink.
+      6. Build new automaton and test spot.are_equivalent(original, new).
+      7. If equivalent → return the pseudo-linear automaton for use by label(q).
+
+    This version builds the automaton using Spot's API (no hardcoded HOA).
+    It is still being refined for full generality.
+    """
+    from testing.fusion_heuristic import try_absorb_size2_nonaccepting_scc as _impl
+    return _impl(aut)
 
 
 def ltl_to_tgba(ltl_str):
@@ -48,10 +75,14 @@ def reconstruct_ltl(aut):
     The reconstruction uses explicit recursion with memoization.
     - `state_formula` acts as the memoization table.
     - A pre-pass marks any state belonging to a multi-state SCC as unsupported.
+    - Before labeling, we run the "fusion test" heuristic: absorption of
+      size-2 non-accepting SCCs into a pseudo-linear form (when the
+      transformation preserves the language). This is the main way we
+      currently recover formulas that would otherwise be rejected.
     - A visiting set + hard depth limit guarantees that recursion is finite.
     - When the automaton has zero acceptance sets (trivial acceptance),
-      every transition is treated as carrying acceptance. This is a pragmatic
-      normalization that lets the existing rules handle very-weak automata.
+      every transition is treated as carrying acceptance. This allows the
+      existing rules to handle very-weak automata (e.g. those coming from W).
     """
     # --- Pre-pass: detect multi-state SCCs (our main structural limitation) ---
     si = spot.scc_info(aut)
@@ -61,6 +92,19 @@ def reconstruct_ltl(aut):
         if len(states) > 1:
             for q in states:
                 bad_states.add(q)
+
+    # --- Heuristic: try to absorb size-2 non-accepting SCCs (fusion test) ---
+    massaged = try_absorb_size2_nonaccepting_scc(aut)
+    if massaged is not None:
+        aut = massaged
+        # Recompute SCC info on the massaged automaton
+        si = spot.scc_info(aut)
+        bad_states = set()
+        for scc_idx in range(si.scc_count()):
+            states = list(si.states_of(scc_idx))
+            if len(states) > 1:
+                for q in states:
+                    bad_states.add(q)
 
     # --- Pragmatic normalization for trivial acceptance ---
     treat_all_transitions_as_accepting = (aut.acc().num_sets() == 0)
@@ -217,3 +261,25 @@ if __name__ == "__main__":
             rec_f = spot.formula(recovered)
             eq = spot.are_equivalent(orig_f, rec_f)
             print(f"Equivalent?  : {eq}")
+
+
+# =============================================================================
+# Demonstration of the size-2 absorption heuristic (fusion test)
+# =============================================================================
+if __name__ == "__main__" and False:   # change to True to run the demo
+    demo = "X(p1 | F(p1 & Xp1))"
+    print("\n" + "=" * 80)
+    print(f"DEMO: size-2 absorption heuristic on {demo}")
+    f = spot.formula(demo)
+    aut = f.translate("GeneralizedBuchi", "Small", "High")
+    print(f"Original automaton has {aut.num_states()} states")
+
+    massaged = try_absorb_size2_nonaccepting_scc(aut)
+    if massaged is not None:
+        recovered, per_state = reconstruct_ltl(massaged)
+        print(f"After absorption + reconstruction: {recovered}")
+        orig_f = spot.formula(demo)
+        rec_f = spot.formula(recovered)
+        print(f"Equivalent to original? {spot.are_equivalent(orig_f, rec_f)}")
+    else:
+        print("Absorption heuristic did not apply or failed.")
