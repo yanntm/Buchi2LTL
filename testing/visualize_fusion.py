@@ -21,7 +21,7 @@ import spot
 # Make sure we can import from the project
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from testing.fusion_heuristic_v2 import try_absorb_size2_v2
+from buchi2ltl.heuristics.size2_overapprox import try_size2_overapprox as try_absorb_size2_v2
 
 
 def aut_to_dot(aut, title=""):

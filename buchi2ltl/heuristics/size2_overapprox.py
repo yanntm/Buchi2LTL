@@ -143,7 +143,3 @@ def try_size2_overapprox(aut):
         if DEBUG_SIZE2_OVERAPPROX:
             print(f"  → Equivalence check failed: {e}")
         return None
-
-
-# Backward compatibility alias (can be removed later)
-try_absorb_size2_nonaccepting_scc = try_size2_overapprox

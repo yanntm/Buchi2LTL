@@ -12,7 +12,7 @@ This file keeps backward compatibility for simple usage like:
 import spot
 
 # Re-export the public API so old imports keep working
-from buchi2ltl import reconstruct_ltl, try_absorb_size2_nonaccepting_scc, simplify_ltl
+from buchi2ltl import reconstruct_ltl, try_size2_overapprox, simplify_ltl
 
 # Also keep the small helper that many experiments still use
 def ltl_to_tgba(ltl_str):
@@ -36,8 +36,8 @@ if __name__ == "__main__":
         print("\n" + "=" * 80)
         aut, _ = ltl_to_tgba(original_str)
 
-        # Try the size-2 fusion heuristic first
-        massaged = try_absorb_size2_nonaccepting_scc(aut)
+        # Try the size-2 over-approximation heuristic first
+        massaged = try_size2_overapprox(aut)
         technique_parts = ["sl"]
         work_aut = aut
         if massaged is not None:

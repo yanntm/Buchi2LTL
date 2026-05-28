@@ -9,7 +9,7 @@ It is kept separate from heuristics and from calling / CLI code.
 
 import spot
 
-from .heuristics.size2_absorption import try_absorb_size2_nonaccepting_scc
+from .heuristics.size2_overapprox import try_size2_overapprox
 
 
 def reconstruct_ltl(aut):
@@ -28,7 +28,7 @@ def reconstruct_ltl(aut):
         - "sl+f2": the above + successful size-2 fusion/absorption ("f2")
     """
     # --- Heuristic layer: try to absorb size-2 non-accepting SCCs ---
-    massaged = try_absorb_size2_nonaccepting_scc(aut)
+    massaged = try_size2_overapprox(aut)
     absorbed = False
     if massaged is not None:
         aut = massaged
