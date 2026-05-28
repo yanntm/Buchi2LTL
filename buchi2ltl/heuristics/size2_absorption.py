@@ -138,7 +138,7 @@ def try_absorb_size2_nonaccepting_scc(aut):
     # During active development of the heuristic, delegate to the latest
     # version living in testing/. This will be cleaned up later.
     try:
-        from testing.fusion_heuristic_v2 import try_absorb_size2_v2 as _impl
+        from testing.fusion_heuristic import try_absorb_size2_v2 as _impl
         result = _impl(aut)
         return result
     except Exception as e:
