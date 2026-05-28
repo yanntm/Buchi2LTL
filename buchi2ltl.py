@@ -12,7 +12,7 @@ This file keeps backward compatibility for simple usage like:
 import spot
 
 # Re-export the public API so old imports keep working
-from buchi2ltl import reconstruct_ltl, try_size2_overapprox, simplify_ltl
+from buchi2ltl import reconstruct_ltl, try_size2_overapprox, try_terminal_2scc_with_validation, simplify_ltl
 
 # Also keep the small helper that many experiments still use
 def ltl_to_tgba(ltl_str):
@@ -29,23 +29,18 @@ if __name__ == "__main__":
         "FG a",
         "a U b",
         "G (p -> X p) & GF q",
-        "X(p1 | F(p1 & Xp1))",   # interesting size-2 case
+        "X(p1 | F(p1 & Xp1))",   # interesting size-2 case (usually f2)
+        "G(p -> X q)",           # classic terminal-2-SCC case (t2)
     ]
 
     for original_str in test_cases:
         print("\n" + "=" * 80)
         aut, _ = ltl_to_tgba(original_str)
 
-        # Try the size-2 over-approximation heuristic first
-        massaged = try_size2_overapprox(aut)
-        technique_parts = ["sl"]
-        work_aut = aut
-        if massaged is not None:
-            technique_parts.append("f2")
-            work_aut = massaged
-
-        recovered, per_state, _ = reconstruct_ltl(work_aut)
-        technique = "+".join(technique_parts)
+        # The single entry point now runs *all* heuristics internally
+        # (size-2 fusion "f2" then terminal-2-SCC "t2") and returns the
+        # correct technique string ("sl", "sl+f2", "sl+t2", "sl+f2+t2" ...).
+        recovered, per_state, technique = reconstruct_ltl(aut)
 
         print(f"Original LTL : {original_str}")
         print(f"States       : {aut.num_states()}")

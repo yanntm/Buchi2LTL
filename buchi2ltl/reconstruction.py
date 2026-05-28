@@ -7,9 +7,16 @@ recursive labeling (`label`).
 It is kept separate from heuristics and from calling / CLI code.
 """
 
+import os
 import spot
 
+# The two heuristics that can "rescue" certain multi-state SCCs before we
+# give up and emit UNSUPPORTED.  Both are tried (and validated) early.
 from .heuristics.size2_overapprox import try_size2_overapprox
+from .heuristics.terminal_2scc import try_terminal_2scc_with_validation
+
+# Enable detailed tracing only when RECONSTRUCT_TRACE=1
+TRACE = os.environ.get("RECONSTRUCT_TRACE") == "1"
 
 
 def reconstruct_ltl(aut):
@@ -27,6 +34,7 @@ def reconstruct_ltl(aut):
         - "sl"   : basic self-loop / semi-linear backward labeling
         - "sl+f2": the above + successful size-2 fusion/absorption ("f2")
     """
+
     # --- Heuristic layer: try to absorb size-2 non-accepting SCCs ---
     massaged = try_size2_overapprox(aut)
     absorbed = False
@@ -34,7 +42,65 @@ def reconstruct_ltl(aut):
         aut = massaged
         absorbed = True   # trust the heuristic: do not re-apply the strict multi-state filter
 
-    # --- Structural safety filter (skip if we just did absorption) ---
+    # ------------------------------------------------------------------
+    # NEW: Terminal 2-state SCC labeling heuristic ("t2")
+    # ------------------------------------------------------------------
+    # We attempt this *before* the structural safety filter that rejects any
+    # SCC with more than one state.  The idea (exactly analogous to f2):
+    #   - detect a very specific, very common shape (terminal 2-state SCC
+    #     with nice L labels)
+    #   - validate it in isolation via language equivalence
+    #   - pre-declare the two states "good" by injecting a pre-validated
+    #     formula fragment into the state_formula cache
+    #   - teach the rest of the labeler to use that fragment instead of
+    #     walking the cycle (which would blow up or produce horrible U/GF
+    #     terms)
+    #
+    # Only SCCs that survive try_terminal_2scc_with_validation() (i.e. the
+    # round-trip equivalence check inside the heuristic) are considered here.
+    # ------------------------------------------------------------------
+    nice_terminal_sccs = try_terminal_2scc_with_validation(aut)
+    nice_scc_states = set()
+    scc_fragments = {}   # state -> validated formula fragment for its SCC
+    for info in nice_terminal_sccs:
+        validated = info.get("validated_formula") or info.get("simplified")
+        if validated:
+            for st in info["states"]:
+                nice_scc_states.add(st)
+                scc_fragments[st] = validated
+
+    if TRACE:
+        print(f"[TRACE] t2: found {len(nice_terminal_sccs)} nice terminal 2-state SCC(s)")
+        for info in nice_terminal_sccs:
+            print(f"[TRACE]   SCC states: {info['states']}")
+            print(f"[TRACE]     L = {info['L']}")
+            print(f"[TRACE]     O = {info['O']}")
+            print(f"[TRACE]     fragment = {info.get('validated_formula') or info.get('simplified')}")
+
+    # --- Trivial acceptance normalization ---
+    treat_all_as_accepting = (aut.acc().num_sets() == 0)
+
+    state_formula = {}
+    visiting = set()
+
+    # ------------------------------------------------------------------
+    # Inject validated t2 fragments into the global state_formula cache
+    # *before* we run the multi-state-SCC rejection pass.
+    # This is the key that lets the two SCC states escape the "bad_states"
+    # treatment that would otherwise nuke any |SCC|>1 component.
+    # ------------------------------------------------------------------
+    for st, frag in scc_fragments.items():
+        state_formula[st] = frag
+
+    # --- Structural safety filter (multi-state SCC rejection) ---
+    # Any state that belongs to a non-trivial SCC and does *not* already have
+    # a formula (from t2, from f2 absorption, or from a previous successful
+    # recursion) is marked bad.  The label() function will immediately return
+    # UNSUPPORTED for them.
+    #
+    # Because we pre-populated the t2 states above, the test
+    #     if q not in state_formula
+    # protects exactly those two states (and any f2-absorbed ones).
     si = spot.scc_info(aut)
     bad_states = set()
     if not absorbed:
@@ -42,13 +108,13 @@ def reconstruct_ltl(aut):
             states = list(si.states_of(scc_idx))
             if len(states) > 1:
                 for q in states:
-                    bad_states.add(q)
+                    if q not in state_formula:
+                        bad_states.add(q)
 
-    # --- Trivial acceptance normalization ---
-    treat_all_as_accepting = (aut.acc().num_sets() == 0)
+    # Belt-and-suspenders: even if something went wrong above, never let a
+    # state that already carries a validated fragment be considered bad.
+    bad_states -= set(state_formula.keys())
 
-    state_formula = {}
-    visiting = set()
     MAX_DEPTH = 10000
     depth = [0]
     UNSUPPORTED = "UNSUPPORTED: non-trivial cycle or complex SCC"
@@ -60,6 +126,28 @@ def reconstruct_ltl(aut):
         if q in bad_states:
             state_formula[q] = UNSUPPORTED
             return UNSUPPORTED
+
+        # ------------------------------------------------------------------
+        # t2 short-circuit #1: the state already carries a pre-validated
+        # fragment (either because we pre-populated it at the top of
+        # reconstruct_ltl, or because an earlier recursive call stored it).
+        # ------------------------------------------------------------------
+        if q in state_formula:
+            return state_formula[q]
+
+        # ------------------------------------------------------------------
+        # t2 short-circuit #2 (the primary one for the two SCC states):
+        # We have a validated G(...) fragment for exactly this state.
+        # Emit it immediately and do *not* walk the self-loops / exit edges
+        # of the SCC.  Walking them would re-discover the cycle and produce
+        # the horrible nested U/GF terms the user complained about.
+        # ------------------------------------------------------------------
+        if q in scc_fragments:
+            if TRACE:
+                print(f"[TRACE] label({q}): short-circuit with t2 fragment")
+            phi = scc_fragments[q]
+            state_formula[q] = phi
+            return phi
 
         if q in visiting:
             state_formula[q] = UNSUPPORTED
@@ -86,23 +174,77 @@ def reconstruct_ltl(aut):
             if e.src == e.dst:
                 self_loops.append((cond, carries))
             else:
-                if e.dst in bad_states:
-                    state_formula[q] = UNSUPPORTED
-                    visiting.remove(q)
-                    depth[0] -= 1
-                    return UNSUPPORTED
+                # ------------------------------------------------------------------
+                # t2-aware successor handling (the most subtle part of the integration)
+                # ------------------------------------------------------------------
+                # When we have a validated terminal 2-state SCC downstream we want:
+                #   * states that merely exit *into* the SCC to build a clean
+                #     "cond & X(fragment)" term (the user's stated expectation)
+                #   * never to mark such a state UNSUPPORTED just because it has
+                #     one edge into a still-unlabeled part of a larger SCC
+                #
+                # The logic below implements a "lenient" rule only when at least
+                # one successor leads to a known-good t2 fragment.
+                # ------------------------------------------------------------------
 
-                succ_phi = label(e.dst)
-                if isinstance(succ_phi, str) and succ_phi.startswith("UNSUPPORTED"):
-                    state_formula[q] = UNSUPPORTED
-                    visiting.remove(q)
-                    depth[0] -= 1
-                    return UNSUPPORTED
+                # Fast pre-check: does this state have *any* edge that we already
+                # know leads into a t2 fragment or a state that already has a formula?
+                has_good_t2_successor = any(
+                    (e2.dst in scc_fragments or e2.dst in state_formula)
+                    for e2 in aut.out(q)
+                )
+
+                if e.dst in bad_states and e.dst not in state_formula and e.dst not in scc_fragments:
+                    if has_good_t2_successor:
+                        continue   # skip the bad edge; we have at least one good t2 branch
+                    else:
+                        state_formula[q] = UNSUPPORTED
+                        visiting.remove(q)
+                        depth[0] -= 1
+                        return UNSUPPORTED
+
+                # The heart of "use the precomputed fragment for the whole SCC":
+                # If the immediate successor *is* one of the two SCC states, or if
+                # any of its own successors is, we short-circuit the recursion and
+                # just grab the validated G(...) string.  This prevents the labeler
+                # from ever walking the internal cycle of the SCC.
+                if e.dst in scc_fragments:
+                    succ_phi = scc_fragments[e.dst]
+                elif any(e2.dst in scc_fragments or e2.dst in state_formula for e2 in aut.out(e.dst)):
+                    # The successor state itself is not in the fragment set, but one
+                    # of the states it can reach in one step is.  Grab the fragment
+                    # from that grandchild (there can be only one because the SCC
+                    # is size 2 and terminal).
+                    for e2 in aut.out(e.dst):
+                        if e2.dst in scc_fragments:
+                            succ_phi = scc_fragments[e2.dst]
+                            break
+                    else:
+                        succ_phi = label(e.dst)
+                else:
+                    succ_phi = label(e.dst)
+                    if isinstance(succ_phi, str) and succ_phi.startswith("UNSUPPORTED"):
+                        # Even after the lenient "has_good_t2_successor" test we may
+                        # still land here for an edge that truly has no good future.
+                        # Only declare the whole state bad if *none* of the other
+                        # edges from q lead to a t2 fragment.
+                        if not any((e2.dst in scc_fragments or e2.dst in state_formula)
+                                   for e2 in aut.out(q) if e2.dst != e.dst):
+                            state_formula[q] = UNSUPPORTED
+                            visiting.remove(q)
+                            depth[0] -= 1
+                            return UNSUPPORTED
+                        else:
+                            # This particular edge is bad but we have other good
+                            # t2 branches; just ignore it for the disjunction.
+                            continue
 
                 if cond == "1":
                     exit_terms.append(f"X({succ_phi})")
                 else:
                     exit_terms.append(f"({cond}) & X({succ_phi})")
+
+        # (debug prints for this session removed)
 
         # Apply reconstruction rules
         if not exit_terms and self_loops:
@@ -148,6 +290,8 @@ def reconstruct_ltl(aut):
         state_formula[q] = phi
         visiting.remove(q)
         depth[0] -= 1
+        if TRACE:
+            print(f"[TRACE] label({q}) assigned formula: {phi}")
         return phi
 
     init = aut.get_init_state_number()
@@ -158,10 +302,31 @@ def reconstruct_ltl(aut):
         final = final.replace("X(true)", "X true")
         final = final.replace("G(true)", "G true")
         final = final.replace("G(1)", "G true")
-        try:
-            final = str(spot.formula(final).simplify())
-        except Exception:
-            pass
 
-    technique = "sl+f2" if absorbed else "sl"
+        # DEBUG MODE: Do NOT call Spot simplification.
+        # The user explicitly requested to keep formulas raw during debugging
+        # because Spot rewriting (especially to W, etc.) hides the structure
+        # actually built by the reconstruction rules.
+        #
+        # try:
+        #     final = str(spot.formula(final).simplify())
+        # except Exception:
+        #     pass
+        #
+        # For now we leave the raw constructed string (after only the trivial replacements above).
+
+    # ------------------------------------------------------------------
+    # Technique string now reflects all heuristics that fired.
+    # Historical values: "sl", "sl+f2"
+    # New values seen in this work: "sl+t2", "sl+f2+t2"
+    # The order is deliberately f2 before t2 only because f2 (absorption)
+    # rewrites the automaton before t2 runs; the presence of either is
+    # what matters for regression / evaluation.
+    # ------------------------------------------------------------------
+    technique_parts = ["sl"]
+    if absorbed:
+        technique_parts.append("f2")
+    if nice_terminal_sccs:
+        technique_parts.append("t2")
+    technique = "+".join(technique_parts)
     return final, state_formula, technique

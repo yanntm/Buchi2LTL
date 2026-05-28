@@ -1,4 +1,10 @@
 # Interesting LTL formulas used during development
+#
+# See also the larger curated sets in the same directory:
+#   f2_successes.py            – 100 formulas where the f2 heuristic activates
+#   terminal_2scc_labeled.py   – 100 formulas where the t2 (terminal-2-SCC) heuristic activates
+#
+# Those can be fed directly to:  python3 evaluate.py -f samples/terminal_2scc_labeled.py ...
 
 # Basic cases that worked well
 BASIC = [
