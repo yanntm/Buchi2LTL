@@ -239,16 +239,16 @@ def reconstruct_ltl(aut):
                         if (crossing_bdd & buddy.bdd_not(i_bdd)) == buddy.bddfalse:
                             direct_scc_sync_attach = True
                 elif any(e2.dst in scc_fragments or e2.dst in state_formula for e2 in aut.out(e.dst)):
-                    # The successor state itself is not in the fragment set, but one
-                    # of the states it can reach in one step is.  Grab the fragment
-                    # from that grandchild (there can be only one because the SCC
-                    # is size 2 and terminal).
-                    for e2 in aut.out(e.dst):
-                        if e2.dst in scc_fragments:
-                            succ_phi = scc_fragments[e2.dst]
-                            break
-                    else:
-                        succ_phi = label(e.dst)
+                    # The successor is an intermediate state that can reach a t2
+                    # fragment in one step.  We must still call label() on it so that
+                    # the *actual crossing edge(s)* from the intermediate into the SCC
+                    # get the correct per-transition sync vs delayed decision
+                    # (based on whether their label implies the target's I(s)).
+                    #
+                    # The old direct "grab grandchild fragment" short-circuit violated
+                    # the principle that the X-or-not rule is specific to each
+                    # transition that actually enters the SCC.
+                    succ_phi = label(e.dst)
                 else:
                     succ_phi = label(e.dst)
                     if isinstance(succ_phi, str) and succ_phi.startswith("UNSUPPORTED"):
