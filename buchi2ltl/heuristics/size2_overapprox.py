@@ -88,8 +88,8 @@ def try_size2_overapprox(aut):
 
     true_bdd = get_true_bdd(aut)
 
-    # Build the transformed automaton (surgical version reinstated from
-    # the verified working implementation in testing/recovered_working_fusion_heuristic.py)
+    # Build the transformed automaton (surgical version from the
+    # verified implementation of the size-2 absorption heuristic).
     new_aut = spot.make_twa_graph(aut.get_dict())
     new_aut.set_acceptance(aut.acc())
 
