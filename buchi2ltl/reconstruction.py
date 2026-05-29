@@ -23,9 +23,8 @@ TRACE = os.environ.get("RECONSTRUCT_TRACE") == "1"
 
 def _compute_state_invariants(aut):
     """
-    For every state, compute the set of invariant literals that hold
-    on all edges reachable downstream from that state (including its own
-    outgoing edges).
+    For every state q, compute the set of invariant literals that hold
+    on all edges reachable from q (including q itself).
 
     This is a one-time precomputation. The result is a dict:
         state -> set of literal strings, e.g. { "p2", "!p0" }
@@ -58,14 +57,11 @@ def _compute_state_invariants(aut):
     d = aut.get_dict()
 
     for q in range(n):
-        # Downstream = states reachable in 1 or more steps from q
-        # (i.e. what you can reach after leaving q)
-        direct_succs = outgoing[q]
-        downstream_states = set()
-        for succ in direct_succs:
-            downstream_states |= get_reachable(succ)
+        # Collect edges from all states reachable from q (including q itself)
+        # so that invariants correctly reflect literals forced on every possible
+        # future transition starting from this state.
+        downstream_states = get_reachable(q)
 
-        # Collect edge conditions from those downstream states
         edge_bdds = []
         for s in downstream_states:
             for e in aut.out(s):
@@ -408,6 +404,8 @@ def reconstruct_ltl(aut):
         visiting.add(q)
         depth[0] += 1
 
+        current_inv = state_invariants.get(q, "")
+
         self_loops = []
         exit_terms = []
 
@@ -549,20 +547,30 @@ def reconstruct_ltl(aut):
                     else:
                         term = base
 
-                if e.dst in scc_fragments:
-                    # SCC case fully controls its own wrapping (including cond=="1").
-                    # This prevents double-X when the SCC decision already chose X(fragment)
-                    # and the generic cond==1 rule would add another X.
+                if current_inv:
                     if cond == "1":
-                        exit_terms.append(f"({term})")
+                        edge_prefix = current_inv
+                        if e.dst in scc_fragments:
+                            exit_terms.append(f"({edge_prefix}) & ({term})")
+                        else:
+                            exit_terms.append(f"({edge_prefix}) & X({term})")
                     else:
-                        exit_terms.append(f"({cond}) & ({term})")
+                        edge_prefix = f"({cond}) & ({current_inv})"
+                        if e.dst in scc_fragments:
+                            exit_terms.append(f"({edge_prefix}) & ({term})")
+                        else:
+                            exit_terms.append(f"({edge_prefix}) & X({term})")
                 else:
-                    # Normal non-SCC exit logic
-                    if cond == "1":
-                        exit_terms.append(f"X({term})")
+                    if e.dst in scc_fragments:
+                        if cond == "1":
+                            exit_terms.append(f"({term})")
+                        else:
+                            exit_terms.append(f"({cond}) & ({term})")
                     else:
-                        exit_terms.append(f"({cond}) & X({term})")
+                        if cond == "1":
+                            exit_terms.append(f"X({term})")
+                        else:
+                            exit_terms.append(f"({cond}) & X({term})")
 
         # (debug prints for this session removed)
 
@@ -618,6 +626,10 @@ def reconstruct_ltl(aut):
                 else:
                     phi = f"G({or_all})"
 
+            inv = state_invariants.get(q, "")
+            if inv:
+                phi = f"({phi}) & ({inv})"
+
         elif exit_terms:
             or_ex = " | ".join(exit_terms)
             if len(exit_terms) > 1:
@@ -636,12 +648,19 @@ def reconstruct_ltl(aut):
                 if len(self_loops) > 1:
                     or_self = f"({or_self})"
                 stay = f"G({or_self}) & GF({or_acc})"
-                phi = f"({stay}) | ({or_self} U ({or_ex}))"
+                inv = state_invariants.get(q, "")
+                if inv:
+                    stay = f"({stay}) & ({inv})"
+                or_self_u = f"(({or_self}) & ({inv}))" if inv else or_self
+                phi = f"({stay}) | ({or_self_u} U ({or_ex}))"
             else:
                 if self_loops:
                     or_self = " | ".join(f"({c})" for c, _ in self_loops)
                     if len(self_loops) > 1:
                         or_self = f"({or_self})"
+                    inv = state_invariants.get(q, "")
+                    if inv:
+                        or_self = f"({or_self}) & ({inv})"
                     phi = f"({or_self}) U ({or_ex})"
                 else:
                     phi = or_ex
