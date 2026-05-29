@@ -123,6 +123,14 @@ def reconstruct_ltl(aut):
     depth = [0]
     UNSUPPORTED = "UNSUPPORTED: non-trivial cycle or complex SCC"
 
+    def _is_unsupported(val):
+        """Return True if val is the clean unsupported sentinel (or contains it as a substring).
+        This is our main defense against the sentinel leaking into constructed LTL strings.
+        """
+        if isinstance(val, str):
+            return val.startswith("UNSUPPORTED") or "UNSUPPORTED" in val
+        return False
+
     def label(q):
         if q in state_formula:
             return state_formula[q]
@@ -259,6 +267,18 @@ def reconstruct_ltl(aut):
                             # t2 branches; just ignore it for the disjunction.
                             continue
 
+                # ------------------------------------------------------------------
+                # HARD GUARD: Never allow the UNSUPPORTED sentinel to be wrapped
+                # into a compound term like "(cond) & X(UNSUPPORTED...)".
+                # If any successor formula is unsupported, the whole state is
+                # unsupported. This is the main defense against polluted output.
+                # ------------------------------------------------------------------
+                if _is_unsupported(succ_phi):
+                    state_formula[q] = UNSUPPORTED
+                    visiting.remove(q)
+                    depth[0] -= 1
+                    return UNSUPPORTED
+
                 if cond == "1":
                     if direct_scc_sync_attach:
                         exit_terms.append(f"({succ_phi})")
@@ -271,6 +291,20 @@ def reconstruct_ltl(aut):
                         exit_terms.append(f"({cond}) & X({succ_phi})")
 
         # (debug prints for this session removed)
+
+        # ------------------------------------------------------------------
+        # Pre-construction safety: if any piece we are about to use in the
+        # final formula is the unsupported sentinel, abort cleanly now.
+        # ------------------------------------------------------------------
+        all_pieces = [c for c, _ in self_loops] + exit_terms
+        if any(_is_unsupported(p) for p in all_pieces):
+            phi = UNSUPPORTED
+            state_formula[q] = phi
+            visiting.remove(q)
+            depth[0] -= 1
+            if TRACE:
+                print(f"[TRACE] label({q}) assigned formula: {phi}")
+            return phi
 
         # Apply reconstruction rules
         if not exit_terms and self_loops:
@@ -312,6 +346,15 @@ def reconstruct_ltl(aut):
                     phi = or_ex
         else:
             phi = "false"
+
+        # ------------------------------------------------------------------
+        # Final belt-and-suspenders: if for any reason a constructed phi
+        # contains the sentinel (from self-loops, complex U/GF cases, etc.),
+        # force the clean sentinel. We must NEVER return a string containing
+        # "UNSUPPORTED" to the caller as if it were a valid LTL formula.
+        # ------------------------------------------------------------------
+        if _is_unsupported(phi):
+            phi = UNSUPPORTED
 
         state_formula[q] = phi
         visiting.remove(q)

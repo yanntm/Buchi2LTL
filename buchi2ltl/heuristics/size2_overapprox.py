@@ -1,5 +1,5 @@
 """
-Size-2 Non-Accepting SCC Over-Approximation Heuristic.
+Size-2 Non-Accepting SCC Over-Approximation Heuristic (f2).
 
 This heuristic detects non-accepting SCCs consisting of exactly two states
 and attempts to "unfold" them once into a pseudo-linear structure.
@@ -11,6 +11,11 @@ not present in the original automaton. We only accept the result if
 
 When successful, the resulting automaton has only size-1 SCCs and can be
 fed to the core backward labeling procedure.
+
+Implementation note: the core surgical rewrite was reinstated from the
+verified working version in testing/recovered_working_fusion_heuristic.py
+(the version that correctly handles cases such as "X(p1 | F(p1 & Xp1))").
+The public API (try_size2_overapprox) and strict equivalence gate are preserved.
 """
 
 DEBUG_SIZE2_OVERAPPROX = False
@@ -82,50 +87,69 @@ def try_size2_overapprox(aut):
 
     true_bdd = get_true_bdd(aut)
 
-    # Build the transformed automaton
+    # Build the transformed automaton (surgical version reinstated from
+    # the verified working implementation in testing/recovered_working_fusion_heuristic.py)
     new_aut = spot.make_twa_graph(aut.get_dict())
     new_aut.set_acceptance(aut.acc())
 
     state_map = {s: new_aut.new_state() for s in range(aut.num_states())}
 
-    # Copy edges that are not internal to the size-2 SCC
+    # Copy edges that are completely outside the {A, B} SCC.
+    # We deliberately skip most internal edges of the size-2 SCC, but we
+    # MUST preserve the initiator → other edge (the "first loop iteration"
+    # A → B edge).  This edge is semantically required for the transformed
+    # automaton to remain language-equivalent on cases such as
+    # "X(p1 | F(p1 & Xp1))".
     for src in range(aut.num_states()):
         for e in aut.out(src):
             if src in (A, B) and e.dst in (A, B):
-                continue
-            new_aut.new_edge(state_map[src], state_map[e.dst], e.cond, e.acc)
+                if src == initiator and e.dst == other:
+                    # Keep the critical first-unfolding edge from initiator into the other state.
+                    new_aut.new_edge(state_map[src], state_map[e.dst], e.cond, e.acc)
+                    if DEBUG_SIZE2_OVERAPPROX:
+                        cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
+                        print(f"     [KEEP] First-loop edge {src} --[{cond_str}]--> {e.dst}")
+                else:
+                    if DEBUG_SIZE2_OVERAPPROX:
+                        cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
+                        print(f"     [SKIP internal] {src} --[{cond_str}]--> {e.dst}")
+                    continue
+            else:
+                new_aut.new_edge(state_map[src], state_map[e.dst], e.cond, e.acc)
 
     # Create A' (copy of the initiator)
     A_prime = new_aut.new_state()
     if DEBUG_SIZE2_OVERAPPROX:
         print(f"  → Created new state A' with index {A_prime}")
 
-    # Copy transitions from A that do not go to B into A'
+    # Copy transitions from initiator that do NOT lead to the other state into A'
+    if DEBUG_SIZE2_OVERAPPROX:
+        print("  → Copying transitions from initiator (only those not going to the other state) into A':")
     for e in aut.out(initiator):
         if e.dst == other:
             if DEBUG_SIZE2_OVERAPPROX:
                 cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
-                print(f"     [SKIP for A'] A --[{cond_str}]--> B")
+                print(f"     [SKIP for A'] {initiator} --[{cond_str}]--> {other}")
             continue
         new_aut.new_edge(A_prime, state_map[e.dst], e.cond, e.acc)
         if DEBUG_SIZE2_OVERAPPROX:
             cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
             print(f"     [COPY] A'={A_prime} --[{cond_str}]--> {e.dst}")
 
-    # Redirect B → A edges to B → A'
+    # Redirect B → A (other → initiator) edges to point to A' instead
     for e in aut.out(other):
         if e.dst == initiator:
             new_aut.new_edge(state_map[other], A_prime, e.cond, e.acc)
             if DEBUG_SIZE2_OVERAPPROX:
                 cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
-                print(f"     [EDIT] Redirect B --> A to B --> A' (cond={cond_str})")
+                print(f"     [EDIT] Redirect {other} --> {initiator} to {other} --> A' (cond={cond_str})")
 
-    # Relabel B's self-loop with true (this is the over-approximating step)
+    # Relabel the other state's self-loop with true (the deliberate over-approximation)
     for e in aut.out(other):
         if e.dst == other:
             new_aut.new_edge(state_map[other], state_map[other], true_bdd, e.acc)
             if DEBUG_SIZE2_OVERAPPROX:
-                print("     [EDIT] Relabeled B self-loop with true (over-approximation)")
+                print("     [EDIT] Relabeled other state's self-loop with true (over-approximation)")
 
     new_aut.set_init_state(state_map[aut.get_init_state_number()])
     new_aut.copy_ap_of(aut)
@@ -137,7 +161,7 @@ def try_size2_overapprox(aut):
             return new_aut
         else:
             if DEBUG_SIZE2_OVERAPPROX:
-                print("  → size2_overapprox produced a non-equivalent automaton.")
+                print("  → Produced non-equivalent automaton after rewrite; rejecting.")
             return None
     except Exception as e:
         if DEBUG_SIZE2_OVERAPPROX:
