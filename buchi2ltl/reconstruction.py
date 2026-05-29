@@ -366,7 +366,9 @@ def reconstruct_ltl(aut):
             or_ex = " | ".join(exit_terms)
             if len(exit_terms) > 1:
                 or_ex = f"({or_ex})"
-            has_acc = any(acc for _, acc in self_loops)
+            # Under trivial acceptance every self-loop is accepting (vacuously),
+            # so treat it the same as a real acc set for the mixed-case decision.
+            has_acc = any(acc for _, acc in self_loops) or (treat_all_as_accepting and bool(self_loops))
 
             if has_acc:
                 # Legacy mixed-case logic kept exactly as before for safety
