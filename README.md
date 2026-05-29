@@ -18,6 +18,7 @@ Key current capabilities:
 - Early rejection of multi-state SCCs (unless a heuristic has already validated a fragment for them)
 - Size-2 non-accepting SCC absorption (f2) when language-equivalent
 - Terminal SCC steady-state extraction (tN) via incoming/outgoing label disjunction + round-trip validation (now size-agnostic)
+- Downstream invariant detection: for any state, precomputes atoms forced to a constant value on all reachable future edges. Used for (a) simplifying outgoing edge labels via existential quantification, and (b) more precise attachment when crossing into terminal SCCs (invariant part always reached under X; choice/labeling part keeps the existing per-transition compatibility test).
 - Trivial acceptance normalization (treat all transitions as accepting when `Acceptance: t`)
 - "Technique" reporting: `sl`, `sl+f2`, `sl+t2`, `sl+t3`, `sl+t4`, `sl+f2+t3`, ...
 - Dual output: constructive formula + version after Spot simplification (`ltlfilt` equivalent)
@@ -29,7 +30,8 @@ Key current capabilities:
 buchi2ltl.py                  # Thin CLI / backward-compat entry point
 buchi2ltl/                    # Main package
     __init__.py               # Public API (reconstruct_ltl + both heuristics)
-    reconstruction.py         # Core reconstruct_ltl + labeling logic (now integrates f2 + t2)
+    reconstruction.py         # Core reconstruct_ltl + labeling logic (now integrates f2 + t2 + invariants)
+    invariants.py             # Generic detection of atoms that are constant across a set of BDD formulas
     heuristics/
         size2_overapprox.py   # Size-2 non-accepting SCC absorption ("f2"/"fusion")
         terminal_2scc.py      # Terminal SCC pattern (tN, generalized from t2) – heavily documented

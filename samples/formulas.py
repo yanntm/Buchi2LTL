@@ -12,6 +12,7 @@ BASIC = [
     "FG a",
     "a U b",
     "G (p -> X p) & GF q",
+    "G(Xp2 & (p0 | Xp1))",   # exercises downstream invariants + t2 + precise SCC attachment
 ]
 
 # Cases that required the f2 (size-2 fusion) heuristic

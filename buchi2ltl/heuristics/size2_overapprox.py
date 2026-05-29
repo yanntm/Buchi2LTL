@@ -19,9 +19,16 @@ The public API (try_size2_overapprox) and strict equivalence gate are
 preserved.
 """
 
-DEBUG_SIZE2_OVERAPPROX = False
-
+import os
 import spot
+
+# Tracing for the f2 / size-2 over-approx heuristic.
+# Enable with RECONSTRUCT_TRACE=1 (consistent with main reconstruction and t2)
+# or the more specific F2_TRACE=1.
+F2_TRACE = os.environ.get("RECONSTRUCT_TRACE") == "1" or os.environ.get("F2_TRACE") == "1"
+
+# Legacy debug flag kept for compatibility but now tied to the new tracing.
+DEBUG_SIZE2_OVERAPPROX = F2_TRACE
 
 
 def find_size2_nonacc_scc(aut):
@@ -31,7 +38,12 @@ def find_size2_nonacc_scc(aut):
             continue
         states = list(si.states_of(scc))
         if len(states) == 2:
+            if F2_TRACE:
+                print(f"[F2] Found size-2 non-accepting SCC #{scc}: states={states}")
+                print("[F2]   (State numbers match trace_aut_before_f2.png / .dot)")
             return scc, states
+    if F2_TRACE:
+        print("[F2] No size-2 non-accepting SCC found.")
     return None, None
 
 
@@ -54,8 +66,8 @@ def try_size2_overapprox(aut):
     if states is None:
         return None
 
-    if DEBUG_SIZE2_OVERAPPROX:
-        print("  → Size-2 non-accepting SCC found. Applying size2_overapprox...")
+    if F2_TRACE:
+        print("[F2] Size-2 non-accepting SCC found. Starting over-approximation rewrite...")
 
     A, B = states[0], states[1]
 
@@ -69,24 +81,35 @@ def try_size2_overapprox(aut):
                     return True
         return False
 
-    if has_exit_to_accepting(A) and has_exit_to_accepting(B):
-        if DEBUG_SIZE2_OVERAPPROX:
-            print("  → Both states have exits to accepting behavior. Skipping.")
+    exit_A = has_exit_to_accepting(A)
+    exit_B = has_exit_to_accepting(B)
+    if F2_TRACE:
+        print(f"[F2]   has_exit_to_accepting({A}) = {exit_A}")
+        print(f"[F2]   has_exit_to_accepting({B}) = {exit_B}")
+
+    if exit_A and exit_B:
+        if F2_TRACE:
+            print("[F2]   Both states have exits to accepting behavior. Skipping (not the expected pattern).")
         return None
 
-    if has_exit_to_accepting(A):
+    if exit_A:
         initiator = A
         other = B
-    elif has_exit_to_accepting(B):
+    elif exit_B:
         initiator = B
         other = A
     else:
+        if F2_TRACE:
+            print("[F2]   Neither state has an exit to an accepting SCC. No pattern match.")
         return None
 
-    if DEBUG_SIZE2_OVERAPPROX:
-        print(f"  → Matched pattern: A = {initiator}, B = {other}")
+    if F2_TRACE:
+        print(f"[F2]   Role assignment: initiator={initiator}, other={other} (the one whose self-loop will be over-approximated)")
 
     true_bdd = get_true_bdd(aut)
+    true_str = spot.bdd_format_formula(aut.get_dict(), true_bdd)
+    if F2_TRACE:
+        print(f"[F2]   true BDD for over-approximation: {true_str}")
 
     # Build the transformed automaton (surgical version from the
     # verified implementation of the size-2 absorption heuristic).
@@ -94,6 +117,9 @@ def try_size2_overapprox(aut):
     new_aut.set_acceptance(aut.acc())
 
     state_map = {s: new_aut.new_state() for s in range(aut.num_states())}
+
+    if F2_TRACE:
+        print("[F2]   --- Edge copy phase (deliberately dropping most internal edges of the 2-SCC) ---")
 
     # Copy edges that are completely outside the {A, B} SCC.
     # We deliberately skip most internal edges of the size-2 SCC, but we
@@ -107,64 +133,82 @@ def try_size2_overapprox(aut):
                 if src == initiator and e.dst == other:
                     # Keep the critical first-unfolding edge from initiator into the other state.
                     new_aut.new_edge(state_map[src], state_map[e.dst], e.cond, e.acc)
-                    if DEBUG_SIZE2_OVERAPPROX:
+                    if F2_TRACE:
                         cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
-                        print(f"     [KEEP] First-loop edge {src} --[{cond_str}]--> {e.dst}")
+                        print(f"[F2]     [KEEP] First-loop edge {src} --[{cond_str}]--> {e.dst}")
                 else:
-                    if DEBUG_SIZE2_OVERAPPROX:
+                    if F2_TRACE:
                         cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
-                        print(f"     [SKIP internal] {src} --[{cond_str}]--> {e.dst}")
+                        print(f"[F2]     [SKIP internal] {src} --[{cond_str}]--> {e.dst}")
                     continue
             else:
                 new_aut.new_edge(state_map[src], state_map[e.dst], e.cond, e.acc)
 
-    # Create A' (copy of the initiator)
+    # Create A' (copy of the initiator) — this is the "unfolded" version
     A_prime = new_aut.new_state()
-    if DEBUG_SIZE2_OVERAPPROX:
-        print(f"  → Created new state A' with index {A_prime}")
+    if F2_TRACE:
+        print(f"[F2]   Created new state A' (index {A_prime}) — unfolded copy of initiator")
 
     # Copy transitions from initiator that do NOT lead to the other state into A'
-    if DEBUG_SIZE2_OVERAPPROX:
-        print("  → Copying transitions from initiator (only those not going to the other state) into A':")
+    if F2_TRACE:
+        print("[F2]   Copying initiator's non-to-other exits into A':")
     for e in aut.out(initiator):
         if e.dst == other:
-            if DEBUG_SIZE2_OVERAPPROX:
+            if F2_TRACE:
                 cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
-                print(f"     [SKIP for A'] {initiator} --[{cond_str}]--> {other}")
+                print(f"[F2]     [SKIP for A'] {initiator} --[{cond_str}]--> {other}")
             continue
         new_aut.new_edge(A_prime, state_map[e.dst], e.cond, e.acc)
-        if DEBUG_SIZE2_OVERAPPROX:
+        if F2_TRACE:
             cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
-            print(f"     [COPY] A'={A_prime} --[{cond_str}]--> {e.dst}")
+            print(f"[F2]     [COPY] A'={A_prime} --[{cond_str}]--> {e.dst}")
 
     # Redirect B → A (other → initiator) edges to point to A' instead
+    if F2_TRACE:
+        print("[F2]   Redirecting other→initiator edges to other→A' :")
     for e in aut.out(other):
         if e.dst == initiator:
             new_aut.new_edge(state_map[other], A_prime, e.cond, e.acc)
-            if DEBUG_SIZE2_OVERAPPROX:
+            if F2_TRACE:
                 cond_str = spot.bdd_format_formula(aut.get_dict(), e.cond)
-                print(f"     [EDIT] Redirect {other} --> {initiator} to {other} --> A' (cond={cond_str})")
+                print(f"[F2]     [EDIT] Redirect {other} --> {initiator}  to  {other} --> A'   (cond={cond_str})")
 
-    # Relabel the other state's self-loop with true (the deliberate over-approximation)
+    # === THE KEY OVER-APPROXIMATION ===
+    # Relabel the other state's self-loop with true (full alphabet).
+    # This is the "raw guess" / deliberate over-approximation.
+    # It can add behaviors. We only keep the result if the language-equivalence
+    # check later says the overall language is still the same.
+    if F2_TRACE:
+        print("[F2]   === OVER-APPROXIMATION STEP ===")
+        print("[F2]   Relabeling the 'other' state's self-loop with true (full alphabet)")
     for e in aut.out(other):
         if e.dst == other:
             new_aut.new_edge(state_map[other], state_map[other], true_bdd, e.acc)
-            if DEBUG_SIZE2_OVERAPPROX:
-                print("     [EDIT] Relabeled other state's self-loop with true (over-approximation)")
+            if F2_TRACE:
+                print(f"[F2]     [OVER-APPROX] {other} self-loop: original cond replaced by TRUE ({true_str})")
+            break
 
     new_aut.set_init_state(state_map[aut.get_init_state_number()])
     new_aut.copy_ap_of(aut)
 
+    if F2_TRACE:
+        print(f"[F2]   Rewritten automaton has {new_aut.num_states()} states (original had {aut.num_states()})")
+        print("[F2]   === LANGUAGE EQUIVALENCE VALIDATION (the soundness gate) ===")
+        print("[F2]   Checking spot.are_equivalent(original, over_approx_rewritten) ...")
+
     try:
-        if spot.are_equivalent(aut, new_aut):
-            if DEBUG_SIZE2_OVERAPPROX:
-                print("  → size2_overapprox succeeded and preserved language.")
+        eq = spot.are_equivalent(aut, new_aut)
+        if F2_TRACE:
+            print(f"[F2]   are_equivalent result = {eq}")
+        if eq:
+            if F2_TRACE:
+                print("[F2]   ✓ Over-approximation accepted (language preserved). Returning massaged automaton.")
             return new_aut
         else:
-            if DEBUG_SIZE2_OVERAPPROX:
-                print("  → Produced non-equivalent automaton after rewrite; rejecting.")
+            if F2_TRACE:
+                print("[F2]   ✗ Produced non-equivalent automaton; rejecting the rewrite.")
             return None
     except Exception as e:
-        if DEBUG_SIZE2_OVERAPPROX:
-            print(f"  → Equivalence check failed: {e}")
+        if F2_TRACE:
+            print(f"[F2]   Equivalence check raised exception: {e}")
         return None

@@ -15,9 +15,141 @@ import buddy
 # give up and emit UNSUPPORTED.  Both are tried (and validated) early.
 from .heuristics.size2_overapprox import try_size2_overapprox
 from .heuristics.terminal_2scc import try_terminal_2scc_with_validation
+from .invariants import compute_invariant_literals
 
 # Enable detailed tracing only when RECONSTRUCT_TRACE=1
 TRACE = os.environ.get("RECONSTRUCT_TRACE") == "1"
+
+
+def _compute_state_invariants(aut):
+    """
+    For every state, compute the set of invariant literals that hold
+    on all edges reachable downstream from that state (including its own
+    outgoing edges).
+
+    This is a one-time precomputation. The result is a dict:
+        state -> set of literal strings, e.g. { "p2", "!p0" }
+    """
+    n = aut.num_states()
+    # Precompute adjacency for reachability
+    outgoing = [[] for _ in range(n)]
+    for s in range(n):
+        for e in aut.out(s):
+            outgoing[s].append(e.dst)
+
+    # Memoized reachability: state -> set of reachable states (including self)
+    reachable_cache = {}
+
+    def get_reachable(q):
+        if q in reachable_cache:
+            return reachable_cache[q]
+        visited = set()
+        stack = [q]
+        while stack:
+            cur = stack.pop()
+            if cur in visited:
+                continue
+            visited.add(cur)
+            stack.extend(outgoing[cur])
+        reachable_cache[q] = visited
+        return visited
+
+    state_invariants = {}
+    d = aut.get_dict()
+
+    for q in range(n):
+        # Downstream = states reachable in 1 or more steps from q
+        # (i.e. what you can reach after leaving q)
+        direct_succs = outgoing[q]
+        downstream_states = set()
+        for succ in direct_succs:
+            downstream_states |= get_reachable(succ)
+
+        # Collect edge conditions from those downstream states
+        edge_bdds = []
+        for s in downstream_states:
+            for e in aut.out(s):
+                edge_bdds.append(e.cond)
+
+        if edge_bdds:
+            invs = compute_invariant_literals(edge_bdds, aut)
+        else:
+            invs = set()
+
+        state_invariants[q] = invs
+
+    return state_invariants
+
+
+def _apply_downstream_invariants(aut, state_invariants):
+    """
+    For each state q, existentially quantify (from its immediate outgoing
+    edge conditions) all the variables that are known to be invariant
+    downstream from q.
+
+    Returns a (possibly new) automaton with the simplified labels.
+    """
+    if not any(state_invariants.values()):
+        return aut
+
+    d = aut.get_dict()
+    aps = list(aut.ap())
+    num_aps = len(aps)
+
+    # Build mapping AP index -> actual Buddy variable used in this aut
+    ap_to_bdd_var = {}
+    for i, ap in enumerate(aps):
+        # Reliable way: create tiny automaton mentioning only this AP
+        lit_f = spot.formula(str(ap))
+        tmp = lit_f.translate()
+        for e in tmp.out(tmp.get_init_state_number()):
+            cond = e.cond
+            if cond != buddy.bddtrue and cond != buddy.bddfalse:
+                ap_to_bdd_var[i] = buddy.bdd_var(cond)
+                break
+        else:
+            ap_to_bdd_var[i] = i   # fallback
+
+    # Precompute per-source quantification cube (positive literals of the vars to quantify)
+    source_cubes = {}
+    for q in range(aut.num_states()):
+        lits = state_invariants.get(q, set())
+        if not lits:
+            source_cubes[q] = buddy.bddtrue
+            continue
+
+        vars_to_quant = set()
+        for lit in lits:
+            name = lit[1:] if lit.startswith("!") else lit
+            for i, ap in enumerate(aps):
+                if str(ap) == name:
+                    vars_to_quant.add(ap_to_bdd_var[i])
+                    break
+
+        cube = buddy.bddtrue
+        for v in vars_to_quant:
+            cube = cube & buddy.bdd_ithvar(v)
+        source_cubes[q] = cube
+
+    # Build new automaton with quantified conditions on outgoing edges
+    new_aut = spot.make_twa_graph(d)
+    new_aut.set_acceptance(aut.acc())
+    new_aut.copy_ap_of(aut)
+
+    state_map = {s: new_aut.new_state() for s in range(aut.num_states())}
+
+    for src in range(aut.num_states()):
+        cube = source_cubes[src]
+        for e in aut.out(src):
+            old_cond = e.cond
+            if cube != buddy.bddtrue:
+                new_cond = buddy.bdd_exist(old_cond, cube)
+            else:
+                new_cond = old_cond
+            new_aut.new_edge(state_map[src], state_map[e.dst], new_cond, e.acc)
+
+    new_aut.set_init_state(state_map[aut.get_init_state_number()])
+    return new_aut
 
 
 def reconstruct_ltl(aut):
@@ -37,11 +169,72 @@ def reconstruct_ltl(aut):
     """
 
     # --- Heuristic layer: try to absorb size-2 non-accepting SCCs ---
+    if TRACE:
+        # Save using Spot's own DOT output *before* f2, so state numbers
+        # exactly match everything printed in the [F2] traces.
+        base = "trace_aut_before_f2"
+        dotfile = base + ".dot"
+        with open(dotfile, "w", encoding="utf-8") as f:
+            f.write(aut.to_str("dot"))
+        print(f"[TRACE] Saved automaton before f2 (over-approx) → {dotfile}")
+        try:
+            import subprocess, shutil
+            if shutil.which("dot"):
+                pngfile = base + ".png"
+                subprocess.run(["dot", "-Tpng", "-o", pngfile, dotfile],
+                               check=False, capture_output=True)
+                print(f"[TRACE] Also rendered {pngfile}")
+        except Exception:
+            pass
+
     massaged = try_size2_overapprox(aut)
     absorbed = False
     if massaged is not None:
         aut = massaged
         absorbed = True   # trust the heuristic: do not re-apply the strict multi-state filter
+
+        if TRACE:
+            # Save after successful f2 rewrite (this is the automaton that will
+            # be passed to t2 and the rest of the labeling).
+            base = "trace_aut_after_f2"
+            dotfile = base + ".dot"
+            with open(dotfile, "w", encoding="utf-8") as f:
+                f.write(aut.to_str("dot"))
+            print(f"[TRACE] Saved automaton AFTER f2 over-approx → {dotfile}")
+            try:
+                import subprocess, shutil
+                if shutil.which("dot"):
+                    pngfile = base + ".png"
+                    subprocess.run(["dot", "-Tpng", "-o", pngfile, dotfile],
+                                   check=False, capture_output=True)
+                    print(f"[TRACE] Also rendered {pngfile}  (use this + before_f2 to see exactly what the over-approx changed)")
+            except Exception:
+                pass
+
+    # --- Precompute downstream invariants for every state (once, up front) ---
+    # Literal sets (for simplification / quantification)
+    state_invariant_literals = _compute_state_invariants(aut)
+
+    # G-formula annotation (the main one we store "next to the formula label")
+    state_invariants = {}
+    for q, lits in state_invariant_literals.items():
+        if lits:
+            inv_inner = " & ".join(sorted(lits))
+            state_invariants[q] = f"G({inv_inner})"
+        else:
+            state_invariants[q] = ""
+
+    if TRACE:
+        print("[TRACE] Downstream invariants per state (G-formulas, computed once):")
+        for s in sorted(state_invariants):
+            inv = state_invariants[s]
+            if inv:
+                print(f"  state {s}: {inv}")
+
+    # --- Simplify outgoing edge labels by existentially quantifying downstream invariants ---
+    aut = _apply_downstream_invariants(aut, state_invariant_literals)
+    if TRACE and any(state_invariant_literals.values()):
+        print("[TRACE] Applied existential quantification of downstream invariants on outgoing edges.")
 
     # ------------------------------------------------------------------
     # NEW: Terminal SCC labeling heuristic ("t2") - generalized beyond 2 states
@@ -61,6 +254,27 @@ def reconstruct_ltl(aut):
     # Only SCCs that survive try_terminal_2scc_with_validation() (i.e. the
     # round-trip equivalence check inside the heuristic) are considered here.
     # ------------------------------------------------------------------
+
+    if TRACE:
+        # Use Spot's native DOT output so the state numbers exactly match what
+        # appears in all the [T2] / [TRACE] messages (e.g. states=[4, 6, 2] after f2).
+        # This is the automaton handed to t2 (post-f2 if any).
+        base = "trace_aut_before_t2"
+        dotfile = base + ".dot"
+        with open(dotfile, "w", encoding="utf-8") as f:
+            f.write(aut.to_str("dot"))
+        print(f"[TRACE] Saved automaton (exact current numbering) before t2 → {dotfile}")
+        # Try to render PNG via graphviz 'dot' if available (best effort, silent on failure)
+        try:
+            import subprocess, shutil
+            if shutil.which("dot"):
+                pngfile = base + ".png"
+                subprocess.run(["dot", "-Tpng", "-o", pngfile, dotfile],
+                               check=False, capture_output=True)
+                print(f"[TRACE] Also rendered {pngfile} (open to see states with the numbers used in traces)")
+        except Exception:
+            pass
+
     nice_terminal_sccs = try_terminal_2scc_with_validation(aut)
     nice_scc_states = set()
     scc_fragments = {}   # state -> validated formula fragment for its SCC
@@ -82,6 +296,25 @@ def reconstruct_ltl(aut):
             print(f"[TRACE]     L = {info['L']}")
             print(f"[TRACE]     O = {info['O']}")
             print(f"[TRACE]     fragment = {info.get('validated_formula') or info.get('simplified')}")
+
+    if TRACE:
+        # t2 never mutates the automaton (it only returns validated formula fragments).
+        # Saving again gives you an "after t2" file with the exact same numbering
+        # that the traces used.
+        base = "trace_aut_after_t2"
+        dotfile = base + ".dot"
+        with open(dotfile, "w", encoding="utf-8") as f:
+            f.write(aut.to_str("dot"))
+        print(f"[TRACE] Saved automaton after t2 processing → {dotfile}")
+        try:
+            import subprocess, shutil
+            if shutil.which("dot"):
+                pngfile = base + ".png"
+                subprocess.run(["dot", "-Tpng", "-o", pngfile, dotfile],
+                               check=False, capture_output=True)
+                print(f"[TRACE] Also rendered {pngfile}")
+        except Exception:
+            pass
 
     # --- Trivial acceptance normalization ---
     treat_all_as_accepting = (aut.acc().num_sets() == 0)
@@ -210,21 +443,18 @@ def reconstruct_ltl(aut):
                 #     only when at least one successor leads to a known-good t2 fragment).
                 # ------------------------------------------------------------------
 
-                # Fast pre-check: does this state have *any* edge that we already
-                # know leads into a t2 fragment or a state that already has a formula?
-                has_good_t2_successor = any(
-                    (e2.dst in scc_fragments or e2.dst in state_formula)
-                    for e2 in aut.out(q)
-                )
-
                 if e.dst in bad_states and e.dst not in state_formula and e.dst not in scc_fragments:
-                    if has_good_t2_successor:
-                        continue   # skip the bad edge; we have at least one good t2 branch
-                    else:
-                        state_formula[q] = UNSUPPORTED
-                        visiting.remove(q)
-                        depth[0] -= 1
-                        return UNSUPPORTED
+                    # Strict hardening: we have no reconstruction algorithm for
+                    # states inside this multi-state SCC. Silently dropping the
+                    # branch (as was done for t2 leniency) can produce wrong
+                    # but plausible formulas. Instead, the whole current state
+                    # must be UNSUPPORTED.
+                    if TRACE:
+                        print(f"[TRACE] label({q}): encountered bad successor {e.dst} with no fragment -> UNSUPPORTED")
+                    state_formula[q] = UNSUPPORTED
+                    visiting.remove(q)
+                    depth[0] -= 1
+                    return UNSUPPORTED
 
                 # The heart of "use the precomputed fragment for the whole SCC":
                 # If the immediate successor *is* one of the SCC states (any size),
@@ -270,20 +500,16 @@ def reconstruct_ltl(aut):
                 else:
                     succ_phi = label(e.dst)
                     if isinstance(succ_phi, str) and succ_phi.startswith("UNSUPPORTED"):
-                        # Even after the lenient "has_good_t2_successor" test we may
-                        # still land here for an edge that truly has no good future.
-                        # Only declare the whole state bad if *none* of the other
-                        # edges from q lead to a t2 fragment.
-                        if not any((e2.dst in scc_fragments or e2.dst in state_formula)
-                                   for e2 in aut.out(q) if e2.dst != e.dst):
-                            state_formula[q] = UNSUPPORTED
-                            visiting.remove(q)
-                            depth[0] -= 1
-                            return UNSUPPORTED
-                        else:
-                            # This particular edge is bad but we have other good
-                            # t2 branches; just ignore it for the disjunction.
-                            continue
+                        # Strict hardening: if any successor we tried to label
+                        # ended up unsupported (typically because it hit a bad
+                        # multi-state SCC with no fragment), the whole current
+                        # state is unsupported. We do not silently drop branches.
+                        if TRACE:
+                            print(f"[TRACE] label({q}): successor {e.dst} returned UNSUPPORTED -> whole state UNSUPPORTED")
+                        state_formula[q] = UNSUPPORTED
+                        visiting.remove(q)
+                        depth[0] -= 1
+                        return UNSUPPORTED
 
                 # ------------------------------------------------------------------
                 # HARD GUARD: Never allow the UNSUPPORTED sentinel to be wrapped
@@ -297,16 +523,42 @@ def reconstruct_ltl(aut):
                     depth[0] -= 1
                     return UNSUPPORTED
 
-                if cond == "1":
+                # --- New connection rule: label of successor AND its downstream invariant ---
+                target = e.dst
+                inv_formula = state_invariants.get(target, "")
+
+                if e.dst in scc_fragments:
+                    # SCC case: always X the invariant part (which already contains its G).
+                    # For the SCC labeling part, still use the old compatibility test
+                    # (direct_scc_sync_attach) to decide sync vs X.
+                    scc_part = succ_phi
                     if direct_scc_sync_attach:
-                        exit_terms.append(f"({succ_phi})")
+                        scc_wrapped = f"({scc_part})"
                     else:
-                        exit_terms.append(f"X({succ_phi})")
+                        scc_wrapped = f"X({scc_part})"
+
+                    if inv_formula:
+                        term = f"({scc_wrapped}) & X({inv_formula})"
+                    else:
+                        term = scc_wrapped
                 else:
-                    if direct_scc_sync_attach:
-                        exit_terms.append(f"({cond}) & ({succ_phi})")
+                    # Normal (non-SCC) successor: label AND invariant (same timing)
+                    base = succ_phi
+                    if inv_formula:
+                        term = f"({base}) & ({inv_formula})"
                     else:
-                        exit_terms.append(f"({cond}) & X({succ_phi})")
+                        term = base
+
+                if cond == "1":
+                    if direct_scc_sync_attach and e.dst in scc_fragments:
+                        exit_terms.append(f"({term})")
+                    else:
+                        exit_terms.append(f"X({term})")
+                else:
+                    if direct_scc_sync_attach and e.dst in scc_fragments:
+                        exit_terms.append(f"({cond}) & ({term})")
+                    else:
+                        exit_terms.append(f"({cond}) & X({term})")
 
         # (debug prints for this session removed)
 

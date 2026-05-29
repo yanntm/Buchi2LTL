@@ -91,7 +91,22 @@ See also:
 - samples/terminal_2scc_labeled.py    (100 formulas where t2 activates)
 """
 
+import os
 import spot
+import buddy
+
+# Optional: sympy for robust constant-atom detection (general case)
+try:
+    from sympy.logic.boolalg import And, Not, symbols, Or
+    from sympy.logic.inference import satisfiable
+    HAS_SYMPY = True
+except ImportError:
+    HAS_SYMPY = False
+
+# Tracing for the t2 / terminal-SCC heuristic.
+# Enable with RECONSTRUCT_TRACE=1 (consistent with main reconstruction)
+# or the more specific T2_TRACE=1.
+T2_TRACE = os.environ.get("RECONSTRUCT_TRACE") == "1" or os.environ.get("T2_TRACE") == "1"
 
 # ---------------------------------------------------------------------------
 # NOTE ON INITIAL-STATE REWIRING
@@ -232,11 +247,26 @@ def find_nice_terminal_2sccs(aut):
         if len(states) < 2:
             continue
 
+        if T2_TRACE:
+            print(f"[T2] SCC {scc}: size={len(states)}, states={states}")
+            print("[T2]   (Numbers match the states in trace_aut_before_t2.png / .dot)")
+
         # Terminal check: every successor of every state in the SCC must
         # itself belong to the same SCC.
         is_terminal = all(si.scc_of(e.dst) == scc for st in states for e in aut.out(st))
         if not is_terminal:
+            if T2_TRACE:
+                # Find one escaping edge for diagnosis
+                for st in states:
+                    for e in aut.out(st):
+                        if si.scc_of(e.dst) != scc:
+                            cond = spot.bdd_format_formula(aut.get_dict(), e.cond)
+                            print(f"[T2]   not terminal: state {st} has escape -> {e.dst} under {cond}")
+                            print(f"[T2]     (Open trace_aut_before_t2.png to see the full graph with these exact indices)")
+                            break
             continue
+        if T2_TRACE:
+            print(f"[T2]   is terminal SCC of size {len(states)}")
 
         # ------------------------------------------------------------------
         # L(s) = "state label when you are in this state"
@@ -253,7 +283,12 @@ def find_nice_terminal_2sccs(aut):
             L_strs[st] = s
             if s in ("1", "true"):
                 all_tight = False
+        if T2_TRACE:
+            print(f"[T2]   L labels (internal incoming): {L_strs}")
+            print(f"[T2]   all L strictly tighter than true? {all_tight}")
         if not all_tight:
+            if T2_TRACE:
+                print("[T2]   -> rejected: some L is 'true' (not a useful state label)")
             continue
 
         # Pairwise mutual exclusion: the key property that lets us emit a
@@ -267,10 +302,14 @@ def find_nice_terminal_2sccs(aut):
                 inter_str = spot.bdd_format_formula(d, inter)
                 # simplify only for the boolean test
                 if str(spot.formula(inter_str).simplify()) not in ("0", "false"):
+                    if T2_TRACE:
+                        print(f"[T2]   mutual exclusion FAIL: L({states[i]}) & L({states[j]}) = {inter_str}")
                     mutually_exclusive = False
                     break
             if not mutually_exclusive:
                 break
+        if T2_TRACE:
+            print(f"[T2]   pairwise mutually exclusive? {mutually_exclusive}")
         if not mutually_exclusive:
             continue
 
@@ -288,6 +327,10 @@ def find_nice_terminal_2sccs(aut):
         # Keep raw (no Spot simplification).
         simplified = formula
 
+        if T2_TRACE:
+            print(f"[T2]   -> syntactic candidate accepted: {formula}")
+            print(f"[T2]     O labels: {O_strs}")
+
         results.append({
             "states": states,
             "L": L_strs,
@@ -297,6 +340,8 @@ def find_nice_terminal_2sccs(aut):
             "simplified": simplified,
         })
 
+    if T2_TRACE and not results:
+        print("[T2] No syntactic nice terminal SCC candidates found in the whole automaton.")
     return results
 
 
@@ -370,6 +415,10 @@ def validate_terminal_2scc(aut, nice_info):
             if e.dst in states:   # keep only internal edges
                 small.new_edge(state_map[st], state_map[e.dst], e.cond, e.acc)
 
+    if T2_TRACE:
+        print(f"[T2]   validation: isolated SCC fragment has {small.num_states()} states, {small.num_edges()} edges")
+        print(f"[T2]   candidate formula being validated: {candidate}")
+
     # The choice of which state we declare initial does not matter for
     # language equivalence of a strongly-connected component; the
     # are_equivalent check will explore the whole cycle anyway.
@@ -379,15 +428,22 @@ def validate_terminal_2scc(aut, nice_info):
         # Translate with the exact same options used everywhere else in the
         # project so that the comparison is apples-to-apples.
         cand_aut = spot.formula(candidate).translate("GeneralizedBuchi", "Small", "High")
-        if spot.are_equivalent(small, cand_aut):
+        eq = spot.are_equivalent(small, cand_aut)
+        if T2_TRACE:
+            print(f"[T2]   are_equivalent(isolated_SCC, translate(candidate)) = {eq}")
+        if eq:
             # DEBUG MODE: return the raw candidate, never the simplified form.
             # (The commented line shows what a non-debug version would do.)
             return candidate
-    except Exception:
+    except Exception as e:
+        if T2_TRACE:
+            print(f"[T2]   validation raised exception: {e}")
         # Any translation or equivalence error -> treat as failure for this
         # candidate.  We stay silent here; the caller can log if needed.
         pass
 
+    if T2_TRACE:
+        print("[T2]   -> validation FAILED for this candidate")
     return None
 
 
@@ -421,6 +477,9 @@ def try_terminal_2scc_with_validation(aut):
     cleanly in the overall backward labeling algorithm.
     """
     candidates = find_nice_terminal_2sccs(aut)
+    if T2_TRACE:
+        print(f"[T2] find_nice_terminal_2sccs returned {len(candidates)} syntactic candidate(s)")
+
     validated = []
 
     for info in candidates:
@@ -429,5 +488,9 @@ def try_terminal_2scc_with_validation(aut):
             info = dict(info)  # do not mutate caller's dicts
             info["validated_formula"] = validated_formula
             validated.append(info)
+            if T2_TRACE:
+                print(f"[T2]   candidate for states {info['states']} VALIDATED successfully")
 
+    if T2_TRACE:
+        print(f"[T2] try_terminal_2scc_with_validation returning {len(validated)} validated fragment(s)")
     return validated
