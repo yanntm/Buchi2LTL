@@ -18,9 +18,11 @@ from pathlib import Path
 
 import spot
 
-# Make sure we can import the recovered working heuristic
+# Use the production size-2 absorption heuristic (the logic that was
+# previously maintained as a separate "recovered working" copy has been
+# reinstated into the main module).
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from testing.recovered_working_fusion_heuristic import try_absorb_size2_v2
+from buchi2ltl.heuristics.size2_overapprox import try_size2_overapprox as try_absorb_size2_v2
 
 
 TIME_LIMIT = 60.0          # seconds
@@ -148,7 +150,8 @@ def main():
         with open(out_path, "w") as f:
             f.write('"""Formulas for which the recovered size-2 fusion heuristic (f2)\n')
             f.write('successfully produced a language-equivalent automaton.\n')
-            f.write(f'Found by testing/recovered_working_fusion_heuristic.py\n')
+            f.write('Found using the production size2_overapprox heuristic\n')
+            f.write('# (logic originally developed and verified in testing/recovered_working_fusion_heuristic.py)\n')
             f.write(f'Search time: {total_time:.1f}s\n"""\n\n')
             f.write("F2_SUCCESS = [\n")
             for s in successes:

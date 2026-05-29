@@ -12,10 +12,10 @@ not present in the original automaton. We only accept the result if
 When successful, the resulting automaton has only size-1 SCCs and can be
 fed to the core backward labeling procedure.
 
-Implementation note: the core surgical rewrite was reinstated from the
-verified working version in testing/recovered_working_fusion_heuristic.py
-(the version that correctly handles cases such as "X(p1 | F(p1 & Xp1))").
-The public API (try_size2_overapprox) and strict equivalence gate are preserved.
+Implementation note: the core surgical rewrite (the version that correctly
+handles cases such as "X(p1 | F(p1 & Xp1))") was reinstated into this module
+from the earlier experimental copy that lived in testing/.  The public API
+(try_size2_overapprox) and strict equivalence gate are preserved.
 """
 
 DEBUG_SIZE2_OVERAPPROX = False

@@ -1,7 +1,9 @@
-"""Formulas for which the recovered size-2 fusion heuristic (f2)
-successfully produced a language-equivalent automaton.
-Found by testing/recovered_working_fusion_heuristic.py
-Search time: 12.6s
+"""Formulas for which the size-2 fusion heuristic (f2) successfully
+produced a language-equivalent automaton.
+
+The core logic was originally developed and verified in
+testing/recovered_working_fusion_heuristic.py and later reinstated
+into the production buchi2ltl.heuristics.size2_overapprox module.
 """
 
 F2_SUCCESS = [
