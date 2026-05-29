@@ -549,14 +549,18 @@ def reconstruct_ltl(aut):
                     else:
                         term = base
 
-                if cond == "1":
-                    if direct_scc_sync_attach and e.dst in scc_fragments:
+                if e.dst in scc_fragments:
+                    # SCC case fully controls its own wrapping (including cond=="1").
+                    # This prevents double-X when the SCC decision already chose X(fragment)
+                    # and the generic cond==1 rule would add another X.
+                    if cond == "1":
                         exit_terms.append(f"({term})")
                     else:
-                        exit_terms.append(f"X({term})")
-                else:
-                    if direct_scc_sync_attach and e.dst in scc_fragments:
                         exit_terms.append(f"({cond}) & ({term})")
+                else:
+                    # Normal non-SCC exit logic
+                    if cond == "1":
+                        exit_terms.append(f"X({term})")
                     else:
                         exit_terms.append(f"({cond}) & X({term})")
 
