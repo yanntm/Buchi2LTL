@@ -1,11 +1,16 @@
-"""Formulas for which the modern production terminal-2-SCC
-heuristic (t2) activated inside reconstruct_ltl and produced
-a language-equivalent result.
-Includes the entry-timing logic (synchronous vs delayed attachment)
-and full validation round-trips.
+"""Formulas for which the modern production terminal-SCC heuristic
+(tN, generalized from the original size-2 "t2" rule) activated inside
+reconstruct_ltl and produced a language-equivalent result.
 
-Search time: 4.2s, target=100
-Generated with testing/find_t2_successes.py
+The heuristic now accepts any terminal SCC size >=2 whose per-state
+L labels (from internal incoming edges) are pairwise mutually exclusive
+and strictly tighter than true. Technique strings now include t3, t4, ...
+when larger SCCs are captured (e.g. "sl+t4", "sl+t3").
+
+Includes the entry-timing logic and full validation round-trips.
+
+Search time: 4.2s (original) + later random + manual cases, target=100+
+Generated with testing/find_t2_successes.py + manual verification
 """
 
 T2_SUCCESS = [
@@ -109,6 +114,15 @@ T2_SUCCESS = [
     "G((p0 U p1) & (!p0 | Xp1))",
     "G(p1 & !p1) R (p0 U Xp0)",
     "G(p0 | (p0 R p2))",
+    # New tN (>=3) cases from relaxed terminal-SCC heuristic (size-agnostic L labels)
+    "G(p->Xq) & G(r->Xt)",  # canonical t4 (product of two independent 2-oscillators)
+    "XG((p2 & (p3 | Xp3)) | (!p2 & !p3 & X!p3))",
+    "X(p2 | G(X!p2 | (!p1 W !p2)))",  # exercises 6-state nice terminal SCC
+    "FG((p0 | p2) & (p0 | Xp2) & (!p0 | !p2 | X!p2))",
+    "p0 W G((p1 & !p3 & Xp0) | (!p1 & (p3 | X!p0)))",
+    "G(p0 | (p2 & Xp3) | (!p2 & X!p3))",
+    "G((p2 & (!p3 M X!p2)) | (!p2 & (p3 W Xp2)))",
+    "G((!p0 & p3 & Xp2) | (!p3 & (p0 | X!p2)))",
 ]
 
 # Metadata
@@ -213,4 +227,13 @@ T2_SUCCESS_META = [
     {"formula": "G((p0 U p1) & (!p0 | Xp1))", "aps": 2, "tree_size": 9, "states": 2, "technique": "sl+t2"},
     {"formula": "G(p1 & !p1) R (p0 U Xp0)", "aps": 2, "tree_size": 10, "states": 2, "technique": "sl+t2"},
     {"formula": "G(p0 | (p0 R p2))", "aps": 3, "tree_size": 7, "states": 2, "technique": "sl+t2"},
+    # New tN (>=3) cases (relaxed rule)
+    {"formula": "G(p->Xq) & G(r->Xt)", "aps": 4, "tree_size": 0, "states": 4, "technique": "sl+t4"},
+    {"formula": "XG((p2 & (p3 | Xp3)) | (!p2 & !p3 & X!p3))", "aps": 4, "tree_size": 0, "states": 4, "technique": "sl+t3"},
+    {"formula": "X(p2 | G(X!p2 | (!p1 W !p2)))", "aps": 3, "tree_size": 0, "states": 6, "technique": "sl+t3"},
+    {"formula": "FG((p0 | p2) & (p0 | Xp2) & (!p0 | !p2 | X!p2))", "aps": 3, "tree_size": 0, "states": 4, "technique": "sl+t3"},
+    {"formula": "p0 W G((p1 & !p3 & Xp0) | (!p1 & (p3 | X!p0)))", "aps": 4, "tree_size": 0, "states": 4, "technique": "sl+t3"},
+    {"formula": "G(p0 | (p2 & Xp3) | (!p2 & X!p3))", "aps": 4, "tree_size": 0, "states": 3, "technique": "sl+t3"},
+    {"formula": "G((p2 & (!p3 M X!p2)) | (!p2 & (p3 W Xp2)))", "aps": 4, "tree_size": 0, "states": 3, "technique": "sl+t3"},
+    {"formula": "G((!p0 & p3 & Xp2) | (!p3 & (p0 | X!p2)))", "aps": 4, "tree_size": 0, "states": 3, "technique": "sl+t3"},
 ]
