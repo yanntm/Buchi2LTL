@@ -71,9 +71,13 @@ The pattern gives a *steady-state* description of the SCC.  When a prefix leads
 into it, the entry edge may choose which of the two states we land in first.
 Some formulas (e.g. "r U G(!p | Xq)") have p-dependent choice of entry state.
 The current symmetric G(...) can over-approximate the entry and produce a
-slightly different automaton for the full formula (see user-supplied HOA
-examples in the development log).  "Slightly asymmetric labeling" of the two
-states (one acting as the canonical entry) is the next refinement direction.
+slightly different automaton for the full formula.  The reconstruction layer
+now resolves the exact entry-timing subtlety (see the two HOA examples with
+"r & XG(!p | Xq)" vs "r U G(!p | Xq)"): when attaching a prefix to the SCC
+fragment it checks (via BDD implication) whether each crossing label L implies
+the I(s_in) of its target SCC state.  If yes the invariant is attached
+synchronously as "(L) & f"; otherwise the delayed "(L) & X(f)" is used.
+This yields the precise "r U f" vs "r & X f" shapes for the two cases.
 
 The technique is therefore marked "t2" in the reported technique string and is
 still considered experimental / in need of refining, but it already turns many
@@ -277,6 +281,7 @@ def find_nice_terminal_2sccs(aut):
         results.append({
             "states": states,
             "L": {sA: LA_str, sB: LB_str},
+            "L_bdd": {sA: LA_bdd, sB: LB_bdd},
             "O": {sA: OA_str, sB: OB_str},
             "formula": formula,
             "simplified": simplified,

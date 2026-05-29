@@ -9,6 +9,7 @@ It is kept separate from heuristics and from calling / CLI code.
 
 import os
 import spot
+import buddy
 
 # The two heuristics that can "rescue" certain multi-state SCCs before we
 # give up and emit UNSUPPORTED.  Both are tried (and validated) early.
@@ -62,12 +63,15 @@ def reconstruct_ltl(aut):
     nice_terminal_sccs = try_terminal_2scc_with_validation(aut)
     nice_scc_states = set()
     scc_fragments = {}   # state -> validated formula fragment for its SCC
+    scc_entry_I = {}     # state -> BDD of I(s): entry letters into this SCC state must imply it
     for info in nice_terminal_sccs:
         validated = info.get("validated_formula") or info.get("simplified")
         if validated:
             for st in info["states"]:
                 nice_scc_states.add(st)
                 scc_fragments[st] = validated
+                if "L_bdd" in info and st in info["L_bdd"]:
+                    scc_entry_I[st] = info["L_bdd"][st]
 
     if TRACE:
         print(f"[TRACE] t2: found {len(nice_terminal_sccs)} nice terminal 2-state SCC(s)")
@@ -208,8 +212,24 @@ def reconstruct_ltl(aut):
                 # any of its own successors is, we short-circuit the recursion and
                 # just grab the validated G(...) string.  This prevents the labeler
                 # from ever walking the internal cycle of the SCC.
+                #
+                # NEW (entry timing subtlety): when the edge is a *direct* crossing
+                # into a t2 SCC state, we check whether its label L logically
+                # implies the target's I(s) label (the steady-state "entry condition"
+                # computed from internal incoming edges).  If yes, the invariant f
+                # already holds on this letter, so we attach synchronously:
+                #     (cond) & f          instead of the usual delayed (cond) & X(f)
+                # This is what distinguishes "r U f" (second HOA) from "r & X f"
+                # (first HOA) even though they share the same core 2-SCC f.
+                direct_scc_sync_attach = False
                 if e.dst in scc_fragments:
                     succ_phi = scc_fragments[e.dst]
+                    i_bdd = scc_entry_I.get(e.dst)
+                    if i_bdd is not None:
+                        crossing_bdd = e.cond
+                        # L implies I(s)  <=>  no counterexample letter that is in L but not I
+                        if (crossing_bdd & buddy.bdd_not(i_bdd)) == buddy.bddfalse:
+                            direct_scc_sync_attach = True
                 elif any(e2.dst in scc_fragments or e2.dst in state_formula for e2 in aut.out(e.dst)):
                     # The successor state itself is not in the fragment set, but one
                     # of the states it can reach in one step is.  Grab the fragment
@@ -240,9 +260,15 @@ def reconstruct_ltl(aut):
                             continue
 
                 if cond == "1":
-                    exit_terms.append(f"X({succ_phi})")
+                    if direct_scc_sync_attach:
+                        exit_terms.append(f"({succ_phi})")
+                    else:
+                        exit_terms.append(f"X({succ_phi})")
                 else:
-                    exit_terms.append(f"({cond}) & X({succ_phi})")
+                    if direct_scc_sync_attach:
+                        exit_terms.append(f"({cond}) & ({succ_phi})")
+                    else:
+                        exit_terms.append(f"({cond}) & X({succ_phi})")
 
         # (debug prints for this session removed)
 
