@@ -1,13 +1,15 @@
 """
-Heuristic for "nice" terminal 2-state accepting SCCs (the "t2" pattern).
+Heuristic for "nice" terminal accepting SCCs (the "t2" pattern, generalized).
 
 -------------------------------------------------------------------------------
 MOTIVATION AND APPROACH
 -------------------------------------------------------------------------------
 Many LTL formulas that are "eventually linear" (after some prefix behavior they
-settle into a simple 2-state oscillation) produce TGBA with a terminal SCC of
-exactly two states under the "GeneralizedBuchi Small High" translation from
-Spot.
+settle into a simple oscillation) produce TGBA with a terminal SCC of any
+size >=2 under the "GeneralizedBuchi Small High" translation from Spot.
+The original implementation required exactly two states; this has been relaxed
+to any size as long as the per-state L labels (derived from internal incoming
+edges) are pairwise mutually exclusive and all strictly tighter than true.
 
 Classic examples:
     G(p -> X q)          --> terminal SCC {0,1} with p-dependent choice of entry
@@ -18,13 +20,13 @@ For such SCCs the two states can be given *state labels* L derived purely from
 the automaton structure:
     L(s) = OR of all (formulas on edges entering s)
 
-If both L(A) and L(B) are:
+If all L(s) for s in the SCC are:
     - strictly tighter than "true"  (i.e. they actually constrain the alphabet)
-    - mutually exclusive (L(A) & L(B) == false)
+    - pairwise mutually exclusive (L(s) & L(t) == false for s != t)
 
 then the whole SCC can be described by the single LTL formula
 
-    G(  (L(A) & X O(A))  |  (L(B) & X O(B))  )
+    G(  OR_{s in SCC} (L(s) & X O(s))  )
 
 where O(s) is the OR of the conditions on edges *leaving* s.
 
@@ -34,12 +36,12 @@ This is a sound characterization of "being in the SCC forever".
 SOUNDNESS
 -------------------------------------------------------------------------------
 We never trust the pattern on faith.  try_terminal_2scc_with_validation()
-isolates the two states + their *internal* transitions into a fresh 2-state
-automaton, translates the candidate G(...) back to an automaton with the same
-settings, and only accepts the fragment if spot.are_equivalent() holds.
+isolates the SCC states + their *internal* transitions into a fresh automaton,
+translates the candidate G(...) back to an automaton with the same settings,
+and only accepts the fragment if spot.are_equivalent() holds.
 
 Only after this round-trip check do we pre-populate state_formula[] in the
-main reconstruction and protect the two states from the "bad_states" multi-SCC
+main reconstruction and protect the SCC states from the "bad_states" multi-SCC
 rejection pass.
 
 -------------------------------------------------------------------------------
@@ -68,7 +70,7 @@ KEY DESIGN DECISIONS (history)
 CURRENT LIMITATIONS / OPEN QUESTIONS
 -------------------------------------------------------------------------------
 The pattern gives a *steady-state* description of the SCC.  When a prefix leads
-into it, the entry edge may choose which of the two states we land in first.
+into it, the entry edge may choose which of the SCC states we land in first.
 Some formulas (e.g. "r U G(!p | Xq)") have p-dependent choice of entry state.
 The current symmetric G(...) can over-approximate the entry and produce a
 slightly different automaton for the full formula.  The reconstruction layer
@@ -192,97 +194,105 @@ def _compute_outgoing_or(aut, state):
 
 def find_nice_terminal_2sccs(aut):
     """
-    Scan the automaton for terminal SCCs that consist of *exactly two states*
-    and for which we can compute "nice" labels L(A), L(B).
+    Scan the automaton for terminal SCCs (of any size >=2) for which we can
+    compute "nice" per-state labels L(s).
 
-    A nice terminal 2-SCC satisfies:
-        1. Exactly two states.
-        2. It is terminal: every outgoing transition from either state stays
+    A nice terminal SCC satisfies:
+        1. Size >= 2.
+        2. It is terminal: every outgoing transition from any state stays
            inside the SCC (no escape edges).
-        3. Both L labels (OR of *internal* incoming edges) are strictly
-           tighter than "true".
-        4. The two L labels are mutually exclusive: L(A) & L(B) == false.
+        3. Every L label (OR of *internal* incoming edges to that state) is
+           strictly tighter than "true".
+        4. All L labels are pairwise mutually exclusive: for every distinct
+           pair s,t we have L(s) & L(t) == false.
 
     When all four hold we synthesize the candidate steady-state formula
 
-        G( (L(A) & X O(A)) | (L(B) & X O(B)) )
+        G( (L(s1) & X O(s1)) | (L(s2) & X O(s2)) | ... )
 
-    and return it together with the L/O tables for debugging / later use by
-    the reconstruction.
+    This generalizes the original "t2" (terminal-2-state) rule. The user
+    observed that the pairwise-disjointness of the L labels is what matters
+    for a precise disjunctive characterization; the hard size==2 limit was
+    unnecessary.
 
     The function deliberately does *not* call any initial-state rewiring.
-    If the original initial state happens to be one of the two SCC states we
+    If the original initial state happens to be one of the SCC states we
     still accept the SCC (the main reconstruction will just use the fragment
     for that state directly).
 
     Returns a list of dicts (one per nice SCC found; usually 0 or 1).
     Each dict contains:
-        states, L, O, formula, simplified
+        states, L, L_bdd, O, formula, simplified
     """
     si = spot.scc_info(aut)
     results = []
 
     for scc in range(si.scc_count()):
         states = list(si.states_of(scc))
-        if len(states) != 2:
+        if len(states) < 2:
             continue
 
         # Terminal check: every successor of every state in the SCC must
-        # itself belong to the same SCC.  This matches the user's requirement
-        # "terminal size-2 accepting SCCs".
+        # itself belong to the same SCC.
         is_terminal = all(si.scc_of(e.dst) == scc for st in states for e in aut.out(st))
         if not is_terminal:
             continue
 
-        sA, sB = states
-
         # ------------------------------------------------------------------
-        # L = "state label when you are in this state"
-        #     = disjunction of all formulas on edges that enter the state
-        # We use the *internal-only* variant so that literals belonging only
+        # L(s) = "state label when you are in this state"
+        #      = disjunction of all formulas on *internal* edges that enter s
+        # We use the internal-only variant so that literals belonging only
         # to incoming edges from transient states do not pollute the label.
         # ------------------------------------------------------------------
-        LA_bdd, LA_str = _compute_internal_incoming_or(aut, sA, states)
-        LB_bdd, LB_str = _compute_internal_incoming_or(aut, sB, states)
-
-        # Both labels must actually constrain the alphabet.
-        # If one of them is "true" the pattern would be useless
-        # (it would not distinguish the two states).
-        tight_A = LA_str not in ("1", "true")
-        tight_B = LB_str not in ("1", "true")
-        if not (tight_A and tight_B):
+        L_bdds = {}
+        L_strs = {}
+        all_tight = True
+        for st in states:
+            bdd, s = _compute_internal_incoming_or(aut, st, states)
+            L_bdds[st] = bdd
+            L_strs[st] = s
+            if s in ("1", "true"):
+                all_tight = False
+        if not all_tight:
             continue
 
-        # Mutual exclusion is the heart of the "two distinct states" idea.
-        # If L(A) & L(B) is satisfiable we cannot emit a clean disjunction
-        # under the outer G.
-        inter = LA_bdd & LB_bdd
-        inter_str = spot.bdd_format_formula(aut.get_dict(), inter)
-        # We simplify only for the boolean test; we do not keep the simplified form.
-        mutually_exclusive = str(spot.formula(inter_str).simplify()) in ("0", "false")
+        # Pairwise mutual exclusion: the key property that lets us emit a
+        # clean top-level disjunction under the outer G.  If any pair overlaps
+        # we cannot use the pattern.
+        mutually_exclusive = True
+        d = aut.get_dict()
+        for i in range(len(states)):
+            for j in range(i + 1, len(states)):
+                inter = L_bdds[states[i]] & L_bdds[states[j]]
+                inter_str = spot.bdd_format_formula(d, inter)
+                # simplify only for the boolean test
+                if str(spot.formula(inter_str).simplify()) not in ("0", "false"):
+                    mutually_exclusive = False
+                    break
+            if not mutually_exclusive:
+                break
         if not mutually_exclusive:
             continue
 
-        # O labels are allowed to be "true" (full alphabet on exit); they
-        # just describe what the next step can do.
-        _, OA_str = _compute_outgoing_or(aut, sA)
-        _, OB_str = _compute_outgoing_or(aut, sB)
+        # O labels (allowed to be "true").
+        O_strs = {}
+        for st in states:
+            _, o = _compute_outgoing_or(aut, st)
+            O_strs[st] = o
 
-        # The raw pattern exactly as the user originally formulated it.
-        # Parentheses are added for readability; they are not semantically
-        # required for the outer G because & binds tighter than |.
-        formula = f"G( ({LA_str} & X({OA_str})) | ({LB_str} & X({OB_str})) )"
+        # Build the (generalized) raw pattern.
+        terms = [f"({L_strs[st]} & X({O_strs[st]}))" for st in states]
+        disj = " | ".join(terms)
+        formula = f"G( ({disj}) )"
 
-        # We intentionally keep the raw constructed string (no Spot
-        # simplification here).  Simplification is disabled globally during
-        # the current debugging phase (see utils.simplify_ltl).
+        # Keep raw (no Spot simplification).
         simplified = formula
 
         results.append({
             "states": states,
-            "L": {sA: LA_str, sB: LB_str},
-            "L_bdd": {sA: LA_bdd, sB: LB_bdd},
-            "O": {sA: OA_str, sB: OB_str},
+            "L": L_strs,
+            "L_bdd": L_bdds,
+            "O": O_strs,
             "formula": formula,
             "simplified": simplified,
         })
@@ -294,8 +304,8 @@ def try_terminal_2scc_heuristic(aut):
     """
     Lightweight entry point (analogous to try_size2_overapprox).
 
-    Returns the raw list of *candidate* nice terminal 2-SCC dicts without
-    performing the expensive language-equivalence validation.
+    Returns the raw list of *candidate* nice terminal SCC dicts (any size >=2)
+    without performing the expensive language-equivalence validation.
 
     In the current integration we always go through the validating wrapper
     below, so this function is mainly useful for quick diagnostics or
@@ -306,13 +316,13 @@ def try_terminal_2scc_heuristic(aut):
 
 def validate_terminal_2scc(aut, nice_info):
     """
-    Soundness gate for a candidate t2 fragment.
+    Soundness gate for a candidate t2 fragment (generalized to N-state SCCs).
 
-    We build a *tiny isolated automaton* that contains *only* the two states
-    and the transitions that stay inside the original SCC.  We then translate
-    the candidate G(LA & X OA | LB & X OB) back to a TGBA with identical
-    settings ("GeneralizedBuchi Small High") and ask Spot whether the two
-    automata recognize exactly the same language.
+    We build a *tiny isolated automaton* that contains *only* the SCC states
+    and the internal transitions.  We then translate the candidate
+    G( (L1 & X O1) | ... ) back to a TGBA with identical settings
+    ("GeneralizedBuchi Small High") and ask Spot whether the two automata
+    recognize exactly the same language.
 
     Only when spot.are_equivalent() returns True do we trust the fragment
     enough to inject it into the main reconstruction.
@@ -343,7 +353,7 @@ def validate_terminal_2scc(aut, nice_info):
         return None
 
     # ------------------------------------------------------------------
-    # Build the isolated 2-state fragment.
+    # Build the isolated SCC fragment (any size >=2).
     # We copy *only* transitions whose both ends are inside the SCC.
     # This gives us a pure "the automaton is now in this SCC forever"
     # sub-problem, independent of any prefix that may have led here.
@@ -401,14 +411,14 @@ def try_terminal_2scc_with_validation(aut):
 
     The main reconstruction (see reconstruction.py) then treats a validated
     t2 fragment almost exactly like a successful f2 absorption:
-        - the two states are pre-inserted into state_formula[]
+        - the SCC states are pre-inserted into state_formula[]
         - they are removed from the bad_states "reject multi-state SCC" set
         - label() short-circuits for them
         - successor edges that point into the SCC reuse the fragment
           instead of recursing
 
-    This is what makes the new terminal-2 pattern participate cleanly in the
-    overall backward labeling algorithm.
+    This is what makes the (now generalized) terminal-SCC pattern participate
+    cleanly in the overall backward labeling algorithm.
     """
     candidates = find_nice_terminal_2sccs(aut)
     validated = []

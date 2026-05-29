@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "a U b",
         "G (p -> X p) & GF q",
         "X(p1 | F(p1 & Xp1))",   # interesting size-2 case (usually f2)
-        "G(p -> X q)",           # classic terminal-2-SCC case (t2)
+        "G(p -> X q)",           # classic terminal-SCC case (t2 / tN for larger)
     ]
 
     for original_str in test_cases:
@@ -38,8 +38,8 @@ if __name__ == "__main__":
         aut, _ = ltl_to_tgba(original_str)
 
         # The single entry point now runs *all* heuristics internally
-        # (size-2 fusion "f2" then terminal-2-SCC "t2") and returns the
-        # correct technique string ("sl", "sl+f2", "sl+t2", "sl+f2+t2" ...).
+        # (size-2 fusion "f2" then terminal-SCC "tN") and returns the
+        # correct technique string ("sl", "sl+f2", "sl+t2", "sl+t3", "sl+f2+t4" ...).
         recovered, per_state, technique = reconstruct_ltl(aut)
 
         print(f"Original LTL : {original_str}")

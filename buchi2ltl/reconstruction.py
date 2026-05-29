@@ -44,14 +44,15 @@ def reconstruct_ltl(aut):
         absorbed = True   # trust the heuristic: do not re-apply the strict multi-state filter
 
     # ------------------------------------------------------------------
-    # NEW: Terminal 2-state SCC labeling heuristic ("t2")
+    # NEW: Terminal SCC labeling heuristic ("t2") - generalized beyond 2 states
     # ------------------------------------------------------------------
     # We attempt this *before* the structural safety filter that rejects any
     # SCC with more than one state.  The idea (exactly analogous to f2):
-    #   - detect a very specific, very common shape (terminal 2-state SCC
-    #     with nice L labels)
-    #   - validate it in isolation via language equivalence
-    #   - pre-declare the two states "good" by injecting a pre-validated
+    #   - detect terminal SCCs that have per-state L labels which are pairwise
+    #     mutually exclusive and all strictly tighter than true
+    #   - validate the resulting G(OR (L(s) & X O(s))) fragment in isolation
+    #     via language equivalence
+    #   - pre-declare the SCC states "good" by injecting a pre-validated
     #     formula fragment into the state_formula cache
     #   - teach the rest of the labeler to use that fragment instead of
     #     walking the cycle (which would blow up or produce horrible U/GF
@@ -74,7 +75,8 @@ def reconstruct_ltl(aut):
                     scc_entry_I[st] = info["L_bdd"][st]
 
     if TRACE:
-        print(f"[TRACE] t2: found {len(nice_terminal_sccs)} nice terminal 2-state SCC(s)")
+        sizes = [len(info["states"]) for info in nice_terminal_sccs]
+        print(f"[TRACE] t*: found {len(nice_terminal_sccs)} nice terminal SCC(s), sizes={sizes}")
         for info in nice_terminal_sccs:
             print(f"[TRACE]   SCC states: {info['states']}")
             print(f"[TRACE]     L = {info['L']}")
@@ -90,7 +92,7 @@ def reconstruct_ltl(aut):
     # ------------------------------------------------------------------
     # Inject validated t2 fragments into the global state_formula cache
     # *before* we run the multi-state-SCC rejection pass.
-    # This is the key that lets the two SCC states escape the "bad_states"
+    # This is the key that lets the SCC states escape the "bad_states"
     # treatment that would otherwise nuke any |SCC|>1 component.
     # ------------------------------------------------------------------
     for st, frag in scc_fragments.items():
@@ -148,7 +150,7 @@ def reconstruct_ltl(aut):
             return state_formula[q]
 
         # ------------------------------------------------------------------
-        # t2 short-circuit #2 (the primary one for the two SCC states):
+        # t2 short-circuit #2 (the primary one for SCC states):
         # We have a validated G(...) fragment for exactly this state.
         # Emit it immediately and do *not* walk the self-loops / exit edges
         # of the SCC.  Walking them would re-discover the cycle and produce
@@ -200,7 +202,7 @@ def reconstruct_ltl(aut):
                 #   Multiple arcs from the same state into the SCC are handled
                 #   independently; their terms are OR-ed in the normal way.
                 #
-                # When a validated terminal 2-state SCC is downstream we also want:
+                # When a validated terminal SCC (t2) is downstream we also want:
                 #   * never to mark a state UNSUPPORTED just because it has one
                 #     edge into a still-unlabeled part of a larger SCC (lenient rule
                 #     only when at least one successor leads to a known-good t2 fragment).
@@ -223,9 +225,9 @@ def reconstruct_ltl(aut):
                         return UNSUPPORTED
 
                 # The heart of "use the precomputed fragment for the whole SCC":
-                # If the immediate successor *is* one of the two SCC states, or if
-                # any of its own successors is, we short-circuit the recursion and
-                # just grab the validated G(...) string.  This prevents the labeler
+                # If the immediate successor *is* one of the SCC states (any size),
+                # or if any of its own successors is, we short-circuit the recursion
+                # and just grab the validated G(...) string.  This prevents the labeler
                 # from ever walking the internal cycle of the SCC.
                 #
                 # Per-transition entry timing (the key subtlety):
@@ -401,15 +403,19 @@ def reconstruct_ltl(aut):
     # ------------------------------------------------------------------
     # Technique string now reflects all heuristics that fired.
     # Historical values: "sl", "sl+f2"
-    # New values seen in this work: "sl+t2", "sl+f2+t2"
-    # The order is deliberately f2 before t2 only because f2 (absorption)
-    # rewrites the automaton before t2 runs; the presence of either is
-    # what matters for regression / evaluation.
+    # t2 generalized: we emit "tN" for each distinct size N of validated
+    # terminal SCC(s) captured by the (now size-agnostic) nice-L-label rule.
+    # Examples: "sl+t2", "sl+t3", "sl+t2+t3", "sl+f2+t4", ...
+    # This makes larger SCC captures visible ("t3 or better") and searchable.
+    # The order is deliberately f2 before the t* tags only because f2
+    # rewrites the automaton before the terminal-SCC pass runs.
     # ------------------------------------------------------------------
     technique_parts = ["sl"]
     if absorbed:
         technique_parts.append("f2")
     if nice_terminal_sccs:
-        technique_parts.append("t2")
+        sizes = sorted({len(info["states"]) for info in nice_terminal_sccs})
+        for sz in sizes:
+            technique_parts.append(f"t{sz}")
     technique = "+".join(technique_parts)
     return final, state_formula, technique

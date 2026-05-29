@@ -6,10 +6,10 @@ Experimental prototype for backward LTL reconstruction from Transition-based Gen
 
 This is research / exploration code. The reconstruction is **incomplete by design**.
 
-We now have two heuristics that can rescue certain formulas whose automata contain a size-2 SCC:
+We now have two heuristics that can rescue certain formulas whose automata contain non-trivial SCCs:
 
 * **f2** – size-2 non-accepting SCC absorption ("fusion test")
-* **t2** – terminal 2-state accepting SCC pattern matching (new)
+* **tN** – terminal SCC pattern (generalized from the original "t2" 2-state rule). Accepts any terminal SCC size ≥2 whose per-state L labels (derived from internal incoming edges) are pairwise mutually exclusive and strictly tighter than true. Technique strings now report `t3`, `t4`, ... for larger captured SCCs (e.g. `sl+t4`).
 
 When either succeeds (and passes an internal language-equivalence soundness check on the isolated fragment), formulas that used to be reported `UNSUPPORTED` become fully reconstructible.
 
@@ -17,11 +17,11 @@ Key current capabilities:
 - Explicit recursion with visiting set + depth limit (finite recursion)
 - Early rejection of multi-state SCCs (unless a heuristic has already validated a fragment for them)
 - Size-2 non-accepting SCC absorption (f2) when language-equivalent
-- Terminal 2-state accepting SCC steady-state extraction (t2) via incoming/outgoing label disjunction + round-trip validation
+- Terminal SCC steady-state extraction (tN) via incoming/outgoing label disjunction + round-trip validation (now size-agnostic)
 - Trivial acceptance normalization (treat all transitions as accepting when `Acceptance: t`)
-- "Technique" reporting: `sl`, `sl+f2`, `sl+t2`, `sl+f2+t2`
+- "Technique" reporting: `sl`, `sl+f2`, `sl+t2`, `sl+t3`, `sl+t4`, `sl+f2+t3`, ...
 - Dual output: constructive formula + version after Spot simplification (`ltlfilt` equivalent)
-- Detailed tracing of the t2 path under `RECONSTRUCT_TRACE=1`
+- Detailed tracing of the tN path under `RECONSTRUCT_TRACE=1`
 
 ## Project Organization
 
@@ -32,7 +32,7 @@ buchi2ltl/                    # Main package
     reconstruction.py         # Core reconstruct_ltl + labeling logic (now integrates f2 + t2)
     heuristics/
         size2_overapprox.py   # Size-2 non-accepting SCC absorption ("f2"/"fusion")
-        terminal_2scc.py      # Terminal 2-state SCC pattern ("t2") – heavily documented
+        terminal_2scc.py      # Terminal SCC pattern (tN, generalized from t2) – heavily documented
     utils.py                  # simplify_ltl() etc. (currently bypassed for raw debug output)
 evaluate.py                   # Evaluation harness (stable samples + random round-trip testing)
 samples/                      # Curated LTL formulas and HOAs (for regression / stable testing)
@@ -110,7 +110,7 @@ nice = try_terminal_2scc_with_validation(aut)   # list of validated t2 fragments
 - Many formulas will still return `"UNSUPPORTED: ..."` (especially those with complex SCCs or entry-choice asymmetries into a terminal SCC).
 - Two heuristics can now rescue size-2 SCCs:
   - `f2` – size-2 non-accepting SCC absorption (older, absorption-style)
-  - `t2` – terminal 2-state accepting SCC pattern (new, G(L & X O | ...) style)
+  - `tN` – terminal SCC pattern (generalized; t2/t3/t4/...), G(OR (L(s) & X O(s)) style)
 - Both heuristics only accept a candidate after a full Spot `are_equivalent` round-trip on the isolated fragment (soundness first).
 - Detailed per-state traces for the t2 integration are emitted only when the environment variable `RECONSTRUCT_TRACE=1` is set (very verbose – intended for debugging the reconstruction rules themselves).
 - All Spot simplification is currently bypassed (`simplify_ltl` is a no-op) so that the raw structure built by the labeler remains visible. Re-enable it in `buchi2ltl/utils.py` when you want the final "ltlfilt --simplify" look.
@@ -121,4 +121,4 @@ nice = try_terminal_2scc_with_validation(aut)   # list of validated t2 fragments
   - `find_*.py` – the search scripts used to populate the stable 100-formula sample sets
 - The historical recovered fusion file is in `testing/`, not `samples/`.
 
-This repository is used for interactive development of the reconstruction technique. The t2 pattern is known to need further refinement (especially around prefix entry choice into the SCC – see development log for the "r U G(!p | Xq)" example).
+This repository is used for interactive development of the reconstruction technique. The tN pattern (generalized terminal-SCC labeling) is known to need further refinement (especially around prefix entry choice into the SCC and validation robustness for certain liveness-marked large SCCs).
