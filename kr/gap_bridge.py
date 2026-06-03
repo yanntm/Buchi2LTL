@@ -1,24 +1,28 @@
 """
-gap_bridge.py — Generate, run, and parse SgpDec holonomy decompositions from Python.
+gap_bridge.py — Generate, run, and high-level orchestration for SgpDec holonomy decompositions.
 
-This module implements the "first integration steps" of the plan:
-- Turn a list of transformation images into a self-contained GAP script that
-  uses SgpDec's HolonomyCascadeSemigroup.
-- Execute it via subprocess (gap --no-window).
-- Parse the structured textual output we asked the script to emit into a
-  `Cascade` Python object.
+This module is the "GAP bridge" service:
+- Turn a list of transformation images into a self-contained GAP script
+  (uses SgpDec's HolonomyCascadeSemigroup).
+- Execute the script via subprocess (gap --no-window --bare).
+- Provide the high-level API (decompose_gens / decompose_aut) that wires
+  extraction + generation + execution + (via kr.gap.parse) result parsing.
 
-The generated script is deliberately verbose and uses easy-to-parse Print
-statements (CASCADE_START / KEY: value style).  This makes the Python side
-robust against small changes in SgpDec's Display* pretty printers.
+Parsing of the structured GAP output lives in the focused sibling
+kr/gap/parse.py (small file, easy to test in isolation, produces Cascade).
 
-We also provide a convenience entry point `decompose_aut(spot_aut)` that
-combines extraction + GAP round-trip.
+The generated script uses easy-to-parse Print statements (CASCADE_START /
+KEY: value + STATE ... CONFIG lines). This keeps the Python side robust
+against small changes in SgpDec pretty-printers.
+
+See also:
+- kr/gap/parse.py : the output parser service
+- kr/cascade.py   : the result data model + config automaton helpers
+- kr/extract.py   : Spot aut -> generator images (with dead-trap completion)
 """
 
 from __future__ import annotations
 import os
-import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -26,6 +30,7 @@ from typing import List, Optional
 
 from .cascade import Cascade, LevelInfo
 from .extract import extract_generators, ExtractionError, is_deterministic
+from .gap.parse import parse_cascade_output  # focused parser service (keeps this file smaller)
 
 
 # ---------------------------------------------------------------------------
@@ -180,71 +185,11 @@ def run_gap_script(
             raise RuntimeError(f"GAP run timed out after {timeout}s") from None
 
 
-# ---------------------------------------------------------------------------
-# Parsing the structured output
-# ---------------------------------------------------------------------------
-
-_STATE_LINE = re.compile(r"^STATE\s+(\d+)\s+CONFIG\s+\[([^\]]*)\]", re.MULTILINE)
-_LEVEL_LINE = re.compile(r"^LEVEL\s+(\d+)\s+SIZE\s+(\d+)\s+KIND\s+(\S+)(?:\s+STRUCT\s+(\S+))?", re.MULTILINE)
-_NUM_LEVELS = re.compile(r"^NUM_LEVELS:\s*(\d+)", re.MULTILINE)
-_NUM_STATES = re.compile(r"^NUM_STATES:\s*(\d+)", re.MULTILINE)
-_SEMI_SIZE = re.compile(r"^SEMI_GROUP_SIZE:\s*(\d+)", re.MULTILINE)
-
-
-def parse_cascade_output(raw: str, generators: Optional[List[List[int]]] = None) -> Cascade:
-    """Parse the CASCADE_START ... CASCADE_END block (and surrounding keys)."""
-    # We are tolerant: we look for the markers but also accept data outside them.
-    m_nl = _NUM_LEVELS.search(raw)
-    num_levels = int(m_nl.group(1)) if m_nl else 0
-
-    m_ns = _NUM_STATES.search(raw)
-    num_states = int(m_ns.group(1)) if m_ns else 0
-
-    levels: List[LevelInfo] = []
-    for m in _LEVEL_LINE.finditer(raw):
-        idx = int(m.group(1))
-        sz = int(m.group(2))
-        kind = m.group(3)
-        struct = m.group(4)
-        levels.append(LevelInfo(index=idx, size=sz, kind=kind, structure=struct))
-
-    if not num_levels and levels:
-        num_levels = len(levels)
-
-    state_to_config: dict[int, tuple[int, ...]] = {}
-    for m in _STATE_LINE.finditer(raw):
-        s = int(m.group(1))
-        coord_str = m.group(2).strip()
-        if coord_str:
-            coords = tuple(int(x.strip()) for x in coord_str.split(","))
-        else:
-            coords = tuple()
-        state_to_config[s] = coords
-
-    # Build reverse map (last write wins if collisions — rare)
-    config_to_state: dict[tuple[int, ...], int] = {
-        cfg: st for st, cfg in state_to_config.items()
-    }
-
-    meta = {}
-    m_ss = _SEMI_SIZE.search(raw)
-    if m_ss:
-        meta["semigroup_size"] = int(m_ss.group(1))
-
-    if "CASCADE_START" not in raw or "CASCADE_END" not in raw:
-        # Still try to return what we got; the caller can decide if it's usable.
-        meta["warning"] = "CASCADE markers not found — partial parse"
-
-    return Cascade(
-        num_levels=num_levels or len(levels),
-        levels=levels,
-        num_states=num_states or len(state_to_config),
-        state_to_config=state_to_config,
-        config_to_state=config_to_state,
-        generator_images=generators or [],
-        raw_output=raw,
-        metadata=meta,
-    )
+# Parsing is now in the focused kr/gap/parse.py service (keeps this file smaller
+# and gives the parser its own small, testable home).
+# We re-export the name here for backward compatibility with any code that
+# did "from kr.gap_bridge import parse_cascade_output".
+from .gap.parse import parse_cascade_output  # noqa: F401
 
 
 # ---------------------------------------------------------------------------
