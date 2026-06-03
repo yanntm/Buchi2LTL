@@ -7,19 +7,30 @@ Udi Boker, Karoliina Lehtinen, Salomon Sickert.
 
 See the top-level README for overall project context. This is separate from the heuristic reconstruction in `buchi2ltl/`.
 
-## Current Status (PoC / first milestone + Phase A/B start)
+## Current Status (PoC + 1-level clean reconstruction)
 
 We have a working automated pipeline:
 
 Spot deterministic automaton  
-→ extract concrete generators (one per 2^|AP| letter)  
+→ extract concrete generators (one per 2^|AP| letter, with dead-trap completion for incomplete auts)  
 → generate self-contained GAP script using SgpDec  
 → run via `gap`  
-→ parse into `Cascade` (num_levels, per-level sizes, state → configuration mapping)
+→ parse into `Cascade` (num_levels, per-level sizes + kinds, state → configuration mapping)
 
-**Phase A complete**: Cascade now carries letter valuations, move_config(), build_config_transitions(), build_configuration_automaton(), and basic accepting config lift. The "configuration automaton" (states = appeared configs, labeled by valuations) is the object for the reachability logic.
+**Decomposition + Configuration Automaton (Phase A)**: Fully general. `Cascade` carries letter valuations (for LTL guards), `move_config()`, `build_config_transitions()`, `build_configuration_automaton()`, and `accepting_configs()`. The configuration automaton is the foundation for reachability.
 
-**Phase B started**: 1-level reachability operators (base cases for reset components) in `reachability.py`, with `build_1level_reachability` etc. Tested on small examples including cases the old heuristic rejects (e.g. G(p → (q U r))).
+**1-level Reachability + Clean Reconstruction (Phase B)**: 
+- 1-level K operators (reset components) in `reachability_operators.py` (`one_level_reach_strong`, `build_1level_reachability`, etc.). General, no hard-coded patterns — they build guards from the transition dict + valuations.
+- High-level reconstruction split for smaller focused files:
+  - `reconstruct_ltl_1level_buchi(casc)` — thin pure builder (main path for 1-level). Core is `build_infinitely_often_accepting()` which uses the K operators to express "from init, always eventually reach some accepting config" (F(reach) for absorbing acc sinks, G F(reach) otherwise). All intelligence in the operators + trans/valuations; no structural ifs on dead/permanent/1-state/"q" filters/etc.
+  - `reconstruct_ltl_1level_buchi_heuristic(casc)` — the old ad-hoc version (kept for comparison/fallback during development).
+- Tested on small cases (Fa, Ga, false, etc.). Clean path produces simple equivalent formulas for 1-level cases where the old ad-hoc was used.
+
+**Multi-level / Full General**: Still pending the inductive multi-level K operators (paper's Stay/Leave/Enter cases with sub-reach) + Fin/Inf/acceptance encoding.
+
+We follow a "smaller files, one service per module" discipline (see `reachability_operators.py`, `bdd_utils.py` for stability, `gap/parse.py`, `kr/testing/` for verification harnesses).
+
+See `kr/STATUS.md` for detailed roadmap/gaps and `kr/testing/README.md` + test scripts for verification.
 
 Later work will complete the inductive multi-level case + acceptance encoding + top-level formula (per the Boker et al. roadmap).
 
@@ -42,17 +53,23 @@ We are still in PoC stage; there is no fancy multi-platform / container / CI set
 ## Usage
 
 ```python
-from kr import decompose_aut
+from kr import decompose_aut, reconstruct_ltl_1level_buchi, reconstruct_ltl_1level_buchi_heuristic
 import spot
 
-aut = spot.formula("Xa").translate("Buchi", "Deterministic")
+aut = spot.formula("Fa").translate("Buchi", "Deterministic")
 casc = decompose_aut(aut)
 print(casc)                    # summary
-print(casc.state_to_config)    # the mapping you will need for LTL synthesis
+print(casc.state_to_config)    # mapping for LTL synthesis
 print(casc.levels)             # sizes + kinds
+
+# Clean thin path (preferred for 1-level; uses K operators only)
+print(reconstruct_ltl_1level_buchi(casc))
+
+# Old ad-hoc version (for comparison)
+print(reconstruct_ltl_1level_buchi_heuristic(casc))
 ```
 
-You can also inspect the exact GAP script that was executed:
+You can also inspect the exact GAP script:
 
 ```python
 from kr.gap_bridge import generate_gap_script
@@ -60,41 +77,39 @@ from kr.extract import extract_generators
 
 gens, masks, valuations = extract_generators(aut)
 script = generate_gap_script(gens)
-print(script)   # or write to .gap file and inspect/run manually
+print(script)
 ```
 
-Example generated scripts for the simple cases below live in `kr/examples/generated/`.
+Parsing of GAP output is now in the focused `kr/gap/parse.py` service (re-exported from `gap_bridge` for compatibility).
+
+Example generated scripts live in `kr/examples/generated/`.
 
 ## Simple Examples (Xa, Fa, GFa, ...)
 
-See `kr/examples/spot_det.py` and the generated/ .gap files.
+See `kr/examples/spot_det.py`, `kr/examples/synthetic.py`, `kr/testing/test_kr_reconstruct.py`, and the generated/ .gap files.
 
-Typical output (after `./kr/install.sh`):
+Note: Adding a dead rejecting trap for incomplete auts (language-preserving) often increases state count and can produce additional trivial (size-1) levels in the cascade compared to older snapshots.
 
-(Results from actual run on this machine with GAP 4.15.1 + SgpDec 1.2.0.)
+Typical current behavior (after `./kr/install.sh`):
+- Trivial 1-state or simple safety cases often produce small/1-level cascades or degenerate results.
+- 1-level cases like Fa now go through the clean K-operator path and produce simple equivalent formulas (e.g. `F(((!a) U (a & true)))`).
+- Multi-level cases (common with dead trap) raise `NotImplemented` in the clean path and fall back to the heuristic.
 
-For "Xa":
-- 3 states, 1 AP → 2 levels of size 2
-- state_to_config: {0: (1, 1), 1: (1, 2), 2: (2, 1)}
+The generated GAP scripts are fully self-contained. They are deterministic given the input generators.
 
-For "Fa":
-- 2 states, 1 AP → 1 level of size 2
-- state_to_config: {0: (1,), 1: (2,) }
-
-For "G(p -> X q)":
-- 2 states, 2 APs → 1 level of size 2
-
-Trivial 1-state cases (GFa etc.) correctly produce degenerate/empty cascades (expected; the language is simple enough that no interesting decomposition is needed).
-
-The generated GAP scripts are fully self-contained (LoadPackage + the exact gens + the extraction Prints we need). They are deterministic given the input generators.
+See `kr/testing/` (and its README) for the verification harnesses we use to compare clean vs heuristic and confirm stability (subprocess isolation + repeated decomp on historically problematic cases like Xa).
 
 ## Files of interest
 
-- `install.sh` — convenience setup (run it; see its comments).
-- `gap_bridge.py` — the script generator + runner + parser.
-- `extract.py` — Spot aut → list of image lists (only for deterministic auts).
-- `cascade.py` — the `Cascade` dataclass.
-- `examples/generated/*.gap` — concrete generated scripts from the simple test cases (inspect these to see "what the GAP looks like").
-- `examples/synthetic.py`, `examples/spot_det.py` — runnable demos.
+- `install.sh` — convenience setup for GAP + SgpDec.
+- `gap_bridge.py` — orchestration, script generation, and execution. (Parser extracted to the focused service below for smaller files.)
+- `gap/parse.py` + `gap/__init__.py` — focused parser service (structured GAP output → `Cascade`). Re-exported from `gap_bridge` for compatibility.
+- `extract.py` — Spot aut → generators (with dead-trap completion for language correctness).
+- `cascade.py` — `Cascade` dataclass + config automaton helpers (`build_configuration_automaton`, `move_config`, etc.).
+- `reachability_operators.py` — 1-level K operators (`one_level_reach_strong`, `build_1level_reachability`, guard helpers, etc.) + 1-level projection helpers. The core "intelligence".
+- `reachability.py` — thin high-level layer: `reconstruct_ltl_1level_buchi` (clean pure builder using the operators) + `_heuristic` (old ad-hoc for comparison) + `build_infinitely_often_accepting`.
+- `bdd_utils.py` — stability helpers (precomputed buddy var maps to avoid sporadic segfaults during extraction).
+- `examples/` + `testing/` — demos and verification harnesses (see `kr/testing/README.md` and `test_kr_reconstruct.py` / `diag_stability.py`).
+- `examples/generated/*.gap` — inspectable generated scripts.
 
-This is still very much a proof-of-concept. The interesting (and large) next piece is transcribing the LTL reachability formulas from the Boker et al. paper on top of these cascades.
+This remains experimental/PoC. The next major piece is the inductive multi-level K operators (per Boker et al.) + Fin/Inf/acceptance encoding on top of the clean 1-level foundation. See `kr/STATUS.md` for the detailed current state and gaps.
