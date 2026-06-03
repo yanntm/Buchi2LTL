@@ -10,19 +10,21 @@ Internal development and verification scripts for the Krohn-Rhodes (kr/) experim
 ## Running
 From the project root:
 
-    python3 kr/testing/test_kr_reconstruct.py
+    python3 kr/testing/test_kr_basic.py          # minimal, normal path, I/O validation, segv-wrapped
+    python3 kr/testing/test_kr_reconstruct.py   # clean vs heuristic side-by-side (isolated)
     python3 kr/testing/diag_stability.py
 
 Or as modules (they set up sys.path relative to the file).
 
-These scripts use subprocess isolation per test case for safety (fresh Python processes avoid accumulating Spot/Buddy global state that can lead to crashes).
+Subprocess wrapping per case (in basic and reconstruct) detects segfaults (rc 139/-11) and avoids Spot/Buddy global state accumulation from direct runs.
 
 ## Key things tested
-- Both `reconstruct_ltl_1level_buchi` (clean, thin K-operator based) and `_heuristic` (old ad-hoc, kept for comparison).
-- `build_infinitely_often_accepting` (the core "G F reach some acc config" using 1-level operators).
-- 1-level cases take the pure path; multi-level correctly raises NotImplemented (fall back to heuristic during transition).
-- Equivalence checks (where formulas are valid LTL) against original input formulas.
-- Repeated decomp on historically problematic formulas (Xa, etc.) to confirm no SEGV.
+- Normal path direct calls to `decompose_aut` + `reconstruct_ltl_1level_buchi` (and `build_infinitely_often_accepting`).
+- I/O: produced LTL string, levels, acc count, basic Spot equiv (failing tests OK to focus dev).
+- Clean vs heuristic (in reconstruct test).
+- 1-level cases (pure K path); multi-level now attempted via generalized reach (up to 2 levels; >2 fallback).
+- Segv detection + repeated decomp on problematic formulas (Xa, a, etc.).
+- Note: Spot often emits 1/0 for true/false; our code normalizes in some paths; tests accept both.
 
 ## Notes on discipline
 Test scripts live here (not /tmp). All development artifacts for kr/ should stay under kr/.
