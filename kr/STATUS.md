@@ -39,10 +39,10 @@ This part is solid and general (algebraic, no heuristic patterns on the automato
 The 1-level path is now general/algebraic ("from init, G F (reach some acc via the operators)"), not ad-hoc. This was the main deliverable of the post-crash refactor work.
 
 ### Induction / Multi-level, Fin/Inf, Acceptance, Top Formula (Paper Steps 3–5)
-- Still the main missing pieces.
-- No recursive multi-level K operators (paper's 4 cases for top-level unchanged with sub-reach on Stay/Leave + change/Enter cases).
-- No proper Fin/Inf using reachability, no full acceptance encoding (Büchi as disjunction of Inf over lifted accepting configs), no general top-level formula construction.
-- The clean 1-level foundation (operators + thin builder + absorbing logic) is intended to be the base for induction.
+- Core recursive 5-formula reachability implemented (in reachability_operators.py): base level-0, solid-stay (Formulas 3/4 with 4 S/B/T cases + >0 disj/conj over stay/leave using lower reach), dashed-change (5, using Enter + weak stay for prefix + force leave). reach_strong/weak entry points; simplify_ltl integrated. Cascade utils (sub_config, compute_stay_leave_from, compute_enters_to_from) added for partitions (pure via move_config).
+- Multi now attempted in clean reconstruct/build_inf (no more hard NotImpl for >1); uses generalized reach_strong for any cascade depth (1-level delegates to old optimized for compat/nice output).
+- Fin/Inf/acc assembly/Muller still missing (builder is still "inf often reach acc via K" generalized; safety G(stay) short for init-acc 1-level cases added + lift improved to not mark dead; for Ga now emits G(a) with equiv True). fin_c() sketch (Lemma 7 using reach) added as starting point for step 7.
+- The 1-level foundation + new inductive ops provide the base; next: polish conj/negations in >0, Fin per Lemma7, full lift+assembly, semantics unit tests vs cascade runs.
 
 ### Testing / Examples / Other
 - Full verification harnesses live in `kr/testing/` (see `kr/testing/README.md`):
@@ -66,13 +66,14 @@ The 1-level path is now general/algebraic ("from init, G F (reach some acc via t
 (The rest of the historical gaps around induction etc. have been incorporated into the current "Gaps" section below.)
 
 ## Gaps for the full general approach (updated)
-- **Multi-level induction** (core remaining piece): No recursive implementation of the paper's compound formulas for >1 levels (the 4 cases for "top level unchanged" with sub-reach on lower levels for Stay/Leave + the change/Enter case with subcalls). We have a solid 1-level base (operators + thin builder); induction is the next step.
-- Fin/Inf not yet implemented using the reachability operators (still placeholders).
-- Acceptance encoding + full top-level formula not general (Büchi as disjunction of Inf over lifted accepting configs; support for general Muller etc.).
-- Acc lift is still heuristic on configs (paper ideally wants precise on transitions/moves for the K definitions). The clean 1-level path already avoids most structural inspection by using the trans dict + valuations.
-- Refined top-level obligations for mixed safety/liveness (more cases may benefit from F(reach) vs G F(reach) decisions or plain G(stay guards) for pure safety).
-- Guard simplification (long DNFs from make_guard for high |AP| or full-letter cases) — current formulas are correct but can be ugly; Spot simplification is intentionally off for debugging.
-- Still limited to small |AP| (explicit 2^|AP|).
+- **Multi-level induction** (core remaining piece): Basic recursive implementation of the 5 reachability formulas added (reach_strong/weak + solid stay 3/4 with 4 cases + >0 + dashed 5 using Enter/Leave + sub recursion on projected lower configs via new Cascade sub_config / compute_stay_leave/enter_from). Uses level-0 base U + delegation for top 1-level. Still approximate in conj/negations for leave/bad and entry logic; produces degenerate (0/1/true) or partial formulas on some multi (e.g. F(0), G(F(1))). Needs polish + semantics validation.
+- Fin/Inf: Still placeholders (1level); generalized reach now available to implement Lemma 7 Fin(C) := ¬(ι ↝ C) ∨ ι ↝ C ( ¬(C>0 ↝ C) ).
+- Acceptance encoding + full top not general (still "inf often via reach" builder, now multi-capable but not using Fin/Muller disj).
+- Acc lift heuristic (still); better marking needed for precise.
+- Safety vs recurrence framing: Partial fix in build_inf (G(stay_g) short-circuit when init acc + constrained stay letters; prefers safety G for Ga family). Triggered for some; more cases (closed acc sets, attach G(stay) to after-tau) remain. "a"/"Ga" still not always ideal post-decomp (dead trap).
+- Guard simplification: Called via simplify_ltl (Spot) at end of reach_strong etc. Reduces some; make_guard still emits long DNFs in >0 disjs (future: simp inside make too).
+- Trivial levels / cascade utils: Added top_of/sub_config/compute_*_from (prereq for partitions). Trivial size-1 levels not yet collapsed (can project to reduce effective levels for clean path).
+- Still small |AP|.
 
 The decomp/config part and the clean 1-level reconstruction are in good general shape. The LTL construction is now at "1-level operators + thin pure K-based top for 1-level" (no more ad-hoc in the main 1-level path).
 
