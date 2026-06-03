@@ -19,6 +19,13 @@ from .gap_bridge import (
     check_gap_available,
 )
 from .extract import extract_generators, ExtractionError, is_deterministic
+from .reachability import (
+    one_level_reach_stay,
+    one_level_reach_strong,
+    build_1level_reachability,
+    fin_1level,
+    inf_1level,
+)
 
 __all__ = [
     "Cascade",
@@ -33,4 +40,9 @@ __all__ = [
     "extract_generators",
     "ExtractionError",
     "is_deterministic",
+    "one_level_reach_stay",
+    "one_level_reach_strong",
+    "build_1level_reachability",
+    "fin_1level",
+    "inf_1level",
 ]
