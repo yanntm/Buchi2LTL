@@ -12,3 +12,9 @@ __pycache__/
 testing/debug_images/
 testing/debug_reconstruction.py   # transient instrumentation, not part of the feature
 decomp/
+
+# kr/ (Krohn-Rhodes experimental) generated outputs and caches
+kr/examples/generated/
+kr/**/__pycache__/
+kr/**/*.pyc
+
