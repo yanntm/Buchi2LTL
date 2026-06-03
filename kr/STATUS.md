@@ -77,6 +77,27 @@ The 1-level path is now general/algebraic ("from init, G F (reach some acc via t
 - Trivial levels / cascade utils: Added top_of/sub_config/compute_*_from (prereq for partitions). Trivial size-1 levels not yet collapsed (can project to reduce effective levels for clean path).
 - Still small |AP|.
 
+### Current practical status on formulas (post Spot complete+det normalization, no manual dead trap)
+We now normalize *inside* `decompose_aut` to a deterministic complete Buchi via Spot postprocessor before extraction. Sinks (when added by Spot) are ordinary states; no artificial dead at index n, no `s >= n_orig` skips, no unconditional extra trap in generators. The reachability operators and builder treat everything uniformly via the config trans + acc lift.
+
+**Recovered / working in clean path (equiv True via Spot, nice output):**
+- Constants: `true`, `false` (often trivial 0-state auts now).
+- Atomic: `a`, `!a` → directly `"a"`, `"!a"` (big win; previously F(a & Xa) etc.).
+- Simple eventual/safety: `Fa` → `"Fa"`, `Ga` / `G a` → `"Ga"`.
+- Some compounds like `G(a & Xa)` → `"Ga"` (Spot simplification helps).
+
+**Not yet (or partial):**
+- `Xa`, `X a`: 3+ levels (Spot complete adds states) → clean raises NotImplemented (guard for stability; falls to heuristic).
+- `G(p -> X q)`, `G(p -> (q U r))` (motivating): degen to `"true"`, equiv False (acc lift marks too many configs after complete; reach collapses).
+- `a U b`: produces wrong/complex, False.
+- `G F a`: degen `"true"`, False.
+- `F G a` / `FGa` / `F(Ga)`: sometimes hit "not deterministic" after postproc (prop "maybe" even after requesting det; the norm+check is strict).
+- Deeper or certain 2L cases still degen or hit limits until better acc marking + full multi-level reach polish + Fin/assembly.
+
+**Regression check:** The core CASES from `test_kr_basic.py` / `test_kr_reconstruct.py` (true/false/a/Fa/Ga/Xa/G(p->Xq)/G(p->(qUr))) all behave as before or better ("a" now correct). No breakage on Fa/Ga/constants. Tests pass cleanly (no segvs). With complete norm, state counts are Spot's (e.g. "a" now 3 states with 1 acc config; sinks not spuriously acc).
+
+The decomp + 1L foundation is solid and simpler. Multi-level + acc precision remain the main gaps for the "very small but not recovered" cases.
+
 The decomp/config part and the clean 1-level reconstruction are in good general shape. The LTL construction is now at "1-level operators + thin pure K-based top for 1-level" (no more ad-hoc in the main 1-level path).
 
 ## On the roadmap steps (updated)
