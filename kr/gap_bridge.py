@@ -227,6 +227,10 @@ def decompose_aut(
     just a normal state in the automaton; the rest of the algebraic
     construction (reachability formulas etc.) deals with it uniformly.
     No more manual dead-trap augmentation in the generator layer.
+    Note: not every LTL formula has an equivalent deterministic Buchi
+    automaton that Spot can easily produce (some require coBuchi or other
+    acceptance even when deterministic); for those, decomp will raise
+    if the result is not det.
     """
     # Normalize input to deterministic complete Buchi using Spot.
     # This is the standardized input contract for the KR path.
