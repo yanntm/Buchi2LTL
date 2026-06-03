@@ -189,21 +189,37 @@ def build_infinitely_often_accepting(casc: Cascade) -> str:
             casc=casc,
         )
 
-        # Absorbing check on the *config* (pure, from build_config_trans or move)
-        # Note: use full config move, not the old pos trans (works for multi)
+        # Trapping check (pure config trans): once in this acc config, all moves stay in acc set.
+        # If trapping, "eventually reach it" (via reach_f) already ensures the Büchi obligation
+        # (you will visit it i.o. automatically because you can't leave the acc set).
+        # This avoids spurious outer F that would weaken co-safety properties like plain "a".
         try:
-            acc_trans_dict = {}
+            acc_set = acc_configs
+            is_trapping = True
             for li in range(casc.num_letters()):
                 nc = casc.move_config(acc_c, li)
-                acc_trans_dict[li] = nc
-            is_absorbing = bool(acc_trans_dict) and all(nc == acc_c for nc in acc_trans_dict.values())
+                if nc not in acc_set:
+                    is_trapping = False
+                    break
         except Exception:
-            is_absorbing = False
+            is_trapping = False
 
-        if is_absorbing:
-            reach_parts.append(f"F({reach_f})")
+        if is_trapping:
+            reach_parts.append(f"({reach_f})")
         else:
-            reach_parts.append(f"G(F({reach_f}))")
+            # old absorbing logic for non-trapping recurrence cases
+            try:
+                acc_trans_dict = {}
+                for li in range(casc.num_letters()):
+                    nc = casc.move_config(acc_c, li)
+                    acc_trans_dict[li] = nc
+                is_absorbing = bool(acc_trans_dict) and all(nc == acc_c for nc in acc_trans_dict.values())
+            except Exception:
+                is_absorbing = False
+            if is_absorbing:
+                reach_parts.append(f"F({reach_f})")
+            else:
+                reach_parts.append(f"G(F({reach_f}))")
 
     if not reach_parts:
         return "false"
