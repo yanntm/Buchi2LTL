@@ -28,6 +28,11 @@ from .reachability import (
     reconstruct_ltl_1level_buchi,
     reconstruct_ltl_1level_buchi_heuristic,
     build_infinitely_often_accepting,
+    simplify_ltl,
+    normalize_ltl,
+    reach_strong,
+    reach_weak,
+    fin_c,
 )
 
 __all__ = [
@@ -51,4 +56,9 @@ __all__ = [
     "reconstruct_ltl_1level_buchi",
     "reconstruct_ltl_1level_buchi_heuristic",
     "build_infinitely_often_accepting",
+    "simplify_ltl",
+    "normalize_ltl",
+    "reach_strong",
+    "reach_weak",
+    "fin_c",
 ]
