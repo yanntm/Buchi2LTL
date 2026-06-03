@@ -96,7 +96,7 @@ See `kr/testing/` for the harnesses that compare clean vs heuristic and validate
 - (Further tuning of top-level obligations, guard simplification, and multi-level induction remain.)
 
 ## The Paper Gist (for reference, no pattern matching)
-See the new file `kr/automata_to_ltl_via_cascades.md` (created from the PDF in paper/). It contains a self-contained pure-text explanation of the Boker-Lehtinen-Sickert method:
+See the canonical single description in `kr/algorithm.md` (fused best-of-both from detailed algorithmic steps and explanatory motivation). It is the authoritative reference for the systematic algebraic method we are implementing in kr/ (no pattern matching). The original paper is now tracked in the repo at `paper/Automata2LTL.pdf`.
 - Krohn-Rhodes reset cascade as the intermediate representation (exactly what our `Cascade` + holonomy via SgpDec already produces).
 - The 5 reachability formulas defined by induction on cascade levels (with Stay/Leave/Enter cases, strong/weak, >0 variants).
 - Inductive proof of semantics w.r.t. cascade runs + size bounds (linear depth per level, singly-exp length per level).
