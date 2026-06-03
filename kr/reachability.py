@@ -23,6 +23,8 @@ from .reachability_operators import (  # noqa: F401
     build_1level_reachability,
     fin_1level,
     inf_1level,
+    _config_to_pos,
+    _build_trans_for_pos,
 )
 
 from .cascade import Cascade
@@ -117,26 +119,6 @@ def reconstruct_ltl_1level_buchi_heuristic(casc: Cascade) -> str:
 # ---------------------------------------------------------------------------
 # New clean implementation (the goal of the refactor)
 # ---------------------------------------------------------------------------
-
-def _config_to_pos(config: Tuple[int, ...]) -> int:
-    """For 1-level cascades, the 'position' is the single coordinate (1-based)."""
-    if len(config) != 1:
-        raise ValueError(f"Expected 1-level config tuple, got {config}")
-    return config[0]
-
-
-def _build_trans_for_pos(casc: Cascade, pos: int) -> Dict[int, int]:
-    """Return {letter_idx: target_pos} for the given pos, using the config automaton."""
-    # Find the config tuple for this pos (for 1-level there is at most one)
-    ca = casc.build_configuration_automaton()
-    for c, trans_list in ca["transitions"].items():
-        if _config_to_pos(c) == pos:
-            out: Dict[int, int] = {}
-            for li, nc, _val in trans_list:
-                out[li] = _config_to_pos(nc)
-            return out
-    return {}
-
 
 def build_infinitely_often_accepting(casc: Cascade) -> str:
     """Core reusable piece for 1-level Büchi: from init, always eventually reach some accepting config.

@@ -153,3 +153,31 @@ def fin_1level(C: int, valuations: List[Dict[str, bool]], aps: List[str], trans:
 def inf_1level(C: int, valuations: List[Dict[str, bool]], aps: List[str], trans: Dict[int, int]) -> str:
     """Placeholder for Inf(C) = G F visit C."""
     return f"G( F( at_config_{C} ) )"
+
+
+# ------------------------------------------------------------------
+# Small 1-level projection helpers (config tuple <-> scalar pos).
+# These are only needed by the 1-level reconstruct logic, but they are
+# "operator adjacent" (they turn the Cascade's config automaton into the
+# scalar positions the K operators expect). Keeping them here keeps the
+# high-level reachability.py (the clean/heuristic policy) smaller and
+# more focused.
+# ------------------------------------------------------------------
+
+def _config_to_pos(config: Tuple[int, ...]) -> int:
+    """For 1-level cascades, the 'position' is the single coordinate (1-based)."""
+    if len(config) != 1:
+        raise ValueError(f"Expected 1-level config tuple, got {config}")
+    return config[0]
+
+
+def _build_trans_for_pos(casc, pos: int) -> Dict[int, int]:
+    """Return {letter_idx: target_pos} for the given pos, using the config automaton."""
+    ca = casc.build_configuration_automaton()
+    for c, trans_list in ca["transitions"].items():
+        if _config_to_pos(c) == pos:
+            out: Dict[int, int] = {}
+            for li, nc, _val in trans_list:
+                out[li] = _config_to_pos(nc)
+            return out
+    return {}
