@@ -242,9 +242,10 @@ def main():
         for r in results
         if r.get("num_levels") == 1 and not r.get("clean_raised")
     )
+    multi_count = sum(1 for r in results if r.get("num_levels", 0) > 1)
     print(f"1-level cases encountered: {one_level_count}")
     print(f"Clean path succeeded on 1-level: {clean_1level}")
-    print("Multi-level cases raised NotImplemented (as designed; use _heuristic).")
+    print(f"Multi-level cases: {multi_count} (clean now attempts via generalized reach_strong; results may be partial until Fin/acc assembly).")
     print()
     print("All runs completed without segfaults (thanks to bdd_utils precompute + isolation).")
 
