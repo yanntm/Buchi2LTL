@@ -63,13 +63,13 @@ def extract_generators(
     *,
     max_aps: int = 5,
     include_all_letters: bool = True,
-) -> Tuple[List[List[int]], List[int]]:
+) -> Tuple[List[List[int]], List[int], List[Dict[str, bool]]]:
     """
-    Return (generators, letter_masks) for a deterministic automaton.
+    Return (generators, letter_masks, valuations) for a deterministic automaton.
 
-    generators : list of image lists (length = number of distinct concrete letters
-                 we decided to emit; usually 2**num_aps).
-    letter_masks : the integer bitmasks corresponding to each generator (same order).
+    generators : list of image lists (0-based targets for each original state).
+    letter_masks : the integer bitmasks corresponding to each generator.
+    valuations : list of {'p': bool, ...} dicts for each letter (for LTL guards).
 
     Raises ExtractionError if the automaton is not deterministic or too many APs.
     """
@@ -135,7 +135,8 @@ def extract_generators(
         # represents a completion of the partial action.
         pass
 
-    return gens, masks
+    valuations = [mask_to_valuation(m, [str(ap) for ap in aps]) for m in masks]
+    return gens, masks, valuations
 
 
 def num_concrete_letters(num_aps: int) -> int:
@@ -149,3 +150,8 @@ def pretty_letter(mask: int, aps: List[str]) -> str:
         bit = bool(mask & (1 << i))
         parts.append(name if bit else f"!{name}")
     return " & ".join(parts) if parts else "1"
+
+
+def mask_to_valuation(mask: int, aps: List[str]) -> Dict[str, bool]:
+    """Return {'p': True, 'q': False, ...} for the mask (bit i corresponds to aps[i])."""
+    return {name: bool(mask & (1 << i)) for i, name in enumerate(aps)}

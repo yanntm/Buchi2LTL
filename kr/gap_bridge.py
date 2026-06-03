@@ -280,8 +280,14 @@ def decompose_aut(
             "decompose_aut expects a deterministic automaton. "
             "Translate with 'Deterministic' or call determinize()."
         )
-    gens, _masks = extract_generators(aut, max_aps=max_aps)
-    return decompose_gens(gens, gap_cmd=gap_cmd, timeout=timeout)
+    gens, masks, valuations = extract_generators(aut, max_aps=max_aps)
+    casc = decompose_gens(gens, gap_cmd=gap_cmd, timeout=timeout)
+    # Enrich the cascade with letter/valuation data needed for LTL encoding
+    casc.aps = [str(ap) for ap in aut.ap()]
+    casc.letter_masks = masks
+    casc.letter_valuations = valuations
+    casc.original_aut = aut  # keep for acceptance lifting etc. (optional, for prototype)
+    return casc
 
 
 def check_gap_available(gap_cmd: str = "gap") -> bool:
