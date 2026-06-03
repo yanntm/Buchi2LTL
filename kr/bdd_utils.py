@@ -4,8 +4,7 @@ bdd_utils.py — Small helpers for reliable buddy BDD construction from Spot aut
 The original _valuation_to_bdd in extract.py did per-mask discovery of buddy var ids
 by creating many tiny auts. This is fragile (var numbering can shift, interleaved
 with & on the main aut's conditions can corrupt the bdd manager leading to sporadic
-segfaults in the C extensions, especially once we add dead-trap states and exercise
-more letters).
+segfaults in the C extensions).
 
 This module provides:
 - get_ap_bdd_vars(aut) -> dict[int, int]   # ap_index -> buddy var id (computed once)
