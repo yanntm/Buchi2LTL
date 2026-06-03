@@ -11,3 +11,4 @@ __pycache__/
 # Heavy debug artifacts from t2 / f2 development sessions
 testing/debug_images/
 testing/debug_reconstruction.py   # transient instrumentation, not part of the feature
+decomp/
