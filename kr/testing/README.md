@@ -4,7 +4,7 @@ Internal development and verification scripts for the Krohn-Rhodes (kr/) experim
 
 ## Purpose
 - Verify the clean vs. heuristic reconstruction after the refactor (moving away from ad-hoc structural pattern matching in `reconstruct_ltl_1level_buchi`).
-- Test stability improvements (BDD var precomputation in `bdd_utils.py` to eliminate sporadic segfaults in Spot/buddy during generator extraction, especially with dead-trap completion).
+- Test stability improvements (BDD var precomputation in `bdd_utils.py` to eliminate sporadic segfaults in Spot/buddy during generator extraction).
 - Provide isolated, repeatable tests without relying on external /tmp.
 
 ## Running
