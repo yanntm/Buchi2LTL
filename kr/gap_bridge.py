@@ -18,7 +18,7 @@ against small changes in SgpDec pretty-printers.
 See also:
 - kr/gap/parse.py : the output parser service
 - kr/cascade.py   : the result data model + config automaton helpers
-- kr/extract.py   : Spot aut -> generator images (with dead-trap completion)
+- kr/extract.py   : Spot aut -> generator images (assumes complete deterministic input)
 """
 
 from __future__ import annotations
@@ -31,6 +31,8 @@ from typing import List, Optional
 from .cascade import Cascade, LevelInfo
 from .extract import extract_generators, ExtractionError, is_deterministic
 from .gap.parse import parse_cascade_output  # focused parser service (keeps this file smaller)
+
+import spot
 
 
 # ---------------------------------------------------------------------------
@@ -216,22 +218,36 @@ def decompose_aut(
     max_aps: int = 5,
 ) -> Cascade:
     """
-    End-to-end: deterministic Spot aut → generators → GAP → Cascade.
+    End-to-end: Spot aut → normalize to deterministic complete Buchi →
+    generators → GAP (SgpDec holonomy) → Cascade.
 
-    The automaton must be deterministic (see extract.is_deterministic).
+    We always ask Spot to produce a deterministic *complete* Buchi automaton
+    first. Completion (and determinization if needed) is handled by Spot;
+    it does not always introduce a sink state. Any sink that appears is
+    just a normal state in the automaton; the rest of the algebraic
+    construction (reachability formulas etc.) deals with it uniformly.
+    No more manual dead-trap augmentation in the generator layer.
     """
+    # Normalize input to deterministic complete Buchi using Spot.
+    # This is the standardized input contract for the KR path.
+    pp = spot.postprocessor()
+    pp.set_type(spot.postprocessor.Buchi)
+    pp.set_pref(spot.postprocessor.Deterministic | spot.postprocessor.Complete)
+    aut = pp.run(aut)
+
     if not is_deterministic(aut):
         raise ExtractionError(
-            "decompose_aut expects a deterministic automaton. "
-            "Translate with 'Deterministic' or call determinize()."
+            "decompose_aut requires a deterministic automaton. "
+            "The input could not be determinized (not LTL-definable?)."
         )
+
     gens, masks, valuations = extract_generators(aut, max_aps=max_aps)
     casc = decompose_gens(gens, gap_cmd=gap_cmd, timeout=timeout)
     # Enrich the cascade with letter/valuation data needed for LTL encoding
     casc.aps = [str(ap) for ap in aut.ap()]
     casc.letter_masks = masks
     casc.letter_valuations = valuations
-    casc.original_aut = aut  # keep for acceptance lifting etc. (optional, for prototype)
+    casc.original_aut = aut  # the normalized complete det Buchi aut
     return casc
 
 
