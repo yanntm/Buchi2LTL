@@ -94,3 +94,17 @@ See `kr/testing/` for the harnesses that compare clean vs heuristic and validate
 - Pure 1-level cases (Fa, false, ...): clean path taken; "false" and Fa give correct equivalent LTL via the pure K path (no structural ifs).
 - Both versions + operators exported; heuristic available for comparison.
 - (Further tuning of top-level obligations, guard simplification, and multi-level induction remain.)
+
+## The Paper Gist (for reference, no pattern matching)
+See the new file `kr/automata_to_ltl_via_cascades.md` (created from the PDF in paper/). It contains a self-contained pure-text explanation of the Boker-Lehtinen-Sickert method:
+- Krohn-Rhodes reset cascade as the intermediate representation (exactly what our `Cascade` + holonomy via SgpDec already produces).
+- The 5 reachability formulas defined by induction on cascade levels (with Stay/Leave/Enter cases, strong/weak, >0 variants).
+- Inductive proof of semantics w.r.t. cascade runs + size bounds (linear depth per level, singly-exp length per level).
+- Combining with holonomy decomposition → double-exp depth / triple-exp length overall.
+- Preservation of syntactic future hierarchy / acceptance classes.
+- Explicit contrast to ad-hoc heuristics: everything is driven uniformly by the algebraic cascade structure and the Stay/Leave partitions of letters; no inspection of original SCC shapes, terminal components, fusion opportunities, etc.
+
+This file is the authoritative "what we are trying to implement" document for the kr/ folder. The current 1-level operators and `build_infinitely_often_accepting` are the base case / specialization of the reachability formulas (Lemma 7 Fin/Inf via reachability is already sketched there).
+
+Next implementation steps remain as listed in the gaps section above (generalize to the full 5 formulas + induction on levels, implement Fin(C), lift acceptance, add guard simplification, handle trivial levels, etc.).
+
