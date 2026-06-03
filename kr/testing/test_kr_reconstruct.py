@@ -4,7 +4,7 @@ kr/testing/test_kr_reconstruct.py
 
 Verification script for the Krohn-Rhodes refactor:
 - Clean `reconstruct_ltl_1level_buchi` (thin builder on top of K operators,
-  no structural pattern matching on dead traps, 1-state cases, special q filters, etc.)
+  no structural pattern matching on aut shape, 1-state cases, special q filters, etc.)
   vs. the preserved `_heuristic` (old ad-hoc version).
 
 - Focus on 1-level cases taking the pure `build_infinitely_often_accepting` path.
@@ -37,7 +37,7 @@ from kr import (
 
 # Cases chosen to exercise:
 # - 0-level degenerate (true/false constants)
-# - Pure 1-level after dead-trap (Fa, Ga, false)
+# - Pure 1-level (Fa, Ga, false)
 # - Multi-level (triggers NotImplemented in clean; heuristic still works)
 # - The motivating until example (2 levels)
 CASES = [
