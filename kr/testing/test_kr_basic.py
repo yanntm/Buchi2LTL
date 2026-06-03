@@ -11,10 +11,12 @@ Minimal direct test using the *normal path* (direct calls to decompose + reconst
 
 Run:
   python3 kr/testing/test_kr_basic.py
+  python3 kr/testing/test_kr_basic.py FGa "a U b"   # test specific formulas
 
 See also test_kr_reconstruct.py (for clean vs heuristic side-by-side) and diag_stability.py.
 """
 
+import argparse
 import subprocess
 import sys
 from pathlib import Path
@@ -87,10 +89,25 @@ except Exception as e:
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="KR basic direct test (normal path + I/O + segv wrap). "
+                    "Pass formulas on command line to test specific ones."
+    )
+    parser.add_argument(
+        "formulas", nargs="*", default=None,
+        help="Formulas to test (e.g. FGa 'a U b'). If omitted, uses built-in CASES list."
+    )
+    args = parser.parse_args()
+
+    if args.formulas:
+        cases = args.formulas
+    else:
+        cases = CASES
+
     print("=== KR basic direct test (normal path + I/O + segv wrap) ===")
     print(f"Project root: {PROJECT_ROOT}")
     print("Cases (direct calls inside wrapped subproc):")
-    for fs in CASES:
+    for fs in cases:
         run_case(fs)
     print()
     print("Done. Use output + EQUIV to focus dev. Failures expected.")
