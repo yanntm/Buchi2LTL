@@ -7,7 +7,7 @@ Udi Boker, Karoliina Lehtinen, Salomon Sickert.
 
 See the top-level README for overall project context. This is separate from the heuristic reconstruction in `buchi2ltl/`.
 
-## Current Status (PoC / first milestone)
+## Current Status (PoC / first milestone + Phase A/B start)
 
 We have a working automated pipeline:
 
@@ -17,7 +17,11 @@ Spot deterministic automaton
 → run via `gap`  
 → parse into `Cascade` (num_levels, per-level sizes, state → configuration mapping)
 
-Later work will add the actual inductive LTL formula construction on top of the cascade (the complex part from the paper).
+**Phase A complete**: Cascade now carries letter valuations, move_config(), build_config_transitions(), build_configuration_automaton(), and basic accepting config lift. The "configuration automaton" (states = appeared configs, labeled by valuations) is the object for the reachability logic.
+
+**Phase B started**: 1-level reachability operators (base cases for reset components) in `reachability.py`, with `build_1level_reachability` etc. Tested on small examples including cases the old heuristic rejects (e.g. G(p → (q U r))).
+
+Later work will complete the inductive multi-level case + acceptance encoding + top-level formula (per the Boker et al. roadmap).
 
 ## Dependencies (what must be on PATH / loadable)
 
@@ -54,7 +58,7 @@ You can also inspect the exact GAP script that was executed:
 from kr.gap_bridge import generate_gap_script
 from kr.extract import extract_generators
 
-gens, _ = extract_generators(aut)
+gens, masks, valuations = extract_generators(aut)
 script = generate_gap_script(gens)
 print(script)   # or write to .gap file and inspect/run manually
 ```
