@@ -27,6 +27,8 @@ import itertools
 import spot
 import buddy
 
+from .bdd_utils import get_ap_bdd_vars, build_point_bdd as _build_point_bdd
+
 
 class ExtractionError(RuntimeError):
     pass
@@ -37,25 +39,10 @@ def is_deterministic(aut: spot.twa_graph) -> bool:
 
 
 def _valuation_to_bdd(aut: spot.twa_graph, mask: int, aps: List[spot.formula]) -> "buddy.bdd":
-    """Build a singleton BDD representing the concrete assignment given by mask."""
-    d = aut.get_dict()
-    b = buddy.bddtrue
-    for i, ap in enumerate(aps):
-        # Create a tiny aut just to get the buddy var for this AP (same trick as invariants.py)
-        lit = spot.formula(str(ap))
-        tmp = lit.translate()
-        var = None
-        for e in tmp.out(tmp.get_init_state_number()):
-            if e.cond != buddy.bddtrue and e.cond != buddy.bddfalse:
-                var = buddy.bdd_var(e.cond)
-                break
-        if var is None:
-            # Fallback: use index (rarely correct but better than nothing)
-            var = i
-        bit = bool(mask & (1 << i))
-        lit_bdd = buddy.bdd_ithvar(var) if bit else buddy.bdd_nithvar(var)
-        b = b & lit_bdd
-    return b
+    """Compat shim. Prefer build_point_bdd + precomputed ap_vars for new code (see bdd_utils.py)."""
+    # Delegate to the robust version (will do its own discovery if no cache, but callers
+    # in this file now precompute to avoid interleaving hazards).
+    return _build_point_bdd(aut, mask, aps)
 
 
 def extract_generators(
@@ -94,22 +81,23 @@ def extract_generators(
     masks: List[int] = []
 
     # For speed we precompute, for each state, a map from concrete mask -> successor.
-    # Since the aut may not be "complete" (some letters have no edge), we treat
-    # missing transitions as "no successor" (we can map to a conventional sink or
-    # raise).  For holonomy on the state set we prefer a total function; if the
-    # aut is not complete we add an implicit sink state?  For the first version
-    # we simply require that every state has a defined successor under every letter
-    # (i.e. the aut is complete for the alphabet we consider).  If not, we still
-    # emit a total map by picking an arbitrary "undefined" target or the state itself.
-    # Better: use Spot's ability to complete or just map missing to n (a virtual sink
-    # that we would have to add).  For simplicity in v1 we map missing letters to
-    # the state itself (a common "stay" convention for unspecified) and warn.
+    # If the aut is not complete on a letter from a state (no edge), we map to a
+    # dedicated dead rejecting trap state. This keeps the language correct
+    # (undefined letters do not allow spurious continuation to accepting runs).
+    # The generators are then total transformations on 0..n (dead = n).
 
     warned_incomplete = False
+    dead = n  # extra dead rejecting trap state for proper completion of incomplete auts (critical for correct language)
+
+    # Precompute AP -> buddy var map *once*, before any per-letter BDD construction.
+    # This avoids the old hazard of doing var discovery (tiny .translate()) interleaved
+    # with (e.cond & point_bdd) on the main aut, which was a source of sporadic segfaults
+    # in buddy/spot C extensions (especially visible after adding dead-trap states).
+    ap_vars = get_ap_bdd_vars(aut)
 
     for mask in range(num_letters):
-        images = []
-        point_bdd = _valuation_to_bdd(aut, mask, aps)
+        images = [0] * (n + 1)
+        point_bdd = _build_point_bdd(aut, mask, aps, ap_vars=ap_vars)
         for s in range(n):
             succ = None
             for e in aut.out(s):
@@ -122,17 +110,15 @@ def extract_generators(
             if succ is None:
                 if not warned_incomplete:
                     warned_incomplete = True
-                    # We continue; the caller can inspect.
-                # Convention: treat as self-loop (harmless for many examples,
-                # but the user should prefer complete deterministic automata).
-                succ = s
-            images.append(succ)
+                succ = dead
+            images[s] = succ
+        images[dead] = dead  # dead is permanent trap
         gens.append(images)
         masks.append(mask)
 
     if warned_incomplete:
-        # We do not raise — the decomposition can still be computed, it just
-        # represents a completion of the partial action.
+        # We do not raise — the decomposition can still be computed.
+        # Dead state makes the language correct (no spurious continuations on undefined letters).
         pass
 
     valuations = [mask_to_valuation(m, [str(ap) for ap in aps]) for m in masks]
