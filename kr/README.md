@@ -22,8 +22,9 @@ Spot deterministic automaton
 **Reachability + Clean Reconstruction (Phase B extended)**: 
 - Generalized inductive 5 reachability formulas (paper Table 1 / Sec 4.2) in `reachability_operators.py`: `reach_strong`/`reach_weak` (Formulas 1/2), solid stay (3/4 with 4 cases + >0), dashed change (5). Base level 0 plain U; recursion on config len via new Cascade sub/Stay/Leave/Enter utils (compute_*_from using move_config). 1-level delegates to old optimized when top-level 1-casc for compat. `simplify_ltl` integrated.
 - `reconstruct_ltl_1level_buchi` + `build_infinitely_often_accepting` now attempt multi (up to 2 levels; >2 fallback) using the generalized reach (no hard NotImpl). Safety short G(stay_g) for init-acc 1-level cases (Ga family).
-- Still "inf often" framing (not full Fin/acc/Muller assembly); formulas on multi often partial/degen (0/1, simple &X) until conj/negations/Fin polished + better acc lift. Heuristic kept for comparison.
-- Tested via `kr/testing/` (1-level equiv good; multi exercises new path).
+- **TRACE support**: `KR_TRACE=1` (or set TRACE_ON) for detailed dev traces of the inductive construction (very helpful for cases like "a").
+- Still "inf often" framing (not full Fin/acc/Muller assembly); formulas on multi often partial/degen until polish. "a" now fully recovered (see STATUS.md for diagnosis). Heuristic kept for comparison.
+- Tested via `kr/testing/` (1-level equiv good; multi exercises new path; test_kr_basic.py for simple normal-path I/O).
 
 **Multi-level / Full General**: Inductive K (5 formulas + recursion + partitions) landed and exercised on 2-level; 3+ limited for stability. Full Fin(C) (Lemma 7), acceptance lift/assembly, and class preservation remain (see kr/algorithm.md + STATUS.md). Clean path usable on some multi but output not yet always correct/equiv.
 
