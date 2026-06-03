@@ -58,6 +58,12 @@ class Cascade:
     raw_output: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+    # Added for Phase A (LTL construction): letter data and original context
+    aps: List[str] = field(default_factory=list)
+    letter_masks: List[int] = field(default_factory=list)
+    letter_valuations: List[Dict[str, bool]] = field(default_factory=list)
+    original_aut: Any = None  # spot.twa_graph if available (for acc lifting)
+
     def __post_init__(self):
         if self.levels and len(self.levels) != self.num_levels:
             # Allow caller to pass partial levels; we still trust num_levels.
@@ -90,6 +96,100 @@ class Cascade:
             if lv.structure and lv.structure not in ("1", "C1", "trivial"):
                 return True
         return False
+
+    def num_letters(self) -> int:
+        return len(self.generator_images)
+
+    def move_config(self, config: Tuple[int, ...], letter_idx: int) -> Tuple[int, ...]:
+        """Given a config (tuple of 1-based coords), return the next config under the given letter (0-based index into generators).
+
+        Uses the original state mapping + generator images (lift via homomorphism).
+        Assumes the decomposition provides a consistent covering.
+        """
+        if not self.state_to_config:
+            raise ValueError("No state_to_config mapping available")
+        if letter_idx < 0 or letter_idx >= len(self.generator_images):
+            raise IndexError("letter_idx out of range")
+        images = self.generator_images[letter_idx]
+        # Find a representative original state for this config
+        for s, c in self.state_to_config.items():
+            if c == config:
+                if s >= len(images):
+                    raise ValueError(f"State {s} out of range for generator images")
+                next_s = images[s]
+                try:
+                    return self.config_of(next_s)
+                except KeyError:
+                    raise ValueError(f"No config mapping for successor state {next_s}")
+        raise ValueError(f"No original state found for config {config}")
+
+    def all_configs(self) -> List[Tuple[int, ...]]:
+        """Return sorted list of distinct configurations that appear in the mapping."""
+        return sorted(set(self.state_to_config.values()))
+
+    def build_config_transitions(self) -> Dict[Tuple[int, ...], Dict[int, Tuple[int, ...]]]:
+        """Build a simple transition table: config -> {letter_idx: next_config} for all letters and appeared configs.
+
+        This is the core 'configuration automaton' transition relation (unlabeled for now; use letter_valuations for guards).
+        """
+        trans: Dict[Tuple[int, ...], Dict[int, Tuple[int, ...]]] = {}
+        configs = self.all_configs()
+        for c in configs:
+            trans[c] = {}
+            for li in range(self.num_letters()):
+                try:
+                    trans[c][li] = self.move_config(c, li)
+                except Exception:
+                    # If some config not fully covered, leave missing
+                    pass
+        return trans
+
+    def build_configuration_automaton(self):
+        """Return a lightweight structure representing the automaton on configurations.
+
+        states: list of config tuples (the appeared ones)
+        transitions: dict config -> list of (letter_idx, next_config, valuation_dict)
+        aps, letter_valuations available on self.
+        This is the object on which we will run the inductive reachability from the paper.
+        """
+        states = self.all_configs()
+        trans_table = self.build_config_transitions()
+        transitions = {}
+        for c in states:
+            transitions[c] = []
+            for li in range(self.num_letters()):
+                if li in trans_table.get(c, {}):
+                    nc = trans_table[c][li]
+                    val = self.letter_valuations[li] if li < len(self.letter_valuations) else {}
+                    transitions[c].append((li, nc, val))
+        return {
+            "states": states,
+            "aps": self.aps,
+            "num_letters": self.num_letters(),
+            "transitions": transitions,
+            "state_to_config_orig": self.state_to_config,  # for lifting acc later
+        }
+
+    def accepting_configs(self) -> set:
+        """Heuristic lift of accepting states/configs for Büchi.
+
+        A config is considered accepting if at least one original state mapped to it
+        has an accepting outgoing transition under some letter.
+        (For more precise, we can track acc on (config, letter) pairs.)
+        """
+        if self.original_aut is None:
+            # Fallback: assume no acc info
+            return set()
+        aut = self.original_aut
+        acc_configs = set()
+        d = aut.get_dict()
+        for s, c in self.state_to_config.items():
+            for e in aut.out(s):
+                if e.acc and list(e.acc.sets()):  # has some acc mark
+                    acc_configs.add(c)
+                    break
+        return acc_configs
+
 
     def summary(self) -> str:
         lv_str = ", ".join(f"L{i}:{lv.size}{('('+lv.structure+')' if lv.structure else '')}"
