@@ -13,12 +13,12 @@ This is separate from the heuristic path. We want the systematic construction: d
 - `Cascade` dataclass is rich and general (see `cascade.py`):
   - num_levels, levels (size + kind/structure from SgpDec)
   - state_to_config / config_to_state (1-based coords)
-  - generator_images (augmented with dead rejecting trap for incomplete auts — preserves language)
+  - generator_images (from the normalized complete det aut)
   - aps, letter_valuations (prop→bool dicts for every 2^|AP| letter — exactly for LTL guards)
   - original_aut ref
   - Methods (general, algebraic, no patterns): `move_config`, `all_configs`, `build_config_transitions`, `build_configuration_automaton`, `accepting_configs` (heuristic lift).
-- Extraction completes incomplete auts with a dedicated dead rejecting trap (dead = n). Generators are total.
-- Works on trivials, simples, and the motivating example (usable config auts even with dead trap).
+- The input is normalized (via Spot postprocessor) to deterministic complete Buchi before extraction. Generators are total by construction. No manual dead trap.
+- Works on trivials, simples, and the motivating example.
 - GAP bridge (`gap_bridge.py`), `install.sh`, `check_gap_available` are general. Synthetic path (`decompose_gens`) for testing without Spot.
 - **File organization for focus/stability**: Parser moved to `kr/gap/parse.py` (small focused service); stability helpers in `bdd_utils.py` (precomputed buddy vars to avoid segfaults during extraction).
 
@@ -72,7 +72,7 @@ The 1-level path is now general/algebraic ("from init, G F (reach some acc via t
 - Fin/Inf: Still placeholders (1level); generalized reach now available to implement Lemma 7 Fin(C) := ¬(ι ↝ C) ∨ ι ↝ C ( ¬(C>0 ↝ C) ).
 - Acceptance encoding + full top not general (still "inf often via reach" builder, now multi-capable but not using Fin/Muller disj).
 - Acc lift heuristic (still); better marking needed for precise.
-- Safety vs recurrence framing: Partial fix in build_inf (G(stay_g) short-circuit when init acc + constrained stay letters; prefers safety G for Ga family). Triggered for some; more cases (closed acc sets, attach G(stay) to after-tau) remain. "a"/"Ga" still not always ideal post-decomp (dead trap).
+- Safety vs recurrence framing: G(stay_g) short-circuit when init acc + constrained stay (prefers safety G for Ga family). More cases (attach G(stay) to after-tau) remain. Some 2L cases still degen due to acc lift.
 - Guard simplification: Called via simplify_ltl (Spot) at end of reach_strong etc. Reduces some; make_guard still emits long DNFs in >0 disjs (future: simp inside make too).
 - Trivial levels / cascade utils: Added top_of/sub_config/compute_*_from (prereq for partitions). Trivial size-1 levels not yet collapsed (can project to reduce effective levels for clean path).
 - Still small |AP|.
