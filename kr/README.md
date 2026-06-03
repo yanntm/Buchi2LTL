@@ -19,14 +19,13 @@ Spot deterministic automaton
 
 **Decomposition + Configuration Automaton (Phase A)**: Fully general. `Cascade` carries letter valuations (for LTL guards), `move_config()`, `build_config_transitions()`, `build_configuration_automaton()`, and `accepting_configs()`. The configuration automaton is the foundation for reachability.
 
-**1-level Reachability + Clean Reconstruction (Phase B)**: 
-- 1-level K operators (reset components) in `reachability_operators.py` (`one_level_reach_strong`, `build_1level_reachability`, etc.). General, no hard-coded patterns — they build guards from the transition dict + valuations.
-- High-level reconstruction split for smaller focused files:
-  - `reconstruct_ltl_1level_buchi(casc)` — thin pure builder (main path for 1-level). Core is `build_infinitely_often_accepting()` which uses the K operators to express "from init, always eventually reach some accepting config" (F(reach) for absorbing acc sinks, G F(reach) otherwise). All intelligence in the operators + trans/valuations; no structural ifs on dead/permanent/1-state/"q" filters/etc.
-  - `reconstruct_ltl_1level_buchi_heuristic(casc)` — the old ad-hoc version (kept for comparison/fallback during development).
-- Tested on small cases (Fa, Ga, false, etc.). Clean path produces simple equivalent formulas for 1-level cases where the old ad-hoc was used.
+**Reachability + Clean Reconstruction (Phase B extended)**: 
+- Generalized inductive 5 reachability formulas (paper Table 1 / Sec 4.2) in `reachability_operators.py`: `reach_strong`/`reach_weak` (Formulas 1/2), solid stay (3/4 with 4 cases + >0), dashed change (5). Base level 0 plain U; recursion on config len via new Cascade sub/Stay/Leave/Enter utils (compute_*_from using move_config). 1-level delegates to old optimized when top-level 1-casc for compat. `simplify_ltl` integrated.
+- `reconstruct_ltl_1level_buchi` + `build_infinitely_often_accepting` now attempt multi (up to 2 levels; >2 fallback) using the generalized reach (no hard NotImpl). Safety short G(stay_g) for init-acc 1-level cases (Ga family).
+- Still "inf often" framing (not full Fin/acc/Muller assembly); formulas on multi often partial/degen (0/1, simple &X) until conj/negations/Fin polished + better acc lift. Heuristic kept for comparison.
+- Tested via `kr/testing/` (1-level equiv good; multi exercises new path).
 
-**Multi-level / Full General**: Still pending the inductive multi-level K operators (paper's Stay/Leave/Enter cases with sub-reach) + Fin/Inf/acceptance encoding.
+**Multi-level / Full General**: Inductive K (5 formulas + recursion + partitions) landed and exercised on 2-level; 3+ limited for stability. Full Fin(C) (Lemma 7), acceptance lift/assembly, and class preservation remain (see kr/algorithm.md + STATUS.md). Clean path usable on some multi but output not yet always correct/equiv.
 
 We follow a "smaller files, one service per module" discipline (see `reachability_operators.py`, `bdd_utils.py` for stability, `gap/parse.py`, `kr/testing/` for verification harnesses).
 
