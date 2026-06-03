@@ -9,6 +9,19 @@ These implement the base cases from Boker et al. for reset levels in the cascade
 
 from __future__ import annotations
 from typing import Callable, Dict, List, Optional, Tuple
+import os
+
+# ---------------------------------------------------------------------------
+# Debug / tracing support (enable with KR_TRACE=1 env var for verbose construction traces)
+# This is invaluable during development of the inductive reachability formulas.
+# Traces show level-by-level decisions, stay/leave partitions, sub-formula construction, etc.
+# Set TRACE_ON = True below or use the env var. Can be removed/refined post-dev.
+# ---------------------------------------------------------------------------
+TRACE_ON = os.getenv("KR_TRACE", "0").lower() in ("1", "true", "yes", "on")
+
+def _trace(msg: str) -> None:
+    if TRACE_ON:
+        print("[KR] " + msg)
 
 # ---------------------------------------------------------------------------
 # Guard helpers (valuation -> LTL prop formula string)
@@ -259,21 +272,25 @@ def reach_strong(
     T: Tuple[int, ...],
     tau: str,
     casc: "Cascade",
+    level: int = 0,
 ) -> str:
-    """Formula 1 (main strong): S ~_B(β)^X T(τ).
+    """Formula 1 (main strong): S ~_B(β)^X T(τ) at the given cascade level (coordinate index).
 
-    - level 0 (empty configs): (¬β) U τ
-    - len==1: delegate to specialized one_level_reach_strong (optimized base case, no extra X)
-    - higher: solid-stay or dashed-change (or-ed; one will be false if tops mismatch)
+    Recursion advances the level cursor while always passing full-length config tuples
+    (so move_config and partition helpers always see correct context for higher coords).
+    Base: when level == num_levels, plain (¬β) U τ .
     """
-    if len(S) == 0 and len(T) == 0:
+    n = getattr(casc, "num_levels", 0)
+    if level == n:
         b = beta or "false"
         negb = "true" if b == "false" else ("false" if b == "true" else f"!({b})")
+        _trace(f"base level reached (level={level}): returning ({negb}) U ({tau})")
         return f"({negb}) U ({tau})"
 
-    if len(S) == 1 and getattr(casc, "num_levels", 0) == 1:
-        # Delegate to 1-level base ONLY when this is the top-level of a 1-level cascade
-        # (preserves nice output without extra X nesting + full compat for existing 1-level cases).
+    _trace(f"reach_strong level={level}/{n} S={S} T={T} beta={beta} tau={tau}")
+
+    if level == 0 and n == 1 and len(S) == 1:
+        # Delegate only for pure top-level 1-level cascades (nice output + compat)
         pos_S = _config_to_pos(S)
         pos_T = _config_to_pos(T)
         pos_B = _config_to_pos(B) if B is not None and len(B) == 1 else 0
@@ -282,10 +299,24 @@ def reach_strong(
             pos_S, pos_B if pos_B else None, pos_T, tau, casc.letter_valuations, casc.aps, trans
         )
 
-    # All other cases (multi-level top or recursive sub-levels): use inductive solid/dashed
-    # (for sub len==1 this bottoms out using level-0 base U with X-adjusted guards)
-    solid = _solid_stay_strong(S, B, beta, T, tau, casc)
-    dashed = _dashed_change_strong(S, B, beta, T, tau, casc)
+    # "0-step from here" only if the *remaining suffix* of the config (from this level onward) already matches target
+    suffix_S = S[level:]
+    suffix_T = T[level:]
+    if suffix_S == suffix_T:
+        _trace(f"  suffix from level {level} already matches target -> return tau early")
+        return tau
+
+    # Current level's value (for solid/dashed decision at this layer)
+    s_val = S[level]
+    t_val = T[level]
+    b_val = B[level] if B is not None else None
+    source_is_target = (suffix_S == suffix_T)  # redundant with above but for clarity in solid
+    source_is_bad = (B is not None and s_val == b_val)
+
+    _trace(f"  at level {level}: s_val={s_val} t_val={t_val} source_is_target={source_is_target} source_is_bad={source_is_bad}")
+
+    solid = _solid_stay_strong(S, B, beta, T, tau, casc, level)
+    dashed = _dashed_change_strong(S, B, beta, T, tau, casc, level)
     res = f"({solid}) | ({dashed})"
     return simplify_ltl(res)
 
@@ -297,13 +328,14 @@ def reach_weak(
     T: Tuple[int, ...],
     tau: str,
     casc: "Cascade",
+    level: int = 0,
 ) -> str:
     """Formula 2 (weak dual of main)."""
-    if len(S) == 0 and len(T) == 0:
-        # dual approx for base
+    n = getattr(casc, "num_levels", 0)
+    if level == n:
         return f"G( ({tau}) | !({beta or 'false'}) )"
 
-    if len(S) == 1 and getattr(casc, "num_levels", 0) == 1:
+    if level == 0 and n == 1 and len(S) == 1:
         pos_S = _config_to_pos(S)
         pos_T = _config_to_pos(T)
         pos_B = _config_to_pos(B) if B is not None and len(B) == 1 else 0
@@ -312,29 +344,31 @@ def reach_weak(
             pos_S, pos_B if pos_B else None, pos_T, tau, casc.letter_valuations, casc.aps, trans
         )
 
-    solid_w = _solid_stay_weak(S, B, beta, T, tau, casc)
-    dashed_w = _dashed_change_weak(S, B, beta, T, tau, casc)
+    solid_w = _solid_stay_weak(S, B, beta, T, tau, casc, level)
+    dashed_w = _dashed_change_weak(S, B, beta, T, tau, casc, level)
     res = f"({solid_w}) | ({dashed_w})"
     return simplify_ltl(res)
 
 
 def _solid_stay_strong(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade"
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
-    """Formulas 3 (strong solid/stay top unchanged). Cases on S==B, S==T at this level."""
-    if len(S) == 0:
-        return reach_strong(S, B, beta, T, tau, casc)
+    """Formulas 3 (strong solid/stay top unchanged). Cases on current level's coord."""
+    n = getattr(casc, "num_levels", 0)
+    if level >= n:
+        return reach_strong(S, B, beta, T, tau, casc, level)
 
-    s_top = casc.top_of(S)
-    t_top = casc.top_of(T)
-    if s_top != t_top:
-        return "false"  # cannot stay to different top
+    s_val = S[level]
+    t_val = T[level]
+    b_val = B[level] if B is not None else None
+    source_is_bad = (B is not None and s_val == b_val)
+    suffix_S = S[level:]
+    suffix_T = T[level:]
+    source_is_target = (suffix_S == suffix_T)
 
-    b_top = casc.top_of(B) if B is not None else None
-    source_is_bad = (B is not None and S == B)
-    source_is_target = (S == T)
+    _trace(f"  _solid_stay_strong level={level}: source_is_target={source_is_target} source_is_bad={source_is_bad}")
 
-    gt0 = _stay_gt0_strong(S, B, beta, T, tau, casc)
+    gt0 = _stay_gt0_strong(S, B, beta, T, tau, casc, level)
 
     if not source_is_bad and not source_is_target:
         return gt0
@@ -347,23 +381,23 @@ def _solid_stay_strong(
 
 
 def _stay_gt0_strong(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade"
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
-    """The >0 common subformula for solid strong: disj over stay steps (first letter keep top) + sub reach from *arrived*,
-    conjoined with negations over leave steps and bad-landing steps.
+    """The >0 common subformula for solid strong at `level`.
+    We always use *full* config tuples for move/partition so context of higher levels is preserved.
+    Sub-recursive calls advance `level` and pass the *full arrived config*.
     """
-    if len(S) == 0:
-        return reach_strong(S, B, beta, T, tau, casc)
+    n = getattr(casc, "num_levels", 0)
+    if level >= n:
+        return reach_strong(S, B, beta, T, tau, casc, level)
 
-    parts = casc.compute_stay_leave_from(S)
+    parts = casc.compute_stay_leave_from(S)  # full S always
     stay_moves = parts.get("stay", [])
     leave_moves = parts.get("leave", [])
 
-    lower_T = casc.sub_config(T)
-    lower_B = casc.sub_config(B) if B is not None else None
-    lower_S0 = casc.sub_config(S)
+    _trace(f"    _stay_gt0_strong level={level}: #stay={len(stay_moves)} #leave={len(leave_moves)}")
 
-    # OR over stay moves: g & X ( lower_reach from *arrived_lower* to lower_T with adjusted )
+    # OR over stay moves at this level: g & X ( sub_reach at level+1 from *full arrived* )
     disjs: List[str] = []
     for li, arrived in stay_moves:
         if li >= len(casc.letter_valuations):
@@ -371,67 +405,72 @@ def _stay_gt0_strong(
         g = letters_to_prop(casc.letter_valuations[li], casc.aps)
         if g == "false":
             continue
-        arrived_lower = casc.sub_config(arrived)
-        sub_tau = f"({g}) & (X({tau}))"
-        sub_beta = f"({g}) & (X({beta}))" if beta not in ("true", "false") else (g if beta == "true" else "false")
-        # recurse lower (will delegate at bottom)
-        sub_f = reach_strong(arrived_lower, lower_B, sub_beta, lower_T, sub_tau, casc)
-        disjs.append(f"({g}) & (X({sub_f}))")
+        # If this letter lands the *remaining* suffix (from next level) exactly on target,
+        # then we have arrived at overall target with this step; attach outer tau after the X, no extra sub g.
+        arrived_suffix = arrived[level+1:]
+        target_suffix = T[level+1:]
+        if arrived_suffix == target_suffix:
+            term = f"({g}) & (X({tau}))"
+            _trace(f"      landing completes target at this step -> g & X(tau)  (g={g})")
+        else:
+            sub_tau = f"({g}) & (X({tau}))"
+            sub_beta = f"({g}) & (X({beta}))" if beta not in ("true", "false") else (g if beta == "true" else "false")
+            sub_f = reach_strong(arrived, B, sub_beta, T, sub_tau, casc, level + 1)
+            term = f"({g}) & (X({sub_f}))"
+            _trace(f"      normal sub step -> g & X(sub_f)")
+        disjs.append(term)
 
     or_part = "(" + " | ".join(disjs) + ")" if disjs else "false"
+    _trace(f"    or_part at level {level}: {or_part[:80]}...")
 
-    # Conjs to enforce stay + avoid bad: negate leave paths that "reach target anyway", and bad landings under beta
+    # Conjs ...
     conj: List[str] = [or_part]
-    # 1. leaves: cannot leave and then lower-reach the target (would violate stay-top)
     for li, arrived in leave_moves:
         if li >= len(casc.letter_valuations):
             continue
         g = letters_to_prop(casc.letter_valuations[li], casc.aps)
         if g == "false":
             continue
-        arrived_lower = casc.sub_config(arrived)
         sub_tau_l = f"({g}) & (X({tau}))"
-        # from arrived after leave, could I reach the lower target (beta=false for this check)
-        forbid = reach_strong(arrived_lower, None, "false", lower_T, sub_tau_l, casc)
+        # forbid using full arrived for that leave, at next level
+        forbid = reach_strong(arrived, B, "false", T, sub_tau_l, casc, level + 1)
         conj.append(f"!(({g}) & (X({forbid})))")
 
-    # 2. bad landings under stay letters (if land on bad lower+same top, then suffix must not satisfy beta)
+    # bad landing conjs (using full)
     if B is not None:
-        bad_lower = casc.sub_config(B)
         for li, arrived in stay_moves:
             if li >= len(casc.letter_valuations):
                 continue
-            if casc.sub_config(arrived) != bad_lower:
+            if arrived != B:  # landed exactly on the bad full config at this step
                 continue
             g = letters_to_prop(casc.letter_valuations[li], casc.aps)
             if g == "false":
                 continue
-            arrived_l = casc.sub_config(arrived)
             sub_b = f"({g}) & (X({beta}))" if beta not in ("true", "false") else (g if beta == "true" else "false")
-            # negate (take step to bad & X (satisfy beta or reach-from-bad under it))
-            forbid_bad = reach_strong(arrived_l, None, "false", bad_lower, sub_b, casc)
+            forbid_bad = reach_strong(arrived, B, "false", B, sub_b, casc, level + 1)
             conj.append(f"!(({g}) & (X({forbid_bad})))")
 
     inner = " & ".join(conj)
-    return f"({inner})" if inner else "false"
+    res = f"({inner})" if inner else "false"
+    _trace(f"    _stay_gt0 result level={level}: {res[:80]}...")
+    return res
 
 
 def _solid_stay_weak(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade"
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
     """Formula 4 (weak solid/stay). Mirror of strong but uses weak subs + slightly different case ors."""
-    if len(S) == 0:
-        return reach_weak(S, B, beta, T, tau, casc)
+    n = getattr(casc, "num_levels", 0)
+    if level >= n:
+        return reach_weak(S, B, beta, T, tau, casc, level)
 
-    s_top = casc.top_of(S)
-    t_top = casc.top_of(T)
-    if s_top != t_top:
-        return "false"
+    s_val = S[level]
+    t_val = T[level]
+    b_val = B[level] if B is not None else None
+    source_is_bad = (B is not None and s_val == b_val)
+    source_is_target = (s_val == t_val)
 
-    source_is_bad = (B is not None and S == B)
-    source_is_target = (S == T)
-
-    gt0 = _stay_gt0_weak(S, B, beta, T, tau, casc)
+    gt0 = _stay_gt0_weak(S, B, beta, T, tau, casc, level)
 
     if not source_is_bad and not source_is_target:
         return gt0
@@ -445,18 +484,16 @@ def _solid_stay_weak(
 
 
 def _stay_gt0_weak(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade"
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
-    """ >0 weak for solid. Similar structure, weak subcalls, extra release conjs for leaves (S~S(false))."""
-    if len(S) == 0:
-        return reach_weak(S, B, beta, T, tau, casc)
+    """ >0 weak for solid. Similar structure, weak subcalls, extra release conjs for leaves."""
+    n = getattr(casc, "num_levels", 0)
+    if level >= n:
+        return reach_weak(S, B, beta, T, tau, casc, level)
 
     parts = casc.compute_stay_leave_from(S)
     stay_moves = parts.get("stay", [])
     leave_moves = parts.get("leave", [])
-
-    lower_T = casc.sub_config(T)
-    lower_B = casc.sub_config(B) if B is not None else None
 
     disjs: List[str] = []
     for li, arrived in stay_moves:
@@ -465,10 +502,9 @@ def _stay_gt0_weak(
         g = letters_to_prop(casc.letter_valuations[li], casc.aps)
         if g == "false":
             continue
-        arrived_lower = casc.sub_config(arrived)
         sub_tau = f"({g}) & (X({tau}))"
         sub_beta = f"({g}) & (X({beta}))" if beta not in ("true", "false") else (g if beta == "true" else "false")
-        sub_f = reach_weak(arrived_lower, lower_B, sub_beta, lower_T, sub_tau, casc)
+        sub_f = reach_weak(arrived, B, sub_beta, T, sub_tau, casc, level + 1)
         disjs.append(f"({g}) & (X({sub_f}))")
 
     or_part = "(" + " | ".join(disjs) + ")" if disjs else "false"
@@ -480,36 +516,31 @@ def _stay_gt0_weak(
         g = letters_to_prop(casc.letter_valuations[li], casc.aps)
         if g == "false":
             continue
-        arrived_lower = casc.sub_config(arrived)
         sub_tau_l = f"({g}) & (X({tau}))"
-        forbid = reach_weak(arrived_lower, None, "false", lower_T, sub_tau_l, casc)
+        forbid = reach_weak(arrived, B, "false", T, sub_tau_l, casc, level + 1)
         conj.append(f"!(({g}) & (X({forbid})))")
 
-    # extra release conjs for weak (S~S(false) under leave, to cover "not yet target" release)
+    # extra release (simplified)
     for li, arrived in leave_moves:
         if li >= len(casc.letter_valuations):
             continue
         g = letters_to_prop(casc.letter_valuations[li], casc.aps)
         if g == "false":
             continue
-        arrived_lower = casc.sub_config(arrived)
-        # weak reach to "self" (arrived) with false target (release not leaving? or not hitting)
-        rel = reach_weak(arrived_lower, lower_B, "false", arrived_lower, "false", casc)
-        conj.append(f"(({g}) => (X({rel})))")  # or just include in ands; use => or G form
+        rel = reach_weak(arrived, B, "false", arrived, "false", casc, level + 1)
+        conj.append(f"(({g}) => (X({rel})))")
 
     if B is not None:
-        bad_lower = casc.sub_config(B)
         for li, arrived in stay_moves:
-            if casc.sub_config(arrived) != bad_lower:
-                continue
             if li >= len(casc.letter_valuations):
+                continue
+            if arrived != B:
                 continue
             g = letters_to_prop(casc.letter_valuations[li], casc.aps)
             if g == "false":
                 continue
-            arrived_l = casc.sub_config(arrived)
             sub_b = f"({g}) & (X({beta}))" if beta not in ("true", "false") else (g if beta == "true" else "false")
-            forbid_bad = reach_weak(arrived_l, None, "false", bad_lower, sub_b, casc)
+            forbid_bad = reach_weak(arrived, B, "false", B, sub_b, casc, level + 1)
             conj.append(f"!(({g}) & (X({forbid_bad})))")
 
     inner = " & ".join(conj)
@@ -517,7 +548,7 @@ def _stay_gt0_weak(
 
 
 def _dashed_change_strong(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade"
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
     """Formula 5 (dashed / change top, most complex)."""
     s_top = casc.top_of(S)
@@ -541,14 +572,14 @@ def _dashed_change_strong(
             continue
         arrived_lower = casc.sub_config(arrived)
         # tail after entry: once at t, do solid stay at new top (avoiding orig B)
-        tail = _solid_stay_strong(arrived, B, beta, T, tau, casc)
+        tail = _solid_stay_strong(arrived, B, beta, T, tau, casc, level)
         entry_tau = f"({g}) & (X({tail}))"
         # (1) entry path, B=S(false) i.e. no special avoid for entry, from S to arrived
-        entry1 = reach_strong(S, S, "false", arrived, entry_tau, casc)
+        entry1 = reach_strong(S, S, "false", arrived, entry_tau, casc, level)
         # (2) entry while avoiding orig bad, using weak solid for after
-        w_tail = _solid_stay_weak(arrived, B, beta, T, tau, casc)
+        w_tail = _solid_stay_weak(arrived, B, beta, T, tau, casc, level)
         w_entry_tau = f"({g}) & (X({w_tail}))"
-        entry2 = reach_weak(S, B, beta, arrived, w_entry_tau, casc)
+        entry2 = reach_weak(S, B, beta, arrived, w_entry_tau, casc, level)
         part12 = f"({entry1}) & ({entry2})"
         # (3) landed cond
         landed_bad = (B is not None and arrived == B)
@@ -579,7 +610,7 @@ def _dashed_change_strong(
 
 
 def _dashed_change_weak(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade"
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
     """Weak dual of dashed (stub for now; full mirror would duplicate structure with weak subs)."""
     # For initial impl, fall back to a safe over-approx or the strong negated in dual context.
