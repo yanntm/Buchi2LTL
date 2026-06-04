@@ -58,11 +58,15 @@ class Cascade:
     raw_output: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    # Added for Phase A (LTL construction): letter data and original context
+    # Added for Phase A (LTL construction): letter data and the (normalized) det aut context.
+    # The stored aut is the deterministic complete parity version produced by
+    # decompose_aut; this *is* the authoritative D for the algorithm (configs,
+    # h via state_to_config, acc lifting, reachability, Fin, assembly).
+    # Callers keep any pre-norm aut aside only for their own final equiv check.
     aps: List[str] = field(default_factory=list)
     letter_masks: List[int] = field(default_factory=list)
     letter_valuations: List[Dict[str, bool]] = field(default_factory=list)
-    original_aut: Any = None  # spot.twa_graph if available (for acc lifting)
+    original_aut: Any = None  # the normalized det parity aut (our working D)
 
     def __post_init__(self):
         if self.levels and len(self.levels) != self.num_levels:
@@ -228,13 +232,15 @@ class Cascade:
         }
 
     def accepting_configs(self) -> set:
-        """Configs from which accepting infinite runs can recur.
+        """Configs from which accepting infinite runs can recur (w.r.t. our D).
 
-        Uses spot.scc_info on the original_aut (normalized det parity) to identify
-        non-rejecting SCCs that contain at least one cycle with an accepting mark.
+        The stored aut is the normalized deterministic complete parity aut
+        (our authoritative input D after Spot transformations). We use
+        spot.scc_info on it to identify non-rejecting SCCs that contain at
+        least one cycle with an accepting mark (per the parity condition on D).
         Returns the corresponding cascade configs for those states.
-        Special-cases trivial "t"/"true"/"f"/"false" acceptance conditions.
-        Returns empty set if no original_aut or on analysis error.
+        Special-cases trivial "t"/"true"/"f"/"false" acceptance conditions on D.
+        Returns empty set if no aut or on analysis error.
         """
         if self.original_aut is None:
             return set()
@@ -273,7 +279,7 @@ class Cascade:
         except Exception:
             pass
         # Fallback: edge acc marks only on self-loops (internal cycles for singletons).
-        # Avoids transients whose acc marks are only on exiting edges.
+        # (This is on the normalized D; transients with acc only on exit edges are avoided.)
         acc_configs = set()
         for s, c in self.state_to_config.items():
             try:
