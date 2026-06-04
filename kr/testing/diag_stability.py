@@ -18,6 +18,8 @@ and reports any SEGV.
 
 Run:
     python3 kr/testing/diag_stability.py
+
+(Note: now exercises the det parity normalization path inside decompose_aut.)
 """
 
 import subprocess
@@ -41,7 +43,8 @@ sys.path.insert(0, str(proj))
 import spot
 from kr import decompose_aut
 f = spot.formula({formula_str!r})
-aut = f.translate("Buchi", "Deterministic")
+# decompose_aut normalizes to det parity min complete; loose translate ok
+aut = f.translate()
 casc = decompose_aut(aut)
 print(f"OK lvls={{casc.num_levels}} n={{casc.num_states}}")
 '''
