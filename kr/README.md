@@ -11,13 +11,14 @@ See the top-level README for overall project context. This is separate from the 
 
 We have a working automated pipeline:
 
-Spot deterministic automaton  
-→ extract concrete generators (one per 2^|AP| letter, from the Spot-normalized complete det aut)  
-→ generate self-contained GAP script using SgpDec  
+Spot automaton  
+→ normalize via Spot to deterministic complete minimized parity (min even)  
+→ extract concrete generators (one per 2^|AP| letter, from the normalized complete det parity aut)  
+→ generate self-contained GAP script using SgpDec (robust for 1-state auts)  
 → run via `gap`  
 → parse into `Cascade` (num_levels, per-level sizes + kinds, state → configuration mapping)
 
-**Decomposition + Configuration Automaton (Phase A)**: Fully general. `Cascade` carries letter valuations (for LTL guards), `move_config()`, `build_config_transitions()`, `build_configuration_automaton()`, and `accepting_configs()`. The configuration automaton is the foundation for reachability.
+**Decomposition + Configuration Automaton (Phase A)**: Fully general. `Cascade` carries letter valuations (for LTL guards), `move_config()`, `build_config_transitions()`, `build_configuration_automaton()`, and `accepting_configs()`. The configuration automaton is the foundation for reachability. Input auts normalized to det parity min complete (paper contract).
 
 **Reachability + Clean Reconstruction (Phase B extended)**: 
 - Generalized inductive 5 reachability formulas (paper Table 1 / Sec 4.2) in `reachability_operators.py`: `reach_strong`/`reach_weak` (Formulas 1/2), solid stay (3/4 with 4 cases + >0), dashed change (5). Base level 0 plain U; recursion on config len via new Cascade sub/Stay/Leave/Enter utils (compute_*_from using move_config). 1-level delegates to old optimized when top-level 1-casc for compat. `simplify_ltl` integrated.
@@ -56,7 +57,7 @@ We are still in PoC stage; there is no fancy multi-platform / container / CI set
 from kr import decompose_aut, reconstruct_ltl_1level_buchi, reconstruct_ltl_1level_buchi_heuristic
 import spot
 
-aut = spot.formula("Fa").translate("Buchi", "Deterministic")
+aut = spot.formula("Fa").translate()  # decompose_aut normalizes to det parity min complete internally
 casc = decompose_aut(aut)
 print(casc)                    # summary
 print(casc.state_to_config)    # mapping for LTL synthesis
@@ -88,12 +89,14 @@ Example generated scripts live in `kr/examples/generated/`.
 
 See `kr/examples/spot_det.py`, `kr/examples/synthetic.py`, `kr/testing/test_kr_reconstruct.py`, and the generated/ .gap files.
 
-Note: The KR path now normalizes to a deterministic complete Buchi automaton via Spot before decomposition. Spot only adds states (e.g. sinks) when needed for completeness; sinks are treated as ordinary states. This often results in fewer artificial levels than the old manual dead-trap approach.
+Note: The KR path now normalizes to a deterministic complete minimized parity automaton (min even) via Spot before decomposition (per paper). Spot only adds states (e.g. sinks) when needed for completeness; sinks are treated as ordinary states. 1-state auts are handled robustly (GAP script avoids SgpDec holonomy call that would crash). This enables det parity for formulas like FGa that have no small det Buchi.
 
 Typical current behavior (after `./kr/install.sh`):
-- Trivial 1-state or simple safety cases often produce small/1-level cascades or degenerate results.
-- 1-level cases like Fa now go through the clean K-operator path and produce simple equivalent formulas (e.g. `F(((!a) U (a & true)))`).
-- Multi-level cases may still occur (Spot completion can add states); the clean path supports up to 2 levels (higher fall back).
+- Parity min-even det complete norm: formulas like FGa now yield small (1-state) det parity auts and decomp to 1L cascades (no more det-Buchi failures).
+- 1L cases like Fa/Ga produce simple equiv via clean K path.
+- Constants true/false handled (special acc="t"/"f").
+- "a" currently degen under parity aut acc marks (see STATUS); was recovered under prior Buchi norm.
+- Multi-level still limited (guard at 3L); clean attempts 2L via generalized reach.
 
 The generated GAP scripts are fully self-contained. They are deterministic given the input generators.
 
@@ -104,7 +107,7 @@ See `kr/testing/` (and its README) for the verification harnesses we use to comp
 - `install.sh` — convenience setup for GAP + SgpDec.
 - `gap_bridge.py` — orchestration, script generation, and execution. (Parser extracted to the focused service below for smaller files.)
 - `gap/parse.py` + `gap/__init__.py` — focused parser service (structured GAP output → `Cascade`). Re-exported from `gap_bridge` for compatibility.
-- `extract.py` — Spot aut → generators (assumes the aut has been normalized to complete deterministic Buchi by the caller/decompose_aut).
+- `extract.py` — Spot aut → generators (assumes the aut has been normalized to complete deterministic minimized parity by the caller/decompose_aut).
 - `cascade.py` — `Cascade` dataclass + config automaton helpers (`build_configuration_automaton`, `move_config`, etc.).
 - `reachability_operators.py` — 1-level K operators (`one_level_reach_strong`, `build_1level_reachability`, guard helpers, etc.) + 1-level projection helpers. The core "intelligence".
 - `reachability.py` — thin high-level layer: `reconstruct_ltl_1level_buchi` (clean pure builder using the operators) + `_heuristic` (old ad-hoc for comparison) + `build_infinitely_often_accepting`.
@@ -112,4 +115,4 @@ See `kr/testing/` (and its README) for the verification harnesses we use to comp
 - `examples/` + `testing/` — demos and verification harnesses (see `kr/testing/README.md` and `test_kr_reconstruct.py` / `diag_stability.py`).
 - `examples/generated/*.gap` — inspectable generated scripts.
 
-This remains experimental/PoC. The next major piece is the inductive multi-level K operators (per Boker et al.) + Fin/Inf/acceptance encoding on top of the clean 1-level foundation. See `kr/STATUS.md` for the detailed current state and gaps.
+This remains experimental/PoC. Frontend now feeds deterministic minimized parity complete auts (paper contract; 1s robustness added). Next major: inductive multi K + Fin/Inf/acceptance encoding adapted to parity conditions (priorities) on top of clean foundation. See `kr/STATUS.md`.
