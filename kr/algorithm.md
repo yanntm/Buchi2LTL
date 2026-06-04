@@ -107,7 +107,7 @@ This is the pure, systematic target for the kr/ folder.
 ## Relation to Current kr/ Implementation & Next Steps
 
 - `Cascade` + `state_to_config` (coordinate tuples), `levels`, `letter_valuations`, `build_config_transitions`, `move_config` already give the cascade + ability to compute Stay/Leave per top-level state.
-- Existing 1-level operators in `reachability_operators.py` + `build_infinitely_often_accepting` (with absorbing check via trans dict) + the Fin/Inf placeholders are a first working approximation/specialization of the base reachability formulas + Lemma 7 `Fin(C)` encoding.
+- The operators in `reachability_operators.py` (generalized 5 formulas + dual weak + fin_c for Lemma 7) + `reconstruct_ltl_paper_style` (Muller DNF assembly) implement the core construction. 1-level base cases are the exact level-0/1 specialization per the paper.
 - `decompose_aut` + gap bridge already perform the decomposition step (and we have stability via `bdd_utils` and focused parser in `kr/gap/parse.py`).
 - The clean `reconstruct_ltl_1level_buchi` is already the "thin pure builder" style the paper demands.
 
@@ -132,4 +132,4 @@ The size will be large (as predicted by the paper), but the result will be eleme
 
 (For full proofs, the exact syntactic definitions of Formulas 3–5, Table 2 recurrences, and the unary cases, see the original paper in `paper/Automata2LTL.pdf` (now under version control) or the extracted text `paper/Automata2LTL.txt`. The unary bounds and related work are omitted here for focus on the general case relevant to kr/.)
 
-This is now the single canonical algorithm description for the kr/ project.
+This is the canonical algorithm description for the kr/ project (the construction we implement directly).
