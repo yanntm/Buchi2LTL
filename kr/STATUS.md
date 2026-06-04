@@ -83,20 +83,19 @@ We now normalize *inside* `decompose_aut` to a deterministic complete minimized 
 **Recovered / working in clean path (equiv True via Spot, nice output):**
 - Constants: `true`, `false` (1L after parity norm + special "t"/"f" acc handling in builder/lift).
 - Simple eventual/safety: `Fa` → `"Fa"`, `Ga` / `G a` → `"Ga"`.
+- Atomic `a`: now `"a"` (2L after parity), EQUIV True. (Was the case with infinite nesting during reach construction.)
 - Some compounds like `G(a & Xa)` → `"Ga"` (Spot simplification helps).
 
-**Not yet (or partial) after parity switch:**
-- Atomic `a` / `!a`: now degen to `"true"` (parity norm produces aut where acc lift marks the transient init config too, because trans-acc marks placed on exiting edges; reach from init to self-acc + G(F(true)) simplifies true. Under Buchi-norm the lift happened to mark only the sink and reach gave "a".)
-- `Xa`, `X a`: 3+ levels → clean raises NotImplemented (guard; falls to heuristic).
-- `G(p -> X q)`, `G(p -> (q U r))`: degen to `"true"`, equiv False (acc lift overmarks + builder still "inf often" framing).
-- `a U b`, `G F a` etc.: wrong or degen.
-- `F G a` / `FGa`: decomp now succeeds (1L parity aut, no more "not det" error), acc lift marks the state, but builder emits "true" (not FGa). Real parity acc (priorities, mixed Fin/Inf) not yet interpreted by the i.o. reach builder.
-- The acc lift (any edge with non-empty acc set, or "t") is a Buchi-flavored heuristic; sensitive to whether Spot attaches acc as trans-acc vs state-acc and which edges. For true parity automata the top-level "inf often reach acc-config" cannot express the priority parity condition.
-- Deeper or 2L cases still degen until better acc marking (or full paper acc assembly using Fin(C) + reach) + polish.
+**Stable (finite LTL, bounded reach calls, no infinite nesting) but not always equiv:**
+- All core CASES via `kr/testing/test_kr_basic.py` (and timeout harness style) now run to completion with small PAPER_REACH_CALLS (0-5), produce finite strings, no /tmp/kr_build.log growth even for 3L (Xa). Subproc wrapped (segv/timeout safe), normal path, argv for single formulas.
+- `Xa` (3L): produces nested X formula (as expected for exact co-safety), EQUIV False but terminates.
+- `FGa`, `G(p -> X q)`, `G(p -> (q U r))`: emit "true" (or degenerate), EQUIV False. (Parity aut + current inf-often builder + acc lift from SCCs still over-approx for some; full paper Muller/Fin DNF + precise priority handling would be needed for exact.)
 
-**Regression check:** The core CASES ... now under parity: true/false/Fa/Ga still correct/equiv (with special acc="t" handling). "a" regressed to true (acc-lift+parity aut interaction); FGa decomp now succeeds but LTL true (not recovered). Multi cases still degen as before. No segvs. With parity, some formulas get smaller auts (FGa:1 state) or same (a:3s 2L). Tests use normal path + subproc.
+**The infinite formula bug (log head confirmation):** Before the landed fix, reach_strong for pairs like S=(1,2) T=(2,1) at level=0 (and subs at level=1 same-suffix) would re-invoke the *same (S,T,level)* from inside _dashed_change_strong's entry1 when an enter letter landed exactly on the target suffix (arrived completes T). This passed a tau' = g & X(tail) (wrapping previous), causing each expansion to nest deeper (!a & X(!a & X(...))) in the tau arg (distinct keys, no memo hit, active didn't catch because tau differed). Log head showed the progressive tau growth + repeated REACH lines for the pair. Fixed by special-casing in dashed (analogous to "if arrived_suffix == target_suffix" in _stay_gt0): for completing enters, contribute entry_tau directly (no sub reach_strong(S, T, wrapped)). Combined with early simplify_ltl(beta/tau) at entry + all composition sites (sub_tau, or_part, forbid, etc), full (S,B,beta,T,tau,level) memo as unique table (with stores on early/base returns), and reset at top of build_inf, this made construction terminate for the small cases. Addresses the "missed unique table of visited" + "yes its building an infinite formula" diagnosis. (Still O(exp) per paper, fine.)
 
-The decomp + 1L foundation + 1s robustness is solid. With parity norm all formulas now produce det complete parity auts (no det-Buchi class limits). Multi-level + acc precision (now visibly sensitive under parity aut shapes) remain the main gaps. "a" recovery and FGa etc. need acc lift or builder adaptation for the new auts.
+**Regression check + test discipline:** Via kr/testing (preferred, direct invoke, no long PYEOF -c in dev, subproc per case for 139/timeout, full CASES never dropped, argv for "give formula on cmdline"). Post-fix: a/Ga/Fa recover with True equiv (no reg); Xa/others stable finite (equiv false OK to focus). 5s-style timeouts used in harness runs for one-by-one. git per-file + diff-read before each commit + MD updates.
+
+The decomp + parity complete+det+min + inductive 5 formulas + memo/early-simp + landed special for stability is solid. Main remaining for correctness: polish exact conj/neg/Enter in the 5 (per algorithm.md Table1), switch main reconstruct to reconstruct_ltl_paper_style (Fin+ Muller DNF over good Ms from Spot cycles) for better acc, precise acc lift (internal cycle acc marks), semantics validators in kr/testing (reach formulas vs actual cascade word runs), trivial level collapse, expand tests (hierarchy/roundtrips/paper ex). "a" is now the proof point that the algebraic path + fix works.
 
 The decomp/config part and the clean 1-level reconstruction are in good general shape. The LTL construction is now at "1-level operators + thin pure K-based top for 1-level" (no more ad-hoc in the main 1-level path).
 
