@@ -124,17 +124,22 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> str:
         return "false"
 
     all_c = set(casc.all_configs())
+    print("[TRACE_ASSEMBLY] good_ms=", [set(m) for m in good_ms])
+    print("[TRACE_ASSEMBLY] all_configs=", all_c)
     terms = []
     for Mf in good_ms:
         M = set(Mf)
         not_M = all_c - M
+        print(f"[TRACE_ASSEMBLY] for M={M} not_M={not_M}")
         and_parts = []
         for c in M:
             fc = simplify_ltl(f"!({fin_c(c, casc)})")
+            print(f"[TRACE_ASSEMBLY]   !fin({c}) = {fc}")
             _ops.PAPER_MAX_LTL_SIZE = max(_ops.PAPER_MAX_LTL_SIZE, len(fc))
             and_parts.append(fc)
         for c in not_M:
             fc = simplify_ltl(fin_c(c, casc))
+            print(f"[TRACE_ASSEMBLY]   fin({c}) = {fc}")
             _ops.PAPER_MAX_LTL_SIZE = max(_ops.PAPER_MAX_LTL_SIZE, len(fc))
             and_parts.append(fc)
         if and_parts:
@@ -143,6 +148,7 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> str:
             for p in and_parts[1:]:
                 term = simplify_ltl(f"({term}) & ({p})")
                 _ops.PAPER_MAX_LTL_SIZE = max(_ops.PAPER_MAX_LTL_SIZE, len(term))
+            print(f"[TRACE_ASSEMBLY]   term for M = {term}")
             terms.append(f"({term})")
     if not terms:
         return "false"
@@ -150,6 +156,7 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> str:
     for t in terms[1:]:
         res = simplify_ltl(f"({res}) | ({t})")
         _ops.PAPER_MAX_LTL_SIZE = max(_ops.PAPER_MAX_LTL_SIZE, len(res))
+    print("[TRACE_ASSEMBLY] final before norm=", res)
     # capture max size from the module
     _ops.PAPER_MAX_LTL_SIZE = max(getattr(_ops, "PAPER_MAX_LTL_SIZE", 0), len(res) if isinstance(res, str) else 0)
     if _ops.PAPER_MAX_LTL_SIZE > 100000:
