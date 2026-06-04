@@ -37,31 +37,22 @@ from .reachability_operators import (  # noqa: F401
 from .cascade import Cascade
 
 def _compute_good_muller_sets(casc: Cascade) -> list:
-    """Compute the good Müller sets M on configs by asking Spot for accepting SCCs.
+    """Compute the good Müller sets M on configs (w.r.t. our normalized D).
 
-    Per the paper, after lifting acc to Müller α' on the configs of the cascade,
-    the good M are (among others) the sets of configs that can appear as the exact
-    set of states visited i.o. on accepting runs.
+    The aut in Cascade is the deterministic post-processed D (Spot transformations
+    are the starting point; we work with its acceptance). We use spot.scc_info
+    to identify non-rejecting SCCs (those that can contain an accepting cycle
+    under D's parity condition). The states in such an SCC map (via h) to a
+    candidate M of configs. This gives the recurrent accepting sets "exhibited"
+    by Spot on D, instead of blind powerset.
 
-    Since our aut is deterministic, the recurrent sets correspond to (parts of)
-    SCCs. We use spot.scc_info to let Spot identify non-rejecting SCCs (those
-    that contain at least one accepting cycle under the parity/Büchi acc).
-    The states in such an SCC form a candidate M (the full SCC as possible recurrent
-    set). This enumerates only the *relevant* accepting recurrent components
-    (Spot "exhibits" them), instead of blind powerset 2^#configs or all subsets.
-
-    For finer (if SCC has multiple possible sub-recurrent accepting cycles with
-    different state supports), we could further enumerate elementary cycles
-    inside, but SCC sets are a sound starting point and keep #M very small (usually
-    the number of accepting bottom SCCs, often 1), avoiding formula explosion.
-
-    This is "enumerating accepting SCCs / their state sets as M", as Spot can
-    exhibit via scc_info.
+    (For general Muller alpha on D this is still an SCC-granular approximation;
+    full subset enumeration per the lifted alpha' would be more precise but expensive.)
     """
     if casc.original_aut is None:
         acc = casc.accepting_configs()
         return [frozenset([c]) for c in acc] if acc else []
-    aut = casc.original_aut
+    aut = casc.original_aut  # the normalized det D (our working automaton)
     try:
         si = spot.scc_info(aut)
     except Exception:
@@ -82,15 +73,17 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> str:
     """Paper-faithful top-level assembly (steps 5-6 / Lemma 7 in algorithm.md).
 
     Uses the reachability operators (the 5 formulas) inside fin_c / Fin(C), then
-    for the lifted Müller condition α' = good_Ms on configs:
+    for the lifted Müller condition α' = good_Ms on configs (w.r.t. the normalized
+    deterministic D stored in the Cascade):
         ϕ = ∨_M ( ∧_{C∈M} ¬Fin(C)  ∧  ∧_{C∉M} Fin(C) )
     This asserts that the exact set of configs visited i.o. is some good M from α'.
 
     The Fin expansions + letter guards from the reach formulas do the systematic work
     (size may be large before Spot simplify, as the paper predicts triple-exp in worst case).
 
-    good_Ms come from Spot's scc_info on non-rejecting SCCs (those with accepting cycles)
-    -- enumerating the recurrent sets Spot exhibits, not blind powerset. Keeps #terms small.
+    good_Ms come from Spot's scc_info on non-rejecting SCCs of D (those with accepting
+    cycles) -- enumerating the recurrent sets Spot exhibits on D, not blind powerset.
+    Keeps #terms small.
     """
     # reset counters owned by reachability_operators
     import kr.reachability_operators as _ops
@@ -101,9 +94,9 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> str:
         _ops._reach_memo.clear()
 
     if casc.num_levels == 0:
-        # trivial
+        # trivial (num_levels==0 is degenerate; normally we have the normalized D)
         if casc.original_aut is not None:
-            aut = casc.original_aut
+            aut = casc.original_aut  # the normalized det D
             acc_cond = str(aut.get_acceptance()).strip().lower()
             if acc_cond in ("t", "true", "1", "0 t"):
                 return "true"
