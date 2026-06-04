@@ -8,7 +8,7 @@ guard helpers, and fin_c (Lemma 7).
 
 The high-level assembly using these (plus Fin + Muller DNF) lives in reachability.py.
 All driven uniformly by Cascade config transitions and letter valuations (no patterns
-on the original automaton).
+on the automaton shape; the normalized det aut in the Cascade *is* the working D).
 """
 
 from __future__ import annotations
@@ -221,7 +221,8 @@ def fin_c(C: Tuple[int, ...], casc: "Cascade") -> str:
     PAPER_FIN_CALLS += 1
     if PAPER_FIN_CALLS > 10000:
         raise RuntimeError("Too many fin_c calls -- repeated Fin on same C exploding the construction")
-    # robust init
+    # robust init (from the normalized det D stored in the Cascade; this D is
+    # the authoritative input to the algorithm)
     init: Optional[Tuple[int, ...]] = None
     if casc.original_aut is not None:
         try:
