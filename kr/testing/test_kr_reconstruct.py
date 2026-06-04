@@ -2,24 +2,23 @@
 """
 kr/testing/test_kr_reconstruct.py
 
-Verification script for the Krohn-Rhodes refactor:
-- Clean `reconstruct_ltl_1level_buchi` (thin builder on top of K operators,
-  no structural pattern matching on aut shape, 1-state cases, special q filters, etc.)
-  vs. the preserved `_heuristic` (old ad-hoc version).
+Verification for the pure paper reconstruction path in kr/:
+- decomp (Spot -> det parity complete -> SgpDec cascade)
+- reconstruct_ltl_1level_buchi (which uses the inductive reach formulas +
+  fin_c (Lemma 7) + Muller DNF assembly from good SCC sets)
 
-- Focus on 1-level cases taking the pure `build_infinitely_often_accepting` path.
-- Multi-level cases correctly delegate/raise so the heuristic can still be used.
-- Stability: uses per-case subprocess isolation (fresh python processes) to avoid
-  Spot/Buddy global state accumulation that previously caused segfaults (exit 139).
-- Equivalence where possible (using Spot's are_equivalent on the produced LTL).
+Uses subprocess isolation per case (stability: fresh python, no Spot/buddy
+state accumulation or segvs). Reports LTL, levels, acc count, and Spot
+equivalence where possible.
+
+Failing equiv is expected for some multi-level cases until the 5 formulas
+are fully polished for conj/neg/entry per the paper.
 
 Run from project root:
     python3 kr/testing/test_kr_reconstruct.py
+    python3 kr/testing/test_kr_reconstruct.py "a" "Fa"   # specific
 
-All paths are relative; no /tmp usage.
-
-Note: decompose_aut normalizes to deterministic minimized parity complete
-automata (the paper's contract); tests feed loose auts and validate via normal path.
+See also test_kr_basic.py and diag_stability.py.
 """
 
 import json
@@ -27,22 +26,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Make the script runnable from anywhere (e.g. python3 kr/testing/... or as -m)
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from kr import (
     decompose_aut,
-    reconstruct_ltl_1level_buchi as rec_clean,
-    reconstruct_ltl_1level_buchi_heuristic as rec_old,
-    build_infinitely_often_accepting,
+    reconstruct_ltl_1level_buchi,
 )
 
-# Cases chosen to exercise:
-# - 0-level degenerate (true/false constants)
-# - Pure 1-level (Fa, Ga, false)
-# - Multi-level (triggers NotImplemented in clean; heuristic still works)
-# - The motivating until example (2 levels)
+# Cases chosen to exercise 0/1/multi level cascades and the paper path.
 CASES = [
     "true",
     "false",
@@ -56,35 +48,22 @@ CASES = [
 
 
 def run_case_in_subprocess(formula_str: str) -> dict:
-    """Run decomp + both reconstructors in an isolated fresh Python process.
-
-    This is the key stability technique: each case gets its own short-lived
-    interpreter so Spot/buddy BDD var allocations and aut objects don't
-    accumulate and trigger the old segfaults in the C extensions.
-    """
-    # The code we execute in the child. It must be self-contained.
+    """Run decomp + pure reconstruct in an isolated fresh Python process."""
     child_code = f'''
 import sys
 import json
 import traceback
 from pathlib import Path
 
-# Child also needs the project on path
 proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 
 import spot
-from kr import (
-    decompose_aut,
-    reconstruct_ltl_1level_buchi as rec_clean,
-    reconstruct_ltl_1level_buchi_heuristic as rec_old,
-    build_infinitely_often_accepting,
-)
+from kr import decompose_aut, reconstruct_ltl_1level_buchi
 
 fs = {formula_str!r}
 try:
     f = spot.formula(fs)
-    # decompose_aut enforces det parity min complete norm internally
     aut = f.translate()
     casc = decompose_aut(aut)
 
@@ -96,33 +75,14 @@ try:
         "num_configs": len(casc.all_configs()),
     }}
 
-    # Always get the heuristic (old) result
-    info["heuristic"] = rec_old(casc)
-
-    # Clean path: for non-1-level it raises (by design during transition)
-    try:
-        info["clean"] = rec_clean(casc)
-        info["clean_raised"] = False
-    except NotImplementedError as nie:
-        info["clean"] = f"NOT_IMPLEMENTED: {{nie}}"
-        info["clean_raised"] = True
-    except Exception as e:
-        info["clean"] = f"ERROR: {{type(e).__name__}}: {{e}}"
-        info["clean_raised"] = True
-
-    # Also expose the core builder result when applicable
-    if casc.num_levels == 1:
-        try:
-            info["build_inf"] = build_infinitely_often_accepting(casc)
-        except Exception as e:
-            info["build_inf"] = f"ERROR: {{type(e).__name__}}"
+    info["recovered"] = reconstruct_ltl_1level_buchi(casc)
 
     print("RESULT_JSON:" + json.dumps(info))
 except Exception as e:
-    info = info if "info" in locals() else {{"formula": fs}}
+    info = {{"formula": fs}}
     info["error"] = str(e)[:200]
     info["tb"] = traceback.format_exc()[-300:]
-    print("RESULT_JSON:" + json.dumps(info))  # always emit RESULT so parent parser succeeds
+    print("RESULT_JSON:" + json.dumps(info))
 '''
 
     proc = subprocess.run(
@@ -138,10 +98,7 @@ except Exception as e:
         line = line.strip()
         if line.startswith("RESULT_JSON:"):
             return json.loads(line[len("RESULT_JSON:") :])
-        if line.startswith("ERROR_JSON:"):
-            return json.loads(line[len("ERROR_JSON:") :])
 
-    # Fallback if no marker (crash or bad output)
     rc = proc.returncode
     if rc == 139:
         return {"formula": formula_str, "error": "SEGV (exit 139) in subprocess", "rc": rc}
@@ -153,18 +110,9 @@ except Exception as e:
     }
 
 
-def _always_emit_result_fallback(formula_str: str, e: Exception) -> dict:
-    """Helper to guarantee we can still report even if early exception before info dict."""
-    return {
-        "formula": formula_str,
-        "error": str(e)[:200],
-        "tb": "see child output",
-    }
-
-
 def safe_equiv(orig_formula_str: str, ltl_str: str) -> str:
-    """Try to check equivalence in yet another isolated process (defensive)."""
-    if not ltl_str or ltl_str.startswith(("NOT_IMPLEMENTED", "ERROR", "UNSUPPORTED")):
+    """Check equivalence in isolated process."""
+    if not ltl_str or ltl_str.startswith(("ERROR", "NOT_IMPLEMENTED", "PAPER_STYLE_TOO_LARGE")):
         return "N/A"
 
     code = f'''
@@ -199,8 +147,8 @@ except Exception as e:
 
 
 def main():
-    print("=== kr reconstruct refactor verification (clean vs heuristic) ===")
-    print("Using subprocess isolation per case for stability.")
+    print("=== kr pure paper reconstruction test (subproc isolated) ===")
+    print("Using the algebraic path (reach formulas + fin_c + Muller assembly).")
     print(f"Project root: {PROJECT_ROOT}")
     print()
 
@@ -219,39 +167,21 @@ def main():
             f"configs={res.get('num_configs')} acc_configs={res.get('num_acc_configs')}"
         )
 
-        heur = res.get("heuristic", "")[:85]
-        print(f"  heuristic: {heur}{'...' if len(res.get('heuristic','')) > 85 else ''}")
+        rec = res.get("recovered", "")[:85]
+        print(f"  recovered: {rec}{'...' if len(res.get('recovered','')) > 85 else ''}")
 
-        if res.get("clean_raised"):
-            print(f"  clean   : {res.get('clean')}")
-        else:
-            cln = res.get("clean", "")[:85]
-            print(f"  clean   : {cln}{'...' if len(res.get('clean','')) > 85 else ''}")
-
-        # For 1-level cases, also show the core builder output if present
-        if "build_inf" in res:
-            bi = res["build_inf"][:70]
-            print(f"  build_inf: {bi}{'...' if len(res['build_inf']) > 70 else ''}")
-
-        # Equivalence only makes sense when we have a clean (non-raising) result
-        if not res.get("clean_raised") and res.get("clean"):
-            eq = safe_equiv(fs, res["clean"])
-            print(f"  clean equiv to original input? {eq}")
+        eq = safe_equiv(fs, res["recovered"])
+        print(f"  equiv to original? {eq}")
 
     print()
     print("=== Summary ===")
-    one_level_count = sum(1 for r in results if r.get("num_levels") == 1)
-    clean_1level = sum(
-        1
-        for r in results
-        if r.get("num_levels") == 1 and not r.get("clean_raised")
-    )
-    multi_count = sum(1 for r in results if r.get("num_levels", 0) > 1)
-    print(f"1-level cases encountered: {one_level_count}")
-    print(f"Clean path succeeded on 1-level: {clean_1level}")
-    print(f"Multi-level cases: {multi_count} (clean now attempts via generalized reach_strong; results may be partial until Fin/acc assembly).")
+    one_level = sum(1 for r in results if r.get("num_levels") == 1)
+    multi = sum(1 for r in results if r.get("num_levels", 0) > 1)
+    print(f"1-level cases: {one_level}")
+    print(f"Multi-level cases: {multi}")
     print()
-    print("All runs completed without segfaults (thanks to bdd_utils precompute + isolation).")
+    print("All runs completed. Equiv False on complex cases is expected until")
+    print("further polish of the 5 formulas (see algorithm.md + gaps in STATUS.md).")
 
 
 if __name__ == "__main__":
