@@ -247,10 +247,16 @@ class Cascade:
             return set()
         aut = self.original_aut
         acc_configs = set()
+        acc_cond = str(aut.get_acceptance()).strip().lower()
+        if acc_cond in ("t", "true", "1") or acc_cond == "0 t":
+            # Tautological acceptance (e.g. "true" formula under parity): all states/configs count.
+            return set(self.state_to_config.values())
+        if acc_cond in ("f", "false", "0 f"):
+            return set()
         for s, c in self.state_to_config.items():
             try:
                 for e in aut.out(s):
-                    if e.acc and list(e.acc.sets()):  # has some acc mark
+                    if e.acc and list(e.acc.sets()):  # has some acc mark (priorities for parity, Inf for Buchi)
                         acc_configs.add(c)
                         break
             except Exception:
