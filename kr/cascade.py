@@ -89,7 +89,7 @@ class Cascade:
         return self.num_levels <= 1 and all(l.size <= 1 for l in self.levels)
 
     def has_nontrivial_groups(self) -> bool:
-        """Heuristic: any level whose kind mentions a non-trivial group structure."""
+        """True if any level's kind or structure indicates a non-trivial group (vs pure reset/constant)."""
         for lv in self.levels:
             if lv.kind and "group" in lv.kind.lower():
                 return True
@@ -228,20 +228,13 @@ class Cascade:
         }
 
     def accepting_configs(self) -> set:
-        """Lift of 'accepting' configs using Spot's SCC analysis.
+        """Configs from which accepting infinite runs can recur.
 
-        We use spot.scc_info to identify non-rejecting SCCs (those containing
-        at least one accepting cycle under the aut's acceptance condition --
-        parity, Buchi, etc.). The configs corresponding to states in those SCCs
-        are the ones from which accepting infinite runs can recur.
-
-        This replaces the old per-edge acc mark heuristic with Spot's proper
-        analysis of accepting recurrent components. It directly uses what Spot
-        "exhibits" for accepting cycles/SCCs, avoiding over-marking transients.
-        For the builder's "inf often reach acc config", this gives the right targets
-        (e.g. only the sink for "a", not the transient).
-
-        Falls back to the old heuristic if no original_aut or scc_info fails.
+        Uses spot.scc_info on the original_aut (normalized det parity) to identify
+        non-rejecting SCCs that contain at least one cycle with an accepting mark.
+        Returns the corresponding cascade configs for those states.
+        Special-cases trivial "t"/"true"/"f"/"false" acceptance conditions.
+        Returns empty set if no original_aut or on analysis error.
         """
         if self.original_aut is None:
             return set()
@@ -279,9 +272,8 @@ class Cascade:
                 return acc_configs
         except Exception:
             pass
-        # Fallback heuristic (edge marks), but only if the acc mark is on a self-loop
-        # (i.e. an internal acc cycle for singleton SCC). This avoids marking transients
-        # whose acc marks are only on exiting edges (as in the "a" parity norm aut).
+        # Fallback: edge acc marks only on self-loops (internal cycles for singletons).
+        # Avoids transients whose acc marks are only on exiting edges.
         acc_configs = set()
         for s, c in self.state_to_config.items():
             try:
