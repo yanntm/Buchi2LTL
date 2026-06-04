@@ -165,6 +165,7 @@ def main():
     print()
 
     results = []
+    successes = []
     for fs in CASES:
         print(f"--- {fs} ---")
         res = run_case_in_subprocess(fs)
@@ -184,6 +185,8 @@ def main():
 
         eq = safe_equiv(fs, res["recovered"])
         print(f"  equiv to original? {eq}")
+        if eq == "True":
+            successes.append(fs)
 
     print()
     print("=== Summary ===")
@@ -191,6 +194,7 @@ def main():
     multi = sum(1 for r in results if r.get("num_levels", 0) > 1)
     print(f"1-level cases: {one_level}")
     print(f"Multi-level cases: {multi}")
+    print(f"Roundtripping formulas (pure paper path, EQUIV True): {successes}")
     print()
     print("All runs completed. Equiv False on complex cases is expected until")
     print("further polish of the 5 formulas (see algorithm.md + gaps in STATUS.md).")
