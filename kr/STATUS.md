@@ -17,7 +17,7 @@ This is separate from the heuristic path. We want the systematic construction: d
   - aps, letter_valuations (prop→bool dicts for every 2^|AP| letter — exactly for LTL guards)
   - original_aut ref
   - Methods (general, algebraic, no patterns): `move_config`, `all_configs`, `build_config_transitions`, `build_configuration_automaton`, `accepting_configs` (heuristic lift).
-- The input is normalized (via Spot postprocessor) to deterministic complete Buchi before extraction. Generators are total by construction. No manual dead trap.
+- The input is normalized (via Spot postprocess) to deterministic complete minimized parity (min even) before extraction. Generators total by construction. No manual dead trap. (1-state auts now handled robustly in GAP script gen to avoid SgpDec holonomy crash on deg-0/1 TS.)
 - Works on trivials, simples, and the motivating example.
 - GAP bridge (`gap_bridge.py`), `install.sh`, `check_gap_available` are general. Synthetic path (`decompose_gens`) for testing without Spot.
 - **File organization for focus/stability**: Parser moved to `kr/gap/parse.py` (small focused service); stability helpers in `bdd_utils.py` (precomputed buddy vars to avoid segfaults during extraction).
@@ -77,26 +77,26 @@ The 1-level path is now general/algebraic ("from init, G F (reach some acc via t
 - Trivial levels / cascade utils: Added top_of/sub_config/compute_*_from (prereq for partitions). Trivial size-1 levels not yet collapsed (can project to reduce effective levels for clean path).
 - Still small |AP|.
 
-### Current practical status on formulas (post Spot complete+det normalization, no manual dead trap)
-We now normalize *inside* `decompose_aut` to a deterministic complete Buchi via Spot postprocessor before extraction. Sinks (when added by Spot) are ordinary states; no artificial dead at index n, no `s >= n_orig` skips, no unconditional extra trap in generators. The reachability operators and builder treat everything uniformly via the config trans + acc lift.
+### Current practical status on formulas (post Spot complete+det parity min-even normalization + 1s robustness, no manual dead trap)
+We now normalize *inside* `decompose_aut` to a deterministic complete minimized parity automaton (min-even) via Spot postprocess before extraction. Sinks (when added by Spot) are ordinary states; no artificial dead at index n, no `s >= n_orig` skips, no unconditional extra trap in generators. The reachability operators and builder treat everything uniformly via the config trans + acc lift. 1-state cases (e.g. some FGa) now produce valid 1L cascades (GAP script special-cases to avoid Holonomy on trivial TS).
 
 **Recovered / working in clean path (equiv True via Spot, nice output):**
-- Constants: `true`, `false` (often trivial 0-state auts now).
-- Atomic: `a`, `!a` → directly `"a"`, `"!a"` (big win; previously F(a & Xa) etc.).
+- Constants: `true`, `false` (1L after parity norm + special "t"/"f" acc handling in builder/lift).
 - Simple eventual/safety: `Fa` → `"Fa"`, `Ga` / `G a` → `"Ga"`.
 - Some compounds like `G(a & Xa)` → `"Ga"` (Spot simplification helps).
 
-**Not yet (or partial):**
-- `Xa`, `X a`: 3+ levels (Spot complete adds states) → clean raises NotImplemented (guard for stability; falls to heuristic).
-- `G(p -> X q)`, `G(p -> (q U r))` (motivating): degen to `"true"`, equiv False (acc lift marks too many configs after complete; reach collapses).
-- `a U b`: produces wrong/complex, False.
-- `G F a`: degen `"true"`, False.
-- `F G a` / `FGa` / `F(Ga)`: sometimes hit "not deterministic" after postproc (prop "maybe" even after requesting det; the norm+check is strict).
-- Deeper or certain 2L cases still degen or hit limits until better acc marking + full multi-level reach polish + Fin/assembly.
+**Not yet (or partial) after parity switch:**
+- Atomic `a` / `!a`: now degen to `"true"` (parity norm produces aut where acc lift marks the transient init config too, because trans-acc marks placed on exiting edges; reach from init to self-acc + G(F(true)) simplifies true. Under Buchi-norm the lift happened to mark only the sink and reach gave "a".)
+- `Xa`, `X a`: 3+ levels → clean raises NotImplemented (guard; falls to heuristic).
+- `G(p -> X q)`, `G(p -> (q U r))`: degen to `"true"`, equiv False (acc lift overmarks + builder still "inf often" framing).
+- `a U b`, `G F a` etc.: wrong or degen.
+- `F G a` / `FGa`: decomp now succeeds (1L parity aut, no more "not det" error), acc lift marks the state, but builder emits "true" (not FGa). Real parity acc (priorities, mixed Fin/Inf) not yet interpreted by the i.o. reach builder.
+- The acc lift (any edge with non-empty acc set, or "t") is a Buchi-flavored heuristic; sensitive to whether Spot attaches acc as trans-acc vs state-acc and which edges. For true parity automata the top-level "inf often reach acc-config" cannot express the priority parity condition.
+- Deeper or 2L cases still degen until better acc marking (or full paper acc assembly using Fin(C) + reach) + polish.
 
-**Regression check:** The core CASES from `test_kr_basic.py` / `test_kr_reconstruct.py` (true/false/a/Fa/Ga/Xa/G(p->Xq)/G(p->(qUr))) all behave as before or better ("a" now correct). No breakage on Fa/Ga/constants. Tests pass cleanly (no segvs). With complete norm, state counts are Spot's (e.g. "a" now 3 states with 1 acc config; sinks not spuriously acc).
+**Regression check:** The core CASES ... now under parity: true/false/Fa/Ga still correct/equiv (with special acc="t" handling). "a" regressed to true (acc-lift+parity aut interaction); FGa decomp now succeeds but LTL true (not recovered). Multi cases still degen as before. No segvs. With parity, some formulas get smaller auts (FGa:1 state) or same (a:3s 2L). Tests use normal path + subproc.
 
-The decomp + 1L foundation is solid and simpler. Multi-level + acc precision remain the main gaps for the "very small but not recovered" cases.
+The decomp + 1L foundation + 1s robustness is solid. With parity norm all formulas now produce det complete parity auts (no det-Buchi class limits). Multi-level + acc precision (now visibly sensitive under parity aut shapes) remain the main gaps. "a" recovery and FGa etc. need acc lift or builder adaptation for the new auts.
 
 The decomp/config part and the clean 1-level reconstruction are in good general shape. The LTL construction is now at "1-level operators + thin pure K-based top for 1-level" (no more ad-hoc in the main 1-level path).
 
