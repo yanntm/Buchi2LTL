@@ -289,6 +289,12 @@ class Cascade:
                         break
             except Exception:
                 pass
+        # prune to reachable from init (using config aut exploration)
+        try:
+            reach = set(self.reachable_configs())
+            acc_configs = {c for c in acc_configs if c in reach}
+        except Exception:
+            pass
         return acc_configs
 
 
@@ -300,6 +306,142 @@ class Cascade:
 
     def __repr__(self) -> str:
         return self.summary()
+
+    # ------------------------------------------------------------------
+    # New: proper use of the configuration automaton + pruning (for point 2)
+    # We compute reachable configs from init via BFS on move_config.
+    # We build a pruned config twa (with acc lifted per transition from D).
+    # We compute good Muller sets via scc_info on the *config* graph (pruned, reachable from init).
+    # This enumerates recurrent accepting config sets on actual paths from ι (model checking
+    # the lifted structure), as recommended in the paper/algo2. No more shying from the
+    # config aut; for our sizes it's fine.
+    # ------------------------------------------------------------------
+
+    def reachable_configs(self) -> list:
+        """BFS from the initial config (using move_config over letters).
+        Returns sorted list of reachable config tuples. Prunes irrelevant configs.
+        """
+        if not self.state_to_config:
+            return []
+        init_c = None
+        if self.original_aut is not None:
+            try:
+                init_s = self.original_aut.get_init_state_number()
+                init_c = self.state_to_config.get(init_s)
+            except Exception:
+                pass
+        if init_c is None:
+            init_c = next(iter(self.state_to_config.values()))
+        from collections import deque
+        visited = set()
+        q = deque([init_c])
+        visited.add(init_c)
+        while q:
+            c = q.popleft()
+            for li in range(self.num_letters()):
+                try:
+                    nc = self.move_config(c, li)
+                    if nc not in visited:
+                        visited.add(nc)
+                        q.append(nc)
+                except Exception:
+                    continue
+        return sorted(list(visited))
+
+    def build_pruned_config_aut(self):
+        """Return a Spot twa_graph on reachable configs only, with transitions and
+        acc marks lifted from the corresponding transitions in the normalized D
+        (self.original_aut). This is the pruned cascade graph for proper SCC/Muller
+        analysis on the config side.
+        """
+        reach = self.reachable_configs()
+        if not reach or self.original_aut is None:
+            return None
+        import spot
+        orig = self.original_aut
+        idx = {c: i for i, c in enumerate(reach)}
+        n = len(reach)
+        g = spot.make_twa_graph()
+        g.set_acceptance(orig.get_acceptance())
+        g.new_states(n)
+        # init config
+        init_c = None
+        if self.original_aut is not None:
+            try:
+                is_ = self.original_aut.get_init_state_number()
+                ic = self.state_to_config.get(is_)
+                if ic in idx:
+                    init_c = ic
+            except Exception:
+                pass
+        if init_c is None:
+            init_c = reach[0]
+        g.set_init_state(idx[init_c])
+        for i, c in enumerate(reach):
+            s = self.state_of(c)
+            if s is None:
+                continue
+            for li in range(self.num_letters()):
+                try:
+                    nc = self.move_config(c, li)
+                    if nc not in idx:
+                        continue
+                    j = idx[nc]
+                    ts = self.state_of(nc)
+                    for e in orig.out(s):
+                        if e.dst == ts:
+                            g.new_edge(i, j, spot.bddtrue, e.acc)
+                            break
+                except Exception:
+                    continue
+        return g
+
+    def compute_good_muller_sets(self):
+        """Good M on configs using SCC analysis on the pruned *config* automaton
+        (reachable from init, acc lifted). This is the correct way to extract
+        the possible i.o. config sets for accepting runs (pruned graph + scc
+        on configs, per paper/algo2). Falls back to (pruned) state-SCC mapping.
+        """
+        g = self.build_pruned_config_aut()
+        if g is not None:
+            try:
+                import spot
+                si = spot.scc_info(g)
+                reach = self.reachable_configs()
+                good = []
+                for scci in range(si.scc_count()):
+                    if not si.is_rejecting_scc(scci):
+                        confs = [reach[k] for k in range(g.num_states()) if si.scc_of(k) == scci]
+                        m = frozenset(confs)
+                        if m:
+                            good.append(m)
+                if good:
+                    return good
+            except Exception:
+                pass
+        # fallback: old state scc logic, but intersected with reachable configs
+        reach = set(self.reachable_configs())
+        if self.original_aut is None:
+            acc = self.accepting_configs()
+            acc = {c for c in acc if c in reach}
+            return [frozenset([c]) for c in acc] if acc else []
+        aut = self.original_aut
+        try:
+            import spot
+            si = spot.scc_info(aut)
+        except Exception:
+            acc = self.accepting_configs()
+            acc = {c for c in acc if c in reach}
+            return [frozenset([c]) for c in acc] if acc else []
+        good = []
+        for scci in range(si.scc_count()):
+            if not si.is_rejecting_scc(scci):
+                states = [s for s in range(aut.num_states()) if si.scc_of(s) == scci]
+                m = frozenset(self.state_to_config.get(s) for s in states
+                              if s in self.state_to_config and self.state_to_config.get(s) in reach)
+                if m:
+                    good.append(m)
+        return good
 
 
 def make_trivial_cascade(n_states: int = 1) -> Cascade:
