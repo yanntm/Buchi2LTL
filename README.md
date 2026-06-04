@@ -133,12 +133,8 @@ This repository is used for interactive development of the reconstruction techni
 
 ## Experimental Algebraic Direction (kr/)
 
-A parallel, more ambitious line of work explores the *algebraic* route to Büchi → LTL via Krohn-Rhodes holonomy cascade decomposition (SgpDec + GAP), following the construction of Boker, Lehtinen & Sickert (FoSSaCS 2022). See the self-contained `kr/` subdirectory (and `kr/README.md` + `kr/STATUS.md`) for the current status, `install.sh`, and the decomposition pipeline (Spot aut → generators → GAP/SgpDec → `Cascade`).
+A parallel line of work explores the *systematic algebraic* route to Büchi → LTL via Krohn-Rhodes holonomy cascade decomposition (SgpDec + GAP), following Boker, Lehtinen & Sickert (FoSSaCS 2022) exactly (no pattern matching on SCCs or shape). See the self-contained `kr/` subdirectory (and `kr/README.md` + `kr/STATUS.md` + `kr/algorithm.md`) for status, `install.sh`, and the pipeline (Spot aut → det parity complete norm → generators → GAP/SgpDec → `Cascade` → inductive 5 reachability formulas + fin_c + Muller DNF assembly).
 
-Recent work includes:
-- File splits for smaller, focused modules ("one service per file") and stability (`bdd_utils.py`, `kr/gap/parse.py`, operator extraction).
-- 1-level clean reconstruction: thin pure builder (`reconstruct_ltl_1level_buchi` + `build_infinitely_often_accepting`) on top of the K operators, with the old ad-hoc version kept as `_heuristic` for comparison. No structural pattern matching in the main 1-level path.
+This path is independent of the heuristic `buchi2ltl/` engine. It targets the theoretically complete case for counter-free deterministic automata (heavy external dep + very large formulas in worst case per paper). The approaches may be combined later.
 
-This path is currently independent of the heuristic `buchi2ltl/` engine. It targets the theoretically complete case for counter-free deterministic automata (at the cost of a heavy external dependency and very large formulas in the worst case). The two approaches may eventually be combined (use heuristics for the common "nice" cases; fall back to the cascade construction when the language is LTL-definable but structurally complex).
-
-See `kr/testing/` for verification harnesses that compare the clean vs heuristic paths and confirm stability.
+See `kr/testing/` for the verification harnesses (subproc-isolated decomp + pure paper reconstruct + equiv).
