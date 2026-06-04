@@ -231,20 +231,32 @@ def decompose_aut(
     max_aps: int = 5,
 ) -> Cascade:
     """
-    End-to-end: Spot aut → normalize to deterministic complete *parity* (min even) →
-    generators → GAP (SgpDec holonomy) → Cascade.
+    End-to-end: caller aut → Spot normalization to a deterministic complete
+    minimized parity automaton (min even, via postprocess "parity min even",
+    "deterministic", "complete") → generators → GAP (SgpDec holonomy) → Cascade.
 
-    We always ask Spot to produce a deterministic *complete* minimized parity
-    automaton first (via spot.postprocess with "parity min even", "deterministic",
-    "complete"). Completion (and determinization if needed) is handled by Spot;
-    it does not always introduce a sink state. Any sink that appears is
-    just a normal state in the automaton; the rest of the algebraic
-    construction (reachability formulas etc.) deals with it uniformly.
-    No more manual dead-trap augmentation in the generator layer.
-    All omega-regular (LTL) properties have equivalent deterministic parity automata.
+    IMPORTANT (per current design): Spot transformations (including any state
+    additions for determinization/completion/minimization) are expected and
+    normal. The resulting deterministic automaton *is* the authoritative input
+    D for the rest of the algorithm (Krohn-Rhodes decomp, reachability formulas,
+    Fin(C), Muller DNF assembly). The homomorphism h (state_to_config) and
+    acceptance lifting are defined with respect to *this* D's states and
+    acceptance condition.
+
+    The caller's original (possibly non-det, Buchi-style) aut is *not* used
+    for the construction. Callers should keep it aside themselves only if
+    they want a final language-equivalence check (spot.are_equivalent) after
+    reconstruction. The LTL we produce is for the language of the normalized D
+    (which is equivalent to the original by Spot's postprocess guarantees).
+
+    Completion (and determinization if needed) is handled by Spot; any sink
+    that appears is just a normal state. The algebraic construction treats
+    everything uniformly via configs. No manual dead-trap.
+
+    This is the standardized input contract for the KR path.
     """
-    # Normalize input to deterministic complete minimized parity using Spot.
-    # This is the standardized input contract for the KR path (as per paper).
+    # Normalize to deterministic complete minimized parity using Spot.
+    # This normalized det aut *is* our working D for decomp + reachability + Fin + assembly.
     aut = spot.postprocess(aut, "parity min even", "deterministic", "complete")
 
     if not is_deterministic(aut):
@@ -259,7 +271,7 @@ def decompose_aut(
     casc.aps = [str(ap) for ap in aut.ap()]
     casc.letter_masks = masks
     casc.letter_valuations = valuations
-    casc.original_aut = aut  # the normalized complete det parity aut
+    casc.original_aut = aut  # the normalized det parity aut (our D)
     return casc
 
 
