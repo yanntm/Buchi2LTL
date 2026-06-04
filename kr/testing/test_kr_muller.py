@@ -118,7 +118,10 @@ def main():
                 print("accepting SCC indices (for aN-style decompose):", acc_sccs)
                 for idx in acc_sccs[:2]:  # show first few
                     basin_confs = casc.configs_in_basin_of_scc(idx) if hasattr(casc, 'configs_in_basin_of_scc') else set()
-                    print(f"  basin configs for accepting SCC {idx} (states leading to it + SCC): {basin_confs}")
+                    scc_confs = casc.configs_in_scc(idx) if hasattr(casc, 'configs_in_scc') else set()
+                    print(f"  accepting SCC {idx}:")
+                    print(f"    precise recurrent configs (for good M, the SCC itself): {scc_confs}")
+                    print(f"    full basin (prefix + SCC, states leading to it): {basin_confs}")
             except Exception as e:
                 print("basin demo err:", e)
         except Exception as e:
