@@ -5,6 +5,9 @@ Example using a small deterministic automaton produced by Spot.
 Requires: the kr package + (optionally) GAP + SgpDec for the full run.
 
 This demonstrates the "extract then decompose" path on a real Spot aut.
+
+Note: the KR path normalizes internally to deterministic minimized parity complete
+automata (the contract required by the paper's construction).
 """
 
 import sys
@@ -20,7 +23,9 @@ def main():
     # A formula whose "Deterministic" translation is small and deterministic.
     # G(p -> X q) is a classic t2 / nice terminal SCC case in the heuristic path.
     f = spot.formula("G(p -> X q)")
-    aut = f.translate("Buchi", "Deterministic")
+    # Note: decompose_aut will normalize this to det parity min complete.
+    # We can pass a loose aut; explicit "Buchi"+"Deterministic" not required.
+    aut = f.translate()
     print("Formula :", f)
     print("States  :", aut.num_states())
     print("Deterministic?", is_deterministic(aut))
