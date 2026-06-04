@@ -110,7 +110,17 @@ def main():
             acc_cfgs = casc.accepting_configs()
             print("accepting_configs():", acc_cfgs)
             good = _compute_good_muller_sets(casc)
-            print("good_muller_sets (from _compute, now via pruned config graph SCC):", [set(m) for m in good])
+            print("good_muller_sets (from _compute, now via pruned config graph SCC or basins):", [set(m) for m in good])
+
+            # Demonstrate the new basin / decompose-scc=aN style helpers
+            try:
+                acc_sccs = casc.get_accepting_scc_indices() if hasattr(casc, 'get_accepting_scc_indices') else []
+                print("accepting SCC indices (for aN-style decompose):", acc_sccs)
+                for idx in acc_sccs[:2]:  # show first few
+                    basin_confs = casc.configs_in_basin_of_scc(idx) if hasattr(casc, 'configs_in_basin_of_scc') else set()
+                    print(f"  basin configs for accepting SCC {idx} (states leading to it + SCC): {basin_confs}")
+            except Exception as e:
+                print("basin demo err:", e)
         except Exception as e:
             print("decompose or good_ms err:", type(e).__name__, e)
 
