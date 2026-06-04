@@ -228,16 +228,19 @@ class Cascade:
         }
 
     def accepting_configs(self) -> set:
-        """Lift of accepting states/configs for Büchi from the (completed) automaton.
+        """Lift of 'accepting' configs from the (completed det parity) automaton.
 
-        A config is considered accepting if at least one state mapped to it
-        has an accepting outgoing transition under some letter.
-        Since the input to the KR path is now always normalized by Spot to a
-        deterministic complete Buchi automaton, all states (including any
-        sinks Spot may have added for completeness) are part of the original
-        state space for this cascade. Non-accepting sinks are simply states
-        from which no accepting run is possible; they are handled uniformly
-        by the reachability construction (no special "dead trap" cases).
+        A config is considered 'accepting' (heuristic) if at least one state
+        mapped to it has an outgoing transition carrying a non-empty acc mark
+        (i.e. a priority for parity). For parity automata this is a coarse
+        over-approximation: acceptance is defined by the liminf/limsup parity
+        of priorities seen along infinite runs (per aut.get_acceptance()),
+        not per-state or simple Inf marks. The heuristic is kept for the
+        current 'infinitely often reach acc-config' builder framing.
+
+        Since the input is normalized by Spot to a deterministic complete
+        minimized parity automaton, all states (including any sinks added
+        for completeness) are ordinary; handled uniformly by reachability.
         """
         if self.original_aut is None:
             # Fallback: assume no acc info
