@@ -1,133 +1,59 @@
 # kr/ Current Status
 
-**Note**: This document previously had a "before further coding" framing. The bulk of the original pre-refactor text has been retained below (lightly edited) as historical context. The "Progress after resume" section and refreshed "What is implemented" / "Gaps" sections reflect the post-refactor state (as of the 1-level clean reconstruction work and file splits for focus/stability).
+**Goal of kr/**: Full general algebraic translation of counter-free deterministic ω-regular automata to LTL via Krohn-Rhodes holonomy reset-cascade decomposition (Boker–Lehtinen–Sickert, FoSSaCS 2022). *No pattern matching* on SCC structures, terminal components, fusion opportunities, or other shape-based rules from the original automaton. Everything is driven uniformly by the cascade components, per-level Stay/Leave/Enter partitions of letters, configuration mapping, and the recursive syntactic definition of the reachability formulas.
 
-**Goal of kr/**: Full general algebraic Büchi-to-LTL via Krohn-Rhodes holonomy cascade (Boker-Lehtinen-Sickert 2022), *without any pattern matching* on specific SCC structures (unlike the old buchi2ltl/ heuristics with f2/tN).
+This path is separate from the heuristic reconstruction in `buchi2ltl/`.
 
-This is separate from the heuristic path. We want the systematic construction: decomp -> config paths -> inductive reachability K operators -> Fin/Inf -> acceptance encoding -> top LTL.
-
-## What is implemented (current post-refactor state)
+## What is implemented
 
 ### Decomposition + Data (Paper Step 1 + part of 2)
-- Full end-to-end: `decompose_aut(det_spot_aut)` (requires deterministic aut; use "Deterministic" in translate). Uses extract + generated GAP script (LoadPackage("SgpDec") + HolonomyCascadeSemigroup + AsCoords, adapted for SgpDec 1.x) + parse.
-- `Cascade` dataclass is rich and general (see `cascade.py`):
-  - num_levels, levels (size + kind/structure from SgpDec)
-  - state_to_config / config_to_state (1-based coords)
-  - generator_images (from the normalized complete det aut)
-  - aps, letter_valuations (prop→bool dicts for every 2^|AP| letter — exactly for LTL guards)
-  - original_aut ref
-  - Methods (general, algebraic, no patterns): `move_config`, `all_configs`, `build_config_transitions`, `build_configuration_automaton`, `accepting_configs` (heuristic lift).
-- The input is normalized (via Spot postprocess) to deterministic complete minimized parity (min even) before extraction. Generators total by construction. No manual dead trap. (1-state auts now handled robustly in GAP script gen to avoid SgpDec holonomy crash on deg-0/1 TS.)
-- Works on trivials, simples, and the motivating example.
-- GAP bridge (`gap_bridge.py`), `install.sh`, `check_gap_available` are general. Synthetic path (`decompose_gens`) for testing without Spot.
-- **File organization for focus/stability**: Parser moved to `kr/gap/parse.py` (small focused service); stability helpers in `bdd_utils.py` (precomputed buddy vars to avoid segfaults during extraction).
+- `decompose_aut` normalizes the input to a deterministic complete minimized parity automaton (min even) via Spot, extracts generators (explicit 2^|AP| letters), runs a self-contained GAP/SgpDec script (HolonomyCascadeSemigroup + AsCoords; special handling for 1-state), and parses the structured output.
+- `Cascade` (cascade.py) is general: `num_levels`, `levels` (size/kind/structure), `state_to_config`/`config_to_state` (1-based), `letter_valuations`, `original_aut`, `generator_images`.
+- Pure algebraic helpers (no original aut shape): `move_config`, `all_configs`, `top_of`/`sub_config`, `compute_stay_leave_from`, `compute_enters_to_from`, `build_config_transitions`/`build_configuration_automaton`, `accepting_configs` (Spot scc_info on non-rejecting SCCs with internal acc marks + t/f specials).
+- GAP bridge, parser (focused in kr/gap/parse.py), extract (with bdd_utils for stable buddy var precompute), and install.sh are general. Synthetic path available.
 
-This part is solid and general (algebraic, no heuristic patterns on the automaton shape).
+### Reachability Operators + Paper Assembly (Paper Step 3 + 4/5/6 base)
+- `reachability_operators.py`:
+  - `letters_to_prop` / `make_guard`.
+  - 1-level base cases (`one_level_*`) exactly for the level-0/1 paper cases; delegated from the inductive for 1L cascades (nice output).
+  - Full inductive 5 formulas (`reach_strong` primary = Formulas 1/3/5 with solid/dashed cases on source/bad/target, >0 disjunctions over Stay/Leave/Enter using lower-level recursion + sub-configs; landing and suffix early-outs for termination).
+  - `reach_weak` (Formula 2) implemented as dual of strong per the paper (¬(S ~_T(¬τ) B(¬β))).
+  - `fin_c` (Lemma 7) using the reach shorthands (ι ↝ C and C>0 ↝ C).
+  - `simplify_ltl` (Spot), full (S,B,beta,T,tau,level) memo as unique table, early simplify on subformulas, PAPER_* counters, KR_TRACE=1 detailed traces (level, partitions, landing decisions).
+- `reachability.py`:
+  - `reconstruct_ltl_paper_style`: computes good M via Spot scc_info (non-rejecting SCCs), builds the top-level ϕ = ∨_M (∧_{C∈M} ¬Fin(C) ∧ ∧_{C∉M} Fin(C)).
+  - `reconstruct_ltl_1level_buchi` (public entry) is a thin wrapper around the paper assembly (name kept for compat; practical >3L guard).
+- `build_infinitely_often_accepting`, the old ad-hoc `_heuristic`, 1L-only fin_1/inf_1level, and associated special cases (G(stay) short-circuits, per-acc trapping F vs G(F)) have been removed.
 
-### Reachability Operators + Clean 1-level Reconstruction (Paper Step 3, base + clean top)
-- Operators in `reachability_operators.py` (smaller focused file):
-  - Helpers: `letters_to_prop`, `make_guard`.
-  - 1-level base cases for reset levels: `one_level_reach_stay`, `one_level_reach_strong` (avoids B), `one_level_reach_weak`, `build_1level_reachability`.
-  - General: take trans dict (from any config) + valuations + aps + τ tail. Build guarded U expressions from stay/change letters. No hard-coded patterns.
-- High-level reconstruction (in `reachability.py`, now slim policy layer after splitting operators out):
-  - `reconstruct_ltl_1level_buchi(casc)` — the **thin pure builder** (main path for 1-level). For num_levels != 1 it raises NotImplemented (use `_heuristic` for comparison/fallback on multi-level). Core logic: `build_infinitely_often_accepting()` which expresses "from the initial config, always eventually reach some accepting config" using `one_level_reach_strong(..., tau="true")`. Chooses `F(reach)` for absorbing acc sinks vs. `G(F(reach))` otherwise — decision made purely from the trans dict (no original_aut shape inspection, no dead/permanent/1-state/"q" filter special cases).
-  - `reconstruct_ltl_1level_buchi_heuristic(casc)` — the old ad-hoc version (kept unchanged for A/B comparison during development; contains the structural ifs we wanted to move away from).
-- Both versions + operators are exported in `kr/__init__.py`.
-- 1-level cases (Fa, false, etc.) now go through the clean K-operator path and produce simple formulas equivalent to the original (verified via Spot `are_equivalent` in the `kr/testing/` harnesses).
-- Fin_1level / inf_1level remain placeholders (will be expressed via K in future).
+Both 1L and multi use the generalized operators. TRACE + counters + memo keep construction bounded (O(exp) per paper).
 
-The 1-level path is now general/algebraic ("from init, G F (reach some acc via the operators)"), not ad-hoc. This was the main deliverable of the post-crash refactor work.
+## Current behavior (after parity min-even det complete norm)
 
-### Induction / Multi-level, Fin/Inf, Acceptance, Top Formula (Paper Steps 3–5)
-- Core recursive 5-formula reachability implemented (in reachability_operators.py): base level-0, solid-stay (Formulas 3/4 with 4 S/B/T cases + >0 disj/conj over stay/leave using lower reach), dashed-change (5, using Enter + weak stay for prefix + force leave). reach_strong/weak entry points; simplify_ltl integrated. Cascade utils (sub_config, compute_stay_leave_from, compute_enters_to_from) added for partitions (pure via move_config).
-- Multi now attempted in clean reconstruct/build_inf (no more hard NotImpl for >1); uses generalized reach_strong for any cascade depth (1-level delegates to old optimized for compat/nice output).
-- Fin/Inf/acc assembly/Muller still missing (builder is still "inf often reach acc via K" generalized; safety G(stay) short for init-acc 1-level cases added + lift improved to not mark dead; for Ga now emits G(a) with equiv True). fin_c() sketch (Lemma 7 using reach) added as starting point for step 7.
-- **New: TRACE support** (see reachability_operators.py): `TRACE_ON` (set via `KR_TRACE=1` env or directly). Emits detailed construction traces (level cursor, stay/leave partitions from full configs, sub-formula building, landing decisions, etc.). Extremely useful for diagnosing issues like the "a" case without pattern matching.
-- Diagnosis of "a" (small formula that decomp'd to 2 levels): root causes were (1) sub-recursion using stripped lower tuples (broke move_config/context for higher coords in wreath), (2) 0-step checks using single coord instead of level suffix, (3) sub_tau carrying current g even on landing steps leading to double-counting, (4) builder always wrapping F() for absorbing acc even for co-safety entry. Fixed with level-cursor + always-full-configs for subs, suffix checks, landing optimization (g & X(tau) when step completes lower target), and trapping-acc emission (plain reach_f, no outer F for terminal sinks). Now recovers exactly "a" (equiv True). Traces made the exact execution (stay_moves per level, sub_f returns, or_part/conj construction) visible.
-- The 1-level foundation + new inductive ops provide the base; next: polish conj/negations in >0 (other 2L cases like G(p->Xq) still degen due to acc lift overmarking), Fin per Lemma7, full lift+assembly, semantics unit tests vs cascade runs, better acc marking.
+- 1L (Fa, Ga, constants, some compounds after Spot norm) often recover simple equivalent LTL (Ga, Fa, true/false).
+- 2L "a" currently yields "false" (or non-equivalent) via the assembly; Ga still good.
+- 3L (Xa) and other 2L produce formulas (often large DNF-ish or degenerate) via the 5 formulas + Fin DNF; equiv frequently False.
+- All core CASES in `kr/testing/` terminate with finite LTL and small call counts under the guards. Subproc isolation + bdd_utils = no segvs.
+- `KR_TRACE=1` shows the exact inductive steps.
 
-### Testing / Examples / Other
-- Full verification harnesses live in `kr/testing/` (see `kr/testing/README.md`):
-  - `test_kr_reconstruct.py` — compares clean vs heuristic on curated cases (constants, 1-level, multi-level); uses subprocess isolation per case for stability; reports equiv where possible.
-  - `diag_stability.py` — repeated isolated decomp on historically crashy cases (Xa, etc.).
-- Demos: `examples/spot_det.py`, `examples/synthetic.py` (extract + config aut + 1-level reach starters).
-- Generated .gap scripts in `examples/generated/`.
-- No dependence on old f2/tN patterns.
-- Still limited to small |AP| (explicit 2^|AP| letters).
-- Cascade data from SgpDec is faithfully represented.
-- Stability: bdd_utils precompute + isolation eliminated sporadic segfaults during extraction (verified repeatedly).
+See `kr/testing/test_kr_*` output and the paper for expected size.
 
-## Historical note (pre-1-level clean refactor)
-(The following text is retained from the original "before further coding" version for context.)
+## Gaps (for full general + precision)
 
-### Top-level Reconstruction (old ad-hoc state)
-- The original `reconstruct_ltl_1level_buchi(casc)` contained significant ad-hoc structural logic (early returns using original_aut, special handling for 1-state/dead/permanent sinks, has_bad_self checks, special "q" filters for until cases, fallbacks to guarded U + GF).
-- It produced correct equivalent formulas for many trivials/simples via special paths, but for the motivating G(p→(q U r)) (then 1-level) it was not equivalent.
-- This was exactly the "pattern matching on structure" we wanted to avoid. It served as a prototype while building the operators.
+- Polish of the 5 formulas (exact conj/negations for leave/bad, entry logic, >0 cases per paper Table 1 / Sec 4.2) so more multi-level cases are correct and equivalent.
+- Trivial (size-1) level collapse (to reduce effective depth).
+- Inside-construction guard simplification (beyond post-simp).
+- Semantics validators in testing (execute cascade words vs. evaluate produced LTL).
+- Hierarchy preservation and more paper examples / round-trips.
+- Larger |AP| (current hard limit + explicit letters for tractability).
+- Remove practical level guard (or make it size-based) once blowup is tamed.
 
-(The rest of the historical gaps around induction etc. have been incorporated into the current "Gaps" section below.)
+## Roadmap alignment (per algorithm.md)
 
-## Gaps for the full general approach (updated)
-- **Multi-level induction** (core remaining piece): Basic recursive implementation of the 5 reachability formulas added (reach_strong/weak + solid stay 3/4 with 4 cases + >0 + dashed 5 using Enter/Leave + sub recursion on projected lower configs via new Cascade sub_config / compute_stay_leave/enter_from). Uses level-0 base U + delegation for top 1-level. Still approximate in conj/negations for leave/bad and entry logic; produces degenerate (0/1/true) or partial formulas on some multi (e.g. F(0), G(F(1))). Needs polish + semantics validation.
-- Fin/Inf: Still placeholders (1level); generalized reach now available to implement Lemma 7 Fin(C) := ¬(ι ↝ C) ∨ ι ↝ C ( ¬(C>0 ↝ C) ).
-- Acceptance encoding + full top not general (still "inf often via reach" builder, now multi-capable but not using Fin/Muller disj).
-- Acc lift heuristic (still); better marking needed for precise.
-- Safety vs recurrence framing: G(stay_g) short-circuit when init acc + constrained stay (prefers safety G for Ga family). More cases (attach G(stay) to after-tau) remain. Some 2L cases still degen due to acc lift.
-- Guard simplification: Called via simplify_ltl (Spot) at end of reach_strong etc. Reduces some; make_guard still emits long DNFs in >0 disjs (future: simp inside make too).
-- Trivial levels / cascade utils: Added top_of/sub_config/compute_*_from (prereq for partitions). Trivial size-1 levels not yet collapsed (can project to reduce effective levels for clean path).
-- Still small |AP|.
+- Step 1/2 (decomp + config paths): done, general.
+- Step 3 (inductive reachability): 5 formulas + base + dual + recursion + utils done; polish remaining.
+- Step 4/5/6 (Fin + acc encoding + top): `fin_c` + paper_style Muller DNF done; precision depends on formula polish + acc lift.
+- See algorithm.md for exact definitions, complexity, and why this is the right systematic method.
 
-### Current practical status on formulas (post Spot complete+det parity min-even normalization + 1s robustness, no manual dead trap)
-We now normalize *inside* `decompose_aut` to a deterministic complete minimized parity automaton (min-even) via Spot postprocess before extraction. Sinks (when added by Spot) are ordinary states; no artificial dead at index n, no `s >= n_orig` skips, no unconditional extra trap in generators. The reachability operators and builder treat everything uniformly via the config trans + acc lift. 1-state cases (e.g. some FGa) now produce valid 1L cascades (GAP script special-cases to avoid Holonomy on trivial TS).
+`kr/algorithm.md` is the single canonical spec for what we are implementing. The original paper is at `paper/Automata2LTL.pdf`.
 
-**Recovered / working in clean path (equiv True via Spot, nice output):**
-- Constants: `true`, `false` (1L after parity norm + special "t"/"f" acc handling in builder/lift).
-- Simple eventual/safety: `Fa` → `"Fa"`, `Ga` / `G a` → `"Ga"`.
-- Atomic `a`: now `"a"` (2L after parity), EQUIV True. (Was the case with infinite nesting during reach construction.)
-- Some compounds like `G(a & Xa)` → `"Ga"` (Spot simplification helps).
-
-**Stable (finite LTL, bounded reach calls, no infinite nesting) but not always equiv:**
-- All core CASES via `kr/testing/test_kr_basic.py` (and timeout harness style) now run to completion with small PAPER_REACH_CALLS (0-5), produce finite strings, no /tmp/kr_build.log growth even for 3L (Xa). Subproc wrapped (segv/timeout safe), normal path, argv for single formulas.
-- `Xa` (3L): produces nested X formula (as expected for exact co-safety), EQUIV False but terminates.
-- `FGa`, `G(p -> X q)`, `G(p -> (q U r))`: emit "true" (or degenerate), EQUIV False. (Parity aut + current inf-often builder + acc lift from SCCs still over-approx for some; full paper Muller/Fin DNF + precise priority handling would be needed for exact.)
-
-**The infinite formula bug (log head confirmation):** Before the landed fix, reach_strong for pairs like S=(1,2) T=(2,1) at level=0 (and subs at level=1 same-suffix) would re-invoke the *same (S,T,level)* from inside _dashed_change_strong's entry1 when an enter letter landed exactly on the target suffix (arrived completes T). This passed a tau' = g & X(tail) (wrapping previous), causing each expansion to nest deeper (!a & X(!a & X(...))) in the tau arg (distinct keys, no memo hit, active didn't catch because tau differed). Log head showed the progressive tau growth + repeated REACH lines for the pair. Fixed by special-casing in dashed (analogous to "if arrived_suffix == target_suffix" in _stay_gt0): for completing enters, contribute entry_tau directly (no sub reach_strong(S, T, wrapped)). Combined with early simplify_ltl(beta/tau) at entry + all composition sites (sub_tau, or_part, forbid, etc), full (S,B,beta,T,tau,level) memo as unique table (with stores on early/base returns), and reset at top of build_inf, this made construction terminate for the small cases. Addresses the "missed unique table of visited" + "yes its building an infinite formula" diagnosis. (Still O(exp) per paper, fine.)
-
-**Regression check + test discipline:** Via kr/testing (preferred, direct invoke, no long PYEOF -c in dev, subproc per case for 139/timeout, full CASES never dropped, argv for "give formula on cmdline"). Post-fix: a/Ga/Fa recover with True equiv (no reg); Xa/others stable finite (equiv false OK to focus). 5s-style timeouts used in harness runs for one-by-one. git per-file + diff-read before each commit + MD updates.
-
-The decomp + parity complete+det+min + inductive 5 formulas + memo/early-simp + landed special for stability is solid. Main remaining for correctness: polish exact conj/neg/Enter in the 5 (per algorithm.md Table1), switch main reconstruct to reconstruct_ltl_paper_style (Fin+ Muller DNF over good Ms from Spot cycles) for better acc, precise acc lift (internal cycle acc marks), semantics validators in kr/testing (reach formulas vs actual cascade word runs), trivial level collapse, expand tests (hierarchy/roundtrips/paper ex). "a" is now the proof point that the algebraic path + fix works.
-
-The decomp/config part and the clean 1-level reconstruction are in good general shape. The LTL construction is now at "1-level operators + thin pure K-based top for 1-level" (no more ad-hoc in the main 1-level path).
-
-## On the roadmap steps (updated)
-- Step 1 (decomp semi-aut to cascade): Covered, general (with stability improvements via bdd_utils and focused parser in kr/gap/).
-- Represent runs as config paths (step 2): Covered (config aut + build_* methods).
-- Define reachability inductively (step 3): Base 1-level K operators exist and are general (in the smaller `reachability_operators.py`). The thin clean `reconstruct_ltl_1level_buchi` + `build_infinitely_often_accepting` is the pure builder on top of them. **Ready for the induction** — implement the recursive multi-level versions of the operators per the paper (using sub-reach on lower levels for Stay/Leave/Enter cases). This remains the core missing piece for "full general".
-- Fin/Inf (step 4), acceptance (step 5): Not yet.
-
-We now have the clean 1-level foundation (operators + thin builder using K only) that the induction can build on. The operators give us the reusable base to recurse.
-
-See `kr/testing/` for the harnesses that compare clean vs heuristic and validate stability/equivalence on curated cases.
-
-### Historical progress note (post-crash refactor)
-- Old ad-hoc body isolated as `reconstruct_ltl_1level_buchi_heuristic`.
-- New thin `reconstruct_ltl_1level_buchi` + `build_infinitely_often_accepting` (uses `one_level_reach_strong` on init→acc with tau=true; F vs G F chosen from trans dict for absorbing accs).
-- Split for smaller focused files: `reachability_operators.py`, `bdd_utils.py` (stability), `gap/parse.py`.
-- Stability: precomputed buddy var map once before the per-letter loop; Xa and other cases now reliable in repeated isolated runs.
-- Pure 1-level cases (Fa, false, ...): clean path taken; "false" and Fa give correct equivalent LTL via the pure K path (no structural ifs).
-- Both versions + operators exported; heuristic available for comparison.
-- (Further tuning of top-level obligations, guard simplification, and multi-level induction remain.)
-
-## The Paper Gist (for reference, no pattern matching)
-See the canonical single description in `kr/algorithm.md` (fused best-of-both from detailed algorithmic steps and explanatory motivation). It is the authoritative reference for the systematic algebraic method we are implementing in kr/ (no pattern matching). The original paper is now tracked in the repo at `paper/Automata2LTL.pdf`.
-- Krohn-Rhodes reset cascade as the intermediate representation (exactly what our `Cascade` + holonomy via SgpDec already produces).
-- The 5 reachability formulas defined by induction on cascade levels (with Stay/Leave/Enter cases, strong/weak, >0 variants).
-- Inductive proof of semantics w.r.t. cascade runs + size bounds (linear depth per level, singly-exp length per level).
-- Combining with holonomy decomposition → double-exp depth / triple-exp length overall.
-- Preservation of syntactic future hierarchy / acceptance classes.
-- Explicit contrast to ad-hoc heuristics: everything is driven uniformly by the algebraic cascade structure and the Stay/Leave partitions of letters; no inspection of original SCC shapes, terminal components, fusion opportunities, etc.
-
-This file is the authoritative "what we are trying to implement" document for the kr/ folder. The current 1-level operators and `build_infinitely_often_accepting` are the base case / specialization of the reachability formulas (Lemma 7 Fin/Inf via reachability is already sketched there).
-
-Next implementation steps remain as listed in the gaps section above (generalize to the full 5 formulas + induction on levels, implement Fin(C), lift acceptance, add guard simplification, handle trivial levels, etc.).
-
+This file (STATUS) is intentionally short and factual about the *current* state of the code. Historical notes and "how we got here" have been removed.
