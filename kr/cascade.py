@@ -228,39 +228,68 @@ class Cascade:
         }
 
     def accepting_configs(self) -> set:
-        """Lift of 'accepting' configs from the (completed det parity) automaton.
+        """Lift of 'accepting' configs using Spot's SCC analysis.
 
-        A config is considered 'accepting' (heuristic) if at least one state
-        mapped to it has an outgoing transition carrying a non-empty acc mark
-        (i.e. a priority for parity). For parity automata this is a coarse
-        over-approximation: acceptance is defined by the liminf/limsup parity
-        of priorities seen along infinite runs (per aut.get_acceptance()),
-        not per-state or simple Inf marks. The heuristic is kept for the
-        current 'infinitely often reach acc-config' builder framing.
+        We use spot.scc_info to identify non-rejecting SCCs (those containing
+        at least one accepting cycle under the aut's acceptance condition --
+        parity, Buchi, etc.). The configs corresponding to states in those SCCs
+        are the ones from which accepting infinite runs can recur.
 
-        Since the input is normalized by Spot to a deterministic complete
-        minimized parity automaton, all states (including any sinks added
-        for completeness) are ordinary; handled uniformly by reachability.
+        This replaces the old per-edge acc mark heuristic with Spot's proper
+        analysis of accepting recurrent components. It directly uses what Spot
+        "exhibits" for accepting cycles/SCCs, avoiding over-marking transients.
+        For the builder's "inf often reach acc config", this gives the right targets
+        (e.g. only the sink for "a", not the transient).
+
+        Falls back to the old heuristic if no original_aut or scc_info fails.
         """
         if self.original_aut is None:
-            # Fallback: assume no acc info
             return set()
         aut = self.original_aut
-        acc_configs = set()
         acc_cond = str(aut.get_acceptance()).strip().lower()
         if acc_cond in ("t", "true", "1") or acc_cond == "0 t":
-            # Tautological acceptance (e.g. "true" formula under parity): all states/configs count.
             return set(self.state_to_config.values())
         if acc_cond in ("f", "false", "0 f"):
             return set()
+        try:
+            si = spot.scc_info(aut)
+            acc_configs = set()
+            for scci in range(si.scc_count()):
+                if not si.is_rejecting_scc(scci):
+                    states_in = [s for s in range(aut.num_states()) if si.scc_of(s) == scci]
+                    has_cycle = False
+                    for s in states_in:
+                        for e in aut.out(s):
+                            if e.dst in states_in:
+                                has_cycle = True
+                                break
+                        if has_cycle:
+                            break
+                    if has_cycle or len(states_in) > 1:
+                        for s in states_in:
+                            if s in self.state_to_config:
+                                has_acc_on_cycle = False
+                                for e in aut.out(s):
+                                    if e.dst in states_in and e.acc and list(e.acc.sets()):
+                                        has_acc_on_cycle = True
+                                        break
+                                if has_acc_on_cycle:
+                                    acc_configs.add(self.state_to_config[s])
+            if acc_configs:
+                return acc_configs
+        except Exception:
+            pass
+        # Fallback heuristic (edge marks), but only if the acc mark is on a self-loop
+        # (i.e. an internal acc cycle for singleton SCC). This avoids marking transients
+        # whose acc marks are only on exiting edges (as in the "a" parity norm aut).
+        acc_configs = set()
         for s, c in self.state_to_config.items():
             try:
                 for e in aut.out(s):
-                    if e.acc and list(e.acc.sets()):  # has some acc mark (priorities for parity, Inf for Buchi)
+                    if e.acc and list(e.acc.sets()) and e.dst == s:  # self-loop with acc
                         acc_configs.add(c)
                         break
             except Exception:
-                # out of range etc: skip
                 pass
         return acc_configs
 
