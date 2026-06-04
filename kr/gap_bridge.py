@@ -218,31 +218,26 @@ def decompose_aut(
     max_aps: int = 5,
 ) -> Cascade:
     """
-    End-to-end: Spot aut → normalize to deterministic complete Buchi →
+    End-to-end: Spot aut → normalize to deterministic complete *parity* (min even) →
     generators → GAP (SgpDec holonomy) → Cascade.
 
-    We always ask Spot to produce a deterministic *complete* Buchi automaton
-    first. Completion (and determinization if needed) is handled by Spot;
+    We always ask Spot to produce a deterministic *complete* minimized parity
+    automaton first (via spot.postprocess with "parity min even", "deterministic",
+    "complete"). Completion (and determinization if needed) is handled by Spot;
     it does not always introduce a sink state. Any sink that appears is
     just a normal state in the automaton; the rest of the algebraic
     construction (reachability formulas etc.) deals with it uniformly.
     No more manual dead-trap augmentation in the generator layer.
-    Note: not every LTL formula has an equivalent deterministic Buchi
-    automaton that Spot can easily produce (some require coBuchi or other
-    acceptance even when deterministic); for those, decomp will raise
-    if the result is not det.
+    All omega-regular (LTL) properties have equivalent deterministic parity automata.
     """
-    # Normalize input to deterministic complete Buchi using Spot.
-    # This is the standardized input contract for the KR path.
-    pp = spot.postprocessor()
-    pp.set_type(spot.postprocessor.Buchi)
-    pp.set_pref(spot.postprocessor.Deterministic | spot.postprocessor.Complete)
-    aut = pp.run(aut)
+    # Normalize input to deterministic complete minimized parity using Spot.
+    # This is the standardized input contract for the KR path (as per paper).
+    aut = spot.postprocess(aut, "parity min even", "deterministic", "complete")
 
     if not is_deterministic(aut):
         raise ExtractionError(
             "decompose_aut requires a deterministic automaton. "
-            "The input could not be determinized (not LTL-definable?)."
+            "The input could not be determinized to parity."
         )
 
     gens, masks, valuations = extract_generators(aut, max_aps=max_aps)
@@ -251,7 +246,7 @@ def decompose_aut(
     casc.aps = [str(ap) for ap in aut.ap()]
     casc.letter_masks = masks
     casc.letter_valuations = valuations
-    casc.original_aut = aut  # the normalized complete det Buchi aut
+    casc.original_aut = aut  # the normalized complete det parity aut
     return casc
 
 
