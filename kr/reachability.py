@@ -155,6 +155,11 @@ def build_infinitely_often_accepting(casc: Cascade) -> str:
     # Global acceptance check (constant false aut etc)
     if casc.original_aut is not None:
         aut = casc.original_aut
+        acc_cond = str(aut.get_acceptance()).strip().lower()
+        if acc_cond in ("f", "false", "0 f"):
+            return "false"
+        if acc_cond in ("t", "true", "1", "0 t"):
+            return "true"
         has_any_acc = any(bool(list(e.acc.sets())) for s in range(aut.num_states()) for e in aut.out(s))
         if not has_any_acc:
             return "false"
@@ -246,6 +251,11 @@ def reconstruct_ltl_1level_buchi(casc: Cascade) -> str:
     if casc.num_levels == 0:
         if casc.original_aut is not None:
             aut = casc.original_aut
+            acc_cond = str(aut.get_acceptance()).strip().lower()
+            if acc_cond in ("t", "true", "1", "0 t"):
+                return "true"
+            if acc_cond in ("f", "false", "0 f"):
+                return "false"
             has_acc = any(bool(list(e.acc.sets())) for s in range(aut.num_states()) for e in aut.out(s))
             return "true" if has_acc else "false"
         return "true"
