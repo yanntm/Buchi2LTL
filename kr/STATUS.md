@@ -55,6 +55,7 @@ See `kr/testing/test_kr_*` output and the paper for expected size.
 - **Dealt with first arch item (leveraging spot.formula):** Core now uses native spot.formula builders internally (tested not worse via placed before commit: Fa/a EQUIV True).
 - **Item 2+3 (Cascade + build_phi):** Added ref API (sigma, stay etc cl, Config) + build_phi(6 types). Placed tests confirm works + not worse (Fa/a True).
 - **Tried lru on R*:** Added _casc registry + @lru on _lru_reach_strong (cid+spot.formula keys). Cache hits seen in arch_adopt; Fa/a EQUIV True (not worse). Placed tests + commit after.
+- Started R4 audit + algo stabilization (per user): first increment stabilized the placed audit tool itself (precise body extraction for 5-pt checklist, semantic Spot check G(drift) => phi for Path A drift grounding instead of string heuristic, relaxed behavioral postpone to not falsely gate on vacuous "true"). Audit now reports CLEAN (all 5pts + semantic drift PASS) under timeout 5. Canaries still FAIL equiv (the signal to drive next targeted operator fixes). One-file-at-a-time discipline, todos/status maintained before commits. See updated TODO.
 
 **Architectural elements from reference.md to adopt (prioritized, before more impl refinement):**
 See TODO.md for details. Most important (high impact, low immediate risk, reduces future refactor):
