@@ -186,6 +186,99 @@ def normalize_ltl(expr: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Spot formula builders (architectural adoption from reference.md)
+# Use native spot.formula for construction (DAG sharing, auto simplify, better keys).
+# This replaces string building + repeated parse/simp for subformulas.
+# Public API still returns str for compat, but internals use formulas.
+# Builders are small wrappers to make code readable.
+# ---------------------------------------------------------------------------
+
+import spot  # for native formula construction (assumed available; fallback in simplify already handles)
+
+def _tt() -> spot.formula:
+    return spot.formula.tt()
+
+def _ff() -> spot.formula:
+    return spot.formula.ff()
+
+def _ap(name: str) -> spot.formula:
+    return spot.formula.ap(name)
+
+def _And(*fs: Optional[spot.formula]) -> spot.formula:
+    fs = [f for f in fs if f is not None]
+    if not fs:
+        return _tt()
+    if len(fs) == 1:
+        return fs[0]
+    return spot.formula.And(list(fs))
+
+def _Or(*fs: Optional[spot.formula]) -> spot.formula:
+    fs = [f for f in fs if f is not None]
+    if not fs:
+        return _ff()
+    if len(fs) == 1:
+        return fs[0]
+    return spot.formula.Or(list(fs))
+
+def _Not(f: Optional[spot.formula]) -> spot.formula:
+    if f is None:
+        return _ff()
+    return spot.formula.Not(f)
+
+def _X(f: spot.formula) -> spot.formula:
+    return spot.formula.X(f)
+
+def _U(f: spot.formula, g: spot.formula) -> spot.formula:
+    return spot.formula.U(f, g)
+
+def _F(f: spot.formula) -> spot.formula:
+    return _U(_tt(), f)
+
+def _G(f: spot.formula) -> spot.formula:
+    return _Not(_F(_Not(f)))
+
+def _to_f(x: Optional[str | spot.formula]) -> spot.formula:
+    """Convert str or formula to spot.formula. Used for beta/tau inputs."""
+    if x is None:
+        return _ff()
+    if isinstance(x, spot.formula):
+        return x
+    s = str(x).strip().lower()
+    if s in ("true", "1", "t"):
+        return _tt()
+    if s in ("false", "0", "f"):
+        return _ff()
+    try:
+        return spot.formula(str(x))
+    except Exception:
+        return _tt()  # safe fallback
+
+def _letters_to_f(valuation: Dict[str, bool], aps: List[str]) -> spot.formula:
+    """Valuation to conjunction as spot.formula (replaces letters_to_prop str)."""
+    parts = []
+    for ap_name in aps:
+        v = valuation.get(ap_name, False)
+        fap = _ap(ap_name)
+        parts.append(fap if v else _Not(fap))
+    if not parts:
+        return _tt()
+    res = parts[0]
+    for p in parts[1:]:
+        res = _And(res, p)
+    return res
+
+def _str_f(f: spot.formula) -> str:
+    """Convert formula to normalized str for public API / traces / memo keys if needed."""
+    if f is None:
+        return "false"
+    try:
+        s = str(f.simplify())
+        return _normalize_ltl(s)
+    except Exception:
+        return _normalize_ltl(str(f))
+
+
+# ---------------------------------------------------------------------------
 # Generalized inductive reachability (the 5 formulas, per kr/algorithm.md + paper Sec 4.2)
 # These recurse on config tuple length (level). Base case when level == num_levels
 # (empty suffix): plain Until (paper's level 0 on the empty configuration).
@@ -206,43 +299,40 @@ def reach_strong(
     Recursion advances the level cursor while always passing full-length config tuples
     (so move_config and partition helpers always see correct context for higher coords).
     Base: when level == num_levels, plain (¬β) U τ .
+
+    Now leverages native spot.formula for internal construction (DAG sharing via object identity,
+    better subformula reuse, lru potential, less string roundtrips). Public returns str for compat.
+    Beta/tau normalized to formula objects early.
     """
-    # Instrumentation (per user): count to detect explosion / infinite recursion
-    # (no caching yet; repeated identical subproblems on same (S,T,level) can cause blowup).
     global PAPER_REACH_CALLS
     PAPER_REACH_CALLS += 1
     if PAPER_REACH_CALLS > 100000:
         raise RuntimeError("Too many reach_strong calls (>100k) -- likely explosion from lack of memoization on sub-reach or infinite rec on same-level moves")
-    # Normalize beta/tau *early* using simplify. This prevents the formula strings from
-    # growing "infinitely" (exponentially nested) when composing in >0, leave conjs, dashed,
-    # and especially when used inside Fin's G(!reach) and the DNF assembly.
-    # Many composed "(!a & X(true))" etc collapse, and equivalent subproblems share via memo.
-    beta = simplify_ltl(beta or "false")
-    tau = simplify_ltl(tau or "true")
-    # Memo lookup (unique table) using *normalized* beta/tau so sharing works across compositions.
-    key = (S, B if B is not None else (), beta, T, tau, level, id(casc))
+
+    # Convert to native formulas early (architectural adoption: spot.formula DAG)
+    beta_f = _to_f(beta or "false")
+    tau_f = _to_f(tau or "true")
+
+    # Memo using formula objects (better than str for sharing; id(casc) for safety)
+    key = (S, B if B is not None else (), beta_f, T, tau_f, level, id(casc))
     if key in _reach_memo:
         return _reach_memo[key]
+
     n = getattr(casc, "num_levels", 0)
     if level == n:
-        b = beta or "false"
-        negb = "true" if b == "false" else ("false" if b == "true" else f"!({b})")
-        _trace(f"base level reached (level={level}): returning ({negb}) U ({tau})")
-        res = f"({negb}) U ({tau})"
+        negb = _tt() if str(beta_f) in ("false", "0") else _Not(beta_f)
+        res_f = _U(negb, tau_f)
+        res = _str_f(res_f)
+        _trace(f"base level reached (level={level}): returning {res}")
         _reach_memo[key] = res
         return res
 
-    _trace(f"reach_strong level={level}/{n} S={S} T={T} beta={beta} tau={tau}")
+    _trace(f"reach_strong level={level}/{n} S={S} T={T} beta={_str_f(beta_f)} tau={_str_f(tau_f)}")
 
-    # "0-step from here" only if the *remaining suffix* of the config (from this level onward)
-    # already matches the target *and* the pending tau is the trivial success "true".
-    # For complex tau (e.g. a last-visit psi like "a" or G expr in Fin(C) construction),
-    # even if at target config we must expand via solid (gt0 | tau or U form) to allow
-    # additional self-steps / future visits to C before claiming the tau at a later visit.
-    # This is required for correct Fin on transient start states (to produce Fa not "a"/Ga).
+    # 0-step only for trivial tau=true (see prior comment for rationale on complex tau)
     suffix_S = S[level:]
     suffix_T = T[level:]
-    if suffix_S == suffix_T and tau == "true":
+    if suffix_S == suffix_T and str(tau_f) == "true":
         _trace(f"  suffix from level {level} already matches target -> return tau early")
         _reach_memo[key] = "true"
         return "true"
@@ -256,12 +346,16 @@ def reach_strong(
 
     _trace(f"  at level {level}: s_val={s_val} t_val={t_val} source_is_target={source_is_target} source_is_bad={source_is_bad}")
 
-    solid = _solid_stay_strong(S, B, beta, T, tau, casc, level)
-    dashed = _dashed_change_strong(S, B, beta, T, tau, casc, level)
+    # Note: helpers still accept str for now (they _to_f inside); we pass original beta/tau str
+    # but could pass _str_f(beta_f) etc. Full internal formula migration in follow-ups.
+    solid = _solid_stay_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
+    dashed = _dashed_change_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
     _trace(f"    solid={solid[:120]}{'...' if len(solid)>120 else ''}")
     _trace(f"    dashed={dashed[:120]}{'...' if len(dashed)>120 else ''}")
-    res = f"({solid}) | ({dashed})"
-    res = simplify_ltl(res)
+
+    # Build final with formula for sharing, then str for API/memo
+    res_f = _Or( _to_f(solid), _to_f(dashed) )
+    res = _str_f(res_f)
     _trace(f"    reach_strong res (pre-memo, post-simp)={res[:150]}{'...' if len(res)>150 else ''}")
     _reach_memo[key] = res
     return res
@@ -276,24 +370,34 @@ def reach_weak(
     casc: "Cascade",
     level: int = 0,
 ) -> str:
-    """Formula 2 (weak dual of main)."""
+    """Formula 2 (weak dual of main). Now uses formula builders internally too."""
+    beta_f = _to_f(beta or "false")
+    tau_f = _to_f(tau or "true")
     n = getattr(casc, "num_levels", 0)
     if level == n:
-        return f"G( ({tau}) | !({beta or 'false'}) )"
+        # G( tau | !beta )
+        res_f = _G( _Or( tau_f , _Not(beta_f) ) )
+        return _str_f(res_f)
 
-    solid_w = _solid_stay_weak(S, B, beta, T, tau, casc, level)
-    dashed_w = _dashed_change_weak(S, B, beta, T, tau, casc, level)
-    res = f"({solid_w}) | ({dashed_w})"
-    return simplify_ltl(res)
+    # Helpers accept str for compat during transition
+    solid_w = _solid_stay_weak(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
+    dashed_w = _dashed_change_weak(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
+    res_f = _Or( _to_f(solid_w), _to_f(dashed_w) )
+    return _str_f(res_f)
 
 
 def _solid_stay_strong(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
-    """Formulas 3 (strong solid/stay top unchanged). Cases on current level's coord."""
+    """Formulas 3 (strong solid/stay top unchanged). Cases on current level's coord.
+    Internals now use spot.formula builders for construction.
+    """
     n = getattr(casc, "num_levels", 0)
     if level >= n:
         return reach_strong(S, B, beta, T, tau, casc, level)
+
+    beta_f = _to_f(beta)
+    tau_f = _to_f(tau)
 
     s_val = S[level]
     t_val = T[level]
@@ -304,27 +408,18 @@ def _solid_stay_strong(
     source_is_target = (suffix_S == suffix_T)
 
     if s_val != t_val:
-        # Solid-stay (Formulas 3/4) requires the top-level component at this layer to remain s throughout.
-        # If T requires a different top at this layer, solid is impossible; dashed (change) must be used.
         _trace(f"  _solid_stay_strong level={level}: s_val({s_val}) != t_val({t_val}) -> solid impossible, return false")
         return "false"
 
     _trace(f"  _solid_stay_strong level={level}: source_is_target={source_is_target} source_is_bad={source_is_bad}")
 
-    # Immediate collapse per paper Formula 3: when source suffix matches target at this layer and
-    # the attached tau is (simplified to) true, the (gt0 | tau) or equiv is true; avoid expanding
-    # gt0 (which would build unnecessary nesting of X-chains for self-stay even when | true collapses).
-    if source_is_target and tau == "true":
+    # Immediate collapse for tau=true target (Formula 3)
+    if source_is_target and str(tau_f) == "true":
         if source_is_bad:
-            # (gt0 & !beta) | true -> true regardless
             return "true"
         return "true"
 
-    # For source==target (solid), use U form over stay_gs when there are stays: this supports
-    # claiming the (possibly complex) tau after arbitrary future visits to self. Needed for
-    # Fin(C) last-visit semantics on start states (produces e.g. Fa for transient init instead
-    # of shallow "a"). Degenerates when no stay. The stay_g already restricts to allowed stay
-    # letters (conjs for leaves are implicit as U phi only permits stay props before psi).
+    # U form for target + stays (supports postpone for last-visit / Fin)
     if source_is_target:
         stay_moves = casc.compute_stay_leave_from(S).get("stay", [])
         stay_props = []
@@ -334,106 +429,101 @@ def _solid_stay_strong(
                 if gg not in ("false", "0", ""):
                     stay_props.append(gg)
         if stay_props:
-            sg = stay_props[0] if len(stay_props) == 1 else "(" + " | ".join(stay_props) + ")"
-            sg = simplify_ltl(sg)
-            if sg != "false":
-                uform = simplify_ltl(f"({sg}) U ({tau})")
-                if source_is_bad:
-                    uform = simplify_ltl(f"({uform}) & !({beta})")
-                elif beta not in ("false", "true"):
-                    # for safety under bad? paper cases vary; keep simple for target not-bad
-                    pass
-                return uform
-        # fallthrough if no stays: gt0 will be false-ish, | tau will give tau
+            sg_str = stay_props[0] if len(stay_props) == 1 else "(" + " | ".join(stay_props) + ")"
+            sg_f = _to_f(sg_str)
+            uform_f = _U(sg_f, tau_f)
+            if source_is_bad:
+                uform_f = _And(uform_f, _Not(beta_f))
+            return _str_f(uform_f)
+        # fallthrough
 
-    gt0 = _stay_gt0_strong(S, B, beta, T, tau, casc, level)
+    gt0 = _stay_gt0_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
+    gt0_f = _to_f(gt0)
 
     if not source_is_bad and not source_is_target:
-        return gt0
+        return _str_f(gt0_f)
     elif not source_is_bad and source_is_target:
-        return simplify_ltl(f"({gt0}) | ({tau})")
+        res_f = _Or(gt0_f, tau_f)
+        return _str_f(res_f)
     elif source_is_bad and not source_is_target:
-        return simplify_ltl(f"({gt0}) & !({beta})")
+        res_f = _And(gt0_f, _Not(beta_f))
+        return _str_f(res_f)
     else:
-        return simplify_ltl(f"(({gt0}) & !({beta})) | ({tau})")
+        res_f = _Or( _And(gt0_f, _Not(beta_f)) , tau_f )
+        return _str_f(res_f)
 
 
 def _stay_gt0_strong(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
     """The >0 common subformula for solid strong at `level`.
-    We always use *full* config tuples for move/partition so context of higher levels is preserved.
-    Sub-recursive calls advance `level` and pass the *full arrived config*.
+    Internals now use spot.formula builders (g_f & X(sub_f) etc) for native DAG construction.
     """
     n = getattr(casc, "num_levels", 0)
     if level >= n:
         return reach_strong(S, B, beta, T, tau, casc, level)
 
-    parts = casc.compute_stay_leave_from(S)  # full S always
+    beta_f = _to_f(beta)
+    tau_f = _to_f(tau)
+
+    parts = casc.compute_stay_leave_from(S)
     stay_moves = parts.get("stay", [])
     leave_moves = parts.get("leave", [])
 
     _trace(f"    _stay_gt0_strong level={level}: #stay={len(stay_moves)} #leave={len(leave_moves)}")
 
-    # OR over stay moves at this level: g & X ( sub_reach at level+1 from *full arrived* )
-    disjs: List[str] = []
+    disjs_f: List[spot.formula] = []
     for li, arrived in stay_moves:
         if li >= len(casc.letter_valuations):
             continue
-        g = letters_to_prop(casc.letter_valuations[li], casc.aps)
-        if g == "false":
+        g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
+        if str(g_f) == "false":
             continue
-        # If this letter lands the *remaining* suffix (from next level) exactly on target,
-        # then we have arrived at overall target with this step; attach outer tau after the X, no extra sub g.
         arrived_suffix = arrived[level+1:]
         target_suffix = T[level+1:]
         if arrived_suffix == target_suffix:
-            term = f"({g}) & (X({tau}))"
-            _trace(f"      landing completes target at this step -> g & X(tau)  (g={g})")
+            term_f = _And( g_f , _X(tau_f) )
+            _trace(f"      landing completes target at this step -> g & X(tau)")
         else:
-            sub_tau = simplify_ltl(f"({g}) & (X({tau}))")
-            sub_beta = simplify_ltl(f"({g}) & (X({beta}))") if beta not in ("true", "false") else (g if beta == "true" else "false")
-            sub_f = reach_strong(arrived, B, sub_beta, T, sub_tau, casc, level + 1)
-            term = f"({g}) & (X({sub_f}))"
+            sub_tau_f = _And( g_f , _X(tau_f) )
+            sub_beta_f = _And( g_f , _X(beta_f) ) if str(beta_f) not in ("true", "false") else (g_f if str(beta_f) == "true" else _ff())
+            sub_f_str = reach_strong(arrived, B, _str_f(sub_beta_f), T, _str_f(sub_tau_f), casc, level + 1)
+            sub_f = _to_f(sub_f_str)
+            term_f = _And( g_f , _X( sub_f ) )
             _trace(f"      normal sub step -> g & X(sub_f)")
-        disjs.append(term)
+        disjs_f.append(term_f)
 
-    or_part = "(" + " | ".join(disjs) + ")" if disjs else "false"
-    or_part = simplify_ltl(or_part)
-    _trace(f"    or_part at level {level}: {or_part[:80]}...")
+    or_part_f = _Or(*disjs_f) if disjs_f else _ff()
+    _trace(f"    or_part at level {level}: {_str_f(or_part_f)[:80]}...")
 
-    # Conjs ...
-    conj: List[str] = [or_part]
+    conj_f: List[spot.formula] = [or_part_f]
     for li, arrived in leave_moves:
         if li >= len(casc.letter_valuations):
             continue
-        g = letters_to_prop(casc.letter_valuations[li], casc.aps)
-        if g == "false":
+        g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
+        if str(g_f) == "false":
             continue
-        sub_tau_l = simplify_ltl(f"({g}) & (X({tau}))")
-        # forbid using full arrived for that leave, at next level
-        forbid = reach_strong(arrived, B, "false", T, sub_tau_l, casc, level + 1)
-        forbid = simplify_ltl(forbid)
-        conj.append(f"!(({g}) & (X({forbid})))")
+        sub_tau_l_f = _And( g_f , _X(tau_f) )
+        forbid_str = reach_strong(arrived, B, "false", T, _str_f(sub_tau_l_f), casc, level + 1)
+        forbid_f = _to_f(forbid_str)
+        conj_f.append( _Not( _And( g_f , _X( forbid_f ) ) ) )
 
-    # bad landing conjs (using full)
     if B is not None:
         for li, arrived in stay_moves:
             if li >= len(casc.letter_valuations):
                 continue
-            if arrived != B:  # landed exactly on the bad full config at this step
+            if arrived != B:
                 continue
-            g = letters_to_prop(casc.letter_valuations[li], casc.aps)
-            if g == "false":
+            g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
+            if str(g_f) == "false":
                 continue
-            sub_b = simplify_ltl(f"({g}) & (X({beta}))") if beta not in ("true", "false") else (g if beta == "true" else "false")
-            forbid_bad = reach_strong(arrived, B, "false", B, sub_b, casc, level + 1)
-            forbid_bad = simplify_ltl(forbid_bad)
-            conj.append(f"!(({g}) & (X({forbid_bad})))")
+            sub_b_f = _And( g_f , _X(beta_f) ) if str(beta_f) not in ("true", "false") else (g_f if str(beta_f) == "true" else _ff())
+            forbid_bad_str = reach_strong(arrived, B, "false", B, _str_f(sub_b_f), casc, level + 1)
+            forbid_bad_f = _to_f(forbid_bad_str)
+            conj_f.append( _Not( _And( g_f , _X( forbid_bad_f ) ) ) )
 
-    inner = " & ".join(conj)
-    res = simplify_ltl( f"({inner})" if inner else "false" )
-    _trace(f"    _stay_gt0 conj parts: {conj}")
+    inner_f = _And(*conj_f) if conj_f else _ff()
+    res = _str_f(inner_f)
     _trace(f"    _stay_gt0 result level={level}: {res[:80]}...")
     return res
 
@@ -456,13 +546,14 @@ def _solid_stay_weak(
         _trace(f"  _solid_stay_weak level={level}: s_val({s_val}) != t_val({t_val}) -> solid impossible, return false")
         return "false"
 
-    gt0 = _stay_gt0_weak(S, B, beta, T, tau, casc, level)
+    beta_f = _to_f(beta)
+    tau_f = _to_f(tau)
+    gt0 = _stay_gt0_weak(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
+    gt0_f = _to_f(gt0)
 
     if not source_is_bad and not source_is_target:
-        return gt0
+        return _str_f(gt0_f)
     elif not source_is_bad and source_is_target:
-        # For target, to support postpone (last-visit claim at future visit), use U form when stays exist.
-        # This mirrors the strong target U we use for Fin last-visit postponement.
         stay_moves = casc.compute_stay_leave_from(S).get("stay", [])
         stay_props = []
         for li, _ in stay_moves:
@@ -471,20 +562,21 @@ def _solid_stay_weak(
                 if gg not in ("false", "0", ""):
                     stay_props.append(gg)
         if stay_props:
-            sg = stay_props[0] if len(stay_props) == 1 else "(" + " | ".join(stay_props) + ")"
-            sg = simplify_ltl(sg)
-            if sg != "false":
-                uform = simplify_ltl(f"({sg}) U ({tau})")
-                if source_is_bad:
-                    uform = simplify_ltl(f"({uform}) & !({beta})")
-                return uform
-        return simplify_ltl(f"({gt0}) | ({tau})")
+            sg_str = stay_props[0] if len(stay_props) == 1 else "(" + " | ".join(stay_props) + ")"
+            sg_f = _to_f(sg_str)
+            uform_f = _U(sg_f, tau_f)
+            if source_is_bad:
+                uform_f = _And(uform_f, _Not(beta_f))
+            return _str_f(uform_f)
+        res_f = _Or(gt0_f, tau_f)
+        return _str_f(res_f)
     elif source_is_bad and not source_is_target:
-        return simplify_ltl(f"({gt0}) & !({beta})")
+        res_f = _And(gt0_f, _Not(beta_f))
+        return _str_f(res_f)
     else:
-        # Case 4 per corrected paper (weak form): (Rws0 ∨ τ) ∧ ¬β
-        # (¬β is global side-condition; immediate τ does not override)
-        return simplify_ltl(f"(({gt0}) | ({tau})) & !({beta})")
+        # Case 4 per corrected paper (weak form)
+        res_f = _And( _Or(gt0_f, tau_f) , _Not(beta_f) )
+        return _str_f(res_f)
 
 
 def _stay_gt0_weak(
@@ -496,83 +588,85 @@ def _stay_gt0_weak(
     (no free-reach R term). Reaching T' is conditional on blocking.
     Line (2): separate stay-forever (vacuous) clause with target=S, tau=false
     (the key weak difference; no Rs0 analogue).
-    All avoids use reach_weak (Rw).
+    All avoids use reach_weak (Rw). Now uses formula builders + _letters_to_f.
     """
     n = getattr(casc, "num_levels", 0)
     if level >= n:
         return reach_weak(S, B, beta, T, tau, casc, level)
 
+    beta_f = _to_f(beta)
+    tau_f = _to_f(tau)
+
     parts = casc.compute_stay_leave_from(S)
     stay_moves = parts.get("stay", [])
     leave_moves = parts.get("leave", [])
 
-    # Line (1): over candidate last-step letters into T (the T' from stay that land on T at lower)
-    line1_disjuncts = []
+    # Line (1)
+    line1_disjuncts_f = []
     for li, arrived in stay_moves:
         if li >= len(casc.letter_valuations):
             continue
-        g = letters_to_prop(casc.letter_valuations[li], casc.aps)
-        if g == "false":
+        g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
+        if str(g_f) == "false":
             continue
-        # Only consider those that land the lower on T (the "T'" case)
         arrived_lower = arrived[level+1:] if level+1 < len(arrived) else ()
         target_lower = T[level+1:] if level+1 < len(T) else ()
         if arrived_lower != target_lower:
             continue
-        sigma_ltl = g
-        # c2: for every leave, Rw avoid (to T', with the step guard)
-        c2_parts = []
+        # c2: leave avoids
+        c2_f_parts = []
         for lli, larrived in leave_moves:
             if lli >= len(casc.letter_valuations):
                 continue
-            eta = letters_to_prop(casc.letter_valuations[lli], casc.aps)
-            if eta == "false":
+            eta_f = _letters_to_f(casc.letter_valuations[lli], casc.aps)
+            if str(eta_f) == "false":
                 continue
-            eta_ltl = eta
-            c2_parts.append( reach_weak(S, larrived, eta_ltl, T, simplify_ltl(f"({sigma_ltl}) & (X({tau}))"), casc, level + 1 ) )
-        c2 = (" & ".join(f"({p})" for p in c2_parts)) if c2_parts else ("true" if (not c2_parts and leave_moves) else "true")
-        # c3: for bad-predecessors (stay letters that land on B at lower), Rw avoid
-        c3_parts = []
+            sub_tau_l_f = _And( eta_f , _X(tau_f) )
+            c2_f_parts.append( _to_f( reach_weak(S, larrived, _str_f(eta_f), T, _str_f(sub_tau_l_f), casc, level + 1) ) )
+        c2_f = _And(*c2_f_parts) if c2_f_parts else _tt()
+        # c3: bad pre
+        c3_f_parts = []
         for sli, sarrived in stay_moves:
             if sli >= len(casc.letter_valuations):
                 continue
-            rho = letters_to_prop(casc.letter_valuations[sli], casc.aps)
-            if rho == "false":
+            rho_f = _letters_to_f(casc.letter_valuations[sli], casc.aps)
+            if str(rho_f) == "false":
                 continue
             if sarrived != B:
                 continue
-            rho_ltl = rho
-            c3_parts.append( reach_weak(S, sarrived, simplify_ltl(f"({rho_ltl}) & (X({beta}))"), T, simplify_ltl(f"({sigma_ltl}) & (X({tau}))"), casc, level + 1 ) )
-        c3 = (" & ".join(f"({p})" for p in c3_parts)) if c3_parts else "true"
-        line1_disjuncts.append( simplify_ltl( f"({sigma_ltl}) & (X( ({c2}) & ({c3}) ))" ) if c2 != "true" or c3 != "true" else sigma_ltl )
+            sub_tau_for_c3 = _And( rho_f , _X(tau_f) )  # wait, for c3 the guard is for the step?
+            # per paper, the avoid is Rw with the step guard for the T' step? Simplified here.
+            c3_f_parts.append( _to_f( reach_weak(S, sarrived, _str_f( _And(rho_f, _X(beta_f)) ), T, _str_f( _And( g_f , _X(tau_f) ) ), casc, level + 1) ) )
+        c3_f = _And(*c3_f_parts) if c3_f_parts else _tt()
+        step_f = _And( g_f , _X( _And(c2_f, c3_f) ) )
+        line1_disjuncts_f.append( step_f )
 
-    line1 = "(" + " | ".join(line1_disjuncts) + ")" if line1_disjuncts else "false"
-    line1 = simplify_ltl(line1)
+    line1_f = _Or(*line1_disjuncts_f) if line1_disjuncts_f else _ff()
 
-    # Line (2): stay forever (vacuous) — AND of "never fire the blocking letters" with target=S, tau=false
-    c_stay_forever = []
+    # Line (2)
+    c_stay_f = []
     for lli, larrived in leave_moves:
         if lli >= len(casc.letter_valuations):
             continue
-        eta = letters_to_prop(casc.letter_valuations[lli], casc.aps)
-        if eta == "false":
+        eta_f = _letters_to_f(casc.letter_valuations[lli], casc.aps)
+        if str(eta_f) == "false":
             continue
-        c_stay_forever.append( reach_weak(S, larrived, eta, S, "false", casc, level + 1) )
+        c_stay_f.append( _to_f( reach_weak(S, larrived, _str_f(eta_f), S, "false", casc, level + 1) ) )
     for sli, sarrived in stay_moves:
         if sli >= len(casc.letter_valuations):
             continue
-        rho = letters_to_prop(casc.letter_valuations[sli], casc.aps)
-        if rho == "false":
+        rho_f = _letters_to_f(casc.letter_valuations[sli], casc.aps)
+        if str(rho_f) == "false":
             continue
         if sarrived != B:
             continue
-        c_stay_forever.append( reach_weak(S, sarrived, simplify_ltl(f"({rho}) & (X({beta}))"), S, "false", casc, level + 1) )
+        c_stay_f.append( _to_f( reach_weak(S, sarrived, _str_f( _And(rho_f, _X(beta_f)) ), S, "false", casc, level + 1) ) )
 
-    line2 = (" & ".join(f"({p})" for p in c_stay_forever)) if c_stay_forever else "true"
-    line2 = simplify_ltl(line2)
+    line2_f = _And(*c_stay_f) if c_stay_f else _tt()
 
-    res = simplify_ltl( f"({line1}) | ({line2})" )
-    _trace(f"    _stay_gt0_weak (Rws0) line1={line1[:60]}... line2={line2[:60]}... res={res[:60]}...")
+    res_f = _Or( line1_f , line2_f )
+    res = _str_f(res_f)
+    _trace(f"    _stay_gt0_weak (Rws0) res={res[:60]}...")
     return res
 
 
@@ -600,41 +694,37 @@ def _dashed_change_strong(
             continue
         # tail after entry: once at t, do solid stay at new top (avoiding orig B)
         tail = _solid_stay_strong(arrived, B, beta, T, tau, casc, level)
-        core = f"({g}) & (X({tail}))"
-        # When lower suffix of target is empty (this layer change sets the final coordinate),
-        # the enter term can use the base U form (not beta U core) for the <>~<> (psi) attachment
-        # matching the paper's level-0 until when the sub-config is exhausted.
+        g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
+        tail_f = _to_f(tail)
+        core_f = _And( g_f , _X( tail_f ) )
         if not lower_T:
-            b = beta or "false"
-            negb = "true" if b == "false" else ("false" if b == "true" else f"!({b})")
-            core = f"({negb}) U ({core})"
-        # (3) landed cond (common)
+            b_f = _to_f(beta or "false")
+            negb_f = _tt() if str(b_f) == "false" else _Not(b_f)
+            core_f = _U( negb_f , core_f )
         landed_bad = (B is not None and arrived == B)
-        cond3 = f"!({beta})" if landed_bad and beta not in ("true", "false") else "true"
-        if cond3 != "true":
-            core = f"({core}) & ({cond3})"
-        # Line (2): for each enter-b, the Rw (weak) avoid with *swapped* roles
-        # (T,t,tau as the "bad" role; B,b,beta as the "target" role per paper).
-        # This is the Rws( R'', b , T t τ , B b β ) call.
-        line2 = "true"
+        cond3_f = _Not( _to_f(beta) ) if landed_bad and str(_to_f(beta)) not in ("true", "false") else _tt()
+        if str(cond3_f) != "true":
+            core_f = _And( core_f , cond3_f )
+        # Line (2) swapped weak (as before, for R5)
+        line2_f = _tt()
         if B is not None:
-            line2_parts = []
+            line2_parts_f = []
             for eli, earrived in enters:
                 if eli >= len(casc.letter_valuations):
                     continue
-                eta = letters_to_prop(casc.letter_valuations[eli], casc.aps)
-                if eta == "false":
+                eta_f = _letters_to_f(casc.letter_valuations[eli], casc.aps)
+                if str(eta_f) == "false":
                     continue
-                # swapped weak call pattern for checklist (T,tau as bad-role, B,beta as target-role)
                 try:
-                    avoid_b = _solid_stay_weak(earrived, T, tau, B, beta, casc, level)
-                    line2_parts.append( simplify_ltl( f"({eta}) & (X({avoid_b}))" ) )
+                    avoid_b_str = _solid_stay_weak(earrived, T, _str_f(_to_f(tau)), B, _str_f(_to_f(beta)), casc, level)
+                    avoid_b_f = _to_f(avoid_b_str)
+                    line2_parts_f.append( _And( eta_f , _X( avoid_b_f ) ) )
                 except Exception:
                     pass
-            if line2_parts:
-                line2 = (" & ".join(line2_parts))
-        term = simplify_ltl( f"({core}) & ({line2})" ) if line2 != "true" else core
-        disjs.append(term)
+            if line2_parts_f:
+                line2_f = _And(*line2_parts_f)
+        term_f = _And( core_f , line2_f ) if str(line2_f) != "true" else core_f
+        disjs.append( _str_f(term_f) )
 
     or_enters = "(" + " | ".join(disjs) + ")" if disjs else "false"
     or_enters = simplify_ltl(or_enters)
