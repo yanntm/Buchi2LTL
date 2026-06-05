@@ -581,27 +581,15 @@ def _solid_stay_weak(
     if not source_is_bad and not source_is_target:
         return _str_f(gt0_f)
     elif not source_is_bad and source_is_target:
-        stay_moves = casc.compute_stay_leave_from(S).get("stay", [])
-        stay_props = []
-        for li, _ in stay_moves:
-            if li < len(casc.letter_valuations):
-                gg = letters_to_prop(casc.letter_valuations[li], casc.aps)
-                if gg not in ("false", "0", ""):
-                    stay_props.append(gg)
-        if stay_props:
-            sg_str = stay_props[0] if len(stay_props) == 1 else "(" + " | ".join(stay_props) + ")"
-            sg_f = _to_f(sg_str)
-            uform_f = _U(sg_f, tau_f)
-            if source_is_bad:
-                uform_f = _And(uform_f, _Not(beta_f))
-            return _str_f(uform_f)
+        # Per ref Rws case (S != B and S == T): exactly Rws0 ∨ τ  (gt0 already carries the full weak line1+line2)
+        # (Removed special stay_prop U path -- was bypassing gt0/line2 and had dead source_is_bad test inside not-bad branch.)
         res_f = _Or(gt0_f, tau_f)
         return _str_f(res_f)
     elif source_is_bad and not source_is_target:
         res_f = _And(gt0_f, _Not(beta_f))
         return _str_f(res_f)
     else:
-        # Case 4 per corrected paper (weak form)
+        # Case 4 per corrected paper (weak form): (Rws0 ∨ τ) ∧ ¬β
         res_f = _And( _Or(gt0_f, tau_f) , _Not(beta_f) )
         return _str_f(res_f)
 
