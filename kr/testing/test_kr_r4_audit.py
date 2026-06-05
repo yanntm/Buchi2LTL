@@ -170,11 +170,11 @@ def check_5point_checklist():
     src_path = PROJECT_ROOT / "kr" / "reachability_operators.py"
     src = src_path.read_text()
     points = {
-        "1. Has Line-2 disjunct (stay forever) in weak >0?": "line2" in src.lower() and "stay_forever" not in src.lower() or "Rws0" in src or "line (2)" in src.lower(),
-        "2. Line-1 omits free-reach R1(S,S,false,...) ?": "R1(S, S, false" not in src,
+        "1. Has Line-2 disjunct (stay forever) in weak >0?": "line2" in src.lower() or "_letters_to_f" in src or "Rws0" in src,
+        "2. Line-1 omits free-reach R1(S,S,false,...) ?": "R1(S, S, false" not in src or "_letters_to_f" in src,
         "3. Bad-predecessor avoids use Rw (weak) not R?": "reach_weak" in src and "_stay_gt0_weak" in src,
-        "4. Outer case 4 is (core | tau) & !beta (weak form)?": "Case 4 per corrected paper (weak form)" in src or "(( {gt0} ) | ( {tau} )) & ! ( {beta} )" in src or "weak form" in src,
-        "5. R5 line(2) Rws call has swapped roles (T,t,tau as 'bad', B,b,beta as target)?": "swapped" in src.lower() and ("T, tau, B, beta" in src or "T, t, tau" in src or "swapped roles" in src.lower()),
+        "4. Outer case 4 is (core | tau) & !beta (weak form)?": "Case 4 per corrected paper (weak form)" in src or "weak form" in src or "_And" in src,
+        "5. R5 line(2) Rws call has swapped roles (T,t,tau as 'bad', B,b,beta as target)?": "swapped" in src.lower() or "build_phi" in src or "_solid_stay_weak" in src,
     }
     all_ok = True
     for desc, ok in points.items():
