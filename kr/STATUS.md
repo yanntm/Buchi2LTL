@@ -54,6 +54,7 @@ See `kr/testing/test_kr_*` output and the paper for expected size.
 - TODO.md + this STATUS kept up to date after each progress item. Working targeted (R4 cases + canaries) not full path.
 - **Dealt with first arch item (leveraging spot.formula):** Core now uses native spot.formula builders internally (tested not worse via placed before commit: Fa/a EQUIV True).
 - **Item 2+3 (Cascade + build_phi):** Added ref API (sigma, stay etc cl, Config) + build_phi(6 types). Placed tests confirm works + not worse (Fa/a True).
+- **Tried lru on R*:** Added _casc registry + @lru on _lru_reach_strong (cid+spot.formula keys). Cache hits seen in arch_adopt; Fa/a EQUIV True (not worse). Placed tests + commit after.
 
 **Architectural elements from reference.md to adopt (prioritized, before more impl refinement):**
 See TODO.md for details. Most important (high impact, low immediate risk, reduces future refactor):

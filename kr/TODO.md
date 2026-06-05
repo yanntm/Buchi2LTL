@@ -32,13 +32,15 @@ Many "missing pieces" listed in older algorithm.md (e.g. full 5 formulas, Fin, a
 - Kept TODO/STATUS up to date after each item.
 - **Item 2+3 progress (Cascade API + build_phi):** Added ref API (sigma, stay/enter/leave cl tuples, Config, make_config) to cascade.py (compat). Added build_phi dispatch (6 types) to reachability.py. Updated+ran placed arch_adopt to test: API works, build_phi ok, Fa/a equiv True (not worse per tests before commit). See arch script output.
 - **Dealt with first arch item (leveraging spot.formula, per user):** Refactored reachability_operators.py to use native spot.formula builders (_tt/_And/_Or/_U/_X/_Not/_letters_to_f/_to_f/_str_f) + formula objects for internal trees/keys in reach_*/_solid_*/_stay_gt0_* (enables sharing). Public str compat. Tested via placed scripts (r4_audit, arch_adopt, basic Fa/a, zoom Fa/a/G(p|F q)) BEFORE commit: Fa/a EQUIV True (same/not worse), no crashes, R4 functional, canary runs. Committed only after (9782f3a).
+- **Tried lru on R*:** Added _casc_by_id registry (_register/_get/_clear) + @lru_cache(maxsize=None) on _lru_reach_strong(cid, S, B, beta_f, T, tau_f, level) [beta/tau now spot.formula hashable]. reach_strong delegates (after _to_f + register). Cache cleared in reconstruct. Confirmed hits in placed arch_adopt (e.g. hits=6 on Fa run). All targeted tests (basic/zoom Fa/a EQUIV True same, r4_audit drift PASS, arch) not worse. Docs updated. Committed after.
+- Updated TODO/STATUS after item.
 
 **Architectural adoption from reference (high priority before more impl refinement):**
 See STATUS.md + `kr/testing/test_kr_arch_adopt.py`. Most important (adopted #1):
 - Native `spot.formula` + builders + lru on R* (DAG sharing; this item).
 - Refined Cascade + Config.
 - Full build_phi etc.
-Next: complete lru integration, then Cascade.
+Next: complete lru integration (more helpers), then Cascade.
 
 ---
 

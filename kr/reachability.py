@@ -101,6 +101,11 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> str:
     _ops.PAPER_MAX_LTL_SIZE = 0
     if hasattr(_ops, "_reach_memo"):
         _ops._reach_memo.clear()
+    _ops._clear_casc_registry()
+    cid = _ops._register_casc(casc)
+    # clear lru on R* for fresh construction (arch adoption)
+    if hasattr(_ops, "_lru_reach_strong"):
+        _ops._lru_reach_strong.cache_clear()
 
     if casc.num_levels == 0:
         # trivial (num_levels==0 is degenerate; normally we have the normalized D)

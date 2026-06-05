@@ -14,6 +14,7 @@ on the automaton shape; the normalized det aut in the Cascade *is* the working D
 from __future__ import annotations
 from typing import Callable, Dict, List, Optional, Tuple
 import os
+from functools import lru_cache
 
 # ---------------------------------------------------------------------------
 # Debug / tracing support (enable with KR_TRACE=1 env var for verbose construction traces)
@@ -34,6 +35,21 @@ PAPER_MAX_LTL_SIZE = 0
 # exponential re-expansion of identical (S, B, beta, T, tau, level) subformulas.
 # This should prevent the work explosion that looks like "infinite loop".
 _reach_memo = {}
+
+# For lru on R* (arch adoption): registry to allow passing only hashable cid to cached funcs.
+# Cleared in reconstruct before each top-level build.
+_casc_by_id: Dict[int, "Cascade"] = {}
+
+def _register_casc(casc: "Cascade") -> int:
+    cid = id(casc)
+    _casc_by_id[cid] = casc
+    return cid
+
+def _get_casc(cid: int) -> Optional["Cascade"]:
+    return _casc_by_id.get(cid)
+
+def _clear_casc_registry():
+    _casc_by_id.clear()
 
 def _trace(msg: str) -> None:
     if TRACE_ON:
@@ -303,6 +319,7 @@ def reach_strong(
     Now leverages native spot.formula for internal construction (DAG sharing via object identity,
     better subformula reuse, lru potential, less string roundtrips). Public returns str for compat.
     Beta/tau normalized to formula objects early.
+    Uses lru_cache on _lru_reach_strong (with cid for hashability).
     """
     global PAPER_REACH_CALLS
     PAPER_REACH_CALLS += 1
@@ -313,10 +330,24 @@ def reach_strong(
     beta_f = _to_f(beta or "false")
     tau_f = _to_f(tau or "true")
 
-    # Memo using formula objects (better than str for sharing; id(casc) for safety)
-    key = (S, B if B is not None else (), beta_f, T, tau_f, level, id(casc))
-    if key in _reach_memo:
-        return _reach_memo[key]
+    cid = id(casc)
+    _register_casc(casc)
+
+    # lru lookup (keyed on hashables: cid + tuples + formula objs; B can be None, which is hashable)
+    res = _lru_reach_strong(cid, S, B, beta_f, T, tau_f, level)
+
+    # keep old memo for any legacy code / traces
+    key = (S, B if B is not None else (), beta_f, T, tau_f, level, cid)
+    _reach_memo[key] = res
+    return res
+
+
+@lru_cache(maxsize=None)
+def _lru_reach_strong(cid: int, S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta_f: 'spot.formula', T: Tuple[int, ...], tau_f: 'spot.formula', level: int) -> str:
+    """Core cached implementation of reach_strong. Args are all hashable (B=None ok)."""
+    casc = _get_casc(cid)
+    if casc is None:
+        return "false"
 
     n = getattr(casc, "num_levels", 0)
     if level == n:
@@ -324,40 +355,36 @@ def reach_strong(
         res_f = _U(negb, tau_f)
         res = _str_f(res_f)
         _trace(f"base level reached (level={level}): returning {res}")
-        _reach_memo[key] = res
         return res
 
     _trace(f"reach_strong level={level}/{n} S={S} T={T} beta={_str_f(beta_f)} tau={_str_f(tau_f)}")
 
-    # 0-step only for trivial tau=true (see prior comment for rationale on complex tau)
+    # 0-step only for trivial tau=true
     suffix_S = S[level:]
     suffix_T = T[level:]
     if suffix_S == suffix_T and str(tau_f) == "true":
         _trace(f"  suffix from level {level} already matches target -> return tau early")
-        _reach_memo[key] = "true"
         return "true"
 
     # Current level's value (for solid/dashed decision at this layer)
     s_val = S[level]
     t_val = T[level]
     b_val = B[level] if B is not None else None
-    source_is_target = (suffix_S == suffix_T)  # redundant with above but for clarity in solid
+    source_is_target = (suffix_S == suffix_T)
     source_is_bad = (B is not None and s_val == b_val)
 
     _trace(f"  at level {level}: s_val={s_val} t_val={t_val} source_is_target={source_is_target} source_is_bad={source_is_bad}")
 
-    # Note: helpers still accept str for now (they _to_f inside); we pass original beta/tau str
-    # but could pass _str_f(beta_f) etc. Full internal formula migration in follow-ups.
+    # helpers accept str for compat during transition
     solid = _solid_stay_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
     dashed = _dashed_change_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
     _trace(f"    solid={solid[:120]}{'...' if len(solid)>120 else ''}")
     _trace(f"    dashed={dashed[:120]}{'...' if len(dashed)>120 else ''}")
 
-    # Build final with formula for sharing, then str for API/memo
+    # Build final with formula for sharing, then str
     res_f = _Or( _to_f(solid), _to_f(dashed) )
     res = _str_f(res_f)
     _trace(f"    reach_strong res (pre-memo, post-simp)={res[:150]}{'...' if len(res)>150 else ''}")
-    _reach_memo[key] = res
     return res
 
 

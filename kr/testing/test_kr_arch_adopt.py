@@ -176,6 +176,13 @@ def run_targeted_arch_test():
     except Exception as e:
         print("  build_phi err:", e)
 
+    # Check lru on R* (item "lru on R*")
+    import kr.reachability_operators as _ops
+    if hasattr(_ops, "_lru_reach_strong"):
+        print("  lru_reach_strong cache_info:", _ops._lru_reach_strong.cache_info())
+    else:
+        print("  no lru_reach_strong yet")
+
     print("\n=== Arch adoption status ===")
     print("Items 1 (spot.formula, done), 2 (Cascade API, tested in this run), 3 (build_phi, tested) adopted targeted.")
     print("Not worse on Fa equiv True, R4 cases.")
