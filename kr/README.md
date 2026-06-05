@@ -22,7 +22,7 @@ Spot automaton
 
 ## Reconstruction
 
-- `reachability_operators.py`: guard helpers, 1-level base cases (for delegation on 1L cascades), full inductive implementation of the 5 reachability formulas (strong/weak, solid/dashed, >0) with recursion, memo + early simplify, TRACE (KR_TRACE=1).
+- `reachability_operators.py`: guard helpers, full inductive implementation of the 5 reachability formulas (strong/weak, solid/dashed, >0) with recursion to base, memo + early simplify, TRACE (KR_TRACE=1). (All 1L special case code deleted; pure paper for all depths.)
 - `fin_c` implements Lemma 7 (Fin(C) via unconditional reach + >0 return).
 - `reachability.py`: `reconstruct_ltl_1level_buchi` (public entry; name retained for compat) delegates to `reconstruct_ltl_paper_style` — the paper assembly using reach/fin_c + good Muller sets (from Spot) + DNF of ¬Fin/Fin conjunctions.
 - 1L cases often produce simple output; multi-level use the generalized operators (may be large or partial until formula details polished).

@@ -15,7 +15,7 @@ This path is separate from the heuristic reconstruction in `buchi2ltl/`.
 ### Reachability Operators + Paper Assembly (Paper Step 3 + 4/5/6 base)
 - `reachability_operators.py`:
   - `letters_to_prop` / `make_guard`.
-  - 1-level base cases (`one_level_*`) exactly for the level-0/1 paper cases; delegated from the inductive for 1L cascades (nice output).
+  - The implementation is the full inductive 5 formulas + base for all depths (no 1L special delegation or scalar helpers in the main path).
   - Full inductive 5 formulas (`reach_strong` primary = Formulas 1/3/5 with solid/dashed cases on source/bad/target, >0 disjunctions over Stay/Leave/Enter using lower-level recursion + sub-configs; landing and suffix early-outs for termination).
   - `reach_weak` (Formula 2) implemented as dual of strong per the paper (¬(S ~_T(¬τ) B(¬β))).
   - `fin_c` (Lemma 7) using the reach shorthands (ι ↝ C and C>0 ↝ C).

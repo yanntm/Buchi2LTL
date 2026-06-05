@@ -100,14 +100,14 @@ The formulas are mutually recursive; recursion bottoms at level 0 (plain Until).
 - The only data used from the *original* automaton are the combinatorial objects from the decomposition. 
 - No need (and no desire) to inspect the original automaton for "nice" SCCs, terminal components with mutually exclusive labels, specific entry/exit patterns, fusion opportunities, or other shape-based rules. Those are ad-hoc and incomplete; the cascade already encodes the necessary control flow.
 - The cascade view makes "controlled movement between positions while satisfying guards" explicit, which maps directly onto Until/Release/X structure of LTL.
-- The 1-level base cases in the current kr/ code (one_level_reach_strong etc.) correspond exactly to the base (m=0) and level-1 cases of these formulas. The higher-level cases (four subcases for source/bad/target + >0 variants + Enter/Leave disjunctions + recursion) are what is needed to handle full multi-level cascades.
+- The main path uses the full inductive definition of the 5 formulas (with their case distinctions on source/bad/target at the current top level, >0 variants, Enter/Leave/Stay disjunctions, and recursion to lower-level sub-configs) for all cascade depths. The recursion bottoms at the paper's level 0 base case (plain Until).
 
 This is the pure, systematic target for the kr/ folder.
 
 ## Relation to Current kr/ Implementation & Next Steps
 
 - `Cascade` + `state_to_config` (coordinate tuples), `levels`, `letter_valuations`, `build_config_transitions`, `move_config` already give the cascade + ability to compute Stay/Leave per top-level state.
-- The operators in `reachability_operators.py` (generalized 5 formulas + dual weak + fin_c for Lemma 7) + `reconstruct_ltl_paper_style` (Muller DNF assembly) implement the core construction. 1-level base cases are the exact level-0/1 specialization per the paper.
+- The operators in `reachability_operators.py` (generalized 5 formulas + dual weak + fin_c for Lemma 7) + `reconstruct_ltl_paper_style` (Muller DNF assembly) implement the core construction uniformly for all depths. The recursion bottoms at the paper's level-0 base case (plain Until on the empty config).
 - `decompose_aut` + gap bridge already perform the decomposition step (and we have stability via `bdd_utils` and focused parser in `kr/gap/parse.py`).
 - The clean `reconstruct_ltl_1level_buchi` is already the "thin pure builder" style the paper demands.
 

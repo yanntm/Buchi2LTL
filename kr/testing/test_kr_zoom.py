@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-kr/testing/test_kr_trace_a.py
+kr/testing/test_kr_zoom.py
 
 Full trace / "zoom in" for a given LTL formula on the pure paper algebraic KR path
 (Boker-Lehtinen-Sickert FoSSaCS 2022 construction via cascade, reach ops, Fin, Muller assembly).
 
 Now reusable: pass formula as argument (default "Fa" to demonstrate).
 Run from project root:
-  python3 kr/testing/test_kr_trace_a.py
-  python3 kr/testing/test_kr_trace_a.py "Fa"
-  python3 kr/testing/test_kr_trace_a.py "G(p -> X q)"
+  python3 kr/testing/test_kr_zoom.py
+  python3 kr/testing/test_kr_zoom.py "Fa"
+  python3 kr/testing/test_kr_zoom.py "G(p -> X q)"
 
 This traces (for the target formula):
 - Original aut from Spot translate()

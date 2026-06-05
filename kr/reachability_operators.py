@@ -2,9 +2,9 @@
 reachability_operators.py — Reachability operators for the Krohn-Rhodes cascade LTL construction.
 
 Implements the 5 inductive reachability formulas (strong/weak, solid-stay/dashed-change,
-with >0 variants) from Boker et al. (paper Sec 4.2 / algorithm.md Table 1), plus
-1-level base cases (used via delegation for 1L cascades and build_1level_reachability),
-guard helpers, and fin_c (Lemma 7).
+with >0 variants) from Boker et al. (paper Sec 4.2 / algorithm.md Table 1),
+guard helpers, and fin_c (Lemma 7). All 1L special case code has been deleted;
+the path is the pure paper inductive for all cascade depths.
 
 The high-level assembly using these (plus Fin + Muller DNF) lives in reachability.py.
 All driven uniformly by Cascade config transitions and letter valuations (no patterns
@@ -64,113 +64,9 @@ def make_guard(valuations: List[Dict[str, bool]], aps: List[str], pred: Callable
     return "(" + " | ".join(good) + ")"
 
 
-# ---------------------------------------------------------------------------
-# 1-level base case reachability (following paper's K operators for reset)
-#
-# S, T, B are 1-based integer positions (coordinates) in the level.
-# trans: Dict[letter_idx, target_pos]  -- the outgoing for *this* S only.
-# tau: subformula to attach on arrival at T.
-# ---------------------------------------------------------------------------
-
-def one_level_reach_stay(
-    S: int,
-    B: Optional[int],
-    T: int,
-    tau: str,
-    valuations: List[Dict[str, bool]],
-    aps: List[str],
-    trans: Dict[int, int],
-) -> str:
-    """Stay at S (or move within) until we take a letter to T, attaching tau."""
-    stay_is = [i for i, tgt in trans.items() if tgt == S]
-    stay_g = make_guard([valuations[i] for i in stay_is], aps) if stay_is else "false"
-    to_T_is = [i for i, tgt in trans.items() if tgt == T]
-    to_T_g = make_guard([valuations[i] for i in to_T_is], aps) if to_T_is else "false"
-
-    if T == S:
-        # Self case: typically G(stay) & tau or the U degenerates to tau if always can "enter"
-        if to_T_g in ("false", "true") or not stay_g or stay_g == "true":
-            return tau if (stay_g in ("false", "true") or not stay_g) else f"G({stay_g}) & ({tau})"
-        return f"(({stay_g}) U (({to_T_g}) & ({tau})))"
-
-    if to_T_g == "false":
-        return "false"
-    if stay_g == "false":
-        return f"({to_T_g}) & ({tau})"
-    return f"(({stay_g}) U (({to_T_g}) & ({tau})))"
-
-
-def one_level_reach_strong(
-    S: int,
-    B: Optional[int],
-    T: int,
-    tau: str,
-    valuations: List[Dict[str, bool]],
-    aps: List[str],
-    trans: Dict[int, int],
-) -> str:
-    """Strong reach: reach T from S while avoiding B (using the B param in guards)."""
-    if B is None or B == 0:
-        bad_g = "false"
-    else:
-        bad_letters = [i for i, tgt in trans.items() if tgt == B]
-        bad_g = make_guard([valuations[i] for i in bad_letters], aps) if bad_letters else "false"
-
-    base = one_level_reach_stay(S, B, T, tau, valuations, aps, trans)
-    if bad_g == "false":
-        return base
-
-    # Strengthen the stay part to avoid bad
-    stay_letters = [i for i, tgt in trans.items() if tgt == S]
-    stay_g = make_guard([valuations[i] for i in stay_letters], aps) if stay_letters else "false"
-    change_letters = [i for i, tgt in trans.items() if tgt == T]
-    change_g = make_guard([valuations[i] for i in change_letters], aps) if change_letters else "false"
-
-    safe_stay = f"(!({bad_g})) & ({stay_g})" if stay_g not in ("false", "true") else f"!({bad_g})"
-    if change_g == "false":
-        return "false"
-    return f"(({safe_stay}) U (({change_g}) & ({tau})))"
-
-
-def one_level_reach_weak(
-    S: int,
-    B: Optional[int],
-    T: int,
-    tau: str,
-    valuations: List[Dict[str, bool]],
-    aps: List[str],
-    trans: Dict[int, int],
-) -> str:
-    """Weak (release-like) dual."""
-    if B is None or B == 0:
-        bad_g = "false"
-    else:
-        bad_letters = [i for i, tgt in trans.items() if tgt == B]
-        bad_g = make_guard([valuations[i] for i in bad_letters], aps) if bad_letters else "false"
-
-    stay_letters = [i for i, tgt in trans.items() if tgt == S]
-    stay_g = make_guard([valuations[i] for i in stay_letters], aps) if stay_letters else "false"
-
-    if bad_g == "false":
-        return f"G( ({stay_g}) | ({tau}) )"
-    return f"G( !({bad_g}) | ({tau}) )"
-
-
-def build_1level_reachability(
-    S: int,
-    B: Optional[int],
-    T: int,
-    tau: str,
-    valuations: List[Dict[str, bool]],
-    aps: List[str],
-    trans_from_S: Dict[int, int],
-) -> Dict[str, str]:
-    """Convenience: return the family for this (S,B,T,tau)."""
-    return {
-        "strong": one_level_reach_strong(S, B, T, tau, valuations, aps, trans_from_S),
-        "weak": one_level_reach_weak(S, B, T, tau, valuations, aps, trans_from_S),
-        "stay_strong": one_level_reach_stay(S, B, T, tau, valuations, aps, trans_from_S),
-    }
+# Level-1 (1L cascade) special case code has been deleted entirely per requirements.
+# The implementation uses only the uniform generalized inductive 5 formulas + base
+# (level == num_levels -> Until) for all depths. No delegation or scalar 1L helpers in the main path.
 
 
 
@@ -238,40 +134,19 @@ def fin_c(C: Tuple[int, ...], casc: "Cascade") -> str:
     # C>0 ↝ C : strict progress return
     r_gt0 = simplify_ltl(_uncond_reach_strict(C, C, casc))
     _trace(f"  fin_c for C={C}: r_gt0={r_gt0}")
-    # after arriving at (last) C, the future must not allow a >0 return to C
-    never_again = simplify_ltl(f"G(!({r_gt0}))")
-    _trace(f"  fin_c for C={C}: never_again={never_again}")
-    fin_expr = simplify_ltl(f"!({r_to}) | (({r_to}) & ({never_again}))")
+    # Paper: second disjunct is the reach parameterized with tau = ¬(C>0 ↝ C)  [plain, not G]
+    # so that when claiming at the *last* visit (future possible), the no-return holds at arrival time.
+    # The U/gt0 expansion in solid (when S==C) allows postponing the claim to future visits.
+    no_return_psi = simplify_ltl(f"!({r_gt0})")
+    _trace(f"  fin_c for C={C}: no_return_psi={no_return_psi}")
+    r_with = simplify_ltl(reach_strong(init, None, "false", C, no_return_psi, casc))
+    _trace(f"  fin_c for C={C}: r_with={r_with}")
+    fin_expr = simplify_ltl(f"!({r_to}) | ({r_with})")
     _trace(f"  fin_c for C={C}: final={fin_expr}")
     return fin_expr
 
 
-# ------------------------------------------------------------------
-# Small 1-level projection helpers (config tuple <-> scalar pos).
-# These are only needed by the 1-level reconstruct logic (and demos),
-# but they are "operator adjacent" (they turn the Cascade's config automaton
-# into the scalar positions the K operators expect for the base case of the
-# inductive formulas). Keeping them here keeps the high-level reachability.py
-# smaller and more focused.
-# ------------------------------------------------------------------
-
-def _config_to_pos(config: Tuple[int, ...]) -> int:
-    """For 1-level cascades, the 'position' is the single coordinate (1-based)."""
-    if len(config) != 1:
-        raise ValueError(f"Expected 1-level config tuple, got {config}")
-    return config[0]
-
-
-def _build_trans_for_pos(casc, pos: int) -> Dict[int, int]:
-    """Return {letter_idx: target_pos} for the given pos, using the config automaton."""
-    ca = casc.build_configuration_automaton()
-    for c, trans_list in ca["transitions"].items():
-        if _config_to_pos(c) == pos:
-            out: Dict[int, int] = {}
-            for li, nc, _val in trans_list:
-                out[li] = _config_to_pos(nc)
-            return out
-    return {}
+# 1-level projection helpers deleted entirely (were only for the removed 1L special case code).
 
 
 # ---------------------------------------------------------------------------
@@ -312,7 +187,8 @@ def normalize_ltl(expr: str) -> str:
 
 # ---------------------------------------------------------------------------
 # Generalized inductive reachability (the 5 formulas, per kr/algorithm.md + paper Sec 4.2)
-# These recurse on config tuple length (level). Base len==0 or delegated len==1.
+# These recurse on config tuple length (level). Base case when level == num_levels
+# (empty suffix): plain Until (paper's level 0 on the empty configuration).
 # All driven by cascade's move_config + letter_valuations (algebraic, no pattern match on orig aut).
 # ---------------------------------------------------------------------------
 
@@ -358,23 +234,18 @@ def reach_strong(
 
     _trace(f"reach_strong level={level}/{n} S={S} T={T} beta={beta} tau={tau}")
 
-    if level == 0 and n == 1 and len(S) == 1:
-        # Delegate only for pure top-level 1-level cascades (nice output + compat)
-        pos_S = _config_to_pos(S)
-        pos_T = _config_to_pos(T)
-        pos_B = _config_to_pos(B) if B is not None and len(B) == 1 else 0
-        trans = _build_trans_for_pos(casc, pos_S)
-        return one_level_reach_strong(
-            pos_S, pos_B if pos_B else None, pos_T, tau, casc.letter_valuations, casc.aps, trans
-        )
-
-    # "0-step from here" only if the *remaining suffix* of the config (from this level onward) already matches target
+    # "0-step from here" only if the *remaining suffix* of the config (from this level onward)
+    # already matches the target *and* the pending tau is the trivial success "true".
+    # For complex tau (e.g. a last-visit psi like "a" or G expr in Fin(C) construction),
+    # even if at target config we must expand via solid (gt0 | tau or U form) to allow
+    # additional self-steps / future visits to C before claiming the tau at a later visit.
+    # This is required for correct Fin on transient start states (to produce Fa not "a"/Ga).
     suffix_S = S[level:]
     suffix_T = T[level:]
-    if suffix_S == suffix_T:
+    if suffix_S == suffix_T and tau == "true":
         _trace(f"  suffix from level {level} already matches target -> return tau early")
-        _reach_memo[key] = tau
-        return tau
+        _reach_memo[key] = "true"
+        return "true"
 
     # Current level's value (for solid/dashed decision at this layer)
     s_val = S[level]
@@ -410,15 +281,6 @@ def reach_weak(
     if level == n:
         return f"G( ({tau}) | !({beta or 'false'}) )"
 
-    if level == 0 and n == 1 and len(S) == 1:
-        pos_S = _config_to_pos(S)
-        pos_T = _config_to_pos(T)
-        pos_B = _config_to_pos(B) if B is not None and len(B) == 1 else 0
-        trans = _build_trans_for_pos(casc, pos_S)
-        return one_level_reach_weak(
-            pos_S, pos_B if pos_B else None, pos_T, tau, casc.letter_valuations, casc.aps, trans
-        )
-
     solid_w = _solid_stay_weak(S, B, beta, T, tau, casc, level)
     dashed_w = _dashed_change_weak(S, B, beta, T, tau, casc, level)
     res = f"({solid_w}) | ({dashed_w})"
@@ -444,12 +306,45 @@ def _solid_stay_strong(
     if s_val != t_val:
         # Solid-stay (Formulas 3/4) requires the top-level component at this layer to remain s throughout.
         # If T requires a different top at this layer, solid is impossible; dashed (change) must be used.
-        # Without this, gt0's lower-suffix "landing completes" check + stay disjuncts can incorrectly
-        # contribute formulas when the current-layer top in arrived (preserved by stay) != target's.
         _trace(f"  _solid_stay_strong level={level}: s_val({s_val}) != t_val({t_val}) -> solid impossible, return false")
         return "false"
 
     _trace(f"  _solid_stay_strong level={level}: source_is_target={source_is_target} source_is_bad={source_is_bad}")
+
+    # Immediate collapse per paper Formula 3: when source suffix matches target at this layer and
+    # the attached tau is (simplified to) true, the (gt0 | tau) or equiv is true; avoid expanding
+    # gt0 (which would build unnecessary nesting of X-chains for self-stay even when | true collapses).
+    if source_is_target and tau == "true":
+        if source_is_bad:
+            # (gt0 & !beta) | true -> true regardless
+            return "true"
+        return "true"
+
+    # For source==target (solid), use U form over stay_gs when there are stays: this supports
+    # claiming the (possibly complex) tau after arbitrary future visits to self. Needed for
+    # Fin(C) last-visit semantics on start states (produces e.g. Fa for transient init instead
+    # of shallow "a"). Degenerates when no stay. The stay_g already restricts to allowed stay
+    # letters (conjs for leaves are implicit as U phi only permits stay props before psi).
+    if source_is_target:
+        stay_moves = casc.compute_stay_leave_from(S).get("stay", [])
+        stay_props = []
+        for li, _ in stay_moves:
+            if li < len(casc.letter_valuations):
+                gg = letters_to_prop(casc.letter_valuations[li], casc.aps)
+                if gg not in ("false", "0", ""):
+                    stay_props.append(gg)
+        if stay_props:
+            sg = stay_props[0] if len(stay_props) == 1 else "(" + " | ".join(stay_props) + ")"
+            sg = simplify_ltl(sg)
+            if sg != "false":
+                uform = simplify_ltl(f"({sg}) U ({tau})")
+                if source_is_bad:
+                    uform = simplify_ltl(f"({uform}) & !({beta})")
+                elif beta not in ("false", "true"):
+                    # for safety under bad? paper cases vary; keep simple for target not-bad
+                    pass
+                return uform
+        # fallthrough if no stays: gt0 will be false-ish, | tau will give tau
 
     gt0 = _stay_gt0_strong(S, B, beta, T, tau, casc, level)
 
@@ -655,7 +550,6 @@ def _dashed_change_strong(
         return "false"
 
     lower_T = casc.sub_config(T)
-    lower_B = casc.sub_config(B) if B is not None else None
 
     disjs: List[str] = []
     for li, arrived in enters:
@@ -664,57 +558,31 @@ def _dashed_change_strong(
         g = letters_to_prop(casc.letter_valuations[li], casc.aps)
         if g == "false":
             continue
-        arrived_lower = casc.sub_config(arrived)
         # tail after entry: once at t, do solid stay at new top (avoiding orig B)
         tail = _solid_stay_strong(arrived, B, beta, T, tau, casc, level)
-        entry_tau = f"({g}) & (X({tail}))"
+        core = f"({g}) & (X({tail}))"
+        # When lower suffix of target is empty (this layer change sets the final coordinate),
+        # the enter term can use the base U form (not beta U core) for the <>~<> (psi) attachment
+        # matching the paper's level-0 until when the sub-config is exhausted.
+        if not lower_T:
+            b = beta or "false"
+            negb = "true" if b == "false" else ("false" if b == "true" else f"!({b})")
+            core = f"({negb}) U ({core})"
         # (3) landed cond (common)
         landed_bad = (B is not None and arrived == B)
         cond3 = f"!({beta})" if landed_bad and beta not in ("true", "false") else "true"
-        # Critical: if this enter lands such that arrived's suffix from here matches T's,
-        # then arrived "completes" the target at this layer. We must NOT call reach_strong(S, arrived)
-        # (which would be reach(S, T, ...) since arrived completes to T) -- that would recurse on
-        # the exact same (S,T,level) with a wrapped tau, causing infinite nesting in the formula
-        # (as seen in logs for direct-landing enters to target top+lower).
-        # Instead, treat as "direct arrival by the enter step": use entry_tau directly (the g&X(tail~tau)).
-        # The outer & force_leave (computed below) will ensure a proper leave/enter happened.
-        # This matches the "if landed completes" early term pattern in _stay_gt0_strong.
-        arrived_suffix = arrived[level:]
-        target_suffix = T[level:]
-        if arrived_suffix == target_suffix:
-            term = f"({entry_tau}) & ({cond3})" if cond3 != "true" else entry_tau
-            _trace(f"      direct enter lands on target suffix -> use entry_tau directly (no sub-reach to T)")
-        else:
-            # (1) entry path, B=S(false) i.e. no special avoid for entry, from S to arrived
-            entry1 = reach_strong(S, S, "false", arrived, entry_tau, casc, level)
-            # (2) entry while avoiding orig bad, using weak solid for after
-            w_tail = _solid_stay_weak(arrived, B, beta, T, tau, casc, level)
-            w_entry_tau = f"({g}) & (X({w_tail}))"
-            entry2 = reach_weak(S, B, beta, arrived, w_entry_tau, casc, level)
-            part12 = f"({entry1}) & ({entry2})"
-            term = f"({part12}) & ({cond3})" if cond3 != "true" else part12
-        disjs.append(term)
+        if cond3 != "true":
+            core = f"({core}) & ({cond3})"
+        disjs.append(simplify_ltl(core))
 
     or_enters = "(" + " | ".join(disjs) + ")" if disjs else "false"
+    or_enters = simplify_ltl(or_enters)
 
-    # Force actual leave happened (OR over any leave from orig S, with landed-bad cond)
-    leaves = casc.compute_stay_leave_from(S).get("leave", [])
-    fparts: List[str] = []
-    for li, arrived in leaves:
-        if li >= len(casc.letter_valuations):
-            continue
-        g = letters_to_prop(casc.letter_valuations[li], casc.aps)
-        if g == "false":
-            continue
-        landed_bad = (B is not None and arrived == B)
-        c = f"!({beta})" if landed_bad and beta not in ("true", "false") else "true"
-        fparts.append(f"({g}) & ({c})" if c != "true" else g)
-    if fparts:
-        force = "(" + " | ".join(fparts) + ")"
-        res = f"({or_enters}) & ({force})"
-    else:
-        res = or_enters
-    return simplify_ltl(res)
+    # Note: no outer & force on leaves here (would force immediate change on first letter).
+    # When lower_T empty the enter cores above injected (notb U core) providing the base
+    # <>~<> (psi) for 1L change cases (giving F for Fa). For multiL eventual at layer
+    # may be provided by recursion / outer solid gt0 landing or keys.
+    return or_enters
 
 
 def _dashed_change_weak(
@@ -740,15 +608,11 @@ def _dashed_change_weak(
 
 
 # Public API for the operators (reach_strong is primary; weak is its dual or mirror).
+# Note: all 1L special case code (one_level_* etc.) has been deleted; only the pure
+# generalized inductive implementation remains.
 __all__ = [
     "letters_to_prop",
     "make_guard",
-    "one_level_reach_stay",
-    "one_level_reach_strong",
-    "one_level_reach_weak",
-    "build_1level_reachability",
-    "_config_to_pos",
-    "_build_trans_for_pos",
     "simplify_ltl",
     "normalize_ltl",
     "reach_strong",

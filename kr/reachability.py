@@ -14,16 +14,12 @@ no inf-often guessing, no special shortcuts for 1L/init-acc/trapping.
 from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple
 
-# Re-export the core operators so existing callers (examples, tests) continue to work
+# Re-export the core operators so existing callers (examples, tests) continue to work.
+# All 1L special case code has been deleted; the implementation is the pure generalized
+# inductive 5 formulas for all depths.
 from .reachability_operators import (  # noqa: F401
     letters_to_prop,
     make_guard,
-    one_level_reach_stay,
-    one_level_reach_strong,
-    one_level_reach_weak,
-    build_1level_reachability,
-    _config_to_pos,
-    _build_trans_for_pos,
     simplify_ltl,
     normalize_ltl,
     reach_strong,

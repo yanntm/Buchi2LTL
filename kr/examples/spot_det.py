@@ -35,7 +35,7 @@ def main():
     print(f"\nExtracted {len(gens)} generators (2^{len(aut.ap())} letters).")
     print("Sample valuation for letter 0:", valuations[0] if valuations else None)
 
-    from kr import decompose_aut, build_1level_reachability
+    from kr import decompose_aut
     casc = decompose_aut(aut)
     ca = casc.build_configuration_automaton()
     print("\n--- Phase A: Configuration automaton ---")
@@ -45,16 +45,6 @@ def main():
         sample_c = ca["states"][0]
         print(f"Sample trans from {sample_c}:", ca["transitions"].get(sample_c, [])[:2])
 
-    print("\n--- Phase B starter: 1-level reachability sample ---")
-    # Treat single-elem tuples as pos ints for the demo
-    if casc.num_levels == 1 and ca["states"]:
-        pos_map = {c: c[0] for c in ca["states"]}
-        # Use trans on first config
-        trans_dict = {}
-        for li, nc, _v in ca["transitions"].get(ca["states"][0], []):
-            trans_dict[li] = pos_map.get(nc, nc)
-        reach = build_1level_reachability(1, 1, 2, "true", casc.letter_valuations, casc.aps, trans_dict)
-        print("Sample reach formulas:", {k: v[:80] + "..." if len(v) > 80 else v for k, v in reach.items()})
     print("First generator image list:", gens[0])
 
     if check_gap_available():
