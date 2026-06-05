@@ -640,7 +640,7 @@ def _stay_gt0_weak(
         target_lower = T[level+1:] if level+1 < len(T) else ()
         if arrived_lower != target_lower:
             continue
-        # c2: leave avoids
+        # c2: leave avoids (per ref Rws0 line1: Rw to T' using the candidate step's σ for its tau)
         c2_f_parts = []
         for lli, larrived in leave_moves:
             if lli >= len(casc.letter_valuations):
@@ -648,10 +648,11 @@ def _stay_gt0_weak(
             eta_f = _letters_to_f(casc.letter_valuations[lli], casc.aps)
             if str(eta_f) == "false":
                 continue
-            sub_tau_l_f = _And( eta_f , _X(tau_f) )
-            c2_f_parts.append( _to_f( reach_weak(S, larrived, _str_f(eta_f), T, _str_f(sub_tau_l_f), casc, level + 1) ) )
+            # Use the entering step's g (σ) + X(outer tau) as the tau for this avoid, target = T' (arrived)
+            sub_tau_for_avoid = _And( g_f , _X(tau_f) )
+            c2_f_parts.append( _to_f( reach_weak(S, larrived, _str_f(eta_f), arrived, _str_f(sub_tau_for_avoid), casc, level + 1) ) )
         c2_f = _And(*c2_f_parts) if c2_f_parts else _tt()
-        # c3: bad pre
+        # c3: bad pre (to T' per ref; conditional avoid using step guard)
         c3_f_parts = []
         for sli, sarrived in stay_moves:
             if sli >= len(casc.letter_valuations):
@@ -661,9 +662,8 @@ def _stay_gt0_weak(
                 continue
             if sarrived != B:
                 continue
-            sub_tau_for_c3 = _And( rho_f , _X(tau_f) )  # wait, for c3 the guard is for the step?
-            # per paper, the avoid is Rw with the step guard for the T' step? Simplified here.
-            c3_f_parts.append( _to_f( reach_weak(S, sarrived, _str_f( _And(rho_f, _X(beta_f)) ), T, _str_f( _And( g_f , _X(tau_f) ) ), casc, level + 1) ) )
+            # per paper: Rw(S, B', ρ∧Xβ , T' , σ∧Xτ )
+            c3_f_parts.append( _to_f( reach_weak(S, sarrived, _str_f( _And(rho_f, _X(beta_f)) ), arrived, _str_f( _And( g_f , _X(tau_f) ) ), casc, level + 1) ) )
         c3_f = _And(*c3_f_parts) if c3_f_parts else _tt()
         step_f = _And( g_f , _X( _And(c2_f, c3_f) ) )
         line1_disjuncts_f.append( step_f )
