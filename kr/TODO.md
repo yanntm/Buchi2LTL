@@ -24,6 +24,21 @@ Prioritization is suggestive (based on ref's emphasis on "exact" defs for correc
 
 Many "missing pieces" listed in older algorithm.md (e.g. full 5 formulas, Fin, assembly, general path for all depths, no L1 special) are now DONE per STATUS + recent patches. Ref's pseudocode (R1/R3/R5 with exact Rs0 conjs, 4 cases, R5 3 lines) is the precise target the current generalized operators aim to match (string form).
 
+**Recent P0 progress (R4/Rws structural, per user direction to use targeted examples + commits on each item):**
+- Created + committed placed `kr/testing/test_kr_r4_audit.py` (implements Path A semantic grounding/drift-forever, Path C exact 5-point checklist on _stay_gt0_weak/_solid_stay_weak/_dashed, Path D better canary like G(p|F q), runs under timeout 5).
+- Committed clean-slate first (as directed).
+- Partial alignments committed: _stay_gt0_weak now has explicit Line(2) stay-forever + omits free-reach (matches corrected Rws0); _solid_stay_weak case 4 uses weak form + U on target for postpone; _dashed_change_strong has line2 + swapped-role weak call pattern for R5(2).
+- Audit re-runs (via placed script) now show all 5 checklist points PASS; drift PASS; canaries still need work (targeted, not full path).
+- Kept TODO/STATUS up to date after each item.
+
+**Architectural adoption from reference (high priority before more impl refinement):**
+See discussion in STATUS.md + new script `kr/testing/test_kr_arch_adopt.py`. Most important elements (to adopt early, reduce downstream refactor cost):
+- Native `spot.formula` (DAG + built-in sharing/simplify) + lru_cache on R* (big win for size/complexity vs current strings + manual memo/simp; reference stresses this for triple-exp).
+- Refined Cascade API (explicit combined letters, delta dicts, stay/enter/leave as first-class returning tuples of cl) + Config NamedTuple (makes exact Rs0/Rc0 disjuncts direct, closer to paper Σ_i defs; current move_config+top_of works but is indirect).
+- Full builders (And/Or/U/R/letter_to_ltl as spot.formula fns) + build_phi dispatch for all acc types.
+- Prune reachable first, per-step simplify.
+Start with spot.formula + lru + minimal Cascade shim in targeted arch script + R4/canary cases. Then integrate.
+
 ---
 
 ## TODO (items to consider adopting / gaps vs. the reference call-to-action)

@@ -39,13 +39,26 @@ See `kr/testing/test_kr_*` output and the paper for expected size.
 
 ## Gaps (for full general + precision)
 
-- Polish of the 5 formulas (exact conj/negations for leave/bad, entry logic, >0 cases per paper Table 1 / Sec 4.2) so more multi-level cases are correct and equivalent.
+- Polish of the 5 formulas (exact conj/negations for leave/bad, entry logic, >0 cases per paper Table 1 / Sec 4.2) so more multi-level cases are correct and equivalent. (P0 focus on R4/Rws0 structural per reference notes: Line(2), no free-reach, case 4 precedence, R5 swap.)
 - Trivial (size-1) level collapse (to reduce effective depth).
 - Inside-construction guard simplification (beyond post-simp).
 - Semantics validators in testing (execute cascade words vs. evaluate produced LTL).
 - Hierarchy preservation and more paper examples / round-trips.
 - Larger |AP| (current hard limit + explicit letters for tractability).
 - Remove practical level guard (or make it size-based) once blowup is tamed.
+
+**Recent P0 progress (targeted examples + commits per user):**
+- Clean slate commit, then placed `kr/testing/test_kr_r4_audit.py` (R4 audit: drift grounding, 5-pt checklist, better canary G(p|Fq)).
+- Commits after each item: audit script, then alignments (gt0_weak Line2+no-free-reach, weak solid case4+U-postpone, dashed line2+swap pattern).
+- Audit runs (timeout 5 via placed script) now PASS all 5 checklist points + drift; canaries still targeted work needed.
+- TODO.md + this STATUS kept up to date after each progress item. Working targeted (R4 cases + canaries) not full path.
+
+**Architectural elements from reference.md to adopt (prioritized, before more impl refinement):**
+See TODO.md for details. Most important (high impact, low immediate risk, reduces future refactor):
+1. Native `spot.formula` (DAG sharing, built-in .simplify()) + @lru_cache on R* fns (vs current strings + manual _reach_memo + post-simp). Reference emphasizes for triple-exp size. Adopt first via shim in arch script.
+2. Refined Cascade (explicit combined-letter tuples, delta on (state,cl), first-class stay/enter/leave) + Config NamedTuple (vs current full-tuple move_config + top_of). Makes paper Rs0/Rc0 disjuncts direct.
+3. Builders (And/Or/U/R/letter_to_ltl returning spot.formula) + full build_phi dispatch.
+Start with 1+2 in targeted `test_kr_arch_adopt.py` (prototypes on R4 audit cases + canaries + Fa), then integrate. This is "architect first".
 
 ## Roadmap alignment (per algorithm.md)
 
