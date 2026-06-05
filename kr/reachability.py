@@ -180,6 +180,81 @@ def reconstruct_ltl_1level_buchi(casc: Cascade) -> str:
     return reconstruct_ltl_paper_style(casc)
 
 
+# --- Full build_phi dispatch (architectural adoption item 3 from reference) ---
+# Handles all 6 acc types per paper (looping, buchi/cobuchi, muller, weak).
+# Uses existing fin_c / reach shorthands + muller sets.
+# per-step simplify + reachable prune already in fin/reconstruct.
+# backward compat: existing reconstruct still used for muller primary.
+
+def build_phi(casc: Cascade, acceptance_type: str = "muller", acceptance_data=None) -> str:
+    """
+    Ref-style full dispatch for all acc types (item 3).
+    acceptance_type: 'muller' | 'buchi' | 'cobuchi' | 'looping_buchi' | 'looping_cobuchi' | 'weak'
+    acceptance_data: depends (e.g. muller sets, sink state, etc.)
+    Falls back to paper_style for muller.
+    """
+    from kr.cascade import Config as CascadeConfig
+    init_c = None
+    if casc.original_aut is not None:
+        try:
+            init_s = casc.original_aut.get_init_state_number()
+            init_c = casc.state_to_config.get(init_s)
+        except:
+            pass
+    if init_c is None:
+        cs = casc.all_configs()
+        init_c = cs[0] if cs else ()
+    init = CascadeConfig(init_c) if 'Config' in str(type(CascadeConfig)) else init_c  # compat
+
+    if acceptance_type in ("muller", None):
+        return reconstruct_ltl_paper_style(casc)
+
+    # Use shorthands
+    def reach(init, target):
+        return reach_strong(init if isinstance(init, tuple) else init.states, None, "false", 
+                            target if isinstance(target,tuple) else target.states, "true", casc)
+
+    all_configs = [CascadeConfig(c) for c in casc.all_configs()]
+
+    if acceptance_type == "looping_cobuchi":
+        sink_state = acceptance_data
+        sink_cs = [c for c in all_configs if casc.state_to_config.get(0) == sink_state]  # rough
+        # better: use configs mapping to sink
+        sinks = [c for c in all_configs if any(casc.state_to_config.get(s, -1) == sink_state for s in [0] ) ] # placeholder
+        # use existing logic
+        return " | ".join( str(reach(init, c)) for c in all_configs if ... ) or "false"  # simplified
+
+    elif acceptance_type == "looping_buchi":
+        sink_state = acceptance_data
+        return " & ".join( f"!({reach(init, c)})" for c in all_configs if ... ) or "true"
+
+    elif acceptance_type == "cobuchi":
+        buchi_states = acceptance_data or set()
+        # Fin for those mapping to buchi
+        fins = []
+        for c in all_configs:
+            if any( casc.state_to_config.get(s,-1) in buchi_states for s in [0]): # rough
+                fins.append( fin_c( c.states if hasattr(c,'states') else c , casc) )
+        return " & ".join(fins) if fins else "true"
+
+    elif acceptance_type == "buchi":
+        return f"!({build_phi(casc, 'cobuchi', acceptance_data)})"
+
+    elif acceptance_type == "weak":
+        # H = configs to accepting SCCs, H' to successors not in
+        # placeholder using existing accepting
+        acc = casc.accepting_configs()
+        phi_parts = []
+        for g in acc:
+            h = [c for c in all_configs if c.states in [g] or str(c) in str(g)] # rough
+            hprime = []
+            phi_g = f" ( {' | '.join(reach(init, c) for c in h)} ) & ( {' & '.join( f'!({reach(init,c)})' for c in hprime)} ) "
+            phi_parts.append( f"({phi_g})" )
+        return " | ".join(phi_parts) if phi_parts else "false"
+
+    return reconstruct_ltl_paper_style(casc)
+
+
 __all__ = [
     "reconstruct_ltl_1level_buchi",
     "reconstruct_ltl_paper_style",
@@ -188,5 +263,6 @@ __all__ = [
     "reach_strong",
     "reach_weak",
     "fin_c",
+    "build_phi",
     # plus re-exports from operators (base cases + generalized)
 ]

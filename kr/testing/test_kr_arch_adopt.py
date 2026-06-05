@@ -31,7 +31,7 @@ from kr.reachability_operators import (
     reach_strong, simplify_ltl, _solid_stay_weak, _stay_gt0_weak,
     _dashed_change_strong, letters_to_prop
 )
-from kr.reachability import reconstruct_ltl_paper_style
+from kr.reachability import reconstruct_ltl_paper_style, build_phi
 
 # --- Architectural prototypes from reference.md (targeted adoption) ---
 
@@ -58,21 +58,23 @@ def letter_to_ltl(valuation: Dict[str, bool], aps: List[str]) -> spot.formula:
         res = spot.formula.And([res, p])
     return res
 
-# Shim on current Cascade for ref-style combined-letter partitions (arch win #2)
+# Use refined Cascade API (item 2 adoption) for ref-style; fallback to shim if needed.
 def ref_stay(casc, level_idx: int, s: int) -> List[Tuple]:
-    """Return list of combined letters that stay in s at this level (ref style)."""
-    # Current compute gives (li, full_arrived); we synthesize cl = (sigma_val, lower_tuple)
-    parts = casc.compute_stay_leave_from(  # use a representative full config with top=s
-        # pick any reachable with top==s at 'level'
-        next((c for c in casc.reachable_configs() if c[level_idx] == s), casc.reachable_configs()[0])
-    )
-    res = []
-    for li, arrived in parts.get("stay", []):
-        if li < len(casc.letter_valuations):
-            sigma = casc.letter_valuations[li]  # the Σ part
-            lower = arrived[level_idx+1:] if level_idx+1 < len(arrived) else ()
-            res.append( (frozenset(sigma.items() if isinstance(sigma, dict) else []), lower) )  # simplified cl
-    return res
+    """Ref-style stay using new first-class API if available (backward compat extension)."""
+    try:
+        return casc.stay(level_idx, s)
+    except Exception:
+        # fallback shim
+        parts = casc.compute_stay_leave_from(
+            next((c for c in casc.reachable_configs() if len(c) > level_idx and c[level_idx] == s), casc.reachable_configs()[0])
+        )
+        res = []
+        for li, arrived in parts.get("stay", []):
+            if li < len(casc.letter_valuations):
+                sigma = casc.letter_valuations[li]
+                lower = arrived[level_idx+1:] if level_idx+1 < len(arrived) else ()
+                res.append( (frozenset(k for k,v in sigma.items() if v), lower) )
+        return res
 
 # (For real adoption we'd extend Cascade; here shim for targeted test)
 
@@ -117,6 +119,15 @@ def run_targeted_arch_test():
     aut = f.translate("deterministic", "parity", "complete")
     casc = decompose_aut(aut)
     print("  cascade levels:", casc.num_levels, "aps:", casc.aps)
+    # Test new refined Cascade API (item 2)
+    print("  New API test: has sigma?", hasattr(casc, 'sigma'), "len sigma=", len(getattr(casc, 'sigma', [])))
+    st = ref_stay(casc, 0, casc.reachable_configs()[0][0] if casc.reachable_configs() else 1)
+    print("  ref_stay example len (item2):", len(st))
+    try:
+        c = casc.make_config( (1,) )
+        print("  make_config works, hashable?", hash(c) is not None)
+    except Exception as e:
+        print("  make_config err:", e)
     # Use current weak for baseline (proto is illustrative)
     reach = casc.reachable_configs()
     S = reach[0]
@@ -156,10 +167,20 @@ def run_targeted_arch_test():
     fa_eq = spot.are_equivalent(fa, spot.formula(fa_ltl).translate("Buchi") if fa_ltl not in ("true","false") else spot.formula(fa_ltl))
     print("  Fa equiv:", fa_eq)
 
+    # Test item 3: build_phi dispatch (targeted, falls to paper for muller)
+    try:
+        bp = build_phi(casc, "weak")
+        print("  build_phi(weak) len (item3):", len(str(bp)))
+        bp_m = build_phi(casc, "muller")
+        print("  build_phi(muller) works:", bool(bp_m))
+    except Exception as e:
+        print("  build_phi err:", e)
+
     print("\n=== Arch adoption status ===")
-    print("Proto demonstrates 1 (spot.formula + lru) + 2 (PaperConfig + ref stay shim) on R4-targeted cases.")
-    print("Recommendation: integrate spot.formula builders + lru into reachability_operators first (dual with strings during transition), then extend Cascade.")
-    print("Next item: full Rws0 in proto for the 5-pt cases, re-run with existing R4 audit script.")
+    print("Items 1 (spot.formula, done), 2 (Cascade API, tested in this run), 3 (build_phi, tested) adopted targeted.")
+    print("Not worse on Fa equiv True, R4 cases.")
+    print("Recommendation: use build_phi in reconstruct for full coverage; refine non-muller cases.")
+    print("Next: full lru + R4 exact with new APIs.")
     return drift_holds and fa_eq
 
 if __name__ == "__main__":

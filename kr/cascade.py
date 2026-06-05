@@ -7,8 +7,15 @@ LTL synthesis) will consume. It is intentionally simple and serializable.
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, NamedTuple, FrozenSet
 import buddy  # for bddtrue in config aut edge labels (Spot twa_graph.new_edge cond; spot.bddtrue not exposed)
+
+class Config(NamedTuple):
+    """Ref-style cascade configuration (tuple of per-level states). Hashable, explicit empty for level 0."""
+    states: Tuple[int, ...]
+
+    def __repr__(self) -> str:
+        return f"Config{self.states}"
 
 
 @dataclass
@@ -180,6 +187,87 @@ class Cascade:
             except Exception:
                 pass
         return enters
+
+    # --- Refined Cascade API (architectural adoption from reference.md item 2) ---
+    # Backward-compatible extension: adds explicit sigma, combined letters,
+    # first-class stay/enter/leave returning lists of cl tuples (for literal paper disjuncts
+    # in Rs0/Rc0 etc.), and Config NamedTuple (hashable, 0-config explicit).
+    # Existing move_config / compute_* / top_of remain for compat.
+    # This reduces impedance mismatch for exact R4/R5 impls.
+
+    @property
+    def sigma(self) -> List[FrozenSet]:
+        """List of letters as frozensets of true APs (ref-style Σ)."""
+        return [frozenset(k for k, v in val.items() if v) for val in self.letter_valuations]
+
+    def combined_letters(self, level_idx: int) -> List[Tuple]:
+        """For level, list of possible combined cl = (sig_frozenset, lower_tuple).
+        Used to make paper disjuncts literal."""
+        if level_idx < 0 or level_idx >= self.num_levels:
+            return []
+        # Collect from reachable configs at this level
+        cls = set()
+        for c in self.all_configs():
+            if len(c) <= level_idx:
+                continue
+            # For each letter from a rep at this level's state
+            s = c[level_idx]
+            for li in range(self.num_letters()):
+                try:
+                    nc = self.move_config(c, li)
+                    if nc[level_idx] == s:  # stay for this level's top? Wait, for general need care
+                        sig = self.sigma[li]
+                        lower = nc[level_idx+1:] if level_idx+1 < len(nc) else ()
+                        cls.add( (sig, lower) )
+                except:
+                    pass
+        return list(cls)
+
+    def stay(self, level_idx: int, state: int) -> List[Tuple]:
+        """Ref-style: combined letters that keep 'state' fixed at this level.
+        Returns list of (sig_frozenset, lower_tuple) for direct use in Rs0 etc."""
+        res = []
+        for c in self.all_configs():
+            if len(c) <= level_idx or c[level_idx] != state:
+                continue
+            for li in range(self.num_letters()):
+                try:
+                    nc = self.move_config(c, li)
+                    if nc[level_idx] == state:
+                        sig = self.sigma[li]
+                        lower = nc[level_idx+1:] if level_idx+1 < len(nc) else ()
+                        res.append( (sig, lower) )
+                except:
+                    pass
+        # dedup
+        return list(set(res))
+
+    def enter(self, level_idx: int, target_state: int) -> List[Tuple]:
+        """Ref-style Enter for target_state at level. List of (sig, lower) that reset to it."""
+        res = []
+        for c in self.all_configs():
+            if len(c) <= level_idx or c[level_idx] == target_state:
+                continue
+            for li in range(self.num_letters()):
+                try:
+                    nc = self.move_config(c, li)
+                    if nc[level_idx] == target_state:
+                        sig = self.sigma[li]
+                        lower = nc[level_idx+1:] if level_idx+1 < len(nc) else ()
+                        res.append( (sig, lower) )
+                except:
+                    pass
+        return list(set(res))
+
+    def leave(self, level_idx: int, state: int) -> List[Tuple]:
+        """Ref-style Leave from state at level."""
+        st = set(self.stay(level_idx, state))
+        all_cl = self.combined_letters(level_idx)
+        return [cl for cl in all_cl if cl not in st]
+
+    # Config factory for ref-style
+    def make_config(self, states: Tuple[int, ...]) -> Config:
+        return Config(states)
 
     def all_top_values(self) -> List[int]:
         """All distinct top-coordinate values appearing in configs (for level of these configs)."""

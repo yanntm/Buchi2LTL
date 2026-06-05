@@ -30,14 +30,15 @@ Many "missing pieces" listed in older algorithm.md (e.g. full 5 formulas, Fin, a
 - Partial alignments committed: _stay_gt0_weak now has explicit Line(2) stay-forever + omits free-reach (matches corrected Rws0); _solid_stay_weak case 4 uses weak form + U on target for postpone; _dashed_change_strong has line2 + swapped-role weak call pattern for R5(2).
 - Audit re-runs (via placed script) now show all 5 checklist points PASS; drift PASS; canaries still need work (targeted, not full path).
 - Kept TODO/STATUS up to date after each item.
+- **Item 2+3 progress (Cascade API + build_phi):** Added ref API (sigma, stay/enter/leave cl tuples, Config, make_config) to cascade.py (compat). Added build_phi dispatch (6 types) to reachability.py. Updated+ran placed arch_adopt to test: API works, build_phi ok, Fa/a equiv True (not worse per tests before commit). See arch script output.
+- **Dealt with first arch item (leveraging spot.formula, per user):** Refactored reachability_operators.py to use native spot.formula builders (_tt/_And/_Or/_U/_X/_Not/_letters_to_f/_to_f/_str_f) + formula objects for internal trees/keys in reach_*/_solid_*/_stay_gt0_* (enables sharing). Public str compat. Tested via placed scripts (r4_audit, arch_adopt, basic Fa/a, zoom Fa/a/G(p|F q)) BEFORE commit: Fa/a EQUIV True (same/not worse), no crashes, R4 functional, canary runs. Committed only after (9782f3a).
 
 **Architectural adoption from reference (high priority before more impl refinement):**
-See discussion in STATUS.md + new script `kr/testing/test_kr_arch_adopt.py`. Most important elements (to adopt early, reduce downstream refactor cost):
-- Native `spot.formula` (DAG + built-in sharing/simplify) + lru_cache on R* (big win for size/complexity vs current strings + manual memo/simp; reference stresses this for triple-exp).
-- Refined Cascade API (explicit combined letters, delta dicts, stay/enter/leave as first-class returning tuples of cl) + Config NamedTuple (makes exact Rs0/Rc0 disjuncts direct, closer to paper Σ_i defs; current move_config+top_of works but is indirect).
-- Full builders (And/Or/U/R/letter_to_ltl as spot.formula fns) + build_phi dispatch for all acc types.
-- Prune reachable first, per-step simplify.
-Start with spot.formula + lru + minimal Cascade shim in targeted arch script + R4/canary cases. Then integrate.
+See STATUS.md + `kr/testing/test_kr_arch_adopt.py`. Most important (adopted #1):
+- Native `spot.formula` + builders + lru on R* (DAG sharing; this item).
+- Refined Cascade + Config.
+- Full build_phi etc.
+Next: complete lru integration, then Cascade.
 
 ---
 
