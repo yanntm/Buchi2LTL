@@ -72,7 +72,7 @@ from kr.ltl_builders import (
     normalize_ltl,
     _normalize_ltl,
     _tt, _ff, _ap, _And, _Or, _Not, _X, _U, _F, _G,
-    _to_f, _letters_to_f, _str_f,
+    _to_f, _letters_to_f, _str_f, _short_f, _simp_f,
 )
 
 # Fin(C) (Lemma 7) lives in kr/fin.py (one-way dependency: fin imports this
@@ -93,21 +93,21 @@ import spot  # used for formula types in signatures and lru keys
 def reach_strong(
     S: Tuple[int, ...],
     B: Optional[Tuple[int, ...]],
-    beta: str,
+    beta: "str | spot.formula",
     T: Tuple[int, ...],
-    tau: str,
+    tau: "str | spot.formula",
     casc: "Cascade",
     level: int = 0,
-) -> str:
+) -> "spot.formula":
     """Formula 1 (main strong): S ~_B(β)^X T(τ) at the given cascade level (coordinate index).
 
     Recursion advances the level cursor while always passing full-length config tuples
     (so move_config and partition helpers always see correct context for higher coords).
     Base: when level == num_levels, plain (¬β) U τ .
 
-    Now leverages native spot.formula for internal construction (DAG sharing via object identity,
-    better subformula reuse, lru potential, less string roundtrips). Public returns str for compat.
-    Beta/tau normalized to formula objects early.
+    Native spot.formula end-to-end: accepts beta/tau as str or formula, RETURNS a
+    spot.formula (hash-consed → DAG sharing across all subterms; stringify only at
+    the very top via reconstruct, or with _str_f in tests/traces).
     Uses lru_cache on _lru_reach_strong (with cid for hashability).
     """
     global PAPER_REACH_CALLS
@@ -115,9 +115,8 @@ def reach_strong(
     if PAPER_REACH_CALLS > 100000:
         raise RuntimeError("Too many reach_strong calls (>100k) -- likely explosion from lack of memoization on sub-reach or infinite rec on same-level moves")
 
-    # Convert to native formulas early (architectural adoption: spot.formula DAG)
-    beta_f = _to_f(beta or "false")
-    tau_f = _to_f(tau or "true")
+    beta_f = _ff() if beta is None else _to_f(beta)
+    tau_f = _tt() if tau is None else _to_f(tau)
 
     cid = id(casc)
     _register_casc(casc)
@@ -132,28 +131,29 @@ def reach_strong(
 
 
 @lru_cache(maxsize=None)
-def _lru_reach_strong(cid: int, S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta_f: 'spot.formula', T: Tuple[int, ...], tau_f: 'spot.formula', level: int) -> str:
+def _lru_reach_strong(cid: int, S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta_f: 'spot.formula', T: Tuple[int, ...], tau_f: 'spot.formula', level: int) -> "spot.formula":
     """Core cached implementation of reach_strong. Args are all hashable (B=None ok)."""
     casc = _get_casc(cid)
     if casc is None:
-        return "false"
+        return _ff()
 
     n = getattr(casc, "num_levels", 0)
     if level == n:
-        negb = _tt() if str(beta_f) in ("false", "0") else _Not(beta_f)
-        res_f = _U(negb, tau_f)
-        res = _str_f(res_f)
-        _trace(f"base level reached (level={level}): returning {res}")
-        return res
+        negb = _tt() if beta_f.is_ff() else _Not(beta_f)
+        res_f = _simp_f(_U(negb, tau_f))
+        if TRACE_ON:
+            _trace(f"base level reached (level={level}): returning {_short_f(res_f)}")
+        return res_f
 
-    _trace(f"reach_strong level={level}/{n} S={S} T={T} beta={_str_f(beta_f)} tau={_str_f(tau_f)}")
+    if TRACE_ON:
+        _trace(f"reach_strong level={level}/{n} S={S} T={T} beta={_short_f(beta_f)} tau={_short_f(tau_f)}")
 
     # 0-step only for trivial tau=true
     suffix_S = S[level:]
     suffix_T = T[level:]
-    if suffix_S == suffix_T and str(tau_f) == "true":
+    if suffix_S == suffix_T and tau_f.is_tt():
         _trace(f"  suffix from level {level} already matches target -> return tau early")
-        return "true"
+        return _tt()
 
     # Current level's value (for solid/dashed decision at this layer)
     s_val = S[level]
@@ -164,28 +164,27 @@ def _lru_reach_strong(cid: int, S: Tuple[int, ...], B: Optional[Tuple[int, ...]]
 
     _trace(f"  at level {level}: s_val={s_val} t_val={t_val} source_is_target={source_is_target} source_is_bad={source_is_bad}")
 
-    # helpers accept str for compat during transition
-    solid = _solid_stay_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
-    dashed = _dashed_change_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
-    _trace(f"    solid={solid[:120]}{'...' if len(solid)>120 else ''}")
-    _trace(f"    dashed={dashed[:120]}{'...' if len(dashed)>120 else ''}")
+    solid_f = _solid_stay_strong(S, B, beta_f, T, tau_f, casc, level)
+    dashed_f = _dashed_change_strong(S, B, beta_f, T, tau_f, casc, level)
+    if TRACE_ON:
+        _trace(f"    solid={_short_f(solid_f)}")
+        _trace(f"    dashed={_short_f(dashed_f)}")
 
-    # Build final with formula for sharing, then str
-    res_f = _Or( _to_f(solid), _to_f(dashed) )
-    res = _str_f(res_f)
-    _trace(f"    reach_strong res (pre-memo, post-simp)={res[:150]}{'...' if len(res)>150 else ''}")
-    return res
+    res_f = _simp_f(_Or(solid_f, dashed_f))
+    if TRACE_ON:
+        _trace(f"    reach_strong res (pre-memo, post-simp)={_short_f(res_f, 150)}")
+    return res_f
 
 
 def reach_weak(
     S: Tuple[int, ...],
     B: Optional[Tuple[int, ...]],
-    beta: str,
+    beta: "str | spot.formula",
     T: Tuple[int, ...],
-    tau: str,
+    tau: "str | spot.formula",
     casc: "Cascade",
     level: int = 0,
-) -> str:
+) -> "spot.formula":
     """Formula 2 (weak / release), literal dual per the paper:
 
         wreach(S, B, β, T, τ) := ¬ reach(S, T, τ, B, β)     -- (B,β) ↔ (T,τ) swap
@@ -197,16 +196,18 @@ def reach_weak(
     construction was not the paper's Formula 2.)
     """
     if B is None:
-        return "true"
-    inner = reach_strong(S, T, tau or "true", B, beta or "false", casc, level)
-    return simplify_ltl(f"!({inner})")
+        return _tt()
+    tau_f = _tt() if tau is None else _to_f(tau)
+    beta_f = _ff() if beta is None else _to_f(beta)
+    inner = reach_strong(S, T, tau_f, B, beta_f, casc, level)
+    return _simp_f(_Not(inner))
 
 
 def _solid_stay_strong(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
-) -> str:
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
+) -> "spot.formula":
     """Formulas 3 (strong solid/stay top unchanged). Cases on current level's coord.
-    Internals now use spot.formula builders for construction.
+    Formula objects in and out (str accepted for probe/test compat).
     """
     n = getattr(casc, "num_levels", 0)
     if level >= n:
@@ -223,28 +224,24 @@ def _solid_stay_strong(
 
     if s_val != t_val:
         _trace(f"  _solid_stay_strong level={level}: s_val({s_val}) != t_val({t_val}) -> solid impossible, return false")
-        return "false"
+        return _ff()
 
     _trace(f"  _solid_stay_strong level={level}: source_is_target={source_is_target} source_is_bad={source_is_bad}")
 
     # Immediate collapse for tau=true target (Formula 3: P ∨ true / (P∧¬β) ∨ true)
-    if source_is_target and str(tau_f) == "true":
-        return "true"
+    if source_is_target and tau_f.is_tt():
+        return _tt()
 
-    gt0 = _stay_gt0_strong(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
-    gt0_f = _to_f(gt0)
+    gt0_f = _stay_gt0_strong(S, B, beta_f, T, tau_f, casc, level)
 
     if not source_is_bad and not source_is_target:
-        return _str_f(gt0_f)
+        return gt0_f
     elif not source_is_bad and source_is_target:
-        res_f = _Or(gt0_f, tau_f)
-        return _str_f(res_f)
+        return _simp_f(_Or(gt0_f, tau_f))
     elif source_is_bad and not source_is_target:
-        res_f = _And(gt0_f, _Not(beta_f))
-        return _str_f(res_f)
+        return _simp_f(_And(gt0_f, _Not(beta_f)))
     else:
-        res_f = _Or( _And(gt0_f, _Not(beta_f)) , tau_f )
-        return _str_f(res_f)
+        return _simp_f(_Or( _And(gt0_f, _Not(beta_f)) , tau_f ))
 
 
 def _combined_letters_at_level(casc: "Cascade", level: int) -> List[Tuple[int, Tuple[int, ...], Tuple[int, ...]]]:
@@ -271,8 +268,8 @@ def _combined_letters_at_level(casc: "Cascade", level: int) -> List[Tuple[int, T
 
 
 def _stay_gt0_strong(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
-) -> str:
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
+) -> "spot.formula":
     """solid⁺ (the >0 common subformula of Formula 3), literal per paper p.11 /
     construction-ref §7:
 
@@ -326,37 +323,36 @@ def _stay_gt0_strong(
     disjs_f: List[spot.formula] = []
     for li, pre, arr in last_steps:
         g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
-        if str(g_f) == "false":
+        if g_f.is_ff():
             continue
-        tail_f = _And(g_f, _X(tau_f))
-        tail = _str_f(tail_f)
+        tail_f = _simp_f(_And(g_f, _X(tau_f)))
         conj_f: List[spot.formula] = []
         # free reach of the pre-target T' (bad never triggers: beta=false)
-        conj_f.append(_to_f(reach_strong(S, None, "false", pre, tail, casc, level + 1)))
+        conj_f.append(reach_strong(S, None, _ff(), pre, tail_f, casc, level + 1))
         # Leave-avoid conjuncts
         for lj, preL, arrL in leave_s:
             eta_f = _letters_to_f(casc.letter_valuations[lj], casc.aps)
-            if str(eta_f) == "false":
+            if eta_f.is_ff():
                 continue
-            conj_f.append(_to_f(reach_strong(S, preL, _str_f(eta_f), pre, tail, casc, level + 1)))
+            conj_f.append(reach_strong(S, preL, eta_f, pre, tail_f, casc, level + 1))
         # bad-predecessor conjuncts
         for lk, preB, arrB in bad_pre:
             rho_f = _letters_to_f(casc.letter_valuations[lk], casc.aps)
-            if str(rho_f) == "false":
+            if rho_f.is_ff():
                 continue
-            rb_f = _And(rho_f, _X(beta_f))
-            conj_f.append(_to_f(reach_strong(S, preB, _str_f(rb_f), pre, tail, casc, level + 1)))
+            rb_f = _simp_f(_And(rho_f, _X(beta_f)))
+            conj_f.append(reach_strong(S, preB, rb_f, pre, tail_f, casc, level + 1))
         disjs_f.append(_And(*conj_f))
 
-    res_f = _Or(*disjs_f) if disjs_f else _ff()
-    res = _str_f(res_f)
-    _trace(f"    _stay_gt0 result level={level}: {res[:80]}...")
-    return res
+    res_f = _simp_f(_Or(*disjs_f)) if disjs_f else _ff()
+    if TRACE_ON:
+        _trace(f"    _stay_gt0 result level={level}: {_short_f(res_f, 80)}")
+    return res_f
 
 
 def _solid_stay_weak(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
-) -> str:
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
+) -> "spot.formula":
     """Formula 4 (weak solid/stay). Mirror of strong but uses weak subs + slightly different case ors."""
     n = getattr(casc, "num_levels", 0)
     if level >= n:
@@ -374,28 +370,24 @@ def _solid_stay_weak(
 
     beta_f = _to_f(beta)
     tau_f = _to_f(tau)
-    gt0 = _stay_gt0_weak(S, B, _str_f(beta_f), T, _str_f(tau_f), casc, level)
-    gt0_f = _to_f(gt0)
+    gt0_f = _stay_gt0_weak(S, B, beta_f, T, tau_f, casc, level)
 
     if not source_is_bad and not source_is_target:
-        return _str_f(gt0_f)
+        return gt0_f
     elif not source_is_bad and source_is_target:
         # Per ref Rws case (S != B and S == T): exactly Rws0 ∨ τ  (gt0 already carries the full weak line1+line2)
         # (Removed special stay_prop U path -- was bypassing gt0/line2 and had dead source_is_bad test inside not-bad branch.)
-        res_f = _Or(gt0_f, tau_f)
-        return _str_f(res_f)
+        return _simp_f(_Or(gt0_f, tau_f))
     elif source_is_bad and not source_is_target:
-        res_f = _And(gt0_f, _Not(beta_f))
-        return _str_f(res_f)
+        return _simp_f(_And(gt0_f, _Not(beta_f)))
     else:
         # Case 4 per corrected paper (weak form): (Rws0 ∨ τ) ∧ ¬β
-        res_f = _And( _Or(gt0_f, tau_f) , _Not(beta_f) )
-        return _str_f(res_f)
+        return _simp_f(_And( _Or(gt0_f, tau_f) , _Not(beta_f) ))
 
 
 def _stay_gt0_weak(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
-) -> str:
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
+) -> "spot.formula":
     """wsolid⁺ (the >0 common subformula of Formula 4), literal per paper p.12 /
     construction-ref §7:
 
@@ -444,45 +436,45 @@ def _stay_gt0_weak(
     _trace(f"    _stay_gt0_weak level={level}: #stay={len(stay_s)} #leave={len(leave_s)} "
            f"#last_steps={len(last_steps)} #bad_pre={len(bad_pre)}")
 
-    def _avoid_conjs(target_cfg: Tuple[int, ...], tail: str) -> List[spot.formula]:
+    def _avoid_conjs(target_cfg: Tuple[int, ...], tail_f: "spot.formula") -> List[spot.formula]:
         conjs: List[spot.formula] = []
         for lj, preL, arrL in leave_s:
             eta_f = _letters_to_f(casc.letter_valuations[lj], casc.aps)
-            if str(eta_f) == "false":
+            if eta_f.is_ff():
                 continue
-            conjs.append(_to_f(reach_weak(S, preL, _str_f(eta_f), target_cfg, tail, casc, level + 1)))
+            conjs.append(reach_weak(S, preL, eta_f, target_cfg, tail_f, casc, level + 1))
         for lk, preB, arrB in bad_pre:
             rho_f = _letters_to_f(casc.letter_valuations[lk], casc.aps)
-            if str(rho_f) == "false":
+            if rho_f.is_ff():
                 continue
-            rb = _str_f(_And(rho_f, _X(beta_f)))
-            conjs.append(_to_f(reach_weak(S, preB, rb, target_cfg, tail, casc, level + 1)))
+            rb_f = _simp_f(_And(rho_f, _X(beta_f)))
+            conjs.append(reach_weak(S, preB, rb_f, target_cfg, tail_f, casc, level + 1))
         return conjs
 
     # line (1)
     line1_disjs_f: List[spot.formula] = []
     for li, pre, arr in last_steps:
         g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
-        if str(g_f) == "false":
+        if g_f.is_ff():
             continue
-        tail = _str_f(_And(g_f, _X(tau_f)))
-        conjs = _avoid_conjs(pre, tail)
+        tail_f = _simp_f(_And(g_f, _X(tau_f)))
+        conjs = _avoid_conjs(pre, tail_f)
         line1_disjs_f.append(_And(*conjs) if conjs else _tt())
     line1_f = _Or(*line1_disjs_f) if line1_disjs_f else _ff()
 
     # line (2): stay forever, never blocked (target false never claimed)
-    line2_conjs = _avoid_conjs(S, "false")
+    line2_conjs = _avoid_conjs(S, _ff())
     line2_f = _And(*line2_conjs) if line2_conjs else _tt()
 
-    res_f = _Or(line1_f, line2_f)
-    res = _str_f(res_f)
-    _trace(f"    _stay_gt0_weak (wsolid+) res={res[:60]}...")
-    return res
+    res_f = _simp_f(_Or(line1_f, line2_f))
+    if TRACE_ON:
+        _trace(f"    _stay_gt0_weak (wsolid+) res={_short_f(res_f, 60)}")
+    return res_f
 
 
 def _dashed_change_strong(
-    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
-) -> str:
+    S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
+) -> "spot.formula":
     """Formula 5 (dashed / change top), literal per paper p.13 / construction-ref §7:
 
       ⋁ over ⟨σ,T'⟩ ∈ Enter(t) :
@@ -543,34 +535,34 @@ def _dashed_change_strong(
 
     if not enter_t or not leave_s:
         # t never entered, or s never left: a dashed path is impossible.
-        return "false"
+        return _ff()
 
     entry_disjs_f: List[spot.formula] = []
     for li, pre, arr in enter_t:
         g_f = _letters_to_f(casc.letter_valuations[li], casc.aps)
-        if str(g_f) == "false":
+        if g_f.is_ff():
             continue
         # inner: after entering t at config arr, solid-stay at t to reach ⟨T,t⟩(τ)
-        inner = _solid_stay_strong(arr, B, beta, T, tau, casc, level)
-        tail = _str_f(_And(g_f, _X(_to_f(inner))))
+        inner_f = _solid_stay_strong(arr, B, beta_f, T, tau_f, casc, level)
+        tail_f = _simp_f(_And(g_f, _X(inner_f)))
         # line (1): freely reach the firing lower config T', then enter + stay
         line_parts_f: List[spot.formula] = [
-            _to_f(reach_strong(S, None, "false", pre, tail, casc, level + 1))
+            reach_strong(S, None, _ff(), pre, tail_f, casc, level + 1)
         ]
         # line (2): same reach, but parameterized-bad on each potential entry into b:
         # never be about to enter b (η firing) with a weak-stay-at-b that reaches
         # ⟨B,b⟩(β) unreleased by ⟨T,t⟩(τ)  — the SWAPPED wsolid call per the paper.
         for lj, preR, arrR in enter_b:
             eta_f = _letters_to_f(casc.letter_valuations[lj], casc.aps)
-            if str(eta_f) == "false":
+            if eta_f.is_ff():
                 continue
             try:
-                wsolid_sw = _solid_stay_weak(arrR, T, _str_f(tau_f), B, _str_f(beta_f), casc, level)
+                wsolid_sw = _solid_stay_weak(arrR, T, tau_f, B, beta_f, casc, level)
             except Exception:
                 continue
-            bbeta = _str_f(_And(eta_f, _X(_to_f(wsolid_sw))))
+            bbeta_f = _simp_f(_And(eta_f, _X(wsolid_sw)))
             line_parts_f.append(
-                _to_f(reach_strong(S, preR, bbeta, pre, tail, casc, level + 1))
+                reach_strong(S, preR, bbeta_f, pre, tail_f, casc, level + 1)
             )
         entry_disjs_f.append(_And(*line_parts_f))
 
@@ -582,16 +574,15 @@ def _dashed_change_strong(
     line3_parts_f: List[spot.formula] = []
     for lj, preL, arrL in leave_s:
         lg_f = _letters_to_f(casc.letter_valuations[lj], casc.aps)
-        if str(lg_f) == "false":
+        if lg_f.is_ff():
             continue
         tail_f = lg_f
-        if B is not None and preL[level:] == B[level:] and str(beta_f) != "false":
+        if B is not None and preL[level:] == B[level:] and not beta_f.is_ff():
             tail_f = _And(lg_f, _Not(beta_f))
-        l3 = _solid_stay_strong(S, B, beta, preL, _str_f(tail_f), casc, level)
-        line3_parts_f.append(_to_f(l3))
+        line3_parts_f.append(_solid_stay_strong(S, B, beta_f, preL, tail_f, casc, level))
     line3_f = _Or(*line3_parts_f) if line3_parts_f else _ff()
 
-    return simplify_ltl(_str_f(_And(lines12_f, line3_f)))
+    return _simp_f(_And(lines12_f, line3_f))
 
 
 # (No weak dashed: the paper has exactly five formulas — weak main (Formula 2)
