@@ -4,6 +4,40 @@ Forward-looking work items only. Current state: `kr/STATUS.md`. History: `git lo
 Construction reference: `paper/automata-to-ltl-construction.md`; ground truth:
 `paper/Automata2LTL.txt` (Sec 4.2 + Table 1 + Formulas 3/4/5 ≈ lines 440–1040).
 
+## HANDOFF 2 — true-cascade extraction (2026-06-11, later session)
+
+**Root cause of `Ga | Gb` equiv=FALSE found and fixed — extraction, not
+operators.** Two stacked bridge bugs: (1) `AsCoords(s, hcs)` is
+`DomainOf(hcs)[s]` (an enumeration accident), the real lift is
+`AsHolonomyCoords(s, sk)`; (2) conjugating D's transitions through the lift
+is unsound — holonomy coordinatization is a many-to-one COVER π, the true
+successor is `OnCoordinates(c, AsHolonomyCascade(g, sk))`. Earlier passing
+cases were degenerate (per-letter actions context-free consistent).
+Fix: gap_bridge emits lifts + TRANS closure + PI (π); parse reverses coords
+(SgpDec top-first ↔ operators peel deepest-first); Cascade.move_config /
+all_configs use the explicit table. Diagnosis chain preserved in
+`probe_reset_consistency.py` (identity-or-reset check per level/context) and
+`probe_sgpdec_api.g` (API ground truth). trace_fin grounding made
+cover-aware (GTs on the config semiautomaton) with per-check Spot caps.
+Result: Ga|Gb and G(a->Xb) zero grounding contradictions; Fa/GFa/aUb/Fa|Gb
+equiv True; audit CLEAN.
+
+**Exact next steps:**
+1. Re-run the full `survey_mp_cascade.py` ladder (phases now separated:
+   CONSTRUCT_TIMEOUT vs SPOT_EQUIV_TIMEOUT; previously-True must stay True;
+   `F(a & X b)` should now show WHICH phase blocked).
+2. P0-verify is now THE wall for everything ≥2L-nontrivial: Spot translation
+   of formulas with 100+ distinct temporal subformulas (32-acc-set fast
+   error) or megabyte flat unfoldings (timeouts). Spot authors contacted
+   about sharing-aware translation (our outputs: ~1000-node DAGs, >1200x
+   unfolding — the ideal client). Meanwhile: vacuous-conjunct pruning,
+   equivalence-based interning of subterms, compositional checking
+   (trace_fin is the per-sub-term oracle), word sampling (pitfall #10).
+3. With the cover in place, revisit P1 "Muller lift exactness": π-preimage
+   handling in `accepting_configs`/fallback paths of config_graph.py still
+   maps states through the lift only (primary pruned-config-aut path is
+   already correct via `state_of` = π).
+
 ## HANDOFF — where debugging stands (written at end of 2026-06-11 session)
 
 **What just happened:** All five operators were rewritten to the LITERAL paper
