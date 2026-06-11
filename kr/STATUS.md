@@ -16,34 +16,47 @@ Factual snapshot of the current state. History lives in `git log`; work items in
   oracle, exact under sbacc; `KR_MULLER_SCC_LIMIT=12` gate, logged whole-SCC fallback).
 - Stability: `bdd_utils` buddy-var precompute + per-case subprocess isolation in tests.
 
-## Operators (done, general; multi-level precision in progress)
+## Operators — now LITERAL paper forms (semantically validated; size blowup open)
 
-- The five reachability formulas, fully inductive for all depths (no 1L special
-  cases): `reach_strong`/`reach_weak`, solid stay strong/weak + >0 variants,
-  dashed change strong (incl. **s==t leave-and-return** + line(3) per the paper —
-  the prose "(s≠t)" is motivation, not a guard). Base case (¬β)Uτ.
+All five formulas are now the literal constructions of paper Sec 4.2 /
+construction-ref §7 (the former from-S / first-step approximations are gone):
+
+- `_stay_gt0_strong` = solid⁺: last-step decomposition over combined letters
+  ⟨σ,T'⟩ enumerated over ALL h-image configs (`_combined_letters_at_level`),
+  lower-level prefix reach to T', stay enforced by Leave-avoid conjuncts,
+  bad-predecessor conjuncts.
+- `_dashed_change_strong` = Formula 5 lines (1)+(2)+(3): Enter(t)/Enter(b)/Leave(s)
+  as combined letters, lower prefix reaches, parameterized-bad line(2) with the
+  SWAPPED wsolid, line(3) solid-to-leave-point. No s==t guard (leave-and-return).
+- `reach_weak` = the literal dual ¬reach(S,T,τ,B,β) (old G(τ|¬β) base was wrong:
+  Table 1 gives τ R ¬β). The bespoke `_dashed_change_weak` was a non-paper
+  invention and is deleted.
+- `_solid_stay_weak`/`_stay_gt0_weak` = literal wsolid/wsolid⁺ (lines (1)+(2),
+  no free-reach, wreach avoids); the s≠t early-false was removed (wrong for
+  weak: degrades to "never blocked"). Case dispatches compare FULL configs.
 - `fin_c` per Lemma 7 with working ι==C postponement.
-- Native spot.formula builders, memo + @lru_cache, early simplify, PAPER_* counters,
-  `KR_TRACE=1` step tracing.
-- Assembly: `reconstruct_ltl_paper_style` Muller DNF over good sets; specials for
-  t/f/weak/looping; practical >3L guard.
 
-## What roundtrips (Spot equiv True)
+## Semantic validation state (trace_fin_semantics grounding)
 
-**All 1-level survey cases**: constants, Fa, Ga, G(a|b), G(a&Xa), F(a&b),
-GFa, G(a->Fb), G(a|Fb) (recurrence), FGa, F(a&Gb) (persistence). Also 2L "a".
-R4 audit fully CLEAN including the G(p|Fq) canary.
+- **GFa: ALL SUB-TERMS GROUNDED OK** (1L regression green).
+- **G(a -> X b): ALL SUB-TERMS GROUNDED OK** — every fin_c sub-term (r_to, r_gt0,
+  r_with, fin, !fin) for every config is language-equivalent to ground truth.
+  This was the first 2L target; the level recursion is now semantically right.
 
-## What fails (all multi-level) — the current ladder, weakest MP class first
+## Open problem: formula SIZE blowup (not non-termination)
 
-- safety: `G(a -> X b)` [2,2], `Ga | Gb` [1,4]
-- guarantee: `a U b` [2,2] (recovers just "b"), `F(a & X b)` [2,2]
-- obligation: `Fa | Gb`, `Fa & Gb`, `Ga | Fb` [2,2]
-- 3L+: `Xa`, `a & Xa`, `GFa & GFb`, `FGa | FGb`, ... (some hit the >3L dev guard)
+Construction terminates (Fa: 24 reach calls, unchanged), but G(a->Xb)'s
+assembled formula is ~3.2 MB (PAPER_MAX_LTL_SIZE). Spot translation of such
+formulas (for equiv checks in audit/survey) is what stalls — use 10s timeouts
+and treat TIMEOUT as a status. Root cause: operators round-trip STRINGS between
+every call (`_str_f` → parse → simplify), so there is no DAG sharing — each
+avoid conjunct physically copies the full nested tail σ∧Xτ, and `_str_f`
+re-simplifies on every conversion. Fix plan in TODO P0-perf.
 
-Known suspect divergences from the paper for the multi-level cases: R5 line(2)
-iterates Enter(t) instead of Enter(b) with a non-paper shape; from-S lower-context
-approximation of Enter/Leave/Stay at deeper levels. See TODO.
+## Survey snapshot (pre-rewrite; re-run after the size fix)
+
+1L cases all True; 2L ladder was failing for the now-fixed reasons; expect
+G(a->Xb) (and likely others) to flip once equiv checks can run.
 
 ## Tooling for targeted work
 
