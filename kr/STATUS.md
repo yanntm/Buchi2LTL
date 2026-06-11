@@ -91,12 +91,13 @@ added: `Xa` 3L → `XXa` 4L → `XXXa` 5L → `X(a & Xa)` 5L.
 
 ## Open front: representation & verification at scale (not fidelity)
 
-The construction is cheap; the flat form is not. Current measurements
-(`measure_formula_dag.py`):
+Full analysis, thesis and candidate counter-measures: `kr/dag_folding.md`
+(research notes, deliberately open). Summary: the construction is cheap; the
+flat form is not. Current measurements (`measure_formula_dag.py`):
 
 | case | build | DAG nodes | unfolded tree | sharing |
 |---|---|---|---|---|
-| `G(a->Xb)` | 0.08s | ~1.2k | 4.8M | >1200x |
+| `G(a->Xb)` | 0.08s | ~1.2k | ~1.5M | >1200x |
 | `Ga\|Gb` | 0.08s | ~1k | 2M | >2000x |
 | `G(p->(qUr))` | 0.14s | 9k | 64.8M | 7179x |
 | `(a U b)\|Gc` | 9.5s | (284k subproblems) | — | — |
