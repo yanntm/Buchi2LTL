@@ -19,6 +19,7 @@ reconstruct_ltl_paper_style before each build; tests reset/read it via this modu
 
 from __future__ import annotations
 from typing import Dict, List, Optional, Tuple
+import functools
 import os
 from functools import lru_cache
 
@@ -36,11 +37,48 @@ PAPER_REACH_CALLS = 0
 PAPER_FIN_CALLS = 0
 PAPER_MAX_LTL_SIZE = 0
 
+# Runaway guard on DISTINCT reach subproblems (lru misses, not raw calls).
+# Legitimate big builds stay finite — (a U b)|Gc completes at ~285k distinct —
+# so the default is generous; an infinite same-level recursion grows without
+# bound and still trips it. Wall-clock budgets belong to the callers.
+REACH_GUARD = int(os.getenv("KR_REACH_GUARD", "5000000"))
+
 # Simple memo for reach_strong subproblems during one construction.
 # Key includes id(casc) for safety. Acts as "unique table of visited" to avoid
 # exponential re-expansion of identical (S, B, beta, T, tau, level) subformulas.
 # This should prevent the work explosion that looks like "infinite loop".
 _reach_memo = {}
+
+# Memo for the five helper formulas (solid/wsolid/dashed and the gt0 cores).
+# Only reach_strong was lru-cached; the helpers re-ran their whole
+# combined-letter enumeration at every call site (dashed lines (1)/(2)/(3)
+# invoke solid/wsolid directly), so the SAME helper signature was recomputed
+# under every enclosing context: (a U b)|Gc profiled at 437k raw reach calls
+# / 91.5% lru hit rate in 6s — pure fan-in overhead. BDD-style: one entry per
+# distinct (helper, casc, S, B, beta, T, tau, level). Cleared with the lru by
+# reconstruct and the probes.
+_helper_memo: Dict = {}
+
+
+def _memo_reach_helper(tag: str):
+    """Memoize a helper with the (S, B, beta, T, tau, casc, level) signature.
+    beta/tau are normalized to hash-consed spot.formula BEFORE keying (str and
+    formula spellings of the same guard share an entry). A decorator so the
+    function BODY keeps its def-name and code shapes (the r4 audit greps
+    bodies by 'def <name>(')."""
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapper(S, B, beta, T, tau, casc, level=0):
+            beta_f = _ff() if beta is None else _to_f(beta)
+            tau_f = _tt() if tau is None else _to_f(tau)
+            key = (tag, id(casc), S, B, beta_f, T, tau_f, level)
+            hit = _helper_memo.get(key)
+            if hit is None:
+                hit = fn(S, B, beta_f, T, tau_f, casc, level)
+                _helper_memo[key] = hit
+            return hit
+        return wrapper
+    return deco
 
 # For lru on R* (arch adoption): registry to allow passing only hashable cid to cached funcs.
 # Cleared in reconstruct before each top-level build.
@@ -110,11 +148,6 @@ def reach_strong(
     the very top via reconstruct, or with _str_f in tests/traces).
     Uses lru_cache on _lru_reach_strong (with cid for hashability).
     """
-    global PAPER_REACH_CALLS
-    PAPER_REACH_CALLS += 1
-    if PAPER_REACH_CALLS > 100000:
-        raise RuntimeError("Too many reach_strong calls (>100k) -- likely explosion from lack of memoization on sub-reach or infinite rec on same-level moves")
-
     beta_f = _ff() if beta is None else _to_f(beta)
     tau_f = _tt() if tau is None else _to_f(tau)
 
@@ -133,6 +166,16 @@ def reach_strong(
 @lru_cache(maxsize=None)
 def _lru_reach_strong(cid: int, S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta_f: 'spot.formula', T: Tuple[int, ...], tau_f: 'spot.formula', level: int) -> "spot.formula":
     """Core cached implementation of reach_strong. Args are all hashable (B=None ok)."""
+    # Guard counts MISSES only (distinct expansions; this body runs once per
+    # key). Counting raw calls tripped the guard on healthy 91%-hit workloads.
+    global PAPER_REACH_CALLS
+    PAPER_REACH_CALLS += 1
+    if PAPER_REACH_CALLS > REACH_GUARD:
+        raise RuntimeError(
+            f"Too many DISTINCT reach_strong subproblems (>{REACH_GUARD}) -- "
+            f"genuine blowup (not memo fan-in; hits are not counted). "
+            f"KR_REACH_GUARD to tune.")
+
     casc = _get_casc(cid)
     if casc is None:
         return _ff()
@@ -203,6 +246,7 @@ def reach_weak(
     return _simp_f(_Not(inner))
 
 
+@_memo_reach_helper("ss")
 def _solid_stay_strong(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
@@ -267,6 +311,7 @@ def _combined_letters_at_level(casc: "Cascade", level: int) -> List[Tuple[int, T
     return out
 
 
+@_memo_reach_helper("ss0")
 def _stay_gt0_strong(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
@@ -350,6 +395,7 @@ def _stay_gt0_strong(
     return res_f
 
 
+@_memo_reach_helper("ws")
 def _solid_stay_weak(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
@@ -385,6 +431,7 @@ def _solid_stay_weak(
         return _simp_f(_And( _Or(gt0_f, tau_f) , _Not(beta_f) ))
 
 
+@_memo_reach_helper("ws0")
 def _stay_gt0_weak(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
@@ -472,6 +519,7 @@ def _stay_gt0_weak(
     return res_f
 
 
+@_memo_reach_helper("dc")
 def _dashed_change_strong(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
@@ -556,9 +604,14 @@ def _dashed_change_strong(
             eta_f = _letters_to_f(casc.letter_valuations[lj], casc.aps)
             if eta_f.is_ff():
                 continue
+            # Narrow catch: only the "no valid weak form from this entry"
+            # shapes. A bare `except Exception` here swallowed EVERYTHING
+            # crossing the recursion — including real TypeErrors (heisenbug
+            # masked for runs where this path enclosed it) and test-harness
+            # control exceptions (probe budget alarms silently ignored).
             try:
                 wsolid_sw = _solid_stay_weak(arrR, T, tau_f, B, beta_f, casc, level)
-            except Exception:
+            except (ValueError, IndexError, KeyError):
                 continue
             bbeta_f = _simp_f(_And(eta_f, _X(wsolid_sw)))
             line_parts_f.append(
