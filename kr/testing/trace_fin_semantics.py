@@ -45,7 +45,23 @@ from kr.reachability_operators import (
     simplify_ltl,
 )
 from kr.fin import fin_c, _uncond_reach_strict
+from kr.ltl_builders import _Not, _to_f, _tree_size_f
 from ltl_diff import diff_report, to_aut
+
+# Flatten gate: sub-terms are kept as formula OBJECTS and only stringified
+# when their memoized unfolded size is below this (≈ a 2MB string). Building
+# the string first and gating on len() was itself the stall: one X(a & Xa)
+# sub-term spends minutes inside str() before any gate can see it.
+FLATTEN_TREE_LIMIT = int(os.environ.get("KR_FLATTEN_TREE_LIMIT", "250000"))
+
+
+def _flatten_gated(f_obj):
+    """(flat_string_or_None, tree_size). None = too large to ever flatten."""
+    f_obj = _to_f(f_obj)
+    n = _tree_size_f(f_obj)
+    if n > FLATTEN_TREE_LIMIT:
+        return None, n
+    return simplify_ltl(f_obj), n
 
 
 # ---------------------------------------------------------------- ground truth
@@ -153,12 +169,18 @@ def _check_child():
     print("REPORT_JSON:" + json.dumps(rep))
 
 
-def check(name: str, gt_aut, produced_ltl: str):
+def check(name: str, gt_aut, produced_ltl, tree_n: int = -1):
     """Compare GT automaton vs produced LTL string; print verdict.
     Returns True (OK) / False (semantic BAD) / None (UNVERIFIED: Spot could
-    not check within KR_CHECK_TIMEOUT — the sub-term was BUILT fine).
+    not check within KR_CHECK_TIMEOUT, or the sub-term was too large to even
+    flatten — it was BUILT fine either way).
     The Spot work (translate + containment both ways, complement inside) is
     unbounded in the worst case, so it runs in a child process under the cap."""
+    if produced_ltl is None:
+        print(f"    {name} = <unflattened formula object, tree={tree_n}>")
+        print(f"      UNVERIFIED (unfolded size {tree_n} > "
+              f"KR_FLATTEN_TREE_LIMIT={FLATTEN_TREE_LIMIT}; never stringified)")
+        return None
     # Truncated print: sub-terms can flatten to 100MB+ (G(p->(qUr)) fin:
     # 108MB) — dumping them burns the whole wall clock on I/O.
     if len(produced_ltl) > 400:
@@ -227,22 +249,28 @@ def trace_formula(formula_str: str) -> dict:
         print(f"\n  --- config C={C} (state {s})"
               f"{'  [== iota]' if C == init_cfg else ''} ---")
 
-        r_to = simplify_ltl(reach_strong(init_cfg, None, "false", C, "true", casc))
-        r_gt0 = simplify_ltl(_uncond_reach_strict(C, C, casc))
-        no_ret = simplify_ltl(f"!({r_gt0})")
-        r_with = simplify_ltl(reach_strong(init_cfg, None, "false", C, no_ret, casc))
-        fin = simplify_ltl(fin_c(C, casc))
-        notfin = simplify_ltl(f"!({fin})")
+        # Everything stays a formula OBJECT until _flatten_gated decides the
+        # unfolded size is printable/checkable (negations via _Not, never
+        # f"!({...})" string surgery on potentially-100MB flats).
+        r_to_o = reach_strong(init_cfg, None, "false", C, "true", casc)
+        r_gt0_o = _uncond_reach_strict(C, C, casc)
+        r_with_o = reach_strong(init_cfg, None, "false", C, _Not(_to_f(r_gt0_o)), casc)
+        fin_o = fin_c(C, casc)
+        notfin_o = _Not(_to_f(fin_o))
 
         v = {}
-        v["r_to"] = check("r_to  (iota~>C, visit>=0)",
-                          gt_visited_once(CD, init_ci, ci, strict=False), r_to)
-        v["r_gt0"] = check("r_gt0 (C>0~>C, revisit from C)",
-                           gt_visited_once(CD, ci, ci, strict=True), r_gt0)
-        v["r_with"] = check("r_with (>=1 visit & finite)",
-                            gt_once_and_fin(CD, init_ci, ci), r_with)
-        v["fin"] = check("fin   (finitely often)", gt_fin(CD, ci), fin)
-        v["notfin"] = check("!fin  (infinitely often)", gt_io(CD, ci), notfin)
+        for key, label, gt, obj in (
+            ("r_to", "r_to  (iota~>C, visit>=0)",
+             gt_visited_once(CD, init_ci, ci, strict=False), r_to_o),
+            ("r_gt0", "r_gt0 (C>0~>C, revisit from C)",
+             gt_visited_once(CD, ci, ci, strict=True), r_gt0_o),
+            ("r_with", "r_with (>=1 visit & finite)",
+             gt_once_and_fin(CD, init_ci, ci), r_with_o),
+            ("fin", "fin   (finitely often)", gt_fin(CD, ci), fin_o),
+            ("notfin", "!fin  (infinitely often)", gt_io(CD, ci), notfin_o),
+        ):
+            flat, tree_n = _flatten_gated(obj)
+            v[key] = check(label, gt, flat, tree_n)
         verdicts[C] = v
 
     bad = [(C, k) for C, v in verdicts.items() for k, ok in v.items() if ok is False]
