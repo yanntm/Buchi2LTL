@@ -75,6 +75,16 @@ class Cascade:
     letter_valuations: List[Dict[str, bool]] = field(default_factory=list)
     original_aut: Any = None  # the normalized det parity aut (our working D)
 
+    # True cascade transitions: config -> {letter_idx: next_config}, over the
+    # BFS closure of the state lifts under the SgpDec-lifted generators
+    # (TRANS lines from the GAP script). Holonomy coordinatization is a COVER:
+    # pi (config_to_state) is many-to-one and state_to_config is just one
+    # section of it, so the dynamics CANNOT be reconstructed by conjugating
+    # D's transitions through the lift (that shortcut produced non-reset
+    # "cascades", e.g. Ga|Gb — see kr/testing/probe_reset_consistency.py).
+    # Empty dict = legacy data; move_config then falls back to the shortcut.
+    transitions: Dict[Tuple[int, ...], Dict[int, Tuple[int, ...]]] = field(default_factory=dict)
+
     def __post_init__(self):
         if self.levels and len(self.levels) != self.num_levels:
             # Allow caller to pass partial levels; we still trust num_levels.
@@ -114,9 +124,18 @@ class Cascade:
     def move_config(self, config: Tuple[int, ...], letter_idx: int) -> Tuple[int, ...]:
         """Given a config (tuple of 1-based coords), return the next config under the given letter (0-based index into generators).
 
-        Uses the original state mapping + generator images (lift via homomorphism).
-        Assumes the decomposition provides a consistent covering.
+        Primary path: the explicit true-cascade transition table (see the
+        `transitions` field). Legacy fallback (table absent): conjugate D's
+        transition through the state lift — UNSOUND in general (cover!),
+        kept only for old parsed outputs and the trivial 1-state case.
         """
+        if self.transitions:
+            row = self.transitions.get(config)
+            if row is None:
+                raise ValueError(f"Config {config} not in the cascade closure")
+            if letter_idx not in row:
+                raise IndexError(f"letter_idx {letter_idx} out of range for config {config}")
+            return row[letter_idx]
         if not self.state_to_config:
             raise ValueError("No state_to_config mapping available")
         if letter_idx < 0 or letter_idx >= len(self.generator_images):
@@ -273,7 +292,11 @@ class Cascade:
         return sorted({self.top_of(c) for c in self.all_configs()})
 
     def all_configs(self) -> List[Tuple[int, ...]]:
-        """Return sorted list of distinct configurations that appear in the mapping."""
+        """Return sorted list of all cascade configurations: the BFS closure of
+        the state lifts when the true transition table is present (this can be
+        strictly larger than the lift image — pi is a cover), else the lift image."""
+        if self.transitions:
+            return sorted(self.transitions.keys())
         return sorted(set(self.state_to_config.values()))
 
     def build_config_transitions(self) -> Dict[Tuple[int, ...], Dict[int, Tuple[int, ...]]]:
