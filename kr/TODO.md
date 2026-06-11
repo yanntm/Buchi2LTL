@@ -21,11 +21,14 @@ observation into a usable pipeline (and a SOTA claim).
    distinct temporal subformulas of `G(p->(qUr))` (currently 4115 for a
    3-state property) drop toward what its automaton warrants; secondary:
    DAG nodes / unfolded size shrink across the ladder.
-2. **Output representation**: reconstruct's str() contract is the bottleneck
-   for the biggest cases (`(a U b)|Gc` builds in 9.5s, serialization blows the
-   budget; one `G(p->(qUr))` fin sub-term flattens to 108MB). Carry
+2. **Output representation — now the TOP item**: reconstruct's str() contract
+   is the bottleneck for 7 of the 11 non-True ladder cases (post guard-drop
+   survey), including mid-size `G(a->Xa)` which flipped True →
+   CONSTRUCT_TIMEOUT when tl_simplifier left the hot path (its construction
+   is instant; only the final flat str() blows the budget). Carry
    `spot.formula` objects to callers (str on demand only), and/or a DAG-aware
-   output format.
+   output format. This also feeds the user's planned BDD-style analysis
+   layer for the formulas — solve naively first, shortcuts after.
 3. **Verification beyond Spot translation** (32-acc-set limit / timeouts on
    100+ distinct temporal subterms): compositional checking (trace_fin is the
    per-sub-term oracle), word-sampling validator (ultimately-periodic u·v^ω,
@@ -45,8 +48,6 @@ observation into a usable pipeline (and a SOTA claim).
   real (duplicated sinks), the fallbacks should classify every closure config
   through π.
 - Trivial (size-1) level collapse to reduce effective depth.
-- Remove/make-dynamic the >3L dev guard once P0.1 lands (the guard exists to
-  find issues at small depth first; 3L is green on the ladder).
 
 ## P2 — feasibility
 
