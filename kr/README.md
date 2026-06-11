@@ -22,6 +22,7 @@ acceptance assembly.
 | `kr/algorithm.md` | Why this construction, scope/policy for kr/ (no pattern matching), complexity recap, mapping to modules. |
 | `kr/STATUS.md` | Current state: what works, what fails, with the current minimal failing cases. |
 | `kr/TODO.md` | Forward-looking work items only (history lives in git log). |
+| `kr/dag_folding.md` | **Research direction (open):** why the construction explodes (measured), the DAG-vs-unfolding thesis, BDD-analogy gap analysis, candidate folding counter-measures, X-ladder benchmark protocol. |
 
 Lesson learned (twice): LLM-generated paper summaries drift on case splits and guards.
 A previous 1767-line reference doc introduced two classes of formula errors
