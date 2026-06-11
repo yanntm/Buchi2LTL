@@ -80,6 +80,12 @@ def generate_gap_script(
     lines.append('')
     lines.append('LoadPackage("SgpDec");')
     lines.append('')
+    lines.append('# Deterministic runs: AsHolonomyCoords picks a RandomChain through each')
+    lines.append('# point, so unseeded runs produce different (equally valid) lifts and')
+    lines.append('# coordinate-dependent bugs become heisenbugs. Fix both GAP sources.')
+    lines.append('Reset(GlobalMersenneTwister, 0);;')
+    lines.append('Reset(GlobalRandomSource, 0);;')
+    lines.append('')
     lines.append('# === Generated generators (1-based images for GAP) ===')
     lines.append('gens := [')
     for i, g in enumerate(generators):
