@@ -67,15 +67,26 @@ unfolding that DAG.
 
 ## Validation state
 
-- **MP ladder (30 formulas): 21 equiv=True, zero equiv=FALSE.** True includes
-  all 1L cases, the 2L cases `a`, `a U b`, `Fa|Gb`, `Fa&Gb`, `Ga|Fb`, and the
-  3L cases `Xa`, `a & Xa`, `a | Xb`, `G(a->Xa)`. The remaining non-True are:
-  3 Spot-verification blocks (below), 3 cases ≥4L behind the dev guard.
+The ≥4-level dev guard is GONE (opt-in `KR_MAX_LEVELS` ceiling remains; the
+real runaway protection is the distinct-subproblem guard). Depth ladder
+added: `Xa` 3L → `XXa` 4L → `XXXa` 5L → `X(a & Xa)` 5L.
+
+- **MP ladder (32 formulas): 21 equiv=True, zero equiv=FALSE** — including
+  **`X X a` at 4 levels** end-to-end. Non-True split, all
+  verification/serialization-bound, none semantic:
+  - SPOT_TIMEOUT / 32-acc-set: `XXXa` (5L, builds in 0.18s), `Ga|Gb`,
+    `G(a->Xb)`, `F(a&Xb)`.
+  - CONSTRUCT_TIMEOUT, dominated by reconstruct's FINAL flat str() of
+    unsimplified output (post no-simplify policy): `G(a->Xa)` (was True
+    under legacy simplify — the one measurable regression of the policy,
+    cured by P0 output-representation work, not by reverting), `X(a&Xa)`,
+    `(a U b)|Gc`, `GFa&GFb`, `FGa|FGb`, `GFa->GFb`, `(GFa&FGb)`.
 - **Semantic grounding (`trace_fin_semantics`, cover-aware — GTs on the config
-  semiautomaton): zero contradictions across all probed cases** (`GFa`,
-  `a U b`, `Fa & Gb`, `Ga | Fb`, `Xa` fully OK; `G(a->Xb)`, `Ga|Gb`,
-  `F(a&Xb)`, `G(p->Xq)`, `G(p->(qUr))` no contradiction with some sub-terms
-  UNVERIFIED by size). Every check Spot can complete is OK.
+  semiautomaton): zero contradictions across every probed case at every
+  depth** (`GFa`, `a U b`, `Fa & Gb`, `Ga | Fb`, `Xa` fully OK; `G(a->Xb)`,
+  `Ga|Gb`, `F(a&Xb)`, `G(p->Xq)`, `G(p->(qUr))`, `XXXa` 14 OK, `X(a&Xa)`
+  11 OK — remaining sub-terms UNVERIFIED by size only). Every check Spot can
+  complete is OK.
 - Audit gate (`test_kr_r4_audit.py`): CLEAN.
 
 ## Open front: representation & verification at scale (not fidelity)
