@@ -2,8 +2,9 @@
 """
 kr/testing/test_kr_r4_audit.py
 
-Placed audit script (per rules) for P0 R4/Rws correctness items from kr/TODO.md
-and the "Audit & Validation Notes" in kr/automata_to_LTL_reference.md.
+Placed audit script (per rules) for P0 R4/Rws correctness items.
+The 5-point checklist below is the authoritative encoding of the R4/Rws0 + R5
+structural corrections (verified against paper/Automata2LTL.txt pp. 11-13).
 
 Focus: semantic grounding (Path A), duality hints (Path B), exact 5-point
 checklist (Path C) against current _*_weak / Rws usage, plus better canary
@@ -185,7 +186,7 @@ def _get_func_body(src: str, func_name: str) -> str:
 
 
 def check_5point_checklist():
-    """Path C: exact 5-point checklist from reference.md Audit notes.
+    """Path C: exact 5-point structural checklist (R4/Rws0 + R5 corrections).
     Precise source inspection of the *bodies* of Rws0 / R4 + behavioral.
     """
     print("\n=== Path C: 5-point Rws0 / R4 checklist (source + behavioral) ===")
@@ -270,7 +271,7 @@ def check_canary_roundtrip():
         return False
 
 def main():
-    print("=== R4 / Rws P0 AUDIT (per kr/TODO.md + reference.md notes) ===")
+    print("=== R4 / Rws P0 AUDIT (structural checklist + semantic grounding) ===")
     print("Using placed script discipline + timeout 5. No core code changes.")
     print("Current git clean slate assumed (run after the initial commit).")
     drift_ok = check_drift_forever_semantics()

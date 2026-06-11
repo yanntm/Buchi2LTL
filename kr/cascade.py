@@ -187,7 +187,7 @@ class Cascade:
                 pass
         return enters
 
-    # --- Refined Cascade API (architectural adoption from reference.md item 2) ---
+    # --- Refined Cascade API (ref-style combined letters / stay/enter/leave) ---
     # Backward-compatible extension: adds explicit sigma, combined letters,
     # first-class stay/enter/leave returning lists of cl tuples (for literal paper disjuncts
     # in Rs0/Rc0 etc.), and Config NamedTuple (hashable, 0-config explicit).

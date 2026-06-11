@@ -2,7 +2,7 @@
 """
 kr/testing/test_kr_arch_adopt.py
 
-Placed script (per rules) for architectural adoption from reference.md,
+Placed script (per rules) for architectural adoption prototypes,
 targeted on key elements + R4 audit cases + canaries (Fa, G(p|F q), drift).
 No full path rewrite; prototypes + shims for comparison on targeted examples.
 Uses timeout 5, no /tmp.
@@ -33,7 +33,7 @@ from kr.reachability_operators import (
 )
 from kr.reachability import reconstruct_ltl_paper_style, build_phi
 
-# --- Architectural prototypes from reference.md (targeted adoption) ---
+# --- Architectural prototypes (targeted adoption) ---
 
 class PaperConfig(NamedTuple):
     """Ref-style: explicit 0-config is empty. Hashable for lru keys."""
@@ -100,7 +100,7 @@ def proto_Rws0_1l(casc, S: PaperConfig, B: Optional[PaperConfig], beta: spot.for
 # --- Targeted test harness (R4 audit cases + canaries, using proto where possible) ---
 
 def run_targeted_arch_test():
-    print("=== Architectural Adoption Test (from reference.md) ===")
+    print("=== Architectural Adoption Test ===")
     print("Targeted: R4 drift/ checklist cases + canaries (Fa, G(p|F q)). No full path.")
     print("Key arch elements adopted in proto: spot.formula (DAG), lru_cache, PaperConfig, ref-style stay shim.")
     print()
