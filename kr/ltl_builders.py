@@ -8,6 +8,7 @@ No dependencies on other kr/ modules.
 """
 
 from __future__ import annotations
+import os
 from typing import Callable, Dict, List, Optional
 
 import spot
@@ -48,11 +49,52 @@ def make_guard(valuations: List[Dict[str, bool]], aps: List[str], pred: Callable
 _tl_simp: Optional["spot.tl_simplifier"] = None
 
 
+# Spot tl_simplifier policy for the construction path. Pure-LTL rewriting is
+# weak on our recursive cascade shapes, and the simplifier is not fully
+# sharing-aware: a single simplify of a big Or/And can stall for minutes
+# inside C++ where even SIGALRM cannot fire (watchdogged on "(a U b) | Gc").
+# The construction therefore relies on spot.formula's constructor-level
+# trivial identities (hash-consing, constant folding, dedup) and calls
+# tl_simplifier only when asked:
+#   KR_SIMP_TREE_LIMIT = 0   (default) never simplify — hash-cons only
+#   KR_SIMP_TREE_LIMIT = N>0 simplify only formulas with <= N unfolded nodes
+#   KR_SIMP_TREE_LIMIT < 0   always simplify (legacy behavior)
+# Skipping is always safe: simplification is cosmetic, never semantic.
+# The size guard uses the unfolded (tree) size — the honest cost proxy for a
+# sharing-blind walk — which unlike DAG size is compositional
+# (1 + sum of child sizes) and so memoizes by node id: O(arity) per NEW node.
+_SIMP_TREE_LIMIT = int(os.getenv("KR_SIMP_TREE_LIMIT", "0"))
+_SIMP_TREE_SAT = 1 << 60  # saturation: sizes beyond any cap are all equal
+_tree_size_memo: Dict[int, int] = {}
+
+
+def _tree_size_f(f: "spot.formula") -> int:
+    """Memoized unfolded-tree node count (saturating)."""
+    gid = f.id()
+    hit = _tree_size_memo.get(gid)
+    if hit is not None:
+        return hit
+    total = 1
+    for child in f:
+        total += _tree_size_f(child)
+        if total >= _SIMP_TREE_SAT:
+            total = _SIMP_TREE_SAT
+            break
+    _tree_size_memo[gid] = total
+    return total
+
+
 def _simp_f(f: "spot.formula") -> "spot.formula":
-    """Simplify a spot.formula, returning a spot.formula (no string round-trip)."""
+    """Normalize a spot.formula for the construction path (no string
+    round-trip). By default this is the identity (hash-cons only); see the
+    _SIMP_TREE_LIMIT policy note above for the opt-in tl_simplifier modes."""
     global _tl_simp
     if f is None:
         return _ff()
+    if _SIMP_TREE_LIMIT == 0:
+        return f
+    if _SIMP_TREE_LIMIT > 0 and _tree_size_f(f) > _SIMP_TREE_LIMIT:
+        return f
     if _tl_simp is None:
         _tl_simp = spot.tl_simplifier()
     try:
