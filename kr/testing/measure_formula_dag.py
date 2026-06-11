@@ -92,6 +92,9 @@ def main():
     parser = argparse.ArgumentParser(description="DAG vs string measurement of the assembled paper-style formula.")
     parser.add_argument("formula", nargs="?", default="G(a -> X b)")
     parser.add_argument("--out", help="write the flat formula string to this file (parse-checked after writing)")
+    parser.add_argument("--no-str", action="store_true",
+                        help="skip flat stringification entirely (the unfolded "
+                             "string can be 100MB+ while the DAG stays tiny)")
     args = parser.parse_args()
     formula_str = args.formula
     print(f"=== DAG measurement for '{formula_str}' ===")
@@ -113,9 +116,12 @@ def main():
 
     stats = dag_stats(res_f)
     n_tree = tree_size(res_f)
-    t1 = time.monotonic()
-    s = str(res_f)
-    t_str = time.monotonic() - t1
+    if args.no_str:
+        s, t_str = "", 0.0
+    else:
+        t1 = time.monotonic()
+        s = str(res_f)
+        t_str = time.monotonic() - t1
 
     acc_relevant = sum(v for k, v in stats["kinds"].items()
                        if k in ("U", "M", "R", "W", "F", "G"))
@@ -123,7 +129,10 @@ def main():
           f"(reach_calls={_ops.PAPER_REACH_CALLS}, fin_calls={_ops.PAPER_FIN_CALLS})")
     print(f"DAG unique nodes          : {stats['unique_nodes']}")
     print(f"tree (unfolded) nodes     : {n_tree}")
-    print(f"string length             : {len(s)} (str() took {t_str:.2f}s)")
+    if args.no_str:
+        print("string length             : SKIPPED (--no-str)")
+    else:
+        print(f"string length             : {len(s)} (str() took {t_str:.2f}s)")
     print(f"sharing factor (tree/DAG) : {n_tree / max(stats['unique_nodes'], 1):.1f}x")
     print(f"distinct temporal binaries (U/M/R/W/F/G): {acc_relevant}")
     print("node kinds:", dict(sorted(stats["kinds"].items(), key=lambda kv: -kv[1])))
