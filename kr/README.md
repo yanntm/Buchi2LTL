@@ -36,10 +36,22 @@ Spot automaton
   state-based acceptance ("sbacc" — required: the Muller condition is lifted over
   configurations, so the set of infinitely-visited states must determine acceptance)
 → extract generators (one per concrete letter in 2^|AP|)        kr/extract.py
-→ self-contained GAP script (SgpDec HolonomyCascadeSemigroup)   kr/gap_bridge.py
-→ parse to Cascade                                              kr/gap/parse.py
+→ self-contained GAP script (SgpDec HolonomyCascadeSemigroup;   kr/gap_bridge.py
+  emits state lifts via AsHolonomyCoords, TRUE cascade transitions
+  via lifted generators/OnCoordinates BFS-closed, and the cover map π
+  via AsHolonomyPoint — holonomy coordinatization is a many-to-one
+  cover, so config dynamics are never reconstructed through the lift;
+  GAP RNG seeded for reproducible runs)
+→ parse to Cascade (coordinates REVERSED: SgpDec top-first ↔    kr/gap/parse.py
+  operators peel deepest-first with suffix context)
 → reachability formulas + Fin(C) + assembly                     kr/reachability*.py
 ```
+
+Construction policy: hash-consed `spot.formula` DAGs end-to-end, full
+memoization (reach + all five helper formulas), and **no external calls in
+the hot path** — Spot is used for hash-consing only; `tl_simplifier` is
+opt-in (`KR_SIMP_TREE_LIMIT`), and every Spot call in the test harness runs
+under a small subprocess budget (a stall is reported, never waited on).
 
 ## Modules
 
@@ -91,6 +103,14 @@ no `python -c` one-liners.
   must report CLEAN before committing operator changes.
 - `test_kr_zoom.py` — full trace for one formula (aut, cascade, Muller, KR_TRACE
   construction, equiv).
+- `probe_reset_consistency.py` — soundness precondition of the paper formulas:
+  every combined letter must act identity-or-reset per level (checked under
+  both context conventions).
+- `probe_memo_stats.py` — memo profiler (distinct subproblems vs raw calls)
+  with a watchdog stack dump for stalls inside native calls.
+- `measure_formula_dag.py` — DAG vs flat-string size of the assembled formula
+  (`--no-str` for cases whose flat form is 100MB+).
+- `probe_sgpdec_api.g` — hand-run GAP ground truth for the SgpDec bridge calls.
 - `test_kr_basic.py`, `test_kr_muller.py`, `test_kr_arch_adopt.py`,
   `diag_stability.py`, `probe_sbacc.py` — basics, Muller helpers, arch prototypes,
   stability, acceptance-marks probe.
