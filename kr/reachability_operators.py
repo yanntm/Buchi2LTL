@@ -685,16 +685,53 @@ def _stay_gt0_weak(
     return res
 
 
+def _enter_letters_at_level(
+    casc: "Cascade", S: Tuple[int, ...], t_val: int, level: int
+) -> List[Tuple[int, Tuple[int, ...]]]:
+    """Enter(t) at layer `level`, evaluated from S (same lower-context
+    approximation as the rest of the operators; exact at the outermost level
+    of 1L cascades). Enter letters *reset* the layer to t_val independently of
+    its current value. When S's layer value already equals t_val, arrival alone
+    cannot distinguish a genuine reset from an identity/stay letter (paper:
+    Enter(q) ⊆ Stay(q)): a genuine enter letter must also send configs whose
+    layer value differs from t_val to t_val."""
+    res: List[Tuple[int, Tuple[int, ...]]] = []
+    s_val = S[level] if len(S) > level else None
+    others = [c for c in casc.all_configs() if len(c) > level and c[level] != t_val]
+    for li in range(casc.num_letters()):
+        try:
+            arrived = casc.move_config(S, li)
+        except Exception:
+            continue
+        if len(arrived) <= level or arrived[level] != t_val:
+            continue
+        if s_val != t_val:
+            res.append((li, arrived))
+            continue
+        if not others:
+            continue  # single layer value: nothing can ever "enter"
+        try:
+            if all(casc.move_config(c, li)[level] == t_val for c in others):
+                res.append((li, arrived))
+        except Exception:
+            continue
+    return res
+
+
 def _dashed_change_strong(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: str, T: Tuple[int, ...], tau: str, casc: "Cascade", level: int = 0
 ) -> str:
     """Formula 5 (dashed / change top, most complex)."""
-    s_top = casc.top_of(S)
-    t_top = casc.top_of(T)
-    if s_top == t_top:
-        return "false"
+    s_top = S[level] if len(S) > level else casc.top_of(S)
+    t_top = T[level] if len(T) > level else casc.top_of(T)
+    # No s_top == t_top early-out: per paper Table 1 / p.13 Formula 5 there is
+    # no s != t requirement. The dashed case must cover leave-and-return paths
+    # (line (3) forces an actual Leave, keeping it disjoint from solid; note
+    # Enter(q) ⊆ Stay(q), so entering without leaving is still solid). The
+    # previous `return "false"` here silently removed every path with >= 2 top
+    # changes back to the source (GFa Fin postponement canary).
 
-    enters = casc.compute_enters_to_from(S, t_top)
+    enters = _enter_letters_at_level(casc, S, t_top, level)
     if not enters:
         return "false"
 
@@ -744,11 +781,32 @@ def _dashed_change_strong(
     or_enters = "(" + " | ".join(disjs) + ")" if disjs else "false"
     or_enters = simplify_ltl(or_enters)
 
-    # Note: no outer & force on leaves here (would force immediate change on first letter).
-    # When lower_T empty the enter cores above injected (notb U core) providing the base
-    # <>~<> (psi) for 1L change cases (giving F for Fa). For multiL eventual at layer
-    # may be provided by recursion / outer solid gt0 landing or keys.
-    return or_enters
+    # Line (3) per paper p.13: "the top-level state is indeed changed":
+    #   ⋁_{⟨σ,L⟩ ∈ Leave(s)}  ⟨S,s⟩ ──solid→_{⟨B,b⟩(β)} ⟨L,s⟩ ( σ ∧ [¬β if ⟨L,s⟩=⟨B,b⟩] )
+    # i.e. a solid-stay reach (avoiding bad) up to the moment a Leave letter
+    # fires -- this does NOT force an immediate change (the solid prefix can be
+    # arbitrarily long). It is what separates dashed from solid when s == t
+    # (leave-and-return), and carries the bad-avoidance of the initial stay
+    # phase in general. (From-S lower-context approximation as elsewhere.)
+    leave_moves = casc.compute_stay_leave_from(S).get("leave", [])
+    line3_parts = []
+    for lli, _larr in leave_moves:
+        if lli >= len(casc.letter_valuations):
+            continue
+        lg_f = _letters_to_f(casc.letter_valuations[lli], casc.aps)
+        if str(lg_f) == "false":
+            continue
+        tail_f = lg_f
+        if B is not None and S == B and str(_to_f(beta)) != "false":
+            tail_f = _And(lg_f, _Not(_to_f(beta)))
+        l3 = _solid_stay_strong(S, B, beta, S, _str_f(tail_f), casc, level)
+        line3_parts.append(_to_f(l3))
+    if not line3_parts:
+        # Leave(s) empty: the top can never change -> dashed impossible.
+        return "false"
+    line3 = simplify_ltl(_str_f(_Or(*line3_parts)))
+
+    return simplify_ltl(f"({or_enters}) & ({line3})")
 
 
 def _dashed_change_weak(
