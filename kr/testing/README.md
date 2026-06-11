@@ -1,29 +1,27 @@
 # kr/testing/
 
-Internal development and verification scripts for the Krohn-Rhodes (kr/) pure algebraic path (Boker et al.).
+Development and verification scripts for the kr/ algebraic path.
+The script-by-script overview lives in `kr/README.md` ("Verification" section);
+this file only records the ground rules.
 
-## Purpose
-- Exercise the paper construction: decompose_aut (to det parity complete minimized + SgpDec cascade) + reconstruct_ltl_1level_buchi (inductive reach formulas + fin_c + Muller assembly).
-- Stability via bdd_utils precompute + per-case subprocess isolation (no segvs from Spot/buddy state).
-- Isolated repeatable tests (no /tmp, no long -c pastes in dev).
+## Rules
 
-## Running
-From the project root:
+- Run from the project root; scripts insert the root on sys.path themselves.
+- Placed scripts only: no /tmp artifacts, no `python -c` one-liners.
+- Subprocess isolation per case (Spot/buddy can segfault on state accumulation;
+  rc 139 = segv) — use the existing scripts as templates.
+- Use timeouts (5–45s per case).
 
-    python3 kr/testing/test_kr_basic.py          # normal path I/O + counters + basic equiv + segv wrap; argv e.g. `... a Fa`
-    python3 kr/testing/test_kr_reconstruct.py   # isolated decomp + pure paper reconstruct + Spot equiv on CASES
-    python3 kr/testing/diag_stability.py
+## Gate before committing operator/assembly changes
 
-Subproc isolation detects rc 139 and prevents accumulation. Full CASES preserved; argv for single formulas. Direct invocation preferred.
+    python3 kr/testing/test_kr_r4_audit.py        # must report CLEAN
+    python3 kr/testing/survey_mp_cascade.py        # previously-True must stay True
 
-## Key things tested
-- decompose_aut + reconstruct_ltl_1level_buchi (paper path) on 0/1/multi-level.
-- LTL output, levels, acc configs, REACH/FIN/MAXSZ counters.
-- Spot are_equivalent (False on some multi until 5-formula polish).
-- No segvs on repeats of Xa etc.; finite construction.
-- Spot 0/1 normalization tolerance.
+## Debug method (contradiction milking)
 
-## Notes on discipline
-Scripts + artifacts under kr/testing/.
-
-See kr/README.md + kr/STATUS.md + kr/algorithm.md for the construction.
+1. `survey_mp_cascade.py` — pick the smallest failing case (weakest MP class).
+2. `trace_fin_semantics.py "<formula>"` — ground each fin_c sub-term against
+   ground-truth automata; find the first diverging sub-term + witness word.
+3. `ltl_diff.py "<A>" "<B>"` — containment direction + witness for any two formulas.
+4. `test_kr_zoom.py "<formula>"` — full KR_TRACE=1 construction trace.
+5. Fix against `paper/Automata2LTL.txt`, re-run the gate, commit (one file).
