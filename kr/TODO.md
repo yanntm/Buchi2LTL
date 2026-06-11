@@ -26,30 +26,34 @@ each fix was verified against `paper/Automata2LTL.txt` directly.
 - Probe script for that diagnosis: `kr/testing/probe_2l_rwith.py` (drills into
   solid⁺ last-step disjuncts and checks each conjunct against the witness word).
 
-**Why it "fails" now — the current blocker is SIZE, not semantics:**
-`G(a->Xb)`'s assembled formula is ~3.2 MB. Construction terminates; Spot
-translation for equivalence checking is what stalls. USE 10s TIMEOUTS and treat
-TIMEOUT as a result. Root cause: operators round-trip strings (`_str_f` → parse
-→ `simplify()`) between every call — no DAG sharing, every conjunct physically
-copies its nested tail, and re-simplification runs on megastrings.
+**P0-perf step 1 DONE (2026-06-11, this session):** operators + fin_c +
+assembly are `spot.formula` objects end-to-end (str accepted at entry for
+probes); one shared `spot.tl_simplifier` with persistent cache, at most one
+simplify per operator return; `_str_f` no longer simplifies; fin_c computed
+once per config in assembly; sentinel guard removed. Validated: GFa +
+G(a->Xb) ALL GROUNDED OK, audit CLEAN (patterns 1+5 updated to new shapes),
+probe witness passes, survey: `a U b`, `Fa|Gb`, `Fa&Gb`, `Ga|Fb` flip True.
+Measured (measure_formula_dag.py): G(a->Xb) builds in 0.08s, 781 DAG nodes,
+3.2MB only as flat string (1600x unfolding). A dedicated reach_weak memo
+looks unnecessary now (its inner reach_strong is lru-cached; ¬+simplify is
+amortized by the persistent simplifier) — revisit only if profiling says so.
 
-**Exact next steps (P0-perf, do these before more semantics):**
-1. Keep `spot.formula` objects end-to-end through the operator recursion:
-   operators accept/return formula objects; convert to str ONLY at the very
-   top (reconstruct) and in traces. `simplify()` at most once per operator
-   return — never inside `_str_f` per conversion.
-2. Add lru/memo to `reach_weak` (it has none; reach_strong's lru exists) and
-   key memos on formula object identity/hash instead of strings.
-3. Re-run: `trace_fin_semantics` GFa + "G(a -> X b)" (must stay ALL GROUNDED OK),
-   `test_kr_r4_audit.py` (audit may need its body-grep patterns updated to the
-   new literal function shapes — the import of `_dashed_change_weak` was already
-   removed), then `survey_mp_cascade.py` — expect G(a->Xb) to flip True and
-   watch the rest of the ladder: `a U b`, `F(a&Xb)`, `Fa|Gb`, `Fa&Gb`, `Ga|Fb`,
-   `Ga|Gb`. Next semantic target after that: `G(p -> (q U r))` (user request),
-   then 3L (`Xa`).
-4. If size is still prohibitive after sharing: simplify aggressively only at
-   low levels (cheap), prune vacuous conjuncts (Enter(b)=∅, unreachable pre),
-   and consider per-subformula equivalence-based interning.
+**Exact next steps (P0-verify — equiv checking, then semantics):**
+1. `G(a->Xb)` (and anything ≥ its size) cannot be equiv-checked by translation:
+   126 distinct temporal subformulas → Spot hard error "Too many acceptance
+   sets used. The limit is 32" (fast fail, not a stall). Reduce DISTINCT
+   temporal subterms: prune vacuous conjuncts (Enter(b)=∅, unreachable pre),
+   per-subformula equivalence-based interning (canonicalize language-equal
+   subterms to one representative); and/or check compositionally (trace_fin
+   grounding is already the per-sub-term oracle) or by word sampling
+   (u·v^ω, construction-ref pitfall #10).
+2. New minimal failing case from survey: **`Ga | Gb` equiv=FALSE** (safety,
+   sizes=[1,4], trivial size-1 top level — suspect the level-collapse /
+   trivial-level handling). Diagnose with ltl_diff (containment + witness)
+   then trace_fin grounding.
+3. `F(a & X b)`: TIMEOUT >45s — find out whether construction or translate;
+   if translate, same as item 1.
+4. Then: `G(p -> (q U r))` (user request), then 3L (`Xa`).
 
 ## P1 — coverage
 
