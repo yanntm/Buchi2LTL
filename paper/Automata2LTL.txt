@@ -1,0 +1,2756 @@
+On the Translation of Automata
+to Linear Temporal Logic?
+Udi Boker1
+
+, Karoliina Lehtinen2
+
+, and Salomon Sickert3??
+
+1
+
+2
+
+Reichman University, Herzliya, Israel
+CNRS, Aix-Marseille University and University of Toulon, LIS, Marseille, France
+3
+The Hebrew University, Jerusalem, Israel
+
+Abstract While the complexity of translating future linear temporal
+logic (LTL) into automata on infinite words is well-understood, the size
+increase involved in turning automata back to LTL is not. In particular,
+there is no known elementary bound on the complexity of translating
+deterministic ω-regular automata to LTL.
+Our first contribution consists of tight bounds for LTL over a unary alphabet: alternating, nondeterministic and deterministic automata can be
+exactly exponentially, quadratically and linearly more succinct, respectively, than any equivalent LTL formula. Our main contribution consists
+of a translation of general counter-free deterministic ω-regular automata
+into LTL formulas of double exponential temporal-nesting depth and
+triple exponential length, using an intermediate Krohn-Rhodes cascade
+decomposition of the automaton. To our knowledge, this is the first elementary bound on this translation. Furthermore, our translation preserves the acceptance condition of the automaton in the sense that it
+turns a looping, weak, Büchi, coBüchi or Muller automaton into a formula that belongs to the matching class of the syntactic future hierarchy.
+In particular, it can be used to translate an LTL formula recognising a
+safety language to a formula belonging to the safety fragment of LTL
+(over both finite and infinite words).
+Keywords: Linear temporal logic · Automata · Cascade decomposition
+
+1
+
+Introduction
+
+Linear Temporal Logic with only future temporal operators (from here on LTL)
+and ω-regular automata, whether deterministic, nondeterministic or alternating,
+are both well-established formalisms to describe properties of infinite-word languages. LTL is popular in formal verification and synthesis due to its simple
+syntax and semantics. Yet, while properties might be convenient to define in
+LTL, most verification and synthesis algorithms eventually compile LTL formulas into ω-regular automata. The expressiveness of both these key formalisms, as
+?
+
+This is the full version of a chapter with the same title that appears in the FoSSaCS
+2022 conference proceedings.
+??
+Salomon Sickert is supported by the Deutsche Forschungsgemeinschaft (DFG) under
+project number 436811179.
+
+2
+
+U. Boker, K. Lehtinen, S. Sickert
+
+well as translations from LTL to automata of various types, are well understood.
+Here, we consider the converse translations, which, in comparison, have received
+less attention: up till now, no elementary upper bound on the size blow-up of
+going from automata to LTL was known.
+Regarding expressive power, deterministic Muller automata, nondeterministic Büchi automata, and weak alternating automata recognise all ω-regular
+languages [20,39]. LTL-definable languages (surveyed in [12]) are a strict subset
+thereof, also defined by first-order logic, star-free regular expressions, aperiodic
+monoids, counter-free automata, and very weak alternating automata. As for
+succinctness, nondeterministic and alternating automata can be exponentially
+and double-exponentially more succinct than deterministic automata, respectively. Determinisation in particular has precise bounds [31,34,23,35,11,3].
+The succinctness of various representations of LTL-definable languages is less
+clear: effective translations between the different models are far from straightforward, and their complexity is sometimes uncertain. In particular, to the best
+of our knowledge, up to now there has been no elementary bound even on the
+translation of deterministic counter-free automata, arguably the simplest automata model for this class of languages, into LTL formulas. (Considering LTL
+with both future and past temporal operators, there is a double-exponential upper bound on the length of the formula [25]4 .) The complexity of obtaining a
+deterministic counter-free automaton from a nondeterministic one is also, to the
+best of our knowledge, open.
+We study the complexity of translating automata to LTL (equivalently, to
+very weak alternating automata), considering formula length, size, and nesting
+depth of temporal operators.
+We begin (Section 3), as a warm-up, with the unary alphabet case on finite words. We show that the size-blow up involved in translating deterministic,
+non-deterministic and alternating automata to LTL, when possible, is linear,
+quadratic and exponential, respectively, and these bounds are tight. In contrast,
+going from LTL to alternating, nondeterministic and deterministic automata is
+linear, exponential and double-exponential, respectively [32,40,18].
+The case of non-unary alphabets is much more difficult. We provide a translation of counter-free deterministic ω-regular automata (with any acceptance condition) into LTL formulas with double exponential depth and triple exponential
+length. Our translation uses an intermediate Krohn-Rhodes reset cascade decomposition (wreath product) of deterministic automata, which is a deterministic
+automaton built from simple components.
+Our main technical contribution consists of a translation of a reset cascade
+into an LTL formula of depth linear and length singly exponential in the number
+of cascade configurations. Combining this with Eilenberg’s Holonomy translation
+of a semigroup into a cascade [13, Corollary II.7.2] and Pnueli and Maler’s adaptation of it to automata [25, Theorem 3] (see Remark 1), we obtain a translation
+of counter-free deterministic ω-regular automata into LTL formulas of double
+exponential depth and triple exponential length. Our construction preserves the
+4
+
+See Remark 1 on whether the upper bound in [25] is single or double exponential.
+
+On the Translation of Automata to Linear Temporal Logic
+
+3
+
+acceptance condition of the automaton in the sense that it turns a Büchi-looping,
+coBüchi-looping, weak, Büchi or coBüchi automaton into a formula that belongs
+to the matching class of the syntactic future hierarchy (see Definition 1 and [7]).
+
+Related work
+Finite words. While LTL is usually interpreted over infinite words, it also admits
+finite-word semantics that coincide with the finite word version of the other
+equivalent formalisms. The equivalence between FO and star-free languages on
+finite words is due to McNaughton and Papert [30]. Cohen, Perrin and Pin [9]
+used the Krohn-Rhodes decomposition to characterise the expressive power of
+LTL with only X and F (eventually), but do not provide bounds on the size
+trade-off between the different models. Wilke [41] gives a double-exponential
+translation from counter-free DFA to LTL. More recently, Bojańczyk provided
+an algebraically flavoured adaptation of Wilke’s proof [2, Section 2.2.2].
+Infinite words. With substantial effort over several decades, the above techniques
+have been extended to infinite words using intricate tools with opaque complexities. Ladner [21] and Thomas [37,38] for example extended the equivalence of
+star-free regular expressions and FO to infinite words, while the ω-extension of
+the equivalence with aperiodic languages is due to Perrin [33]. The correspondence with LTL is due to Kamp [17] and Gabbay, Pnueli, Shelah and Stavi [15].
+Diekert and Gastin’s survey [12] provides an algebraic translation into LTL via ωmonoids while Cohen-Chesnot gives a direct algebraic proof of the equivalence of
+star-free ω-regular expressions and LTL [10]. Wilke takes an automata-theoretic
+approach, using backward deterministic automata [42,43]. However, none of the
+above address the complexity of the transformations. Zuck’s dissertation [45]
+gives a translation of star-free regular expressions into LTL, with at least nonelementary complexity. Subsequently, Chang, Mana and Pneuli [7] use Zuck’s
+results to show that the levels of their hierarchy of future temporal properties
+coincide with syntactic fragments of LTL. Sickert and Esparza [36] gave an exponential translation of any LTL formula into level ∆2 of this hierarchy.
+
+2
+
+Preliminaries
+
+Languages. An alphabet Σ, of size |Σ|, is a finite set of letters. Σ ∗ , Σ + , and Σ ω
+denote the sets of finite, nonempty finite, and infinite words over Σ, respectively.
+A language of finite or infinite words is a subset of Σ ∗ or Σ ω , respectively.
+We write [i..j] and [i..j), with integers i ≤ j, for the sets {i, i + 1, . . . , j} and
+{i, i + 1, . . . , j − 1}, respectively. For a word w = σ0 · σ1 · · · , we write |w| for its
+length (∞ if w is infinite), w[i] for σi , w[i..j] and w[i..j) for its corresponding infixes
+(w[i..i) is the empty word), and w[i..] for its (finite or infinite) suffix σi · σi+1 · · · .
+
+4
+
+U. Boker, K. Lehtinen, S. Sickert
+
+Linear Temporal Logic (LTL). Let AP be a finite set of atomic propositions. LTL
+formulas are constructed from the constant true, atomic propositions a ∈ AP ,
+the connectives ¬ (negation) and ∧ (and), and the temporal operators U (until)
+and X (next). Their semantics are given by a satisfiability relation |= between
+finite or infinite words w ∈ (2AP )+ ∪ (2AP )ω , and a formula ϕ inductively as
+follows:
+w |= true
+w |= a
+iff a ∈ w[0]
+w |= ¬ϕ
+iff w 6|= ϕ
+w |= ϕ ∧ ψ iff w |= ϕ and w |= ψ
+w |= Xϕ iff |w| > 1 and w[1..] |= ϕ
+w |= ϕUψ iff ∃i ∈ [0..|w|). w[i..] |= ψ and ∀j ∈ [0..i). w[j..] |= ϕ
+We also use the common shortcuts false := ¬true, ϕ ∨ ψ := ¬((¬ϕ) ∧ (¬ψ)),
+Fϕ := trueUϕ, Gϕ := ¬F¬ϕ, and ψ1 Rψ2 := ¬(¬ψ1 )U(¬ψ2 ). The language
+of finite words of ϕ is L<ω (ϕ) := {w ∈ (2AP )+ | w |= ϕ}, and the language of
+infinite words is L(ϕ) := {w ∈ (2AP )ω | w |= ϕ}. Note that we omit the “< ω”
+superscript if it is clear from the context which set is used. The length |ϕ| of ϕ
+is the number of nodes in its syntax tree, the size of ϕ is the number of nodes in
+a DAG representing this syntax tree, and its temporal nesting depth, denoted by
+depth(ϕ), is defined by: depth(true) = 0; depth(a) = 0 for an atomic proposition
+a ∈ AP ; depth(¬ψ) = depth(ψ); depth(ψ1 ∧ ψ2 ) = max(depth(ψ1 ), depth(ψ2 ));
+depth(Xψ) = depth(ψ) + 1; and depth(ψ1 Uψ2 ) = max(depth(ψ1 ), depth(ψ2 )) + 1.
+Chang, Manna, and Pnueli define in [7] a syntactic hierarchy for LTL formulas
+(over infinite words):
+Definition 1 (LTL Syntactic future hierarchy [7] 5 ).
+– Σ0 = Π0 = ∆0 is the least set containing all atomic propositions and their
+negations, and is closed under the application of conjunction and disjunction.
+– Σi+1 is the least set containing Πi and negated formulas of Πi+1 closed under
+the application of conjunction, disjunction, and the X and U operators.
+– Πi+1 is the least set containing Σi and negated formulas of Σi+1 closed under
+the application of conjunction, disjunction, and the X and R operators.
+– ∆i+1 is the least set containing Σi+1 and Πi+1 that is closed under the
+application of conjunction, disjunction, and negation.
+Σ1 is referred to as syntactic co-safety formulas, Π1 as syntactic safety formulas.
+Automata. A deterministic semiautomaton is a tuple D = (Σ, Q, δ), where Σ
+is an alphabet; Q is a finite nonempty set of states; and δ : Q × Σ → Q is a
+transition function and we extend it to finite words in the usual way. A path of
+D on a word w = σ0 · σ1 · · · is a sequence of states q0 , q1 , . . ., such that for every
+i < |w|, we have δ(qi , σi ) = qi+1 .
+It is a reset semiautomaton if for every letter σ ∈ Σ, either i) for every state
+q ∈ Q we have δ(q, σ) = q, or ii) there exists a state q 0 ∈ Q, such that for every
+state q ∈ Q we have δ(q, σ) = q 0 .
+5
+
+This extends [5,36] with negation, which can be removed via negation normal form.
+
+On the Translation of Automata to Linear Temporal Logic
+
+5
+
+It is counter free if for every state q ∈ Q, finite word u ∈ Σ + , and number
+n ∈ N \ {0}, there is a self loop of q on un iff there is a self loop of q on u.
+A deterministic automaton is a tuple D = (Σ, Q, ι, δ, α), where (Σ, Q, δ) is a
+deterministic semiautomaton, ι ∈ Q is an initial state; and α is some acceptance
+condition, as detailed below. A run of D on a word w is a path of D on w that
+starts in ι. It is a reset or counter-free automaton if its semiautomaton is.
+The acceptance condition of an automaton on finite words is a set F ⊆ Q; a
+run is accepting if it ends in a state q ∈ F . The acceptance condition of an ωregular automaton, on infinite words, is defined with respect to the set inf (r ) of
+states visited infinitely often along a run r. We define below several acceptance
+conditions that we use in the sequel; for other conditions, see, for example, [3].
+The Muller condition is a set α = {M1 , . . . , Mk } of sets Mi ⊆ Q of states,
+and a run r is accepting if there exists a set Mi , such that Mi = inf (r ). The
+Rabin condition is a set α = {(G1 , B1 ), . . . , (Gk , Bk )} of pairs of sets of states,
+and r is accepting if there exists a pair (Gi , Bi ), such that Gi ∩ inf (r ) 6= ∅ and
+Bi ∩ inf (r ) = ∅. The Büchi (resp. coBüchi ) condition is a set α ⊆ Q of states,
+and r is accepting if α ∩inf (r ) 6= ∅ (resp. α ∩inf (r ) = ∅). A weak automaton is a
+Büchi automaton, in which every strongly connected component (SCC) contains
+only states in α or only states out of α. A looping automaton is a Büchi or
+coBüchi automaton, where all states are in α, except for a single sink state.
+Deterministic automata of the above types correspond to the hierarchy of
+temporal properties [27]: Looping-Büchi, looping-coBüchi, weak, Büchi, coBüchi,
+and Rabin/Muller deterministic automata define respectively safety, guarantee
+(co-safety), obligation, recurrence, persistence, and reactivity languages. If the
+language is also LTL-definable, then there exists an equivalent LTL formula in
+Π1 , Σ1 , ∆1 , Π2 , Σ2 , and ∆2 , respectively [7]. Every deterministic ω-regular
+automaton is equivalent to deterministic Muller and Rabin automata, where the
+Muller (but not always Rabin) one can be defined on the same semiautomaton.
+Nondeterministic and alternating automata (to which we only refer in Section 3, on finite words over a unary alphabet) extend deterministic automata by
+having a transition function δ : Q × Σ → 2Q and δ : Q × Σ → (positive Boolean
+formulas over Q), respectively. (See, for example, [6] for formal definitions.)
+
+3
+
+Unary Alphabet
+
+Kupferman, Ta-Shma and Vardi [19] compared the succinctness of different automata models when counting, that is, recognising the singleton language {ak } for
+some k over the singleton alphabet {a}. For the succinctness gap between automata and LTL, we study the task of recognising arbitrary languages over the
+unary alphabet, which can be seen as sets of integers, rather than a single integer.
+For a unary alphabet, since there is only one infinite word, only languages
+on finite words are interesting. We thus consider LTL formulas over (no) atomic
+propositions AP = ∅, and automata on finite unary words over the corresponding
+alphabet Σ = 2AP = {∅}, where we use the shorthand a = ∅. The size of
+a deterministic automaton is the number of its states, of a nondeterministic
+
+6
+
+U. Boker, K. Lehtinen, S. Sickert
+
+automaton the number of its transitions, and of an alternating automaton the
+number of subformulas in its transition function.
+We show that the size blow-up involved in translating deterministic, nondeterministic, and alternating automata to LTL, when possible, is linear, quadratic, and exponential, respectively.
+In our analysis, we shall use the following folklore theorem, which extends
+Wolper’s Theorem [44]. The proof is given in Appendix A.1.
+Proposition 1 (Extended Wolper’s theorem, Folklore). Consider an
+LTL formula ϕ with depth(ϕ) = n over the atomic propositions AP , and let
+Σ = 2AP . Then for every words u ∈ Σ ∗ , v ∈ Σ + and t ∈ Σ ω , and numbers
+i, j > n, ϕ has the same truth value on the words (uv i t) and (uv j t).
+We use this to establish that unary LTL describes only finite and co-finite
+properties, and that there is a tight relation between the depth of LTL formulas
+and the length of words above which they are all in or all out of the language.
+Proposition 2. Given an LTL formula ϕ with depth(ϕ) = n on finite words
+over the unary alphabet {a}, ai ∈ L(ϕ) for all i > n or ai ∈
+/ L(ϕ) for all i > n.
+Proposition 3. Consider a language L ⊆ {a}+ that agrees on all words of
+length over n, that is, has the same truth value on all such words. Then there is
+an LTL formula of size in O(n) with language L.
+We now establish the trade-off between LTL and alternating automata (AFA)
+over unary alphabets. AFA are closed under (linear) complementation, so we use
+a pumping argument to bound the length after which all words have the same
+truth value, giving an upper bound on the LTL formula.
+Lemma 1. Every alternating automaton with n states that recognises an LTLexpressible language L ⊆ {a}+ is equivalent to an LTL formula of size in O(2n ).
+n−1
+
+We show next that this upper bound is tight. Consider the language {a2 },
+which, according to Proposition 2, is only recognised by LTL formulas of size at
+least 2n−1 . It is recognised by a weak alternating automaton with 2n states and
+size in O(n), using an automaton based on Leiss’s construction [22]. Intuitively,
+the alternating automaton represents an n-bit up-counter with two states for
+each bit, one for 1 and one for 0 (see Fig. 1), where the universal transitions
+enforce that nondeterministic transitions correctly update the counter.
+Lemma 2 (Adaptation of [22, proof of Theorem 1]). For every n ∈
+N \ {0}, there is a weak alternating automaton with 2n states and transition
+n−1
+function of size in O(n) recognising the language {a2 }.
+We continue to nondeterministic automata (NFAs), for which the arguments
+are more involved as they do not allow for linear complementation.
+
+On the Translation of Automata to Linear Temporal Logic
+q4,0
+
+q3,0
+
+q2,0
+
+a
+
+a
+
+a
+
+∨
+
+∧
+∨
+
+∧
+
+q1,1
+q2,1
+q3,1
+
+∧
+∧
+qacc
+
+qacc
+
+∨
+q2,0
+q1,0
+
+∨
+a
+q3,1
+
+∧
+
+∧
+
+∨
+
+7
+q1,0
+
+∧
+
+q1,0
+∨
+∧
+
+q1,1
+q2,1
+
+∧
+
+a
+
+∨
+q1,1
+
+∧
+qacc
+
+∨
+a
+
+∧
+
+∨
+qacc
+
+q2,1
+
+Figure 1. A weak alternating automaton of size in O(n) recognising {a2
+with n = 4, where the initial configuration is q1,0 ∧ q2,0 ∧ q3,0 ∧ q4,0 .
+
+a
+q1,1
+
+n−1
+
+}; here
+
+Lemma 3. Every nondeterministic automaton with n states recognising an LTLexpressible language L ⊆ {a}+ is equivalent to an LTL formula of size in O(n2 ).
+Proof sketch. For finite L, by a pumping argument, A only accepts words up to
+length n, and by Proposition 3 we are done. We now consider a co-finite L.
+We use 2-way deterministic automata, which are deterministic automata that
+process words of the form `wa, where ` and a are start- and end-of-word markers
+respectively, and where transitions specify whether to read the letter to the right
+or to the left of the current position. They accept by reaching an end state, and
+reject by reaching a rejecting state or by failing to terminate [16], and every
+unary NFA A can be turned into a 2-way DFA D of size O(n2 ) [8].
+We construct from an NFA A a 2-way DFA D, and then a 2-way DFA D0 of
+the same size that recognises a∗ \ {ak }, where ak is the longest word not in L.
+We use the fact that a 2-way DFA of size m can be complemented into one of
+size 4m [16] to complement D0 into D00 that recognises {ak } and must therefore
+be of size at least k + 2 [1], so k, and by Proposition 2, an LTL formula for L,
+is in O(n2 ).
+We now show that this upper bound is tight. The previous lower bound ideas
+do not work with nondeterminism, since we need n states to recognise {an } [19].
+Yet, we need not count exactly to n for achieving a lower bound. We can use
+a variant of a language used in [4, pages 10–11]: For every positive integer k,
+define the set of positive integers Sk = {m > 0 | ∃i, j ∈ N. m = ik + j(k + 1)},
+and the language Vk = {am | m ∈ Sk } ⊆ {a}∗ .
+Proposition 4 (Folklore, [4, Theorem 3]). For every k ∈ N the number
+k 2 − k − 1 is the maximal number not in Sk .
+
+8
+
+U. Boker, K. Lehtinen, S. Sickert
+
+Proposition 5 ([4, proof of Theorem 4]). For every n ∈ N, there is an NFA
+2
+of size in O(n) recognising a co-finite language L ⊆ {a}∗ , such that ak −k−1 is
+2
+t
+not in L, while for every t ≥ k − k, we have that a ∈ L.
+Theorem 1. The size blow-up involved in translating deterministic, nondeterministic, and alternating automata on finite unary words to LTL, when possible, is
+Θ(n), Θ(n2 ), and Θ(2n ), respectively.
+
+4
+
+General Alphabet
+
+In this section we consider the more challenging task of turning counter-free ωregular automata over arbitrary alphabets into LTL. We use the fact that these
+automata can be turned into reset cascade automata (Krohn-Rhodes-Holonomy
+decomposition), which we describe in Section 4.1. Our technical contribution is
+then the translation of reset cascade automata into LTL.
+In brief, we build, in Section 4.2, a parameterised LTL formula that is satisfied by a word w iff the run of the cascade on w, starting in the parameter
+configuration S, reaches a parameter configuration T , such that the remaining suffix of w satisfies a parameter LTL formula τ . We then use this formula,
+in Section 4.4, to describe the automaton’s acceptance condition.
+When encoding the behavior of a cascade by an LTL formula, we need to
+overcome two major challenges: First, the cascade is a formalism that looks at
+the past, namely at the word read so far, to determine the next configuration,
+while an LTL formula obtains its value only from the future. Second, the cascade
+has an internal state, while an LTL formula does not. Our reachability formulas
+are therefore quite involved, built inductively over the number of levels in the
+cascade, and implicitly allowing to track the internal configuration of the cascade.
+In Section 4.3 we analyse the length and depth of the resulting formulas.
+4.1
+
+Cascaded Automata
+
+Cascades. A cascaded semiautomaton (analogous to the algebraic wreath product) over an alphabet Σ is a semiautomaton that can be described as a sequence
+of simple semiautomata, such that the alphabet of each of them is Σ together
+with the current state of each of the preceding semiautomata in the sequence. It
+is a reset cascade if it is a sequence of reset semiautomata. Formally, a cascaded
+semiautomaton, or just cascade, over alphabet Σ with n levels is a tuple A =
+hΣ, A1 , A2 , . . . , An i, such that Ai = (Σi , Qi , δi ) is a semiautomaton for each
+level i, where Σi = Σ × Q1 × · · · × Qi−1 . (So Σ1 = Σ, Σ2 = Σ × Q1 , etc.). It is
+a reset cascade if all Ai ’s are reset semiautomata.
+An i-configuration S of A is a tuple hq1 , q2 , . . . , qi i ∈ Q1 × · · · × Qi . If qi+1 ∈
+Qi+1 is a state of level i + 1, we write hS, qi+1 i for the (i + 1)-configuration
+hq1 , . . . , qi , qi+1 i. Note that the 0-configuration is the empty tuple hi. Further, we
+derive the transition relation for configurations by point-wise application of the
+respective δi ’s. We define δ≤i (hq1 , q2 , . . . qi i, σ) as hδ1 (q1 , hσi), δ2 (q2 , hσ, q1 i), . . .i.
+
+On the Translation of Automata to Linear Temporal Logic
+
+9
+
+Note that we will omit the “≤ i”-subscript if it is clear from context, and by
+just writing “configuration”, we mean an n-configuration.
+Notice that A describes a standard semiautomaton DA over Σ, whose states
+are the configurations of A of level n, and its transition function is δ≤n . If there
+are up to j states in each level of A, there are up to j n states in DA . Observe that
+when A is a reset cascade, it can be translated to an equivalent reset cascade
+with up to n log j levels, and 2 states in each level [13, Ex. I.10.2].
+For a state q ∈ Qi of level i of a reset cascade, we denote by Enter(q), Stay(q),
+and Leave(q) ⊆ Σ × Q1 × · · · × Qi−1 the sets of (combined) letters that enter
+q, stay in it, and leave it, respectively. These are sets of pairs hσ, Si, where S
+is an (i−1)-configuration and σ ∈ Σ. Notice that Enter(q) ⊆ Stay(q), and that
+Leave(q) is the complement of Stay(q) (w.r.t. the relevant (combined) letters).
+A semiautomaton (Σ, Q, δ) is homomorphic to a cascade hΣ, A1 , . . . , An i if
+there exists a partial surjective function ϕ : Q1 × · · · × Qn → Q, such that for
+every σ ∈ Σ and S ∈ Q1 × · · · × Qn , we have δ(ϕ(S), σ) = ϕ(δ≤n (S, σ)).
+Proposition 6 (Part of the Krohn-Rhodes-Holonomy Decomposition
+[13, Corollary II.7.2], [25, Theorem 3]). Every counter-free deterministic
+semiautomaton D with n states is homomorphic to a reset cascade A with up to
+2n levels and 2n states in each level.
+Remark 1. The Krohn-Rhodes and Holonomy decomposition theorems consider
+also more general cascades and give results with respect to arbitrary semiautomata. The Holonomy decomposition in [13], as opposed to many other proofs
+of the Krohn-Rhodes decomposition, guarantees up to 2n levels with up to 2n
+states in each level. Yet, it shows that A covers D, allowing A to operate over
+an alphabet different from that of D. In [25,26,24], the algebraic proof of [13] is
+translated to an automata-theoretic one, providing the stated homomorphism.
+It is also stated in [25, Theorem 3.1], [26, Corollary 20], and [24, Corollary 2]
+that the number of configurations in A is singly exponential in n, but to the
+best of our understanding they do not provide an explicit proof for it.
+Cascades with acceptance conditions. As a cascade A describes a standard semiautomaton (whose states are the configurations of A), we can add to it an initial
+configuration and an acceptance condition to make it a standard deterministic
+automaton. We show below that the homomorphism between an automaton and
+a cascade can be extended to also transfer the same acceptance condition.
+Proposition 7. Let D be a deterministic Büchi, coBüchi or Rabin automaton,
+with a semiautomaton homomorphic to a cascade A. There is respectively a
+deterministic Büchi, coBüchi or Rabin automaton D0 equivalent to D with semiautomaton A. For Rabin, D and D0 have the same number of acceptance pairs.
+Proposition 8. Consider a deterministic Muller automaton D with n states,
+whose semiautomaton is homomorphic to a reset cascade A with m configurations. Then there is a deterministic Muller automaton D0 equivalent to D, whose
+semiautomaton is A and its Muller condition has up to 2O(mn) acceptance sets.
+
+10
+
+4.2
+
+U. Boker, K. Lehtinen, S. Sickert
+
+Encoding Reachability within Reset Cascades by LTL Formulas
+
+For the rest of this section, let us fix a set of atomic propositions AP , an alphabet
+Σ = 2AP , and a reset cascade A = hΣ, A1 , A2 , . . . , An i.
+The main reachability formula. For every level i of A, three configurations S, B
+and T of level i, and two LTL formulas β and τ , we will define the LTL formula
+∼∼∼K T (τ ) with the intended semantics that it holds on a word w ∈ Σ ω iff
+S ∼X
+B(β)
+X
+A goes from the ‘starting’ configuration S to the ‘target’ configuration T along
+some prefix u of w, such that the suffix of w after u satisfies τ and the path
+along u avoids the ‘bad’ configuration B with a suffix satisfying β.
+Auxiliary reachability formulas. We will formally define the main reachability
+formula by induction on the level i of the involved configurations, and using
+four auxiliary formulas, whose intended semantics is described in Table 1. These
+formulas distinguish between the case that the top-level state is unchanged along
+the reachability path, denoted with a solid arrow −−→, and the case that it is
+changed, denoted by a dashed arrow 999K. They also have dual, weak, versions.
+∼∼∼K T (τ ) is an extended Until operator, while
+Observe that intuitively S ∼X
+B(β)
+X
+weak
+∼∼∼K T (τ ) = ¬(S ∼X
+∼∼∼K B (β)) is an extended Weak until (or Release)
+its dual S ∼X
+B(β)
+T (τ
+X)
+X
+operator. We build the formulas so that for appropriate choices of β and τ , the
+(strong) reachability formulas 1, 3, and 5 (as numbered in Table 1) are syntactic
+co-safety and the weak formulas 2 and 4 are syntactic safety formulas.
+Formulas 1 and 2. The main formula is simply defined as the union of two
+auxiliary formulas, corresponding to whether or not the top-level state changes,
+and its weak version is defined to be its dual.
+(
+(¬β)Uτ
+if S = hi
+∼∼∼K T (τ ) :=
+S ∼X
+S−
+−−→ T (τ ) ∨ S 9999
+K T (τ ) otherwise.
+B(β)
+X
+X
+X
+B(β)
+B(β)
+X
+X
+
+
+weak
+S ∼X
+∼∼∼K T (τ ) := ¬ S ∼∼∼∼K B (β)
+B(β)
+H
+X
+T (τ
+H)
+Formula 3. Since the formula should ensure that the top-level state s is unchanged, we first distinguish between four cases, depending on which of the
+source configuration hS, si, bad configuration hB, bi, and target configuration
+hT, ti are equal. The definitions of the four cases only differ in whether or not
+each of β and τ are satisfied in the first position of the word.
+We define them using an intermediate common formula that is indifferent
+to the first position, which we mark by “> 0” on top of the arrow. We then
+define the “> 0” formula by using the main reachability formula with respect
+to a lower level, namely with respect to the configurations S and T instead of
+hS, si and hT, ti, and having corresponding disjunctions and conjunctions on all
+the combined letters of the top level that belong to Stay(s) and Leave(s).
+
+On the Translation of Automata to Linear Temporal Logic
+
+Intended semantics
+Intuitively: Reading a word w from the configuration S or hS, si
+Formally: w |= ϕ ⇐⇒
+
+Reachability formula ϕ
+
+1.
+
+not reaching B(β) until reaching T (τ ).
+∃i ≥ 0. δ(S, w[0..i) ) = T ∧ w[i..] |= τ
+∧ (∀j ∈ [0..i). δ(S, w[0..j) ) 6= B ∨ w[j..] 6|= β)
+
+S ∼X
+∼∼∼K T (τ )
+B(β)
+
+X
+
+2.
+
+11
+
+reaching T (τ ) releases not reaching B(β).
+∀i ≥ 0. (δ(S, w[0..i) ) = B ∧ w[i..] |= β)
+→ (∃j ∈ [0..i). δ(S, w[0..j) ) = T ∧ w[j..] |= τ )
+
+weak
+
+∼∼∼K T (τ )
+S ∼X
+B(β)
+
+X
+
+−−−−→ hT, ti (τ )
+3. hS, si −
+X
+hB,bi(β)
+
+XX
+
+weak
+
+−−−−→ hT, ti (τ )
+4. hS, si −
+X
+hB,bi(β)
+
+XX
+
+not reaching hB, bi(β) until reaching hT, ti(τ ), while staying in s.
+∃i ≥ 0. δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ
+∧ (∀j ∈ [0..i). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β)
+∧ (∀j ∈ [0..i). hw[j], δ(S, w[0..j) )i ∈ Stay(s))
+reaching hT, ti(τ ) releases not (reaching hB, bi(β) or leaving s).
+∀i ≥ 0. (δ(hS, si, w[0..i) ) = hB, bi ∧ w[i..] |= β)
+
+∨ (i > 0 ∧ hw[i−1], δ(S, w[0..i−1) )i ∈ Leave(s))
+→ (∃j ∈ [0..i). δ(hS, si, w[0..j) ) = hT, ti ∧ w[j..] |= τ )
+
+not reaching hB, bi(β) until reaching hT, ti(τ ) and leaving s.
+∃i1 , i2 ≥ 0. δ(hS, si, w[0..i1 ) ) = hT, ti ∧ w[i1 ..] |= τ
+∧ (∃j1 ∈ [0..i1 ). hw[j1 ], δ(S, w[0..j1 ) )i ∈ Enter(t))
+hS,
+si
+9999999
+K
+hT,
+ti
+(τ
+)
+5.
+X
+XX
+hB,bi(β)
+∧ hw[i2 ], δ(S, w[0..i2 ) )i ∈ Leave(s)
+∧ (∀j2 ∈ [0.. max(i1 −1, i2 )]. δ(hS, si, w[0..j2 ) ) 6= hB, bi
+∨ w[j2 ..] 6|= β)
+Table 1. The intended semantics of reachability formulas. Orange subformulas show
+the difference between the auxiliary formulas and the first or second (main) formula.
+
+hS, si −
+−−−−→ hT, ti (τ ) :=
+X
+hB,bi(β)
+
+XX
+
+
+>0
+hS, si −
+−−−−→ hT, ti (τ )
+
+
+X
+
+X
+hB,bi(β)
+
+X
+
+
+>0
+
+
+−−−−→ hT, ti (τ ) ∨ τ
+hS, si −
+X
+X
+hB,bi(β)
+
+if hS, si =
+6 hB, bi and hS, si 6= hT, ti
+
+
+hS, si −
+−−−−→ hT, ti (τ ) ∧ ¬β
+
+X
+
+XX
+hB,bi(β)
+
+
+
+
+
+
+>0
+
+ hS, si −−−
+−
+−
+→
+hT,
+ti
+(τ
+)
+∧
+¬β
+∨τ
+X
+
+if hS, si = hB, bi and hS, si 6= hT, ti
+
+>0
+
+if hS, si =
+6 hB, bi and hS, si = hT, ti
+
+X
+
+if hS, si = hB, bi and hS, si = hT, ti
+
+hB,bi(β)
+
+XX
+
+>0
+
+where hS, si −
+−−−−→ hT, ti (τ ) :=
+X
+hB,bi(β)
+
+XX
+
+_
+0
+
+hσ,T i∈Stay(s)
+σ
+s.t. hT 0,si→hT,ti
+
+∼∼∼∼∼K T 0 (σ ∧ Xτ )
+S ∼X
+S(false)
+
+XX
+
+12
+
+U. Boker, K. Lehtinen, S. Sickert
+!
+^
+
+∧
+
+S ∼∼∼∼K T 0 (σ ∧ Xτ )
+
+hη,Li∈Leave(s)
+
+H
+L(η)
+H
+
+^
+
+∧
+
+S∼
+∼∼∼∼∼∼K T 0 (σ ∧ Xτ )
+X
+B 0 (ρ∧Xβ)
+
+XXX
+
+hρ,B 0 i∈Stay(s)
+0
+
+ρ
+
+s.t. hB ,si→hB,bi
+
+Formula 4. Its intended semantics is also that the top-level state s is unchanged,
+but we weaken Formula 3 by not enforcing that the target configuration hT, ti is
+reached and τ is satisfied. Thus as long as the top-level state s stays unchanged
+and the bad configuration hB, bi is not reached while satisfying β, Formula 4 is
+also satisfied. Note that since both Formula 3 and Formula 4 need to ensure that
+the top-level state s is unchanged they cannot simply be defined as the dual of
+each other. However, they share the same construction principle:
+weak
+
+hS, si −
+−−−−→ hT, ti (τ ) :=
+X
+X
+hB,bi(β)
+ X
+weak,>0
+
+hS, si −
+−−−−→ hT, ti (τ )
+
+
+X
+
+XX
+hB,bi(β)
+
+
+
+weak,>0
+
+
+hS,
+si
+−
+−
+−
+−−→ hT, ti (τ ) ∨ τ
+
+X
+X
+hB,bi(β)
+
+if hS, si =
+6 hB, bi and hS, si 6= hT, ti
+if hS, si =
+6 hB, bi and hS, si = hT, ti
+
+X
+
+weak,>0
+
+
+hS, si −
+−−−−→ hT, ti (τ ) ∧ ¬β
+
+X
+
+XX
+hB,bi(β)
+
+
+
+
+
+
+weak,>0
+
+
+−−−−→ hT, ti (τ ) ∨ τ ∧ ¬β
+ hS, si −
+X
+
+if hS, si = hB, bi and hS, si 6= hT, ti
+if hS, si = hB, bi and hS, si = hT, ti
+
+hB,bi(β)
+
+XX
+
+where
+weak,>0
+
+hS, si −
+−−−−→ hT, ti (τ ) :=
+X
+hB,bi(β)
+
+XX
+
+!
+_
+
+^
+
+hσ,T 0 i∈Stay(s)
+σ
+s.t. hT 0,si→hT,ti
+
+hη,Li∈Leave(s)
+
+_
+
+^
+
+weak
+
+^
+
+H
+L(η)
+H
+
+hρ,B 0 i∈Stay(s)
+
+S ∼∼∼∼K T 0 (σ ∧ Xτ ) ∧
+
+S∼
+∼∼∼∼∼∼K T 0 (σ ∧ Xτ )
+X
+weak
+
+ρ
+
+B 0 (ρ∧Xβ)
+
+(1)
+
+XXX
+
+s.t. hB 0,si→hB,bi
+
+!
+weak
+
+S ∼∼∼∼K S (false)
+
+hη,Li∈Leave(s)
+
+H
+L(η)
+H
+
+∧
+
+^
+
+weak
+
+S∼
+∼∼∼∼∼∼K S (false)
+X
+
+hρ,B 0 i∈Stay(s)
+ρ
+
+B 0 (ρ∧Xβ)
+
+XXX
+
+s.t. hB 0,si→hB,bi
+
+Formula 5. The definition of the last reachability formula is the most challenging,
+since the top-level state changes (s 6= t), which prevents the direct usage of lower
+level configurations.
+Intuitively, before reaching the target configuration hT, ti, the run must see a
+combined letter hσ, T 0 i ∈ Enter(t), after which the top-level state t is preserved
+and the bad situation hB, bi(β) is avoided. This is line (1) of the definition.
+The run must also not see hB, bi(β) before reaching T 0 , which is handled in
+line (2), whose difference from line (1) is the additional constraint on the path
+from S to T 0 . (Line (1) is required for the case that Enter(b) is empty.) We use
+Formula 4 for that constraint, rather than Formula 3 which could also be used,
+in order to ensure that Formula 5 can be a syntactic co-safety formula.
+
+(2)
+
+On the Translation of Automata to Linear Temporal Logic
+
+13
+
+Lastly, line (3) ensures that the top-level state is indeed changed.
+hS, si 9999999
+K hT, ti (τ ) :=
+X
+hB,bi(β)
+
+XX
+
+_
+hσ,T 0 i∈
+Enter(t)
+
+
+
+
+∧
+−
+−
+−
+−
+→
+hT,
+ti
+(τ
+)
+∼∼∼∼∼K T 0 σ ∧ X δ(hT 0 , ·i, σ) −
+S ∼X
+X
+S(false)
+
+XX
+
+XX
+
+!
+
+
+
+0
+S ∼h
+∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼∼K T σ ∧ X δ(hT , ·i, σ) −
+−−−−→ hT, ti (τ )
+X
+hhhh
+XX
+hB,bi(β)
+weak
+hη,Ri∈
+h−
+R(η∧X(δ(hR,·i,η)
+−
+−
+−
+−
+→
+hB,bi(β)))
+h
+h
+X
+h
+Enter(b)
+hT ,ti(τ
+) hh
+XX
+(hh
+!
+_
+¬β
+if hL, si = hB, bi
+∧
+hS, si −
+−−−−→ hL, si σ ∧
+X
+XX
+hB,bi(β)
+true otherwise.
+hσ,Li∈
+^
+
+0
+
+Leave(s)
+
+We prove the correctness of the above definitions with respect to the intended
+meaning of Table 1 by induction on the level of the involved configurations.
+Lemma 4. The intended semantics of Table 1 hold for all infinite words w ∈
+Σ ω = (2AP )ω , configurations S, B, T of level m ≤ n, states s, b, t in level m + 1
+(when m < n), and LTL formulas β and τ over AP .
+Using the same induction principle we prove that the reachability formulas
+stay within certain classes of the syntactic future hierarchy (Definition 1). We
+use S ∼X
+∼∼∼K T (Y ) ∈ Z as a shorthand for saying that for every formulas β ∈ X
+B(X)
+and τ ∈ Y , the formula S ∼X
+∼∼∼K T (τ ) is in Z.
+B(β)
+X
+Lemma 5. Let S, B, T be configurations of level m ≤ n, and let s, b, t be states
+in level m + 1 (when m < n). Then for i ≥ 1 it holds that:
+– S ∼X
+∼∼∼∼K T (Σi ) , hS, si −
+−−−−−→ hT, ti (Σi ) , hS, si 99999999
+K hT, ti (Σi ) ∈ Σi
+h
+h
+hh
+hh
+B(Π
+hB,bi(Π
+hB,bi(Π
+X
+i)
+i)
+i)
+X
+h
+h
+weak
+weak
+– S ∼X
+∼∼∼∼K T (Πi ) , hS, si −
+−−−−−→ hT, ti (Πi ) ∈ Πi
+h
+hh
+B(Σ
+B,bi(Σ
+X
+i)
+i)
+X
+h
+4.3
+
+(1)
+
+hB,bi(β)
+
+Depth and Length Analysis
+
+We analyze the length and temporal-nesting depth of the LTL reachability formulas defined in Section 4.2. Notice that both measures are of independent
+interest, as there might be a non-elementary gap between the depth and length
+of LTL formulas [14, Theorem 6]. Since we provide upper bounds, the bound on
+the length of formulas obviously gives also a bound on their size.
+We consider a reset cascade A with n levels, as in Section 4.2, and further
+assume for the length and depth analysis that it has up to n states in each level.
+(This assumption holds in the reset cascades that result from the Krohn-Rohdes
+decomposition as per Proposition 6.)
+We define for each of the five reachability formulas a depth function Dx (i, d)
+and a length function Lx (i, l), where x refers to the number of the reachability
+
+(2)
+
+(3)
+
+14
+
+U. Boker, K. Lehtinen, S. Sickert
+
+formula, to bound the depth and length of the formulas. These depend on the
+level i of its input configurations S, B and T , and the maximal depth d and
+length l of its input formulas β and τ . For the main (first) reachability formula,
+we also use D and L, standing for D1 and L1 . For example, the length of the first
+∼∼∼K T (τ ) over configurations S, B and T of level 7 and formulas β
+formula S ∼X
+B(β)
+X
+and τ of length up to 77 is bounded by the value of L1 (7, 77).
+For simplicity, we consider the LTL representation of an alphabet letter σ ∈ Σ
+to be of length 1, while its actual length is 3 log2 |Σ|. This increase is due to the
+need to encode an alphabet letter σ ∈ Σ = 2AP as a conjunction of atomic
+propositions in AP . The representation length can be multiplied by the total
+length of the final relevant formula (e.g., a formula equivalent to the entire reset
+cascade), since it remains constant along all steps of our inductive computation.
+We provide in Table 2 upper bounds on the depth and length functions, relative to values of other depth and length functions with respect to configurations
+of the same or lower-by-one level. The table is constructed by following the syntactic definitions of the reachability formulas, and applying basic simplifications
+to the resulting expressions. For example, L1 (0, l) = 2+2l standing for the length
+of (¬β)Uτ . In Lemma 6 we will use Table 2 to bound the absolute depth and
+length of the main reachability formula.
+Depth Analysis. The temporal nesting depth of the main reachability formula
+S ∼X
+∼∼∼K T (τ ) is intuitively exponential in the number n of levels of the reset
+B(β)
+X
+cascade (linear in the number of configurations), since it is defined inductively
+along these levels, and the depth of a level-(i + 1) formula is about twice the
+depth of a level-i formula. The parameters of the reachability formula are both
+the configurations S, B and T of level i, and the formulas β and τ ; yet, the
+depth of the reachability formula only linearly depends on the depth of β and τ .
+Length Analysis. Intuitively, the overall length of the main reachability formula
+∼∼∼K T (τ ) with respect to configurations of the top level is doubly exponential
+S ∼X
+B(β)
+X
+in the number n of levels of the reset cascade (and thus singly exponential in
+the number of configurations), since the formula is defined inductively along
+these levels, and the length L(i, l) is roughly L(i−1, l) · L(i−1, l). More precisely,
+L(i, l) = l · f (i) for some doubly exponential function f (i).
+Now, why is L(i, l) roughly equal to L(i−1, l) · L(i−1, l)? The dominant
+component of the level-i reachability formula is line (2) in the definition of
+hS, si 9999999
+K hT, ti (τ ). It is a level-(i−1) reachability formula whose formulaX
+XX
+hB,bi(β)
+parameters are themselves auxiliary reachability formulas of level i with formula
+parameters of length l. The length of an auxiliary reachability formula of level i is
+roughly as of the main reachability formula of level i−1, implying that the length
+of Li (l) is roughly Li−1 (Li−1 (l)). By the inductive proof that Li−1 (l) = l·f (i−1),
+we get that Li (l) = Li−1 (Li−1 (l)) = Li−1 (l) · f (i−1) = l · f (i−1) · f (i−1).
+As for the many disjunctions and conjunctions that appear in the formulas,
+observe that the number of disjuncts and conjuncts does not depend on the
+
+On the Translation of Automata to Linear Temporal Logic
+Bounds on depth(ϕ) and length |ϕ|
+
+Reachability formula ϕ
+(
+
+d+1
+max(D3 (i, d) , D5 (i, d))
+
+(
+
+2 + 2l
+1 + L3 (i, l) + L5 (i, l)
+
+D1 (i, d) ≤
+∼∼∼K T (τ )
+S ∼X
+
+1.
+
+B(β)
+
+X
+
+L1 (i, l) ≤
+
+weak
+
+∼∼∼K T (τ )
+S ∼X
+
+2.
+
+B(β)
+
+X
+
+−−−−→ hT, ti (τ )
+3. hS, si −
+X
+X
+hB,bi(β)
+
+X
+
+weak
+
+−−−−→ hT, ti (τ )
+4. hS, si −
+X
+X
+hB,bi(β)
+
+X
+
+K hT, ti (τ )
+5. hS, si 9999999
+X
+X
+hB,bi(β)
+
+X
+
+15
+
+if i = 0
+otherwise.
+
+if i = 0
+otherwise.
+
+D2 (i, d) = D1 (i, d)
+L2 (i, l) = 1 + L1 (i, l)
+D3 (i, d) ≤ D1 (i−1, d + 1)
+L3 (i, l) ≤ 3+2l + |Σ|ni−1 1+L1 (i−1, 3+l)+
+1 + |Σ|ni−1 (L1 (i−1, 3+l) + 1)+
+
+1 + |Σ|ni−1 (L1 (i−1, 3+l) + 1)
+≤ 3 + 2l + 4|Σ|2 n2(i−1) L1 (i−1, l+3)
+D4 (i, d) ≤ D2 (i−1, d + 1) = D1 (i−1, d + 1)
+
+L4 (i, l) ≤ 3 + 2l + (1 + |Σ|ni−1 ) 1 + |Σ|ni−1 (1 + L2 (i−1, l+3))
+≤ 3 + 2l + 4|Σ|2 n2(i−1) L1 (i−1, l + 3)
+D5 (i, d) ≤ D1 (i−1, max(1 + D3 (i, d) , 1 + D4 (i, d)))
+L5 (i, l) ≤ |Σ|ni−1 · L1 (i − 1, 3 + L3 (i, l)) + 2+
+
+|Σ|ni−1 · L1 (i − 1, max(3 + L3 (i, l), 3 + L4 (i, l))) + 1
++1 + |Σ|ni−1 · (1 + L3 (i, 3 + l))
+
+Table 2. The relative depths and lengths of the reachability formulas over configurations of level i, and LTL formulas β and τ of depth at most d and length at most l. For
+the first two reachability formulas, we consider i ≥ 0 and for the other formulas i ≥ 1.
+
+formula-parameters β and τ , but only the level i of the configurations S, B, and
+T . Hence, they do not dominate the growth rate of the overall formula length.
+Lemma 6. Consider a reset cascade A with n levels and up to n states in each
+∼∼∼K T (τ ) with configurations S, B and T of A of
+level, and a formula ζ = S ∼X
+B(β)
+X
+level i ≤ n. Let d = max(depth(β), depth(τ )) and let l = max(|β|, |τ |). Then:
+(a) depth(ζ) ≤ d + 3i
+
+and
+
+(b) |ζ| ≤ l · (10|Σ|2 n)4
+
+i
+
+Lemma 6 is proven by induction on i. The details are given in Appendix A.4.
+4.4
+
+Translating Deterministic Counter-Free Automata to LTL
+
+We use the reachability formulas of Section 4.2 to translate a reset cascade A to
+an equivalent LTL formula. Our LTL formulation of A’s acceptance condition
+is based on an LTL formulation of “C is visited finitely/infinitely often along
+
+16
+
+U. Boker, K. Lehtinen, S. Sickert
+
+a run of A on a word w”, for a given configuration C of A. It thus applies
+to every ω-regular acceptance condition and by Propositions 6 and 8 to every
+deterministic counter-free ω-regular automaton. We introduce two shorthands to
+the main reachability formula: the first is satisfied if we reach T from S without
+any side constraints (which is always satisfied in the case that S = T ), and the
+second requires that we reach it along a nonempty prefix.
+
+_ 
+>0
+∼∼∼∼∼K T (true)
+σ ∧ X(δ(S, σ) ∼∼K T )
+S ∼∼∼K T :=
+S ∼∼K T := S ∼X
+XX
+T (false)
+X
+σ∈Σ
+With Lemmas 4 and 5 we then obtain (a proof is given in Appendix A.5):
+Lemma 7. Consider a reset cascade A = h2AP , A1 , . . . , An i together with an
+ω
+initial configuration ι and some configuration C. Then for a word w ∈ (2AP ) ,
+the run of A on w starting in ι visits C finitely often iff w satisfies the formula
+>0
+Fin(C) := ¬(ι ∼∼∼K C) ∨ ι ∼∼∼K C(¬(C ∼∼∼K C)). Furthermore, Fin(C) ∈ Σ2 .
+We are now in position to give our main result.
+Theorem 2. Every counter-free deterministic ω-regular automaton D over alphabet 2AP with n states (and any acceptance condition) is equivalent to an LTL
+formula ϕ over atomic propositions AP of double-exponential temporal-nesting
+n
+O(2n )
+depth (in O(22 )) and triple-exponential length (in 22
+). If D is a loopingBüchi, looping-coBüchi, weak, Büchi, coBüchi, or Muller automaton then ϕ is
+respectively in the Π1 , Σ1 , ∆1 , Π2 , Σ2 , or ∆2 syntactic fragment of LTL.
+Proof. We first prove the general result, w.r.t. an arbitrary counter-free deterministic automaton D, and then take into account D’s acceptance condition, to
+establish the last part of the theorem.
+Consider a counter-free deterministic ω-regular automaton D with some acceptance condition and n states. Recall that there is a Muller automaton D0 equivalent to D over the semiautomaton of D. By Propositions 6 and 8, D0 is equivalent to a deterministic Muller automaton D00 that is described by a reset cascade
+A with up to m = 2n levels and m states in each level (and thus up to mm conm
+m
+figurations), and whose acceptance condition has up to k ∈ 2O(m n) = 2O(m )
+acceptance sets. An LTL formula ϕ equivalent to D can be defined by formulating
+the acceptance condition of D0 along Lemma 7.
+Recall that the Muller condition is a k-elements disjunction, where each disjunct M is a conjunction of requirements to visit infinitely often every configuration from some set G and finitely often every configuration not in G. Observe
+that M can be formulated as a disjunction over all the configurations in D00 (at
+most mm ), having for each configuration C the LTL formula Fin(C) or ¬Fin(C),
+as defined in Lemma 7, depending on whether or not C ∈ G. Hence, the overall
+formula ϕ is a combination of disjunctions and conjunctions of up to k · mm subformulas of the form Fin(C) or ¬Fin(C). Therefore, the depth of ϕ is the same
+m
+as of Fin(C), while |ϕ| ∈ O(kmm |Fin(C)|) ≤ 2O(m ) |Fin(C)|. For calculating
+depth(Fin(C)) and |Fin(C)|, we use Lemma 6 bottom up over the subformulas
+of Fin(C).
+
+On the Translation of Automata to Linear Temporal Logic
+
+17
+
+Depth.
+>0
+depth(ι ∼∼K C) ≤ 3m ; depth(C ∼∼∼K C) ≤ 3m + 1
+>0
+
+depth(ι ∼∼K C(¬(C ∼∼∼K C))) ≤ 2 · 3m + 1
+n
+
+depth(Fin(C)) = max(3m , 2 · 3m + 1) ∈ O(3m ) = O(22 ),
+n
+implying depth(ϕ) ∈ O(22 ).
+Length.
+m
+m
+>0
+|ι ∼∼K C| ≤ (10|Σ|2 m)4 ; |C ∼∼∼K C| ≤ (4|Σ|) · (10|Σ|2 m)4
+>0
+
+m
+
+m
+
+O(m)
+
+|ι ∼∼K C(¬(C ∼∼∼K C))| ≤ (4|Σ|(10|Σ|2 m)4 +1)(10|Σ|2 m)4 ∈ (|Σ|m)2
+m
+
+O(m)
+
+|Fin(C)| ∈ 2 + (10|Σ|2 m)4 + (|Σ|m)2
+m
+
+O(m)
+
+∈ (|Σ|m)2
+
+O(m)
+
+.
+
+O(m)
+
+Therefore, |ϕ| ∈ 2O(m ) · (mm ) · ((|Σ|m)2
+) = |Σ|2
+.
+Expressing the length of ϕ with respect to the number n of states in the
+automaton D, and taking into account the fact that the alphabet Σ has at most
+nn different letters (any additional letter must have the same behavior as another
+O(2n )
+O(2n )
+O(2n )
+letter), we have: |ϕ| ∈ |Σ|2
+≤ (2n )2
+= 22
+.
+We now sketch the second part of the theorem connecting the syntactic hierarchy and the different acceptance conditions of D. We only consider the cases
+in which D is either a Muller or a coBüchi automaton. The complete analysis is
+given in Appendix A.5. If D is a Muller automaton, then the overall formula ϕ is
+in ∆2 , since it is a Boolean combination of Fin(C) formulas, which by Lemma 7
+belong to Σ2 . If D is a coBüchi automaton, then we construct the formula ϕ
+directly from the coBüchi condition α: ϕ is a conjunction of Fin(C) formulas
+over all configurations C that are mapped to states in α. As Fin(C) belongs to
+Σ2 , so does ϕ.
+Observe that by Theorem 2, we get the following result, extending the result
+of [38, Theorem 3.2] that only considers Rabin automata.
+Corollary 1. Every counter-free deterministic ω-regular automaton (with any
+acceptance condition) recognises an LTL-definable language.
+Proof. Recall that every deterministic ω-regular automaton is equivalent to a
+deterministic Muller automaton over the same semiautomaton (see, e.g., [3]).
+The claim is then a direct consequence of Theorem 2.
+Remark 2. Theorem 2 can be adapted to the finite-word setting. While on infinite words, the neXt operator is self-dual, i.e., ¬Xψ is equivalent to X¬ψ, over
+finite words, this equivalence does not hold on words of length 1. Thus X gains
+a dual weak next, defined as X̃ψ := ¬X¬ψ. In the finite word case, syntactic
+cosafety (safety) formulas are constructed from true, false, a, ¬a, ∨, ∧, and the
+temporal operators U and X (R and X̃). Observe that X and X̃ differ only on
+words of length 1, and thus the only required change in our translation scheme
+is to replace some Xs with X̃s in the reachability formula 4. For finite words a
+
+18
+
+U. Boker, K. Lehtinen, S. Sickert
+
+translation of a counter-free DFA to an LTL formula with only a double exponential size blow-up is known [41]; however, unlike our translation, it does not
+guarantee syntactic safety (cosafety) formulas for safety (cosafety) languages.
+Lastly, we provide a corollary on looping automata, using Theorem 2 and
+the following known result.
+Proposition 9 (Rephrased Theorem 13 from [28]). Let D be a deterministic looping-Büchi automaton with n states that recognises an LTL-definable language. Then there exists an equivalent counter-free deterministic looping-Büchi
+automaton D0 with at most n states.
+Corollary 2. Every deterministic looping-Büchi (looping-coBüchi) automaton
+with n states that recognises an LTL-definable language is equivalent to an LTL
+n
+O(2n )
+formula ϕ ∈ Π1 (Σ1 ) of temporal nesting depth in O(22 ) and length in 22
+.
+This is an elementary upper bound for two constructions for which either the
+upper bound was unknown or non-elementary: the liveness-safety decomposition
+of LTL [28] and the translation of semantic safety LTL to syntactic safety LTL.
+
+5
+
+Conclusions
+
+We have studied the size trade-offs between LTL and automata. Over a unary alphabet, the situation is straightforward and we provided tight complexity
+bounds. The general case of infinite words over an arbitrary alphabet is more
+complex. We gave to our knowledge the first elementary complexity bound on the
+translation of counter-free deterministic ω-regular automata into LTL formulas.
+Every ω-regular automaton recognising an LTL-definable language can be
+translated to a counter-free deterministic automaton [38, Theorem 3.2]. Yet, we
+are unaware of a bound on the size blow-up involved in such a translation. Once
+established, it can be combined with our translation to get a general bound on
+the translation of automata to LTL. It will also provide a (currently unknown6 )
+elementary upper bound on the translation of LTL with both future and past
+operators to LTL with only future operators (which is the version of LTL that we
+have considered), as (both version of) LTL can be translated to nondeterministic
+Büchi automata with a single exponential size blow-up [40, Theorem 2.1].
+While going from non-elementary to double-exponential depth and triple-exponential length is an improvement, these upper bounds might not be tight—
+there is currently no known non-linear lower bound! Closing this gap is a challenging open problem, which might require new lower bound techniques for alternating automata, as LTL formulas are an inherently alternating model.
+Acknowledgements. We thank Moshe Vardi and Orna Kupferman for suggesting
+studying the succinctness gap between semantic and syntactic safe formulas, and
+Mikolaj Bojańczyk for answering our questions on algebraic automata theory.
+6
+
+In consultation with the author of [29], we have confirmed that while the lower bound
+provided in that paper holds, the stated upper bound is erroneous.
+
+On the Translation of Automata to Linear Temporal Logic
+
+19
+
+References
+1. Birget, J.C.: Two-way automata and length-preserving homomorphisms. Mathematical Systems Theory 29(3), 191–226 (1996)
+2. Bojańczyk, M.: Languages recognised by finite semigroups, and their generalisations to objects such as trees and graphs, with an emphasis on definability in
+monadic second-order logic (2020)
+3. Boker, U.: Why these automata types? In: Proc. of LPAR. pp. 143–163 (2018)
+4. Boker, U., Kupferman, O.: The quest for a tight translation of Büchi to co-Büchi
+automata. In: Fields of Logic and Computation, pp. 147–164. Springer (2010)
+5. Cerná, I., Pelánek, R.: Relating hierarchy of temporal properties to model checking.
+In: MFCS. Lecture Notes in Computer Science, vol. 2747, pp. 318–327. Springer
+(2003)
+6. Chandra, A.K., Kozen, D.C., Stockmeyer, L.J.: Alternation. J. ACM 28(1), 114–
+133 (Jan 1981)
+7. Chang, E.Y., Manna, Z., Pnueli, A.: Characterization of temporal property classes.
+In: Kuich, W. (ed.) Automata, Languages and Programming, 19th International
+Colloquium, ICALP92, Vienna, Austria, July 13-17, 1992, Proceedings. Lecture
+Notes in Computer Science, vol. 623, pp. 474–486. Springer (1992)
+8. Chrobak, M.: Finite automata and unary languages. Theoretical Computer Science
+47, 149–158 (1986)
+9. Cohen, J., Perrin, D., Pin, J.E.: On the expressive power of temporal logic. Journal
+of computer and System Sciences 46(3), 271–294 (1993)
+10. Cohen-Chesnot, J.: On the expressive power of temporal logic for infinite words.
+Theoretical Computer Science 83(2), 301–312 (1991)
+11. Colcombet, T., Zdanowski, K.: A tight lower bound for determinization of transition labeled Büchi automata. In: International Colloquium on Automata, Languages, and Programming. pp. 151–162. Springer (2009)
+12. Diekert, V., Gastin, P.: First-order definable languages. In: Logic and Automata:
+History and Perspectives [in Honor of Wolfgang Thomas]. Texts in Logic and
+Games, vol. 2, pp. 261–306 (2008)
+13. Eilenberg, S.: Automata, Languages, and Machines Volume B. Academic Press,
+Inc., USA (1976)
+14. Etessami, K., Vardi, M.Y., Wilke, T.: First-order logic with two variables and
+unary temporal logic. Inf. Comput. 179(2), 279–295 (2002)
+15. Gabbay, D., Pnueli, A., Shelah, S., Stavi, J.: On the temporal analysis of fairness.
+In: Proc. of POPL. p. 163–173. New York, NY, USA (1980)
+16. Geffert, V., Mereghetti, C., Pighizzini, G.: Complementing two-way finite automata. Information and Computation 205(8), 1173–1187 (2007)
+17. Kamp, J.A.W.: Tense logic and the theory of linear order. University of California,
+Los Angeles (1968)
+18. Kupferman, O., Rosenberg, A.: The blowup in translating LTL to deterministic
+automata. In: Proc. of Model Checking and Artificial Intelligence. pp. 85–94 (2010)
+19. Kupferman, O., Ta-Shma, A., Vardi, M.Y.: Counting with automata. In: Proc. of
+LICS (1999)
+20. Kupferman, O., Vardi, M.Y.: Weak alternating automata are not that weak. ACM
+Transactions on Computational Logic (TOCL) 2(3), 408–429 (2001)
+21. Ladner, R.E.: Application of model theoretic games to discrete linear orders and
+finite automata. Information and Control 33(4), 281–303 (1977)
+
+20
+
+U. Boker, K. Lehtinen, S. Sickert
+
+22. Leiss, E.: Succinct representation of regular languages by boolean automata. Theoretical computer science 13(3), 323–330 (1981)
+23. Löding, C.: Optimal bounds for transformations of ω-automata. In: Rangan, C.P.,
+Raman, V., Ramanujam, R. (eds.) Foundations of Software Technology and Theoretical Computer Science. pp. 97–109. Springer Berlin Heidelberg, Berlin, Heidelberg (1999)
+24. Maler, O.: On the Krohn-Rhodes cascaded decomposition theorem. In: Time for
+Verification, Essays in Memory of Amir Pnueli. Lecture Notes in Computer Science,
+vol. 6200, pp. 260–278. Springer (2010)
+25. Maler, O., Pnueli, A.: Tight bounds on the complexity of cascaded decomposition
+of automata. In: Proc. of FOCS. pp. 672–682 (1990)
+26. Maler, O., Pnueli, A.: On the cascaded decomposition of automata, its complexity
+and its application to logic. Unpublished. Available at: http://www-verimag.imag.
+fr/∼maler/Papers/decomp.pdf (1994)
+27. Manna, Z., Pnueli, A.: A hierarchy of temporal properties. In: PODC. pp. 377–410.
+ACM (1990)
+28. Maretic, G.P., Dashti, M.T., Basin, D.A.: LTL is closed under topological closure.
+Inf. Process. Lett. 114(8), 408–413 (2014)
+29. Markey, N.: Temporal logic with past is exponentially more succinct. Bull. EATCS
+79, 122–128 (2003)
+30. McNaughton, R., Papert, S.A.: Counter-Free Automata (MIT research monograph
+no. 65). The MIT Press (1971)
+31. Michel, M.: Complementation is more difficult with automata on infinite words.
+CNET, Paris 15 (1988)
+32. Muller, D.E., Saoudi, A., Schupp, P.E.: Weak alternating automata give a simple
+explanation of why most temporal and dynamic logics are decidable in exponential
+time. In: Proceedings Third Annual Symposium on Logic in Computer Science. pp.
+422–423. IEEE Computer Society (1988)
+33. Perrin, D.: Recent results on automata and infinite words. In: International Symposium on Mathematical Foundations of Computer Science. pp. 134–148. Springer
+(1984)
+34. Safra, S.: Complexity of automata on infinite objects. Ph.D. thesis, Weizmann
+Institute, Rehovot, Israel (1989)
+35. Schewe, S.: Büchi Complementation Made Tight. In: Albers, S., Marion, J.Y. (eds.)
+Proc. of 26th International STACS. Leibniz International Proceedings in Informatics (LIPIcs), vol. 3, pp. 661–672 (2009)
+36. Sickert, S., Esparza, J.: An efficient normalisation procedure for linear temporal
+logic and very weak alternating automata. In: LICS. pp. 831–844. ACM (2020)
+37. Thomas, W.: Star-free regular sets of ω-sequences. Information and Control 42(2),
+148–156 (1979)
+38. Thomas, W.: A combinatorial approach to the theory of ω-automata. Information
+and Control 48(3), 261–283 (1981)
+39. Thomas, W.: Automata on infinite objects. In: Formal Models and Semantics, pp.
+133–191. Elsevier (1990)
+40. Vardi, M., Wolper, P.: An automata-theoretic approach to automatic program
+verification. In: Proc. of LICS. pp. 332–344 (1986)
+41. Wilke, T.: Classifying discrete temporal properties. In: Annual symposium on theoretical aspects of computer science. pp. 32–46. Springer (1999)
+42. Wilke, T.: Past, present, and infinite future. In: 43rd International Colloquium
+on Automata, Languages, and Programming (ICALP 2016). Schloss DagstuhlLeibniz-Zentrum fuer Informatik (2016)
+
+On the Translation of Automata to Linear Temporal Logic
+
+21
+
+43. Wilke, T.: Backward deterministic Büchi automata on infinite words. In: 37th
+IARCS Annual Conference on Foundations of Software Technology and Theoretical Computer Science (FSTTCS 2017). Schloss Dagstuhl-Leibniz-Zentrum fuer
+Informatik (2018)
+44. Wolper, P.: Temporal logic can be more expressive 56(1–2), 72–99 (1983)
+45. Zuck, L.D.: Past Temporal Logic. Ph.D. thesis, The Weizmann Institute of Science,
+Israel (Aug 1986)
+
+Open Access This chapter is licensed under the terms of the Creative Commons
+Attribution 4.0 International License (http://creativecommons.org/licenses/by/4.0/),
+which permits use, sharing, adaptation, distribution and reproduction in any medium
+or format, as long as you give appropriate credit to the original author(s) and the
+source, provide a link to the Creative Commons license and indicate if changes were
+made.
+The images or other third party material in this chapter are included in the chapter’s
+Creative Commons license, unless indicated otherwise in a credit line to the material. If
+material is not included in the chapter’s Creative Commons license and your intended
+use is not permitted by statutory regulation or exceeds the permitted use, you will need
+to obtain permission directly from the copyright holder.
+
+22
+
+U. Boker, K. Lehtinen, S. Sickert
+
+A
+
+Omitted Proofs
+
+A.1
+
+Proofs from Section 3
+
+Proposition 1 (Extended Wolper’s theorem, Folklore). Consider an LTL
+formula ϕ with depth(ϕ) = n over the atomic propositions AP , and let Σ = 2AP .
+Then for every words u ∈ Σ ∗ , v ∈ Σ + and t ∈ Σ ω , and numbers i, j > n, ϕ has
+the same truth value on the words (uv i t) and (uv j t).
+Proof. Consider an LTL formula ϕ and words wi = (uv i t) and wj = (uv j t), such
+that i, j > depth(ϕ). We prove the claim by induction on the structure of ϕ.
+Base case: ϕ is an atomic proposition or a Boolean constant. Indeed, depth(ϕ) =
+0 and we have that wi |= ϕ iff wj |= ϕ, because the first letter of these two words,
+which is the first letter of u if u is not empty and the first letter of v otherwise,
+is the same.
+Induction step: We assume that the claim holds for all strict subformulas of
+ϕ. Let ψ1 and ψ2 be strict subformulas of ϕ. We show that the claim holds for:
+– ϕ = ¬ψ1 : Since depth(ϕ) = depth(ψ1 ), it follows that i, j > depth(ψ1 ), and
+therefore by the induction assumption wi |= ψ1 iff wj |= ψ1 , implying that
+wi |= ϕ iff wj |= ϕ.
+– ϕ = ψ1 ∧ ψ2 : Since depth(ϕ) = max(depth(ψ1 ), depth(ψ2 )), it follows that
+i, j > depth(ψ1 ) and i, j > depth(ψ2 ). Therefore by the induction assumption
+(wi |= ψ1 iff wj |= ψ1 ) and (wi |= ψ2 iff wj |= ψ2 ). Hence, wi |= ψ1 ∧ ψ2 iff
+wj |= ψ1 ∧ ψ2 .
+– ϕ = Xψ1 : Recall that a word w satisfies ϕ iff w1 satisfies ψ1 . Observe that
+wi1 = u0 v i−1 t and wj1 = u0 v j−1 t, where u0 = (uv)1 . Since depth(ψ1 ) =
+depth(ϕ) − 1, it follows that i − 1, j − 1 > depth(ψ1 ). Hence, by the induction
+assumption wi1 |= ψ1 iff wj1 |= ψ1 , and therefore wi |= ϕ iff wj |= ϕ.
+– ϕ = ψ1 Uψ2 : We will show that if wi satisfies ϕ then so does wj .
+If wi satisfies ϕ then there is a position p of wi , such that wip |= ψ2 and
+for every k < p, wik |= ψ1 . Let o be the position of wi that appears at the
+beginning of the v-block that is depth(ϕ) blocks of v before the t part of wi ,
+namely o = |uv i−depth(ϕ) |. (See Figure 2.)
+o
+
+wi :
+
+u
+
+v
+
+0 or more blocks of v
+
+v
+
+v
+
+v
+
+t
+
+···
+
+depth(ϕ) blocks of v
+
+Figure 2. The structure of the word wi from the proof of Proposition 1.
+
+We split the proof into disjoint cases, depending on the location of p within
+wi .
+
+On the Translation of Automata to Linear Temporal Logic
+
+23
+
+• p < |u|: Let u0 be the infix of wj from p to the end of u, namely
+u0 = wi [p..|u| − 1]. Then wip = u0 v i t and wjp = u0 v j t. Since i, j >
+depth(ϕ) > depth(ψ2 ), by the induction assumption wip |= ψ2 iff wjp |= ψ2
+and therefore wjp |= ψ2 . Likewise, since i, j > depth(ϕ) > depth(ψ1 ),
+by the induction assumption for every position m < p, wim |= ψ1 iff
+wjm |= ψ1 and therefore wjm |= ψ1 .
+• p ∈ [|u|..o − 1]: Let p0 be the position in wj that appears in the first
+v-block after u and that is located within that v-block like p is located
+within its v-block. That is, p0 = |u| + ((p − |u|) mod |v|). Let u0 be the
+remaining suffix in the v-block of p and p0 , that is u0 = wj [p0 +1..|u|+|v|].
+Let h be the number of v-blocks that appear after p and before the t
+part of wi , that is h = depth(ϕ) + b(o − p)/|v|c. Then wip = u0 v h t and
+0
+wjp = u0 v j−1 t. Since h ≥ depth(ϕ) > depth(ψ2 ) and j − 1 ≥ depth(ϕ) >
+0
+
+depth(ψ2 ), we have by the induction assumption that wjp |= ψ2 iff wip |=
+0
+
+ψ2 , and therefore wjp |= ψ2 .
+Now, for every position m < p0 , let u0 be the infix of wj from m to the end
+of the first v-block of wj , that is u0 = wj [m..|u|+|v|]. Then wim = u0 v i−1 t
+and wjm = u0 v j−1 t. Since i−1 > depth(ψ1 ) and j −1 > depth(ψ1 ), by the
+induction assumption wim |= ψ1 iff wjm |= ψ1 and therefore wjm |= ψ1 .
+• p ≥ o: Let p0 and o0 be the positions in wj that are at the same distance
+from the t part of wj as p and o are from the t part wi , namely o0 =
+0
+0
+|uv j−depth(ϕ) | and p0 = o0 + (p − o). Observe that wio = wjo and wjp = wip ,
+0
+
+implying that wjp |= ψ2 .
+Further, for every position m ∈ [o − |v|..p] of wi , let m0 be the corres0
+ponding position in wj , namely m0 = o0 + (m − o). Then wjm = wim , and
+0
+accordingly wjm |= ψ1 .
+Now, for every position m0 ∈ [|u|..o − |v| − 1], we have by the induc0
+m0 +|v|
+tion assumption that wjm |= ψ1 iff wj
+|= ψ1 (as both words have
+the same prefix until the end of the first v block, followed by at least
+0
+depth(ψ1 ) + 1 blocks of v and then t), implying that wjm |= ψ1 .
+Finally, for every position m ∈ [0..|u| − 1], we have by the induction
+assumption that wim |= ψ1 iff wjm |= ψ1 , implying that wjm |= ψ1 .
+
+Proposition 2. Given an LTL formula ϕ with depth(ϕ) = n on finite words
+over the unary alphabet {a}, ai ∈ L(ϕ) for all i > n or ai ∈
+/ L(ϕ) for all i > n.
+Proof. Let # = {p} be the shorthand for a new atomic proposition p. Given a
+unary LTL formula recognising L ⊆ {a}+ , it can be turned into a general LTL
+formula of linear length that recognises L0 = {v#ω | v ∈ L} over the alphabet
+Σ 0 = 2{p} . Then, the statement is a direct consequence of Proposition 1.
+Proposition 3. Consider a language L ⊆ {a}+ that agrees on all words of
+length over n, that is, has the same truth value on all such words. Then there is
+an LTL formula of size in O(n) with language L.
+
+24
+
+U. Boker, K. Lehtinen, S. Sickert
+
+Proof. The very weak deterministic automaton for L consists of n + 2 states
+{0, . . . , n + 1}, with an a-transition from state i to state i + 1 and a self loop at
+state n + 1. The state i is accepting whenever ai ∈ L.
+Theorem 1. The size blow-up involved in translating deterministic, nondeterministic, and alternating automata on finite unary words to LTL, when possible, is
+Θ(n), Θ(n2 ), and Θ(2n ), respectively.
+Proof. Deterministic automata: For the upper bound, consider a DFA A recognising an LTL definable language. By a pumping argument, if w ∈ L(A) for some
+w longer than n, then L(A) is infinite. Considering the dual automaton A0 of A,
+recognising the complement language, by the pumping argument if w 6∈ L(A) for
+some w longer than n, then the complement of L(A) is infinite. Hence, by Proposition 2, L(A) agrees on all words of length more than n, and by Proposition 3
+there is an LTL formula for it of length in O(n). As for the lower bound, since
+there is a DFA of size n recognising ak , it directly follows from Proposition 1.
+Nondeterministic automata: Directly follows from Lemmas 1 and 2.
+Alternating automata: Directly follows from Lemma 3 and Proposition 5.
+Lemma 1. Every alternating automaton with n states that recognises an LTLexpressible language L ⊆ {a}+ is equivalent to an LTL formula of size in O(2n ).
+Proof. First recall that the run of an alternating automaton is a tree, of which
+all paths are accepting if and only if the run itself is accepting. These runs can
+be pumped in the same way as runs of nondeterministic automata, except that
+the run to be pumped must be of length over 2n to guarantee that the set of
+states in a cross-section of the run are repeated.
+Then, by a pumping argument, if w ∈ L(A) for some w longer than 2n , then
+L(A) is infinite: indeed, let A0 be an NFA equivalent to A of size at most 2n ;
+if A0 accepts a word longer than 2n , then its run sees some state more than
+once and can be pumped to build infinitely many accepting runs. Dually, since
+/ L(A) for some w0 longer than 2n , then
+AFA are easy to complement, if w0 ∈
+Σ ∗ \L(A) is infinite. The existence of both w ∈ L(A) and w0 ∈
+/ L(A) longer than
+2n therefore contradicts Lemma 2. We conclude that L(A) agrees on all words
+of length over 2n . Thus, by Proposition 3 there is an LTL formula for L(A) of
+length in O(2n ).
+Lemma 2 (Adaptation of [22, proof of Theorem 1]). For every n ∈ N\{0},
+there is a weak alternating automaton with 2n states and transition function of
+n−1
+size in O(n) recognising the language {a2 }.
+Proof. The idea of the construction is that it represents an n-bit up-counter,
+having two states for each bit, one corresponding to 1, one to 0 (see Fig. 1).
+Given a way to resolve the nondeterministic choices, the resulting set of
+“active” states of the automaton represents a configuration of the counter: The
+nondeterminism in each bit-state chooses whether to change the bit’s value (going left in Fig. 1), in which case the universality ensures that all lower bits are
+
+On the Translation of Automata to Linear Temporal Logic
+
+25
+
+set to 0, or to preserve the bit’s value (going right in Fig. 1), in which case the
+universality ensures that at least one lower bit is set to 1.
+The automaton thus preserves the invariant that a correct update (for example from 011 to 100) ensures that the number of active states is constant, in
+particular, if all updates are correct, then exactly one state per bit is active at
+a time; an incorrect update on the other hand increases the number of active
+states. The set of accepting states corresponds to the bit-configuration for 2n−1 ,
+where a transition to a state qi,0 , for every i < n, can be changed to a move
+to qacc , provided that it is on the last letter of the input word. (There is no
+transition out of qacc ). The only way to build an accepting run is to correctly
+update the counter at each step; an incorrect update ensures that both states of
+some bit are set from thereon, of which one must be rejecting.
+As for the automaton size, which is the number of subformulas in the transition function, observe that it is linear in n, since there are 2n states and the total
+number of subformulas in the transition function is as follows: The transition
+functions of q1,0 and q1,1 have together four subformulas, and the transition
+function of every other state q(i,·) adds up to 4 subformulas: (i) the topmost
+disjunction of whether to change the bit’s value or not; (ii)&(iii) the universality involved in each of these two options; and (iv) within each of the two
+universality subformulas – a disjunction or conjunction between q(i−1,·) and
+(q(i−1,·) , . . . , q(i−1,·) ), where the latter subformula (within the parenthesis) is
+already used in the transition function of q(i−1,·) and these two formulas (one
+of conjunction and one of disjunction) is used by both qi,0 and qi,1 (except for
+qn,1 = qacc , which has no outgoing transitions).
+Lemma 3. Every nondeterministic automaton with n states recognising an LTLexpressible language L ⊆ {a}+ is equivalent to an LTL formula of size in O(n2 ).
+Proof. If L(A) is finite, then by a pumping argument, A only accepts words up
+to length n, and by Proposition 3 we are done. We consider co-finite L(A).
+We will argue using 2-way deterministic automata, which are deterministic
+automata that process words of the form `wa, where ` and a are start- and
+end-of-word markers respectively, and where transitions specify whether to read
+the letter to the right or to the left of the current position. They accept by
+reaching an end state, and reject by reaching a rejecting state or by failing to
+terminate. For a more formal definition, see [16]. We will use the facts that a
+unary NFA can be turned into a 2-way DFA of size O(n2 ) [8], that a 2-way DFA
+of size m can be complemented into one of size 4m [16], and that the smallest
+2-way DFA recognising {ak } is of length k + 2 [1].
+The NFA A can be turned into a 2-way DFA D with O(n2 ) states recognising
+the same language. From D, we can obtain a 2-way DFA D0 that recognises
+a∗ \ {ak }, where ak is the longest word not in L(A), as follows: we keep the
+states and transitions involved in the run of D on `ak a, which is rejecting and
+must read a (since, by the co-finiteness of L(A), there are accepted words longer
+than ak ). Notice that states in D0 may have only some of the transitions they
+had in D – only those that are involved in the run on ak . We then add an a-
+
+26
+
+U. Boker, K. Lehtinen, S. Sickert
+
+transition and a a-transition from all states without such transitions, and these
+all lead to the (accepting) end state.
+Notice that D0 is still deterministic and not larger than D. It still rejects ak ,
+on which it has the same run as D, but accepts all other words, which are either
+shorter than ak and therefore accepted via one of the new a-transitions, or are
+longer than ak and accepted when they read the k + 1th letter.
+We can then complement D0 into a 2-way DFA D00 of size linear in the size
+of D0 , namely in O(n2 ), that recognises {ak }. However, since D00 must be of size
+at least k + 2, we get that k + 2 is at most in O(n2 ), meaning that the longest
+word rejected by A, which is of length k, is of length in O(n2 ).
+Then, there is an equivalent very weak automaton of the size of the longest
+word not in L(A), from Lemma 2.
+A.2
+
+Proofs from Section 4.1
+
+Proposition 7. Let D be a deterministic Büchi, coBüchi or Rabin automaton,
+with a semiautomaton homomorphic to a cascade A. There is respectively a
+deterministic Büchi, coBüchi or Rabin automaton D0 equivalent to D with semiautomaton A. For Rabin, D and D0 have the same number of acceptance pairs.
+Proof. We provide the proof for Rabin automata. The proofs for Büchi and
+coBüchi automata are special cases of the Rabin case.
+Let D = (Σ, Q, ι, δ, α), and h be the mapping via which (Σ, Q, δ) is homomorphic to A. We shall define a configuration ι0 of A, and a set α0 of pairs of sets
+of configurations of A that will provide the initial state and acceptance condition
+of D0 , making it equivalent to D.
+For the initial state of D0 , one can choose any configuration ι0 ∈ h−1 (ι): A
+run of A starting in ι0 corresponds via h to a run of D starting in h(ι0 ) = ι.
+As for the acceptance condition, consider the run r0 of D0 on a word w,
+starting in ι0 , and let r = h(r0 ) be the corresponding run of D on w. (With
+h(r0 ), we mean the sequence of states of D, obtained by mapping with h each
+configuration of r0 .) Then, r0 should be accepting iff r is.
+Recall that r is accepting iff inf (r ) ∩ G 6= ∅ and inf (r ) ∩ B = ∅ for some pair
+(G, B) ∈ α. Hence, r0 should be accepting “according to (G, B)” iff h(inf (r 0 )) ∩
+G 6= ∅ and h(inf (r 0 )) ∩ B = ∅.
+Thus, r0 should visit infinitely often some configuration in G0 = h−1 (G) and
+finitely often every configuration in B 0 = h−1 (B). Hence, there are k acceptance
+pairs (G0 , B 0 ) in α0 , each corresponding to an acceptance pair (G, B) in D.
+Proposition 8. Consider a deterministic Muller automaton D with n states,
+whose semiautomaton is homomorphic to a reset cascade A with m configurations. Then there is a deterministic Muller automaton D0 equivalent to D, whose
+semiautomaton is A and its Muller condition has up to 2O(mn) acceptance sets.
+Proof. Let D = (Σ, Q, ι, δ, α), and h be the mapping via which (Σ, Q, δ) is
+homomorphic to A. We shall define a configuration ι0 of A, and a set α0 of sets
+
+On the Translation of Automata to Linear Temporal Logic
+
+27
+
+of configurations of A that will provide the initial state and acceptance condition
+of D0 , making it equivalent to D.
+For the initial state of D0 , one can choose any configuration ι0 ∈ h−1 (ι): A
+run of A starting in ι0 corresponds via h to a run in D starting in h(ι0 ) = ι.
+As for the acceptance condition, consider the run r0 of D0 on w, starting in
+0
+ι , and let r = h(r0 ) be the run of D on w (that is defined by mapping each
+configuration of r0 to a state of D via h). Then, r0 should be accepting iff r is.
+Recall that r is accepting iff inf (r ) = M , for some M = {q1 , . . . ql } ∈ α.
+Hence, r0 should be accepting “according to M ” iff h(inf (r 0 )) = M . Thus, r0
+should visit finitely often every configuration in h−1 (Q \ M ), and for every i ∈
+[1..l], visit some configurations in Gi = h−1 (qi ) infinitely often.
+Since we should consider every choice of configurations in Gi = h−1 (qi ),
+where |Gi | ≤ m, there are up to 2m choices for Gi , and therefore up to (2m )n
+choices for M , each providing a Muller set G of configurations to be visited
+infinitely often.
+As there are up to 2n sets in α, we end up with up to 2n (2m )n ∈ 2O(mn) sets
+in α0 .
+A.3
+
+Proofs from Section 4.2
+
+Lemma 4. The intended semantics of Table 1 hold for all infinite words w ∈
+Σ ω = (2AP )ω , configurations S, B, T of level m ≤ n, states s, b, t in level m + 1
+(when m < n), and LTL formulas β and τ over AP .
+Proof. Observe first that there is no circularity in the definitions of the five
+reachability formulas, even though they are defined by each other: Formula 2
+is defined on top of formula 1, which is defined on top of formulas 3 and 5,
+while formulas 3, 4, and 5 are defined with respect to reachability formulas over
+configurations of a lower level.
+We prove the statement by induction on the level m of the configurations S,
+B, T in the reachability formulas. We split the proof to five cases corresponding
+to the five reachability formulas in Table 1. In order to clarify which equivalence
+of the induction hypothesis is used we denote by (I.H.1) the equivalence in
+Table 1 for reachability formula 1, (I.H.2) the equivalence for reachability formula
+2, and so on.
+Reachability formula 1
+(m = 0): There is exactly one configuration of level 0 and it is the empty configuration. Thus S = T = B = hi. We then derive:
+∼∼∼K hi (τ )
+w |= hi ∼X
+hi(β)
+X
+⇐⇒ w |= (¬β)Uτ
+⇐⇒ ∃i ≥ 0. w[i..] |= τ ∧ ∀j ∈ [0..i). w[j..] 6|= β
+⇐⇒ ∃i ≥ 0. δ(hi, w[0..i) ) = hi ∧ w[i..] |= τ
+∧ ∀j ∈ [0..i). δ(hi, w[0..j) ) 6= hi ∨ w[j..] 6|= β
+
+28
+
+U. Boker, K. Lehtinen, S. Sickert
+
+(m → m + 1): Let hS, si, hT, ti, hB, bi ∈ Q1 × · · · × Qm+1 be arbitrary configurations of level m + 1. Thus we can use the equalities from Table 1 for all
+configurations of Q1 × · · · × Qm as induction hypotheses. We need to show that:
+∼∼∼∼∼K hT, ti (τ )
+w |= hS, si ∼X
+XX
+hB,bi(β)
+X
+⇐⇒ w |= hS, si −
+−
+−
+−
+−
+→ hT, ti (τ ) ∨ hS, si 9999999
+K hT, ti (τ )
+X
+X
+XX
+XX
+hB,bi(β)
+hB,bi(β)
+X
+X
+⇐⇒ ∃i ≥ 0. δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ
+∧ (∀j ∈ [0..i). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β)
+We split this into the (⇒)- and (⇐)-direction:
+(⇒): We further refine this and first assume that the first disjunct is satisfied by
+w and defer the other case to a later point in the proof. We then apply (I.H.3)
+and derive:
+w |= hS, si −
+−−−−→ hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+⇐⇒ ∃i ≥ 0. δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ
+∧ (∀j ∈ [0..i). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β)
+∧ (∀j ∈ [0..i). hw[j], δ(S, w[0..j) )i ∈ Stay(s))
+=⇒ ∃i ≥ 0. δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ
+∧ (∀j ∈ [0..i). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β)
+We now assume that the first disjunct is not satisfied by w and thus the
+second disjunct is satisfied by w. We then derive using (I.H.5):
+w |= hS, si 9999999
+K hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+⇐⇒ ∃i1 , i2 ≥ 0. δ(hS, si, w[0..i1 ) ) = hT, ti ∧ w[i1 ..] |= τ
+∧ (∃j1 ∈ [0..i1 ). hw[j1 ], δ(S, w[0..j1 ) )i ∈ Enter(t)
+∧ hw[i2 ], δ(S, w[0..i2 ) )i ∈ Leave(s)
+∧ (∀j ∈ [0.. max(i1 −1, i2 )]. δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β)
+=⇒ ∃i ≥ 0. δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ
+∧ (∀j ∈ [0..i). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β)
+(⇐): We assume that w satisfies the right-hand side of the equation and we
+instantiate i to be the smallest non-negative integer such that:
+δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ
+∧ (∀j ∈ [0..i). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β)
+Assume that for all proper prefixes of w[0..i) the combined letter stays in
+s, i.e., hw[j], δ(S, w[0..j) )i ∈ Stay(s) for all j ∈ [0..i). We then apply (I.H.3)
+and obtain that w satisfies hS, si −
+−−−−→ hT, ti (τ ) and so the left-hand side of
+X
+XX
+hB,bi(β)
+
+On the Translation of Automata to Linear Temporal Logic
+
+29
+
+the equation is satisfied by w. Thus let k ∈ [0..i) be the smallest non-negative
+integer such that:
+hw[k], δ(S, w[0..k) )i ∈ Leave(s)
+Since k < i, we immediately obtain one of the missing preconditions for applying
+(I.H.5):
+∀j2 ∈ [0..k]. δ(hS, si, w[0..j2 ) ) 6= hB, bi ∨ w[j2 ..] 6|= β
+The second missing precondition is that we need to find a j1 ∈ [0..i) such that
+hw[j1 ], δ(S, w[0..j1 ) )i ∈ Enter(t): In the case s 6= t this is straightforward, since
+after reading w[0..i) we reach hT, ti, and thus there must be a j1 < i such that
+hw[j1 ], δ(S, w[0..j1 ) )i ∈ Enter(t). Thus let us assume s = t. In general there might
+be not such an index j1 . However, we have shown that hw[k], δ(S, w[0..k) )i ∈
+Leave(s) for some k < i and by the same reasoning as above there must be j1
+between k and i such that hw[j1 ], δ(S, w[0..j1 ) )i ∈ Enter(t).
+We now can apply (I.H.5) and conclude this direction of the proof.
+Reachability formula 2
+We proceed by a straightforward derivation for which we use (I.H.1) in the second
+step:
+weak
+∼∼∼K T (τ )
+w |= S ∼X
+B(β)
+X
+⇐⇒ w 6|= S ∼∼∼∼K B (β)
+H
+T (τ
+H)
+⇐⇒ ¬ ∃i ≥ 0. δ(S, w[0..i) ) = B ∧ w[i..] |= β
+
+∧ (∀j ∈ [0..i). δ(S, w[0..j) ) 6= T ∨ w[j..] 6|= τ )
+⇐⇒ ∀i ≥ 0. (δ(S, w[0..i) ) = B ∧ w[i..] |= β)
+→ (∃j ∈ [0..i). δ(S, w[0..j) ) = T ∧ w[j..] |= τ )
+Reachability formula 3
+We want to prove the following equivalence:
+w |= hS, si −
+−−−−→ hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+⇐⇒ ∃i ≥ 0. δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ
+∧ (∀j1 ∈ [0..i). δ(hS, si, w[0..j1 ) ) 6= hB, bi ∨ w[j1 ..] 6|= β)
+∧ (∀j2 ∈ [0..i). hw[j2 ], δ(S, w[0..j2 ) )i ∈ Stay(s))
+(⇒): Assume that w satisfies the left-hand side of the equivalence. Notice that if
+>0
+w does not satisfy ϕ := hS, si −
+−−−−→ hT, ti (τ ), then necessarily δ(hS, si, w[0..0) ) =
+X
+XX
+hB,bi(β)
+X
+hT, ti and w[0..] |= τ and thus the right-hand side trivially holds for i = 0.
+Thus we can assume that w satisfies ϕ and using the same reasoning we know
+that either δ(hS, si, w[0..0) ) = hB, bi or w[0..] |= β does not hold, which takes care
+of the case j1 = 0 in the second line of the right-hand side, assuming i > 0.
+Since we have w |= ϕ, there must be a hσ, T 0 i ∈ Stay(s) with δ(hT 0 , si, σ) =
+hT, ti such that the matching disjunct ψ of ϕ is satisfied by w. Note that this
+
+30
+
+U. Boker, K. Lehtinen, S. Sickert
+
+immediately implies that s = t. Observe that ψ is a conjunction of formulas with
+the shape
+S ∼∼∼K T 0 (σ ∧ Xτ )
+·(·)
+Z
+Z
+and we now apply (I.H.1) to all reachability formulas. Since they all share the
+same target, we can instantiate them to the same i0 (where i0 is the smallest
+non-negative integer satisfying the conditions) such that:
+(a) δ(S, w[0..i0 ) ) = T 0
+(b) w[i0 ] = σ
+(c) w[i0 +1..] |= τ
+(d) For every hη, Li ∈ Leave(s) and every j ∈ [0..i0 ) at least one of the following
+statements holds:
+(i) δ(S, w[0..j) ) 6= L
+(ii) w[j] 6= η
+(e) For every hρ, B 0 i ∈ Stay(s) such that δ(hB 0 , si, ρ) = hB, bi and every j ∈
+[0..i0 ) at least one of the following statements holds:
+(i) δ(S, w[0..j) ) 6= B 0
+(ii) w[j] 6= ρ
+(iii) w[j+1..] 6|= β
+We now instantiate i of the right-hand side with i0 + 1. Remember that we
+have hσ, T 0 i ∈ Stay(s) and together with (a-c) we obtain the first conjunct of the
+right hand side.
+We now establish the third conjunct. Note that for every j2 ∈ [0..i0 ) we have
+hw[j2 ], δ(hS, si, w[0..j2 ) )i ∈ Stay(s), since Stay(s) = (Σ ×Q1 ×· · ·×Qm )\Leave(s)
+and by (d) we do not encounter an element of Leave(s) for any j2 . Further, for
+j2 = i0 we obtain hw[j2 ], δ(hS, si, w[0..j2 ) )i ∈ Stay(s) from (a,b) and the choice of
+hσ, T 0 i ∈ Stay(s).
+For the second conjunct it remains to show that for every j1 ∈ [0..i):
+δ(hS, si, w[0..j1 ) ) 6= hB, bi ∨ w[j1 ..] 6|= β
+Assume that δ(hS, si, w[0..j1 ) ) = hB, bi (if this is not the case we are immediately done). Due to the already established third conjunct, we have hw[j1 −
+1], δ(S, w[0..j1 −1) )i = hρ, B 0 i ∈ Stay(s) and δ(hB 0 , si, ρ) = hB, bi. Thus (e,i) and
+(e,ii) cannot hold and (e,iii) must hold for j1 (= j + 1).
+(⇐): We assume that w satisfies the right-hand side and instantiate i as the
+smallest i ≥ 0 such that:
+(a) δ(hS, si, w[0..i) ) = hT, ti
+(b) w[i..] |= τ
+(c) ∀j ∈ [0..i). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β
+(d) ∀j ∈ [0..i). hw[j], δ(S, w[0..j) )i ∈ Stay(s)
+
+On the Translation of Automata to Linear Temporal Logic
+
+31
+
+If i = 0, then due to (a-b) we have immediately w |= hS, si −
+−−−−→ hT, ti (τ ).
+X
+XX
+hB,bi(β)
+X
+Thus without loss of generality we can assume i > 0 from now on. Further, due
+to (c) we have that either hS, si =
+6 hB, bi or w 6|= β. Thus it remains to show
+>0
+that w |= hS, si −
+−−−−→ hT, ti (τ ). Define σ as w[i − 1] and T 0 as δ(S, w[0..i−1) ).
+X
+XX
+hB,bi(β)
+X
+From (a,d) we then follow:
+(e) hσ, T 0 i ∈ Stay(s)
+(f) δ(S, w[0..i−1) ) = T 0 and δ(hT 0 , si, σ) = hT, ti
+(g) w[i−1..] |= σ ∧ Xτ
+We are going to use the induction hypothesis to show that w satisfies the
+disjunct corresponding to hσ, T 0 i. The first conjunct is satisfied from (f,g) and
+(I.H.1). From (d) it follows that for every j ∈ [0..i) the tuple hw[j], δ(S, w[0..j) )i
+is not in Leave(s). Thus for every hη, Li ∈ Leave(s), we either have w[j..] 6|= η or
+δ(S, w[0..j) ) 6= L. Thus by (I.H.1) and (f,g) we obtain that w satisfies the second
+conjunct. Analogously, from (c) it follows that for every j ∈ [1..i) and for every
+hρ, B 0 i ∈ Stay(s) such that δ(hB 0 , si, ρ) = hB, bi, either δ(S, w[0..j−1) ) 6= B 0 or
+w[j−1..] 6|= ρ ∧ Xβ. Thus by (I.H.1) and (f,g) we obtain that w satisfies the third
+and final conjunct.
+Reachability formula 4
+We want to prove the following equivalence:
+weak
+
+w |= hS, si −
+−−−−→ hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+⇐⇒ ∀i ≥ 0. (δ(hS, si, w[0..i) ) = hB, bi ∧ w[i..] |= β)
+
+∨ (i > 0 ∧ hw[i−1], δ(S, w[0..i−1) )i ∈ Leave(s))
+→ (∃j ∈ [0..i). δ(hS, si, w[0..j) ) = hT, ti ∧ w[j..] |= τ )
+(⇒): Assume that w satisfies the left-hand side of the equivalence. Then we
+immediately obtain from the definition that either δ(hS, si, w[0..0) ) 6= hB, bi or
+weak,>0
+
+w[0..] 6|= β. Further, notice that if w does not satisfy ϕ := hS, si −
+−−−−→ hT, ti (τ ),
+X
+XX
+hB,bi(β)
+X
+then necessarily δ(hS, si, w[0..0) ) = hT, ti and w[0..] |= τ , and thus the right-hand
+side trivially holds for all i by instantiating j with 0.
+Thus we can assume that w satisfies ϕ and using the fact that at least one
+of δ(hS, si, w[0..0) ) = hB, bi and w[0..] |= β does not hold, we only need to prove
+the right-hand side for i > 0.
+Since we have w |= ϕ, then either w satisfies the disjunct ψ in line (2) or
+there exists a hσ, T 0 i ∈ Stay(s) with δ(hT 0 , si, σ) = hT, ti such that the matching
+disjunct χ in (1) is satisfied by w. We assume that the first case holds, and defer
+the second case to later.
+Note, that when applying the induction hypothesis (I.H.2) to each conjunct of
+ψ, we can simplify the nested existential quantification to false, since w 6|= false.
+Thus we obtain for all i ≥ 0:
+
+32
+
+U. Boker, K. Lehtinen, S. Sickert
+
+(a) For every hη, Li ∈ Leave(s) at least one of the following statements holds:
+(i) δ(S, w[0..i) ) 6= L
+(ii) w[i] 6= η
+(b) For every hρ, B 0 i ∈ Stay(s) such that δ(hB 0 , si, ρ) = hB, bi at least one of the
+following statements holds:
+(i) δ(S, w[0..i) ) 6= B 0
+(ii) w[i] 6= ρ
+(iii) w[i+1..] 6|= β
+Because w and the sequence of generated configurations does not contain a
+combined letter that leaves s due to (a), we do have hw[i], δ(S, w[0..i) )i ∈
+/ Leave(s)
+for all i ≥ 0. Thus hw[i], δ(S, w[0..i) )i ∈ Stay(s) for all i ≥ 0. Further, due to (b)
+we either do not see a combined letter at position i that enters the configuration
+hB, bi (and thus δ(hS, si, w[i+1..] ) = hB, bi) or the infinite suffix of w[i+1..] does
+not satisfy β. From this, we can conclude that the right-hand side holds. (The
+case for i = 0 was already established in the second paragraph.)
+We now assume that there exists a tuple hσ, T 0 i such that w satisfies the
+matching disjunct χ of line (1). Note that the existence of hσ, T 0 i immediately
+implies s = t. Moreover, we can assume that w does not satisfy the disjunct
+ψ from line (2). Thus by applying (I.H.2), we know that there exists an k ≥
+0 such that either δ(S, w[0..k) ) = L and w[k] = η from hη, Li ∈ Leave(s) or
+δ(S, w[0..k) ) = B, w[k] = ρ, and w[k+1..] |= β for some hρ, B 0 i ∈ Stay(s) and
+δ(hB 0 , si, ρ) = hB, bi. Thus when we apply the (I.H.2) to the corresponding
+reachability formula of χ we obtain a k 0 ∈ [0..k) such that δ(S, w[0..k0 ) ) = T 0 and
+w[k0 ..] |= σ ∧ Xτ . Observe that χ is a conjunction of formulas with the shape
+S ∼∼∼K T 0 (σ ∧ Xτ )
+·(·)
+Z
+Z
+weak
+
+and we now apply the induction hypothesis to all reachability formulas. Since
+they all share the same “target”, we can instantiate the nested existential quantification to the same j 0 (where j 0 is the smallest non-negative integer satisfying
+the condition) such that:
+(a) δ(S, w[0..j 0 ) ) = T 0
+(b) w[j 0 ] = σ
+(c) w[j 0 +1..] |= τ
+(d) For every hη, Li ∈ Leave(s) and every i0 ∈ [0..j 0 ] at least one of the following
+statements holds:
+(i) δ(S, w[0..i0 ) ) 6= L
+(ii) w[i0 ] 6= η
+(e) For every hρ, B 0 i ∈ Stay(s) such that δ(hB 0 , si, ρ) = hB, bi and every i0 ∈
+[0..j 0 ] at least one of the following statements holds:
+(i) δ(S, w[0..i0 ) ) 6= B 0
+(ii) w[i0 ] 6= ρ
+(iii) w[i0 +1..] 6|= β
+
+On the Translation of Automata to Linear Temporal Logic
+
+33
+
+In order to show that w satisfy the right-hand side of the equation, let now
+i ≥ 0 be an arbitrary integer and we need to prove:
+
+(δ(hS, si, w[0..i) ) = hB, bi ∧ w[i..] |= β) ∨ (i > 0 ∧ hw[i−1], δ(S, w[0..i) )i ∈ Leave(s))
+→ (∃j ∈ [0..i). δ(hS, si, w[0..j) ) = hT, ti ∧ w[j..] |= τ )
+The case i = 0 was already discussed in the second paragraph. Further, if
+i > j 0 + 1, then (a-c) show that j can be instantiated with j 0 + 1. Thus assume
+that i ∈ [1..(j 0 + 1)]. Further, since j 0 was chosen to be the smallest integer such
+that (a-c) holds, we can simplify the expression we need to prove to:
+(δ(hS, si, w[0..i) ) 6= hB, bi ∨ w[i..] 6|= β) ∧ hw[i−1], δ(S, w[0..i−1) )i ∈ Stay(s))
+Note that second conjunct is direct consequence of (d). For the first conjunct,
+we proceed by contradiction and assume that i is the smallest integer such that:
+δ(hS, si, w[0..i) ) = hB, bi ∧ w[i..] |= β
+Due to the already established second conjunct, we have hw[i−1], δ(S, w[0..i−1) i) =
+hρ, B 0 i ∈ Stay(s) and δ(hB 0 , si, ρ) = hB, bi. But since i − 1 ∈ [0..j 0 ], we have a
+contradiction to (e).
+(⇐): We assume that w satisfies the right-hand side. We first consider the case
+that the nested existential quantification is not true for any i ≥ 0. Thus for all
+i ≥ 0 it holds that:
+(a) hw[i], δ(S, w[0..i) )i ∈ Stay(s)
+(b) δ(hS, si, w[0..i) ) 6= hB, bi or w[i..] 6|= β
+Since w satisfies the right-hand side, it is easy to see that we have either
+weak,>0
+hS, si 6= hB, bi or w 6|= β. Hence it remains to show that w |= hS, si −
+−−−−→
+X
+XX
+hB,bi(β)
+X
+hT, ti (τ ), which we do by showing that w satisfies (2). From (a,b) we obtain:
+(a’) For every hη, Li ∈ Leave(s) we have either δ(S, w[0..i) ) 6= L or w[i] 6= η.
+(b’) Either w[i+1..] 6|= β or for every hρ, B 0 i ∈ Stay(s) such that δ(hB 0 , si, ρ) =
+hB, bi we have either δ(S, w[0..i) ) 6= B 0 or w[i] 6= ρ.
+We then apply the induction hypothesis (I.H.2) to (a’,b’) and obtain that w
+satisfies the disjunct of line (2).
+We now consider the second case and assume that there is a j such that:
+(a) δ(hS, si, w[0..j) ) = hT, ti
+(b) w[j..] |= τ
+Without loss of generality, we can assume j to be the smallest integer with
+such a property. Further, since w satisfies the right-hand side, we have:
+(c) ∀i ∈ [0..j). hw[i], δ(S, w[0..i) )i ∈ Stay(s)
+(d) ∀i ∈ [0..j]. δ(hS, si, w[0..i) ) 6= hB, bi ∨ w[i..] 6|= β
+
+34
+
+U. Boker, K. Lehtinen, S. Sickert
+
+If j = 0, then w immediately satisfies the left-hand side. Thus assume j >
+0. Due to (c), we have that hσ, T 0 i = hw[j−1] , δ(S, w[0..j−1) )i ∈ Stay(s) and
+δ(hδ(S, w[0..j−1) ), si, w[j−1] ) = hT, ti. Thus there exists a matching disjunct for
+hσ, T 0 i in line (1) and we know it is satisfied by w due the (a, b, d) and the
+induction hypothesis (I.H.2).
+Reachability formula 5
+We want to prove the following equivalence:
+w |= hS, si 9999999
+K hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+⇐⇒ ∃i1 , i2 ≥ 0. δ(hS, si, w[0..i1 ) ) = hT, ti ∧ w[i1 ..] |= τ
+∧ (∃j1 ∈ [0..i1 ). hw[j1 ], δ(S, w[0..j1 )) ∈ Enter(s)i)
+∧ hw[i2 ], δ(S, w[0..i2 ) )i ∈ Leave(s)
+∧ (∀j2 ∈ [0.. max(i1 −1, i2 )].
+δ(hS, si, w[0..j2 ) ) 6= hB, bi ∨ w[j2 ..] 6|= β)
+(⇒): We assume that
+w |= hS, si 9999999
+K hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+holds and proceed by first constructing a witness for i2 and then one for i1 .
+(∃i2 ): Since w satisfies line (3), there must be a combined letter hσ, Li ∈ Leave(s)
+such that w satisfies the corresponding disjunct. We apply to this disjunct the induction hypothesis (I.H.3) and instantiate the existential quantifier to i2 (which
+we intend to be the witness for ∃i2 ) with the following properties:
+1. δ(hS, si, w[0..i2 ) ) = hL, si
+2. w[i2 ] = σ and δ(hS, si, w[0..i2 ) ) 6= hB, bi ∨ w[i2 ..] 6|= β
+3. ∀j2 ∈ [0..i2 ). δ(hS, si, w[0..j2 ) ) 6= hB, bi ∨ w[j2 ..] 6|= β
+4. ∀j2 ∈ [0..i2 ). hw[j2 ], δ(S, w[0..j2 ) )i ∈ Stay(s).
+Observe that due to (1,2) we have hw[i2 ], δ(S, w[0..i2 ) )i ∈ Leave(s) and together
+with (2,3) one can see that i2 is a sufficient witness for the ∃i2 in the right-hand
+side of the equation we want to prove. Note that property (4) is not useless and
+will be of importance later.
+(∃i1 ): Since w also satisfies lines (1,2), there must be a combined letter hσ, T 0 i ∈
+Enter(t) such that w satisfies the corresponding disjunct. We then apply the induction hypothesis (I.H.1) to all terms of the matching conjunction in lines (1,2).
+Since all reachability formulas share the same target configuration and formula,
+we can instantiate all existential quantifiers to the same integer k by picking the
+smallest instance for each existential quantifier. Let now k be this smallest nonnegative integer. We introduce the following two abbreviations T 00 = δ(hT 0 , ·i, σ)
+and Rη0 = δ(hR, ·i, η) for some hη, Ri ∈ Enter(b). Note that we can leave out the
+last state in the definition of T 00 , since for all states q, p the transition relation
+maps the the same successor configuration, i.e., δ(hT 0 , qi, σ) = δ(hT 0 , pi, σ). Analogously, for we omit it from Rη0 . We now list all relevant properties of k derived
+from applying the induction hypothesis:
+
+On the Translation of Automata to Linear Temporal Logic
+
+35
+
+5. δ(S, w[0..k) ) = T 0
+6. w[k] = σ
+7. w[k+1..] |= T 00 −
+−−−−→ hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+8. For all hη, Ri ∈ Enter(b) and all ` ∈ [0..k) at least one of the following
+statements is true:
+(a) δ(S, w[0..`) ) 6= R
+(b) w[`] 6= η
+weak
+(c) w[`+1..] 6|= Rη0 −
+−−−−→ hB, bi (β)
+X
+XX)
+hT,ti(τ
+We continue and apply the induction hypothesis to (7) and then obtain i1 (which
+we intend to be the witness for ∃i1 ) with the following properties (already shifted
+to indices relative to w). Further, we can assume i1 to be the smallest integer
+with these properties.
+9. δ(T 00 , w[k+1..i1 ) ) = hT, ti and w[i1 ..] |= τ
+10. ∀j ∈ [(k + 1)..i1 ). δ(T 00 , w[k+1..j) ) 6= hB, bi ∨ w[j..] 6|= β
+11. ∀j ∈ [(k + 1)..i1 ). hw[j], δ(δ(T 0 , σ), w[k+1..j) )i ∈ Stay(t)
+From (5,6,9) we obtain that δ(hS, si, w[0..i1 ) ) = hT, ti and that w[i1 ..] |= τ taking
+care of the first line of the right-hand side of the equation. Further, by construction hw[k], δ(S, w[0..k) )i = hσ, T i ∈ Enter(t) and since k < i1 , we now know that
+the second line is satisfied by our witness for ∃i1 . Next, we inline the definition
+of T 00 in (10) and obtain: ∀j ∈ [(k + 1)..i1 ). δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β.
+Thus in order to complete this direction of the proof it remains to show that:
+∀j ∈ [(i2 + 1)..k]. δ(hS, si, w[0..j) ) 6= hB, bi ∨ w[j..] 6|= β
+If [(i2 +1)..k] is the empty set, we are done. Thus assume that i2 < k. We proceed
+with a proof by contradiction and assume that there exists an index j ∈ [i2 +1..k]
+such that δ(hS, si, w[0..j) ) = hB, bi and w[j..] |= β. Due to (1) and (4), there must
+be some j 0 ∈ [i2 ..j−1] such that the combined letter hη, Ri = hw[j 0 ], δ(S, w[0..j 0 ) )i
+is in Enter(b). Without loss of generality we can further assume that:
+12. ∀j 00 ∈ [j 0 ..j). hw[j 00 ], δ(S, w[0..j 00 ) )i ∈ Stay(b)
+Note that j 0 < k and since (8a) and (8b) cannot be true we can instantiate (8c)
+to:
+weak
+w[j 0 +1..] 6|= Rη0 −
+−−−−→ hB, bi (β)
+X
+XX)
+hT,ti(τ
+We now apply the induction hypothesis to this and obtain an index ` ≥ j 0 + 1
+such that the following two statements hold (already with adjusted indices):
+13. At least one of the following statements hold:
+(a) δ(hS, si, w[0..`) ) = hT, ti ∧ w[`..] |= τ
+(b) ` > j 0 + 1 ∧ hw[` − 1], δ(hS, si, w[0..`−1) i ∈ Leave(b)
+14. ∀j 00 ∈ [(j 0 +1)..`). δ(hS, si, w[0..j 00 ) ) 6= hB, bi ∨ w[j 00 ..] 6|= β
+
+36
+
+U. Boker, K. Lehtinen, S. Sickert
+
+Since j 0 < j and since we assumed that j is the smallest integer satisfying
+δ(hS, si, w[0..j) ) = hB, bi and w[j 00 ..] |= β, we can conclude with (14) that ` ≤ j.
+However, we have a contradiction between (13a), ` ≤ j ≤ k < i1 , and i1 being the
+smallest index reaching hT, ti and satisfying τ . Thus (13b) must hold. However,
+since ` ≤ j this contradicts (12). Thus there cannot be such a j and we can
+conclude this direction.
+(⇐): Assume that w satisfies the left-hand side. Then there exists i1 , i2 , j1 ≥ 0,
+further let i1 , i2 be the smallest integers and let j1 be the largest integer such
+that:
+(a) δ(hS, si, w[0..i1 ) ) = hT, ti
+(b) w[i1 ..] |= τ
+(c) j1 < i1
+(d) hw[j1 ], δ(S, w[0..j1 ) )i ∈ Enter(t)
+(e) hw[i2 ], δ(S, w[0..i2 ) )i ∈ Leave(s)
+(f) ∀j2 ∈ [0.. max(i1 − 1, i2 )]. δ(hS, si, w[0..j2 ) ) 6= hB, bi ∨ w[j2 ..] 6|= β
+Since i2 is the smallest integer with this property, we have hw[k], δ(S, w[0..k) )i ∈
+Stay(s) for all k ∈ [0..i2 −1]. Thus we can apply (I.H.3) to this and (e,f) to show
+that w satisfies line (3) for hw[i2 ], δ(S, w[0..i2 ) )i = hσ, Li ∈ Leave(s). In order to
+show the disjunct of (1) and (2), we need to identify a suitable hσ, T 0 i ∈ Enter(t).
+We argue that hσ, T 0 i = hw[j1 ], δ(S, w[0..j1 ) )i is a suitable choice.
+We proceed by first showing that w satisfies line (1). Since j1 is the largest
+integer with such a property, we immediately get hw[k], δ(S, w[0..k) )i ∈ Stay(s)
+for all k ∈ [j1 +1, i1 −1]. By applying (I.H.3) we get:
+w[j1 +1..] |= δ(hT 0 , ·i, σ) −
+−−−−→ hT, ti (τ )
+X
+XX
+hB,bi(β)
+X
+We now apply (I.H.1) and use (d) to establish that the first line is satisfied
+by w. In order show that line (2) is satisfied it remains to show that for all
+k ∈ [0..j
+ 1 ] and all hη, Li ∈ Enter(b) either δ(hS, si, w[0..k) ) 6= hη, Li or w[k..] 6|=
+weak
+
+η ∧ X δ(hR, ·i, η) −
+−−−−→ hB, bi (β) .
+X
+XX)
+hT,ti(τ
+We proceed by contradiction. Assume that there is k ≤ j1 such that δ(hS, si,
+weak
+w[0..k) ) = hη, Li, w[k] = η, and w[k+1..] |= δ(hR, ·i, η) −
+−−−−→ hB, bi (β)). By
+X
+XX)
+hT,ti(τ
+applying (I.H.4) and adjusting the indices we obtain:
+∀i ≥ k + 1. (δ(hS, si, w[0..i) ) = hT, ti ∧ w[i..] |= τ )
+
+∨ (i > k + 1 ∧ hw[i−1], δ(S, w[0..i−1) )i ∈ Leave(b))
+→ (∃j ∈ [k + 1..i). δ(hS, si, w[0..j) ) = hB, bi ∧ w[j..] |= β)
+By instantiating this with (a,b) we get:
+∃j ∈ [k + 1..i1 ). δ(hS, si, w[0..j) ) = hB, bi ∧ w[j..] |= β
+However this contradicts (f).
+Thus we can apply (I.H.1) to establish that w satisfies (2).
+
+On the Translation of Automata to Linear Temporal Logic
+
+37
+
+Lemma 5. Let S, B, T be configurations of level m ≤ n, and let s, b, t be states
+in level m + 1 (when m < n). Then for i ≥ 1 it holds that:
+K hT, ti (Σi ) ∈ Σi
+∼∼∼∼K T (Σi ) , hS, si −
+−−−−−→ hT, ti (Σi ) , hS, si 99999999
+– S ∼X
+h
+h
+hh
+hh
+B(Π
+hB,bi(Π
+hB,bi(Π
+X
+i)
+i)
+i)
+X
+h
+h
+weak
+weak
+– S ∼X
+−−−−−→ hT, ti (Πi ) ∈ Πi
+∼∼∼∼K T (Πi ) , hS, si −
+h
+hh
+B(Σ
+B,bi(Σ
+X
+i)
+i)
+X
+h
+
+Proof. Observe first that there is no circularity in the definitions of the five
+reachability formulas, even though they are defined by each other: Formula 2
+is defined on top of formula 1, which is defined on top of formulas 3 and 5,
+while formulas 3, 4, and 5 are defined with respect to reachability formulas over
+configurations of a lower level.
+Let i ≥ 1 be an arbitrary index. We prove the statement by induction on the
+level m of the configurations S, B, T in the reachability formulas. We split the
+proof to five cases corresponding to the five reachability formulas.
+Reachability formula 1. Let β ∈ Πi and let τ ∈ Σi . We proceed by an
+induction on the the configuration level m.
+(m = 0): There is only one configuration of level 0 and it is the empty configuration. Thus S = T = B = hi. Applying the definition we obtain:
+hi ∼X
+∼∼∼K hi (τ ) = (¬β)Uτ
+hi(β)
+X
+Note that ¬β ∈ Σi and thus the whole formula (¬β)Uτ is also in Σi .
+(m → m + 1): Let hS, si, hT, ti, hB, bi ∈ Q1 × · · · × Qm+1 be arbitrary configurations of level m + 1. Thus:
+hS, si ∼X
+∼∼∼∼∼K hT, ti (τ ) = hS, si −
+−−−−→ hT, ti (τ ) ∨ hS, si 9999999
+K hT, ti (τ )
+X
+X
+XX
+XX
+XX
+hB,bi(β)
+hB,bi(β)
+hB,bi(β)
+X
+X
+X
+We now can use apply the induction hypothesis and obtain that the formula is
+in Σi .
+Reachability formula 2. Let β ∈ Σi and let τ ∈ Πi . Then by induction
+weak
+hypothesis S ∼∼∼∼K B (β) is in Σi and thus S ∼X
+∼∼∼K T (τ ) is in Πi .
+B(β)
+H
+X
+T (τ
+H)
+Reachability formula 3. Let β ∈ Πi and let τ ∈ Σi . Note that under this
+assumption false, η, and ρ∧Xβ belong to Πi and that σ∧Xτ belongs to Σi . Thus
+>0
+by applying the induction hypothesis we obtain that hS, si −
+−−−−→ hT, ti (τ ) is
+X
+XX
+hB,bi(β)
+X
+in Σi . Since ¬β also belongs to Σi , we obtain that hS, si −
+−−−−→ hT, ti (τ ) is
+X
+XX
+hB,bi(β)
+X
+from Σi .
+Reachability formula 4. Let β ∈ Σi and let τ ∈ Πi . Note that under this
+assumption η and ρ ∧ Xβ belong to Σi and that false, ¬β, and σ ∧ Xτ belong to
+weak,>0
+Πi . We then apply again the induction hypothesis and obtain that hS, si −
+−−−−→
+X
+XX
+hB,bi(β)
+X
+weak
+hT, ti (τ ) and thus also hS, si −
+−
+−
+−
+−
+→
+hT,
+ti
+(τ
+)
+belongs
+to
+Π
+.
+i
+X
+XX
+hB,bi(β)
+X
+
+38
+
+U. Boker, K. Lehtinen, S. Sickert
+
+Reachability formula 5. Let β ∈ Πi and let τ ∈ Σi . By an analogous argument
+to the two preceding cases we obtain that the formulas in line
+ (1) and (3) belong
+weak
+
+to Σi . Further, note that by the induction hypothesis η ∧ X δ(hR, ·i, η) −
+−−−−→
+X
+XX)
+hT,ti(τ
+
+hB, bi (β) belongs to Πi and thus the overall reachability formula 5 belongs to
+Σi .
+
+A.4
+
+Proofs from Section 4.3
+
+Lemma 6. Consider a reset cascade A with n levels and up to n states in each
+level, and a formula ζ = S ∼X
+∼∼∼K T (τ ) with configurations S, B and T of A of
+B(β)
+X
+level i ≤ n. Let d = max(depth(β), depth(τ )) and let l = max(|β|, |τ |). Then:
+(a) depth(ζ) ≤ d + 3i
+
+and
+
+i
+
+(b) |ζ| ≤ l · (10|Σ|2 n)4
+
+Proof. We first prove the upper bound on the depth of the formula and then
+move on to the claim about the length of the formula.
+Depth Analysis. We prove the claim by induction on the level i. For the base
+case of i = 0, the main reachability formula is just (¬β)Uτ , having D(0, d) =
+d + 1, which is equal to d + 30 , as required. For the induction step of a general
+level i > 0, we will first establish a bound on D(i, d) that is relative to D(i−1, d),
+and then get from it an absolute bound, using the induction hypothesis.
+Observe that D(i, d) is bounded in Table 2 to the maximum between D3 (i, d)
+and D5 (i, d), while the bound on D5 (i, d) is at least as on D3 (i, d). Hence:
+D(i, d) ≤ D5 (i, d) ≤
+
+D(i−1, max(1 + D3 (i, d), 1 + D4 (i, d)))
+
+≤
+
+D(i−1, 1 + D(i−1, d + 1))
+
+Applying the induction hypothesis on D(i−1, d), we get an absolute bound:
+D(i, d) ≤
+
+D(i−1, 1 + (d + 1 + 3i−1 ))
+
+≤
+
+2 + d + 3i−1 + 3i−1
+
+≤
+
+d + 3i
+
+Length Analysis. We prove the claim by induction on the level i. For the base
+case of i = 0, the main reachability formula is just (¬β)Uτ , having L(0, l) =
+i
+2 + 2l, which is indeed not larger than l · (10|Σ|2 n)4 . For the induction step of a
+general level i > 0, we will first establish a bound on L(i, l) relative to L(i−1, ·),
+and then apply the induction hypothesis to get an absolute bound.
+Observe that L(i, l) is bounded in Table 2 with respect to L3 (i, ·) and L5 (i, ·),
+and L3 (i, l) is already bounded in Table 2 with respect to L(i−1, ·). We simplify
+the L5 bound, and substitute the bound on L3 , getting:
+
+On the Translation of Automata to Linear Temporal Logic
+
+L5 (i, l) ≤
+
+39
+
+|Σ|ni−1 · L1 (i − 1, 3 + L3 (i, l)) + 2+
+
+|Σ|ni−1 · L1 (i − 1, max(3 + L3 (i, l), 3 + L4 (i, l))) + 1 +
+1 + |Σ|ni−1 · (1 + L3 (i, 3 + l))
+|Σ|ni−1 · L1 (i − 1, 3 + L3 (i, l)) + 2+
+
+|Σ|ni−1 · L1 (i − 1, 3 + L3 (i, l)) + 1 +
+
+≤
+
+1 + |Σ|ni−1 · (1 + L3 (i, 3 + l))
+|Σ|2 n2(i−1) L1 (i − 1, 3 + L3 (i, l))+
+
+≤
+
+|Σ|n(i−1) L1 (i − 1, 3 + L3 (i, l))+
+|Σ|n(i−1) L3 (i, 3 + l))+
+|Σ|2 n2(i−1) +
+3|Σ|n(i−1) + 1
+≤
+
+4|Σ|2 n2(i−1) L1 (i − 1, 3 + L3 (i, l + 3))
+
+≤
+
+4|Σ|2 n2(i−1) L1 (i − 1, 12 + 2l + 4|Σ|2 n2(i−1) L1 (i−1, l+3))
+
+We can now bound L(i, l) relative to L(i−1, ·), getting:
+L(i, l) ≤
+
+1 + L3 (i, l) + L5 (i, l)
+
+≤
+
+4 + 2l + 4|Σ|n2(i−1) L1 (i−1, l+3)+
+4|Σ|2 n2(i−1) L1 (i − 1, 12 + 2l + 4|Σ|2 n2(i−1) L1 (i−1, l+3))
+
+≤
+
+5|Σ|2 n2(i−1) L1 (i − 1, 12 + 2l + 4|Σ|2 n2(i−1) L1 (i−1, l+3))
+
+≤
+
+5|Σ|2 n2(i−1) L1 (i − 1, 5|Σ|2 n2(i−1) L1 (i−1, l+3))
+
+Applying the induction hypothesis on L(i−1, ·), we get an absolute bound:
+L(i, l) ≤
+≤
+
+5|Σ|2 n2(i−1) L1 (i − 1, 5|Σ|2 n2(i−1) L1 (i−1, l+3))
+i−1
+
+)(10|Σ|2 n)4
+
+i−1
+
+25|Σ|4 n4(i−1) (l + 3)(10|Σ|2 n)2·4
+
+i−1
+
+5|Σ|2 n2(i−1) (5|Σ|2 n2(i−1) (l + 3)(2|Σ|n)4
+
+≤
+≤
+
+i
+
+l(10|Σ|2 n)4
+i
+
+The last inequality clearly holds for i ≥ 2 as the (10|Σ|2 n)4 term becomes
+very large. For i = 1, it also holds as the n4(i−1) term disappears and we get
+25 · 102 (l + 3) ≤ 104 ln2 , which holds even for l = n = 1.
+A.5
+
+Proofs from Section 4.4
+
+Lemma 7. Consider a reset cascade A = h2AP , A1 , . . . , An i together with an
+ω
+initial configuration ι and some configuration C. Then for a word w ∈ (2AP ) ,
+
+40
+
+U. Boker, K. Lehtinen, S. Sickert
+
+the run of A on w starting in ι visits C finitely often iff w satisfies the formula
+>0
+Fin(C) := ¬(ι ∼∼∼K C) ∨ ι ∼∼∼K C(¬(C ∼∼∼K C)). Furthermore, Fin(C) ∈ Σ2 .
+Proof. Observe that C is visited finitely often iff either C is not visited at all,
+which by Lemma 4 is formulated by ¬(ι ∼∼∼K C) or there exists a last visit to C,
+namely a visit to C after which there is no other visit to C, which is formulated
+>0
+>0
+by ι ∼∼∼K C(¬(C ∼∼∼K C)). Note that by Lemma 5 we have ι ∼∼∼K C, C ∼∼∼K
+C ∈ Σ1 . Thus ¬ι ∼∼∼K C, ¬C ∼∼∼K C ∈ Π1 and then again by Lemma 5 we get
+>0
+
+∼∼K C)) ∈ Σ2 . Thus Fin(C) ∈ Σ2 .
+ι ∼∼∼K C(¬(C ∼>0
+
+Theorem 2. Every counter-free deterministic ω-regular automaton D over alphabet 2AP with n states (and any acceptance condition) is equivalent to an LTL
+formula ϕ over atomic propositions AP of double-exponential temporal-nesting
+n
+O(2n )
+depth (in O(22 )) and triple-exponential length (in 22
+). If D is a loopingBüchi, looping-coBüchi, weak, Büchi, coBüchi, or Muller automaton then ϕ is
+respectively in the Π1 , Σ1 , ∆1 , Π2 , Σ2 , or ∆2 syntactic fragment of LTL.
+Proof. We complete the proof of the Theorem and give a complete analysis of
+all six acceptance conditions:
+– D is a Muller automaton: the overall formula ϕ is in ∆2 , since it is a Boolean
+combination of Fin(C) formulas, which by Lemma 7 belong to Σ2 .
+– D is a coBüchi automaton: we construct the formula ϕ directly from the
+coBüchi condition α, having a conjunction of Fin(C) formulas, over all configurations C that are mapped to states in α. As Fin(C) belongs to Σ2 , so
+does ϕ.
+– D is a Büchi automaton: we can complement it, apply the above argument
+over the resulting coBüchi automaton, and negate the resulting formula to
+obtain a formula from Π2 .
+– D is a looping-coBüchi automaton: Let s ∈ Q be the unique sink state that
+all accepting runs end up in, and let S be the set of configurations mapped
+W
+to s. We then define ϕ as C∈S ι ∼∼∼K C . Note that ϕ belongs to Σ1 since
+every disjunct belongs to Σ1 due to Lemma 5.
+– D is a looping-Büchi automaton: the dual of the previous argument.
+– D is a weak automaton: Let G ⊆ Q be an accepting SCC of D and G0 ⊆ Q
+be all states that are reachable from G, but are not in G. Let H and H 0 be
+the set of configurations thatWare mapped to G V
+and G0 , respectively. Then
+by Lemma 4, we have that ( C∈H ι ∼∼K C) ∧ ( C 0 ∈H 0 ¬ι ∼∼K C 0 ) exactly
+captures all words that are accepted by eventually ending up in G. The
+overall formula ϕ is then the disjunction of these formulas constructed for
+each accepting SCC of D. The membership in ∆1 then follows immediately
+from Lemma 5.
+
+
