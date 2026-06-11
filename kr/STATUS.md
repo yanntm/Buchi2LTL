@@ -41,7 +41,7 @@ See `kr/testing/test_kr_*` output and the paper for expected size.
 
 ## Gaps (for full general + precision)
 
-- **Muller subset lift (P0)**: `compute_good_muller_sets` must enumerate strongly-connected accepting *subsets* of non-rejecting SCCs of the pruned config aut (not just whole SCCs), using `acc().accepting(union of in-M edge marks)` as the oracle (sound under sbacc), gated by SCC size with logged truncation. Minimal failing case: GFa (good_ms misses {(1,)}). Spot's --decompose-scc=aN only gives basins (already a fallback), not sub-cycles.
+- **Muller subset lift: DONE.** `compute_good_muller_sets` now enumerates strongly-connected accepting *subsets* of non-rejecting SCCs of the pruned config aut via `_accepting_sc_subsets` (acc().accepting(union of in-M edge marks) oracle, sound under sbacc; KR_MULLER_SCC_LIMIT=12 gate with logged whole-SCC truncation). GFa good_ms now correctly [{(1,)}, {(1,),(2,)}] and its !fin((2,)) term is exactly GF!a. Remaining GFa failure isolated to !fin((1,)) = the Fin(C) construction for the transients iota==C case (one-shot release instead of recurrence; separating word !a a !a^w) -- this is the R4/Rws0 postponement logic, making GFa the minimal R4 canary.
 - Polish of the 5 formulas (exact conj/negations for leave/bad, entry logic, >0 cases per paper Table 1 / Sec 4.2) so more multi-level cases are correct and equivalent. (P0 focus on R4/Rws0 structural per reference notes: Line(2), no free-reach, case 4 precedence, R5 swap.) Targeted via the survey ladder (weakest MP classes first).
 - Trivial (size-1) level collapse (to reduce effective depth).
 - Inside-construction guard simplification (beyond post-simp).
