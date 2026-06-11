@@ -7,7 +7,7 @@ This path is separate from the heuristic reconstruction in `buchi2ltl/`.
 ## What is implemented
 
 ### Decomposition + Data (Paper Step 1 + part of 2)
-- `decompose_aut` normalizes the input to a deterministic complete minimized parity automaton (min even) via Spot, extracts generators (explicit 2^|AP| letters), runs a self-contained GAP/SgpDec script (HolonomyCascadeSemigroup + AsCoords; special handling for 1-state), and parses the structured output.
+- `decompose_aut` normalizes the input to a deterministic complete minimized parity automaton (min even, **state-based acceptance via "sbacc"**) via Spot, extracts generators (explicit 2^|AP| letters), runs a self-contained GAP/SgpDec script (HolonomyCascadeSemigroup + AsCoords; special handling for 1-state), and parses the structured output. sbacc is required for soundness: the Muller condition is lifted over configurations (states), so the set of infinitely-visited states must determine acceptance; with Spot's default transition-based marks a single state can carry both accepting and rejecting out-edges (e.g. the 1-state DPA for GFa) and the state-level Muller view is unsound (GFa recovered "true" before this fix).
 - `Cascade` (cascade.py) is general: `num_levels`, `levels` (size/kind/structure), `state_to_config`/`config_to_state` (1-based), `letter_valuations`, `original_aut`, `generator_images`.
 - Pure algebraic helpers (no original aut shape): `move_config`, `all_configs`, `top_of`/`sub_config`, `compute_stay_leave_from`, `compute_enters_to_from`, `build_config_transitions`/`build_configuration_automaton`, `accepting_configs` (Spot scc_info on non-rejecting SCCs with internal acc marks + t/f specials).
 - GAP bridge, parser (focused in kr/gap/parse.py), extract (with bdd_utils for stable buddy var precompute), and install.sh are general. Synthetic path available.
@@ -27,11 +27,13 @@ This path is separate from the heuristic reconstruction in `buchi2ltl/`.
 
 Both 1L and multi use the generalized operators. TRACE + counters + memo keep construction bounded (O(exp) per paper).
 
-## Current behavior (after parity min-even det complete norm)
+## Current behavior (after parity min-even det complete sbacc norm)
 
 - 1L (Fa, Ga, constants, some compounds after Spot norm) often recover simple equivalent LTL (Ga, Fa, true/false).
-- 2L "a" currently yields "false" (or non-equivalent) via the assembly; Ga still good.
-- 3L (Xa) and other 2L produce formulas (often large DNF-ish or degenerate) via the 5 formulas + Fin DNF; equiv frequently False.
+- 2L "a" now roundtrips (equiv True).
+- A survey tool (`kr/testing/survey_mp_cascade.py`) maps small formulas by Manna-Pnueli class x cascade depth; current ladder of failing 2L cases (weakest first): G(a->Xb), Ga|Gb (safety); a U b, F(a & Xb) (guarantee); Fa|Gb, Fa&Gb, Ga|Fb (obligation).
+- 1L recurrence/persistence (GFa, FGa, G(a->Fb), ...) produce real formulas post-sbacc but equiv False: the good-Muller-set computation only emits whole SCCs, never strongly-connected proper subsets (for GFa, M={(1,)} realized by a^w is missing). This is a P0 assembly bug, distinct from the R4 formula work.
+- 3L (Xa) and other deep cases produce formulas (often large DNF-ish) via the 5 formulas + Fin DNF; equiv frequently False.
 - All core CASES in `kr/testing/` terminate with finite LTL and small call counts under the guards. Subproc isolation + bdd_utils = no segvs.
 - `KR_TRACE=1` shows the exact inductive steps.
 
@@ -39,7 +41,8 @@ See `kr/testing/test_kr_*` output and the paper for expected size.
 
 ## Gaps (for full general + precision)
 
-- Polish of the 5 formulas (exact conj/negations for leave/bad, entry logic, >0 cases per paper Table 1 / Sec 4.2) so more multi-level cases are correct and equivalent. (P0 focus on R4/Rws0 structural per reference notes: Line(2), no free-reach, case 4 precedence, R5 swap.)
+- **Muller subset lift (P0)**: `compute_good_muller_sets` must enumerate strongly-connected accepting *subsets* of non-rejecting SCCs of the pruned config aut (not just whole SCCs), using `acc().accepting(union of in-M edge marks)` as the oracle (sound under sbacc), gated by SCC size with logged truncation. Minimal failing case: GFa (good_ms misses {(1,)}). Spot's --decompose-scc=aN only gives basins (already a fallback), not sub-cycles.
+- Polish of the 5 formulas (exact conj/negations for leave/bad, entry logic, >0 cases per paper Table 1 / Sec 4.2) so more multi-level cases are correct and equivalent. (P0 focus on R4/Rws0 structural per reference notes: Line(2), no free-reach, case 4 precedence, R5 swap.) Targeted via the survey ladder (weakest MP classes first).
 - Trivial (size-1) level collapse (to reduce effective depth).
 - Inside-construction guard simplification (beyond post-simp).
 - Semantics validators in testing (execute cascade words vs. evaluate produced LTL).
