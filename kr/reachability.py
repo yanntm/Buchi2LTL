@@ -12,6 +12,7 @@ no inf-often guessing, no special shortcuts for 1L/init-acc/trapping.
 """
 
 from __future__ import annotations
+import os
 from typing import Any, Dict, List, Optional, Tuple
 
 # Re-export the core operators so existing callers (examples, tests) continue to work.
@@ -170,12 +171,15 @@ def reconstruct_ltl_1level_buchi(casc: Cascade) -> str:
     (reconstruct_ltl_paper_style). This is the systematic algebraic construction
     with no ad-hoc, no shape inspection, no inf-often approximations.
     """
-    # Practical guard for dev (paper formulas can be very large for deep cascades);
-    # remove to attempt full per paper bounds.
-    if casc.num_levels > 3:
+    # Depth guard dropped (was 3 levels during find-issues-small-first dev):
+    # the ladder is green through 3L and the construction is fully memoized
+    # with a distinct-subproblem guard (KR_REACH_GUARD), which is the real
+    # runaway protection. KR_MAX_LEVELS gives an opt-in ceiling if ever needed.
+    max_levels = int(os.environ.get("KR_MAX_LEVELS", "0"))
+    if max_levels > 0 and casc.num_levels > max_levels:
         raise NotImplementedError(
-            f"Paper style reconstruction limited to 3 levels in current dev guard "
-            f"(got {casc.num_levels}); the formulas grow per paper (double-exp depth)."
+            f"Reconstruction depth ceiling KR_MAX_LEVELS={max_levels} "
+            f"(got {casc.num_levels} levels)."
         )
     return reconstruct_ltl_paper_style(casc)
 
