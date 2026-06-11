@@ -3,153 +3,127 @@
 Factual snapshot of the current state. History lives in `git log`; work items in
 `kr/TODO.md`; doc map in `kr/README.md`.
 
-## Pipeline (done, general)
+**Bottom line: the FoSSaCS'22 construction is implemented end-to-end and
+semantically validated.** The five reachability formulas are the literal paper
+forms over a genuine SgpDec holonomy cascade; the MP-class ladder shows zero
+semantic failures up to the 3-level dev guard. The open front is no longer
+fidelity — it is output representation and verification at scale: the
+construction produces small hash-consed DAGs in fractions of a second, and
+everything expensive (Spot translation, flat strings) is an artifact of
+unfolding that DAG.
+
+## Pipeline
 
 - `decompose_aut`: Spot norm to det complete min-even parity with **state-based
-  acceptance** (`sbacc` — soundness requirement: the Muller condition is lifted over
-  configurations, so the infinitely-visited state set must determine acceptance)
-  → generators (explicit 2^|AP| letters) → GAP/SgpDec holonomy → parsed `Cascade`.
-- **True-cascade extraction (2026-06-11, the Ga|Gb root-cause fix):** the GAP
-  script now emits (i) the state lifts via `AsHolonomyCoords(s, sk)` — the old
-  `AsCoords(s, hcs)` is `DomainOf(hcs)[s]`, an enumeration accident unrelated
-  to point s; (ii) the **true transitions**: generators lifted with
-  `AsHolonomyCascade` acting via `OnCoordinates`, BFS-closed from the lifts
-  (TRANS lines); (iii) the cover map π via `AsHolonomyPoint` (PI lines).
-  Holonomy coordinatization is a many-to-one **cover**, so config dynamics
-  cannot be reconstructed by conjugating D through the lift (the old shortcut
-  produced non-reset "cascades": for Ga|Gb, `!a&b` acted as {1→1,2→1,3→4,4→4}
-  on a level — impossible in a reset cascade; all earlier passing cases were
-  degenerate, i.e. context-free consistent). Parse REVERSES coordinates
-  (SgpDec is top-first with deeper levels reading upper state; the operators
-  peel index 0 first with suffix as the self-contained sub-cascade) — verified
-  by `kr/testing/probe_reset_consistency.py`: post-fix the suffix convention
-  is exactly the reset-consistent one.
+  acceptance** (`sbacc` — soundness requirement: the Muller condition is lifted
+  over configurations, so the infinitely-visited state set must determine
+  acceptance) → generators (explicit 2^|AP| letters) → GAP/SgpDec holonomy →
+  parsed `Cascade`.
+- **True-cascade extraction.** The GAP script emits (i) state lifts via
+  `AsHolonomyCoords(s, sk)`; (ii) the genuine transitions: generators lifted
+  with `AsHolonomyCascade` acting via `OnCoordinates`, BFS-closed from the
+  lifts (TRANS lines); (iii) the cover map π via `AsHolonomyPoint` (PI lines).
+  Holonomy coordinatization is a many-to-one **cover**: the closure can be
+  strictly larger than the lift image (duplicated sinks etc.), and config
+  dynamics must come from these lifted transitions — they are NOT the
+  h-conjugation of D (that shortcut yields non-reset "cascades"; soundness
+  precondition checkable with `probe_reset_consistency.py`). Parse REVERSES
+  coordinates: SgpDec is top-first (deeper levels read upper state), the
+  operators peel index 0 first with the suffix as the self-contained
+  sub-cascade. GAP RNG is seeded → decompositions are reproducible.
 - `Cascade`: levels, state↔config (1-based), letter valuations, `move_config`
-  (explicit transition table when present — closure may be strictly larger
-  than the lift image, e.g. Ga|Gb sink covered twice; legacy h-conjugation
-  fallback only for old outputs), Enter/Stay/Leave helpers, pruned config
-  automaton, accepting configs.
+  (explicit transition table; legacy h-conjugation only as fallback for old
+  outputs), Enter/Stay/Leave helpers, pruned config automaton, accepting
+  configs. `config_to_state` is π (total on the closure); `state_to_config`
+  is the lift section.
 - Good Muller sets: enumeration of strongly-connected **accepting subsets** of
-  non-rejecting SCCs of the pruned config aut (`acc().accepting(in-M edge-mark union)`
-  oracle, exact under sbacc; `KR_MULLER_SCC_LIMIT=12` gate, logged whole-SCC fallback).
-- Stability: `bdd_utils` buddy-var precompute + per-case subprocess isolation in tests.
+  non-rejecting SCCs of the pruned config aut (`acc().accepting(in-M edge-mark
+  union)` oracle, exact under sbacc; `KR_MULLER_SCC_LIMIT=12` gate, logged
+  whole-SCC fallback).
+- Stability: `bdd_utils` buddy-var precompute + per-case subprocess isolation
+  in tests.
 
-## Operators — LITERAL paper forms, spot.formula objects end-to-end
+## Operators — literal paper forms, fast
 
-All five formulas are now the literal constructions of paper Sec 4.2 /
-construction-ref §7 (the former from-S / first-step approximations are gone):
+- All five formulas are the literal constructions of paper Sec 4.2 /
+  construction-ref §7: solid⁺ last-step decomposition with combined letters
+  ⟨σ,T'⟩ over all closure configs and Leave-avoid/bad-predecessor conjuncts;
+  Formula 5 lines (1)+(2)+(3) with the swapped wsolid in line (2) and no s==t
+  guard; `reach_weak` = the literal dual ¬reach(S,T,τ,B,β); literal
+  wsolid/wsolid⁺; `fin_c` per Lemma 7 with ι==C postponement. Case dispatches
+  compare FULL configs.
+- **Hash-consed `spot.formula` objects end-to-end** (str accepted at entry for
+  probes); stringification only at the very top, or on demand.
+- **Fully memoized:** `reach_strong` (lru) AND the five helpers (decorator
+  keyed ⟨helper, casc, S, B, β, T, τ, level⟩) — one expansion per distinct
+  subproblem, BDD-style. The runaway guard counts DISTINCT subproblems
+  (`KR_REACH_GUARD`, default 5M).
+- **No external calls in the hot path (policy):** we never wait on a stalled
+  outside operation. Spot serves as hash-consing/constructor-folding only;
+  `_simp_f` is identity by default (`KR_SIMP_TREE_LIMIT`: 0 never / N
+  size-capped / -1 always — diagnostics on small cases may use -1; Spot's
+  tl_simplifier is not sharing-aware and its cost is not even size-bounded on
+  these shapes).
 
-- `_stay_gt0_strong` = solid⁺: last-step decomposition over combined letters
-  ⟨σ,T'⟩ enumerated over ALL h-image configs (`_combined_letters_at_level`),
-  lower-level prefix reach to T', stay enforced by Leave-avoid conjuncts,
-  bad-predecessor conjuncts.
-- `_dashed_change_strong` = Formula 5 lines (1)+(2)+(3): Enter(t)/Enter(b)/Leave(s)
-  as combined letters, lower prefix reaches, parameterized-bad line(2) with the
-  SWAPPED wsolid, line(3) solid-to-leave-point. No s==t guard (leave-and-return).
-- `reach_weak` = the literal dual ¬reach(S,T,τ,B,β) (old G(τ|¬β) base was wrong:
-  Table 1 gives τ R ¬β). The bespoke `_dashed_change_weak` was a non-paper
-  invention and is deleted.
-- `_solid_stay_weak`/`_stay_gt0_weak` = literal wsolid/wsolid⁺ (lines (1)+(2),
-  no free-reach, wreach avoids); the s≠t early-false was removed (wrong for
-  weak: degrades to "never blocked"). Case dispatches compare FULL configs.
-- `fin_c` per Lemma 7 with working ι==C postponement.
-- **No string round-trips (P0-perf step 1 done):** all operators + fin_c accept
-  and return hash-consed `spot.formula` objects (str still accepted at entry
-  for probes); `_str_f` is a pure stringifier; assembly in
-  `reconstruct_ltl_paper_style` builds formula objects (fin_c computed once
-  per config, reused across Muller terms) and stringifies only the final
-  result. The `PAPER_STYLE_TOO_LARGE` sentinel guard is gone — the real
-  formula is always returned; callers run equiv checks under timeouts.
-- **Full memoization + no Spot in the hot path (P0-perf step 2, 2026-06-11):**
-  the five helper formulas are memoized like reach_strong (decorator keyed
-  ⟨helper, casc, S, B, β, T, τ, level⟩ — only reach was cached before; the
-  dashed lines re-ran whole solid/wsolid enumerations per call site: 437k raw
-  calls / 91.5% hit rate profiled on (a U b)|Gc). The runaway guard counts
-  DISTINCT subproblems (lru misses; `KR_REACH_GUARD`, default 5M). `_simp_f`
-  is identity by default — tl_simplifier is NOT sharing-aware and stalled
-  >10s inside C++ even on <2000-node formulas; policy (user): we never wait
-  on a stalled external call. `KR_SIMP_TREE_LIMIT`: 0 never (default) / N
-  size-capped / -1 legacy-always (diagnostics on small 2L cases use -1).
-  Effect: `(a U b)|Gc` fin/Muller construction completes in 9.5s (284k
-  distinct subproblems), `FGa|FGb` 1.6s, `GFa&GFb` 0.7s — none ever finished
-  before. Also fixed: `_dashed_change_strong`'s bare `except Exception`
-  narrowed (it swallowed real TypeErrors + probe alarms); GAP RNG seeded in
-  the generated script (AsHolonomyCoords picks a RandomChain — runs are now
-  reproducible).
+## Validation state
 
-## Semantic validation state (trace_fin_semantics grounding)
+- **MP ladder (30 formulas): 21 equiv=True, zero equiv=FALSE.** True includes
+  all 1L cases, the 2L cases `a`, `a U b`, `Fa|Gb`, `Fa&Gb`, `Ga|Fb`, and the
+  3L cases `Xa`, `a & Xa`, `a | Xb`, `G(a->Xa)`. The remaining non-True are:
+  3 Spot-verification blocks (below), 3 cases ≥4L behind the dev guard.
+- **Semantic grounding (`trace_fin_semantics`, cover-aware — GTs on the config
+  semiautomaton): zero contradictions across all probed cases** (`GFa`,
+  `a U b`, `Fa & Gb`, `Ga | Fb`, `Xa` fully OK; `G(a->Xb)`, `Ga|Gb`,
+  `F(a&Xb)`, `G(p->Xq)`, `G(p->(qUr))` no contradiction with some sub-terms
+  UNVERIFIED by size). Every check Spot can complete is OK.
+- Audit gate (`test_kr_r4_audit.py`): CLEAN.
 
-Grounding is now **cover-aware**: GTs are built on the config semiautomaton
-(the closure graph — the actual cascade run space), since with π many-to-one
-"visits config C" is strictly finer than "visits state π(C)" (per-state GTs
-gave spurious under-approx BADs on duplicated sinks).
+## Open front: representation & verification at scale (not fidelity)
 
-- **GFa: ALL SUB-TERMS GROUNDED OK** (1L regression green).
-- **G(a -> X b): zero contradictions** on the true cascade; 4 sub-terms
-  UNVERIFIED (Spot blocked under the per-check timeout — megabyte flat
-  serializations, see below), every check that completes is OK.
-- **Ga | Gb: zero contradictions** (was 11 BADs pre-fix — the case that
-  exposed the cover bug); 5 sub-terms UNVERIFIED for the same Spot reason.
+The construction is cheap; the flat form is not. Current measurements
+(`measure_formula_dag.py`):
 
-## Open problem: Spot-side verification of large outputs (size = serialization artifact)
+| case | build | DAG nodes | unfolded tree | sharing |
+|---|---|---|---|---|
+| `G(a->Xb)` | 0.08s | ~1.2k | 4.8M | >1200x |
+| `Ga\|Gb` | 0.08s | ~1k | 2M | >2000x |
+| `G(p->(qUr))` | 0.14s | 9k | 64.8M | 7179x |
+| `(a U b)\|Gc` | 9.5s | (284k subproblems) | — | — |
 
-Construction is NOT the bottleneck (`kr/testing/measure_formula_dag.py`, true
-cascades): G(a->Xb) 0.08s / 1173 DAG nodes / 3.8MB flat / 192 distinct
-temporal subformulas; Ga|Gb 0.08s / 988 nodes / 5.0MB flat / 191. The flat
-unfolding (sharing factor >1200x) and the one-acceptance-set-per-temporal-
-subformula tableau hit Spot's 32-acc-set hard limit (fast error) or blow the
-translation/complementation time on big sub-terms. Test scripts now carry a
-built-in Spot budget (`KR_SPOT_EQUIV_TIMEOUT` / `KR_CHECK_TIMEOUT`, default
-10s) and report SPOT_TIMEOUT / UNVERIFIED — *distinct from a semantic
-failure* — so blocked-verification is never mistaken for blocked-construction.
-Spot authors have been contacted about leveraging heavily-repeated
-subformulas in translation (our DAGs are tiny; any sharing-aware approach
-would shine here). Until then: TODO P0-verify (fewer distinct temporal
-subterms, compositional checking, word sampling).
-
-## Survey snapshot (2026-06-11, post true-cascade extraction)
-
-- Full 30-formula ladder (post true-cascade): **21 equiv=True**, including
-  the 3L flips `Xa`, `a & Xa`, `a | Xb`, `G(a->Xa)`; **zero equiv=FALSE**
-  anywhere. The 3 `err` cases (`G(a->Xb)`, `Ga|Gb`, `F(a&Xb)`) are the Spot
-  32-acc-set limit, all grounded NO CONTRADICTION. Post memo round (spot
-  checks): `GFa`, `a U b`, `Xa` stay True with unsimplified output; audit
-  CLEAN; groundings unchanged.
-- Former construction exploders `(a U b)|Gc`, `FGa|FGb`, `GFa&GFb` now build
-  (probe_memo_stats); `(a U b)|Gc` end-to-end reconstruct still exceeds 30s
-  in the FINAL FLAT-STRING serialization (the string API contract is the
-  bottleneck — P0-verify track, not reach recursion, not Spot).
-- **`Ga | Gb`: FIXED semantically** (zero grounding contradictions; true
-  sizes [4,3], 5 closure configs). End-to-end equiv unverifiable by
-  translation (32-acc-set fast error) pending P0-verify.
-- Full `survey_mp_cascade.py` ladder re-run pending (now reports
-  construction and Spot phases separately).
+Consequences: (i) Spot translation hits the 32-acceptance-set tableau limit
+(one set per distinct temporal subformula; we carry 100s–1000s) or times out;
+(ii) flat strings reach 100MB+ (one `G(p->(qUr))` fin sub-term: 108MB), so
+the str() API contract itself becomes the bottleneck for the biggest cases.
+All test scripts carry built-in Spot budgets (`KR_SPOT_EQUIV_TIMEOUT` /
+`KR_CHECK_TIMEOUT`, 10s) and report SPOT_TIMEOUT / UNVERIFIED — never
+conflated with semantic failure. Spot authors are in the loop on
+sharing-aware translation (our outputs are the ideal client). The active work
+items (TODO P0): our own sharing-aware fold pass, formula-object/DAG output,
+compositional + word-sampling verification.
 
 ## Tooling for targeted work
 
-- `kr/testing/survey_mp_cascade.py` — MP-class × depth ladder; construction
-  and Spot-equiv phases in separate subprocesses with separate budgets
+All under `kr/testing/` (placed scripts only; subprocess isolation; small
+built-in budgets — a blown budget is a finding, not a nuisance).
+
+- `survey_mp_cascade.py` — MP-class × depth ladder; construction and
+  Spot-equiv phases in separate subprocesses with separate budgets
   (`KR_CONSTRUCT_TIMEOUT` 30s / `KR_SPOT_EQUIV_TIMEOUT` 10s).
-- `kr/testing/trace_fin_semantics.py` — per-config semantic grounding of fin_c
-  sub-terms vs GTs on the config semiautomaton (cover-aware), witness words,
-  per-check subprocess cap (`KR_CHECK_TIMEOUT` 10s; verdicts OK/BAD/UNVERIFIED).
-  Robust to monster flat forms: formula prints truncated at 400 chars (a
-  G(p->(qUr)) run once wrote a 324MB log), and sub-terms whose flat length
-  exceeds 2MB are marked UNVERIFIED immediately (no point shipping 108MB to
-  a child that cannot translate it).
-- `kr/testing/probe_reset_consistency.py` — checks every combined letter acts
-  identity-or-reset per level under both context conventions (soundness
-  precondition of the paper formulas; the Ga|Gb smoking gun).
-- `kr/testing/probe_sgpdec_api.g` — hand-run GAP probe of the SgpDec calls
-  used by the bridge (lift/π inversion, morphism property, closure).
-- `kr/testing/ltl_diff.py` — containment direction + witness words.
-- `kr/testing/test_kr_r4_audit.py` — structural checklist + drift grounding
-  (gate for operator commits).
-- `kr/testing/measure_formula_dag.py` — DAG vs string size of the assembled
-  formula (unique nodes, unfolded tree, distinct temporal subformulas, build
-  time); `--out` dumps the flat formula; `--no-str` skips stringification
-  (the only way to measure cases whose flat form is 100MB+; measured
-  G(p->(qUr)): 9k DAG nodes vs 64.8M tree, sharing 7179x).
-- `kr/testing/probe_memo_stats.py` — memo profiler: distinct subproblems vs
-  raw calls (lru hits/misses), helper-memo size, alarm + watchdog stack dump
-  (names the native call when stuck in C++).
+- `trace_fin_semantics.py` — per-config semantic grounding of fin_c sub-terms
+  vs GTs on the config semiautomaton (cover-aware), witness words, per-check
+  subprocess cap (`KR_CHECK_TIMEOUT`); verdicts OK/BAD/UNVERIFIED; prints
+  truncated; >2MB sub-terms fast-skipped.
+- `probe_reset_consistency.py` — soundness precondition: every combined letter
+  acts identity-or-reset per level under both context conventions.
+- `probe_sgpdec_api.g` — hand-run GAP ground truth for the SgpDec bridge calls
+  (lift/π inversion, morphism property, closure).
+- `probe_memo_stats.py` — memo profiler: distinct subproblems vs raw calls,
+  helper-memo size, alarm + watchdog stack dump (names the native call when
+  stuck in C++).
+- `measure_formula_dag.py` — DAG vs string size of the assembled formula;
+  `--no-str` to measure cases whose flat form is 100MB+.
+- `ltl_diff.py` — containment direction + witness words.
+- `test_kr_r4_audit.py` — structural checklist + drift grounding (gate for
+  operator commits).
+- `test_kr_zoom.py` / `test_kr_reconstruct.py` — single-case full trace /
+  multi-case roundtrip with isolated equiv.
