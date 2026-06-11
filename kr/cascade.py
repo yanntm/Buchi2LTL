@@ -502,7 +502,13 @@ class Cascade:
         Prefers config-graph SCCs (on pruned config aut). Falls back to basins
         or pruned state-SCCs.
         """
-        # 1. Try the direct config-graph SCCs (best, on the lifted pruned structure)
+        # 1. Direct config-graph analysis (best, on the lifted pruned structure):
+        #    the Muller alpha' contains every realizable inf-set, i.e. every
+        #    reachable subset M inducing a strongly connected subgraph that is
+        #    accepting -- not just whole SCCs (e.g. GFa needs the accepting
+        #    self-loop subset of its single SCC; conversely a whole SCC whose
+        #    mark union is rejecting must NOT be emitted). Rejecting SCCs
+        #    contain no accepting cycle, hence no accepting subset: skipped.
         g = self.build_pruned_config_aut()
         if g is not None:
             try:
@@ -511,9 +517,11 @@ class Cascade:
                 reach = self.reachable_configs()
                 good = []
                 for scci in range(si.scc_count()):
-                    if not si.is_rejecting_scc(scci):
-                        confs = [reach[k] for k in range(g.num_states()) if si.scc_of(k) == scci]
-                        m = frozenset(confs)
+                    if si.is_rejecting_scc(scci):
+                        continue
+                    nodes = [k for k in range(g.num_states()) if si.scc_of(k) == scci]
+                    for combo in self._accepting_sc_subsets(g, nodes):
+                        m = frozenset(reach[k] for k in combo)
                         if m:
                             good.append(m)
                 if good:
@@ -552,6 +560,83 @@ class Cascade:
                 if m:
                     good.append(m)
         return good
+
+    def _accepting_sc_subsets(self, g, nodes):
+        """Yield the subsets of `nodes` (the states of one non-rejecting SCC
+        of the pruned config aut g) that induce a strongly connected subgraph
+        (singletons need a self-loop) and are accepting per g's acceptance.
+
+        A run whose inf-set of configs is exactly M visits infinitely often
+        exactly the marks on the in-M edges; under state-based acceptance
+        (guaranteed by the sbacc normalization in decompose_aut) all out-edges
+        of a state carry the same marks, so the union over induced edges is
+        run-independent and `g.acc().accepting(union)` is an exact oracle.
+
+        Enumeration is exponential in the SCC size, gated by
+        KR_MULLER_SCC_LIMIT (default 12); beyond the limit we emit only the
+        whole-SCC set and warn (no silent truncation).
+        """
+        import os
+        import sys
+        import itertools
+        import spot
+
+        nodeset = set(nodes)
+        succ = {k: set() for k in nodes}
+        emarks = {}
+        for k in nodes:
+            for e in g.out(k):
+                if e.dst in nodeset:
+                    succ[k].add(e.dst)
+                    key = (k, e.dst)
+                    emarks[key] = (emarks[key] | e.acc) if key in emarks else e.acc
+
+        limit = int(os.environ.get("KR_MULLER_SCC_LIMIT", 12))
+        if len(nodes) > limit:
+            print(
+                f"[KR][WARN] Muller subset enumeration truncated: SCC size "
+                f"{len(nodes)} > KR_MULLER_SCC_LIMIT={limit}; emitting the "
+                f"whole-SCC set only (raise the env var for exactness).",
+                file=sys.stderr,
+            )
+            yield tuple(nodes)
+            return
+
+        def strongly_connected(cset):
+            start = next(iter(cset))
+            if len(cset) == 1:
+                return start in succ[start]
+            seen = {start}
+            stack = [start]
+            while stack:
+                for v in succ[stack.pop()]:
+                    if v in cset and v not in seen:
+                        seen.add(v)
+                        stack.append(v)
+            if seen != cset:
+                return False
+            rseen = {start}
+            stack = [start]
+            while stack:
+                u = stack.pop()
+                for w in cset:
+                    if w not in rseen and u in succ[w]:
+                        rseen.add(w)
+                        stack.append(w)
+            return rseen == cset
+
+        acc = g.acc()
+        for r in range(1, len(nodes) + 1):
+            for combo in itertools.combinations(nodes, r):
+                cset = set(combo)
+                if not strongly_connected(cset):
+                    continue
+                mk = spot.mark_t()
+                for (u, v), m in emarks.items():
+                    if u in cset and v in cset:
+                        mk |= m
+                if acc.accepting(mk):
+                    yield combo
 
     # ------------------------------------------------------------------
     # Basin / "leading to accepting SCC" helpers, inspired by Spot's
