@@ -42,17 +42,35 @@ def make_guard(valuations: List[Dict[str, bool]], aps: List[str], pred: Callable
 # Simplification / normalization
 # ---------------------------------------------------------------------------
 
-def simplify_ltl(expr: str) -> str:
-    """Simplify an LTL formula string using Spot (if available). Reduces DNF size from
-    full letter disjunctions etc. Purely algebraic on the produced expr; no aut shape used.
+# One shared simplifier for the whole construction: its internal cache persists
+# across calls, so repeatedly simplifying shared subformulas (hash-consed
+# spot.formula nodes) is amortized O(1) instead of a fresh tree walk each time.
+_tl_simp: Optional["spot.tl_simplifier"] = None
+
+
+def _simp_f(f: "spot.formula") -> "spot.formula":
+    """Simplify a spot.formula, returning a spot.formula (no string round-trip)."""
+    global _tl_simp
+    if f is None:
+        return _ff()
+    if _tl_simp is None:
+        _tl_simp = spot.tl_simplifier()
+    try:
+        return _tl_simp.simplify(f)
+    except Exception:
+        return f
+
+
+def simplify_ltl(expr: "str | spot.formula") -> str:
+    """Simplify an LTL formula (string or spot.formula) using Spot; returns str.
+    Purely algebraic on the produced expr; no aut shape used.
     """
+    if isinstance(expr, spot.formula):
+        return _normalize_ltl(str(_simp_f(expr)))
     if not expr or expr in ("true", "false"):
         return expr
     try:
-        f = spot.formula(expr)
-        fs = f.simplify()
-        s = str(fs)
-        return _normalize_ltl(s)
+        return _normalize_ltl(str(_simp_f(spot.formula(expr))))
     except Exception:
         return _normalize_ltl(expr)  # keep as-is if cannot simplify
 
@@ -153,11 +171,16 @@ def _letters_to_f(valuation: Dict[str, bool], aps: List[str]) -> spot.formula:
     return res
 
 def _str_f(f: spot.formula) -> str:
-    """Convert formula to normalized str for public API / traces / memo keys if needed."""
+    """Convert formula to normalized str — top-level output and traces ONLY.
+    Pure stringification: no simplify (that was a per-conversion tree walk that
+    dominated construction time; use _simp_f explicitly where wanted)."""
     if f is None:
         return "false"
-    try:
-        s = str(f.simplify())
-        return _normalize_ltl(s)
-    except Exception:
-        return _normalize_ltl(str(f))
+    return _normalize_ltl(str(f))
+
+
+def _short_f(f: spot.formula, n: int = 120) -> str:
+    """Truncated stringification for trace lines (full str() of a huge shared
+    DAG is O(unfolded size); only call under an enabled-trace guard)."""
+    s = _str_f(f)
+    return s if len(s) <= n else s[:n] + "..."
