@@ -8,7 +8,6 @@ LTL synthesis) will consume. It is intentionally simple and serializable.
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple, NamedTuple, FrozenSet
-import buddy  # for bddtrue in config aut edge labels (Spot twa_graph.new_edge cond; spot.bddtrue not exposed)
 
 class Config(NamedTuple):
     """Ref-style cascade configuration (tuple of per-level states). Hashable, explicit empty for level 0."""
@@ -320,72 +319,17 @@ class Cascade:
             "state_to_config_orig": self.state_to_config,  # for lifting acc later
         }
 
+    # ------------------------------------------------------------------
+    # Config-graph analysis (reachability, pruned config aut, accepting
+    # configs, good Muller sets, basins) lives in kr/config_graph.py.
+    # Thin delegating methods below keep all call sites unchanged.
+    # ------------------------------------------------------------------
+
     def accepting_configs(self) -> set:
         """Configs from which accepting infinite runs can recur (w.r.t. our D).
-
-        The stored aut is the normalized deterministic complete parity aut
-        (our authoritative input D after Spot transformations). We use
-        spot.scc_info on it to identify non-rejecting SCCs that contain at
-        least one cycle with an accepting mark (per the parity condition on D).
-        Returns the corresponding cascade configs for those states.
-        Special-cases trivial "t"/"true"/"f"/"false" acceptance conditions on D.
-        Returns empty set if no aut or on analysis error.
-        """
-        if self.original_aut is None:
-            return set()
-        aut = self.original_aut
-        acc_cond = str(aut.get_acceptance()).strip().lower()
-        if acc_cond in ("t", "true", "1") or acc_cond == "0 t":
-            return set(self.state_to_config.values())
-        if acc_cond in ("f", "false", "0 f"):
-            return set()
-        try:
-            si = spot.scc_info(aut)
-            acc_configs = set()
-            for scci in range(si.scc_count()):
-                if not si.is_rejecting_scc(scci):
-                    states_in = [s for s in range(aut.num_states()) if si.scc_of(s) == scci]
-                    has_cycle = False
-                    for s in states_in:
-                        for e in aut.out(s):
-                            if e.dst in states_in:
-                                has_cycle = True
-                                break
-                        if has_cycle:
-                            break
-                    if has_cycle or len(states_in) > 1:
-                        for s in states_in:
-                            if s in self.state_to_config:
-                                has_acc_on_cycle = False
-                                for e in aut.out(s):
-                                    if e.dst in states_in and e.acc and list(e.acc.sets()):
-                                        has_acc_on_cycle = True
-                                        break
-                                if has_acc_on_cycle:
-                                    acc_configs.add(self.state_to_config[s])
-            if acc_configs:
-                return acc_configs
-        except Exception:
-            pass
-        # Fallback: edge acc marks only on self-loops (internal cycles for singletons).
-        # (This is on the normalized D; transients with acc only on exit edges are avoided.)
-        acc_configs = set()
-        for s, c in self.state_to_config.items():
-            try:
-                for e in aut.out(s):
-                    if e.acc and list(e.acc.sets()) and e.dst == s:  # self-loop with acc
-                        acc_configs.add(c)
-                        break
-            except Exception:
-                pass
-        # prune to reachable from init (using config aut exploration)
-        try:
-            reach = set(self.reachable_configs())
-            acc_configs = {c for c in acc_configs if c in reach}
-        except Exception:
-            pass
-        return acc_configs
-
+        See config_graph.accepting_configs."""
+        from . import config_graph as _cg
+        return _cg.accepting_configs(self)
 
     def summary(self) -> str:
         lv_str = ", ".join(f"L{i}:{lv.size}{('('+lv.structure+')' if lv.structure else '')}"
@@ -396,390 +340,52 @@ class Cascade:
     def __repr__(self) -> str:
         return self.summary()
 
-    # ------------------------------------------------------------------
-    # New: proper use of the configuration automaton + pruning (for point 2)
-    # We compute reachable configs from init via BFS on move_config.
-    # We build a pruned config twa (with acc lifted per transition from D).
-    # We compute good Muller sets via scc_info on the *config* graph (pruned, reachable from init).
-    # This enumerates recurrent accepting config sets on actual paths from ι (model checking
-    # the lifted structure), as recommended in the paper/algo2. No more shying from the
-    # config aut; for our sizes it's fine.
-    # ------------------------------------------------------------------
-
     def reachable_configs(self) -> list:
-        """BFS from the initial config (using move_config over letters).
-        Returns sorted list of reachable config tuples. Prunes irrelevant configs.
-        """
-        if not self.state_to_config:
-            return []
-        init_c = None
-        if self.original_aut is not None:
-            try:
-                init_s = self.original_aut.get_init_state_number()
-                init_c = self.state_to_config.get(init_s)
-            except Exception:
-                pass
-        if init_c is None:
-            init_c = next(iter(self.state_to_config.values()))
-        from collections import deque
-        visited = set()
-        q = deque([init_c])
-        visited.add(init_c)
-        while q:
-            c = q.popleft()
-            for li in range(self.num_letters()):
-                try:
-                    nc = self.move_config(c, li)
-                    if nc not in visited:
-                        visited.add(nc)
-                        q.append(nc)
-                except Exception:
-                    continue
-        return sorted(list(visited))
+        """BFS from the initial config. See config_graph.reachable_configs."""
+        from . import config_graph as _cg
+        return _cg.reachable_configs(self)
 
     def build_pruned_config_aut(self):
-        """Return a Spot twa_graph on reachable configs only, with transitions and
-        acc marks lifted from the corresponding transitions in the normalized D
-        (self.original_aut). This is the pruned cascade graph for proper SCC/Muller
-        analysis on the config side.
-        """
-        reach = self.reachable_configs()
-        if not reach or self.original_aut is None:
-            return None
-        import spot
-        orig = self.original_aut
-        idx = {c: i for i, c in enumerate(reach)}
-        n = len(reach)
-        g = spot.make_twa_graph()
-        # Copy acceptance condition properly (Spot API: use acc() for cond, then num + code)
-        acc = orig.acc()
-        g.set_acceptance( acc.num_sets() , acc.get_acceptance() )
-        g.new_states(n)
-        # init config
-        init_c = None
-        if self.original_aut is not None:
-            try:
-                is_ = self.original_aut.get_init_state_number()
-                ic = self.state_to_config.get(is_)
-                if ic in idx:
-                    init_c = ic
-            except Exception:
-                pass
-        if init_c is None:
-            init_c = reach[0]
-        g.set_init_state(idx[init_c])
-        for i, c in enumerate(reach):
-            s = self.state_of(c)
-            if s is None:
-                continue
-            for li in range(self.num_letters()):
-                try:
-                    nc = self.move_config(c, li)
-                    if nc not in idx:
-                        continue
-                    j = idx[nc]
-                    ts = self.state_of(nc)
-                    for e in orig.out(s):
-                        if e.dst == ts:
-                            g.new_edge(i, j, buddy.bddtrue, e.acc)
-                            break
-                except Exception:
-                    continue
-        return g
+        """Pruned config twa with acc lifted from D. See config_graph.build_pruned_config_aut."""
+        from . import config_graph as _cg
+        return _cg.build_pruned_config_aut(self)
 
     def compute_good_muller_sets(self):
-        """Good M on configs using SCC analysis on the pruned *config* automaton
-        (reachable from init, acc lifted). This is the correct way to extract
-        the possible i.o. config sets for accepting runs (pruned graph + scc
-        on configs, per paper/algo2).
-
-        We also support basin-based good Ms (using Spot's decompose-scc=aN style):
-        for each accepting SCC in the normalized D, compute the attraction basin
-        (states that can reach it, i.e. the "sub-automaton leading to" it), map
-        to configs. This gives precise per-accepting-component recurrent sets
-        via explicit BFS exploration (backward reachability).
-
-        Prefers config-graph SCCs (on pruned config aut). Falls back to basins
-        or pruned state-SCCs.
-        """
-        # 1. Direct config-graph analysis (best, on the lifted pruned structure):
-        #    the Muller alpha' contains every realizable inf-set, i.e. every
-        #    reachable subset M inducing a strongly connected subgraph that is
-        #    accepting -- not just whole SCCs (e.g. GFa needs the accepting
-        #    self-loop subset of its single SCC; conversely a whole SCC whose
-        #    mark union is rejecting must NOT be emitted). Rejecting SCCs
-        #    contain no accepting cycle, hence no accepting subset: skipped.
-        g = self.build_pruned_config_aut()
-        if g is not None:
-            try:
-                import spot
-                si = spot.scc_info(g)
-                reach = self.reachable_configs()
-                good = []
-                for scci in range(si.scc_count()):
-                    if si.is_rejecting_scc(scci):
-                        continue
-                    nodes = [k for k in range(g.num_states()) if si.scc_of(k) == scci]
-                    for combo in self._accepting_sc_subsets(g, nodes):
-                        m = frozenset(reach[k] for k in combo)
-                        if m:
-                            good.append(m)
-                if good:
-                    return good
-            except Exception:
-                pass
-
-        # 2. Try basin-based (decompose-scc / aN idea on the state D, lifted to configs)
-        try:
-            basin_good = self.get_good_muller_sets_from_basins()
-            if basin_good:
-                return basin_good
-        except Exception:
-            pass
-
-        # 3. Fallback: pruned state-SCC mapping (old logic, now with reach prune)
-        reach = set(self.reachable_configs())
-        if self.original_aut is None:
-            acc = self.accepting_configs()
-            acc = {c for c in acc if c in reach}
-            return [frozenset([c]) for c in acc] if acc else []
-        aut = self.original_aut
-        try:
-            import spot
-            si = spot.scc_info(aut)
-        except Exception:
-            acc = self.accepting_configs()
-            acc = {c for c in acc if c in reach}
-            return [frozenset([c]) for c in acc] if acc else []
-        good = []
-        for scci in range(si.scc_count()):
-            if not si.is_rejecting_scc(scci):
-                states = [s for s in range(aut.num_states()) if si.scc_of(s) == scci]
-                m = frozenset(self.state_to_config.get(s) for s in states
-                              if s in self.state_to_config and self.state_to_config.get(s) in reach)
-                if m:
-                    good.append(m)
-        return good
+        """Good Muller sets M on configs (strongly-connected accepting subsets of
+        non-rejecting SCCs of the pruned config aut, with basin / state-SCC
+        fallbacks). See config_graph.compute_good_muller_sets."""
+        from . import config_graph as _cg
+        return _cg.compute_good_muller_sets(self)
 
     def _accepting_sc_subsets(self, g, nodes):
-        """Yield the subsets of `nodes` (the states of one non-rejecting SCC
-        of the pruned config aut g) that induce a strongly connected subgraph
-        (singletons need a self-loop) and are accepting per g's acceptance.
-
-        A run whose inf-set of configs is exactly M visits infinitely often
-        exactly the marks on the in-M edges; under state-based acceptance
-        (guaranteed by the sbacc normalization in decompose_aut) all out-edges
-        of a state carry the same marks, so the union over induced edges is
-        run-independent and `g.acc().accepting(union)` is an exact oracle.
-
-        Enumeration is exponential in the SCC size, gated by
-        KR_MULLER_SCC_LIMIT (default 12); beyond the limit we emit only the
-        whole-SCC set and warn (no silent truncation).
-        """
-        import os
-        import sys
-        import itertools
-        import spot
-
-        nodeset = set(nodes)
-        succ = {k: set() for k in nodes}
-        emarks = {}
-        for k in nodes:
-            for e in g.out(k):
-                if e.dst in nodeset:
-                    succ[k].add(e.dst)
-                    key = (k, e.dst)
-                    emarks[key] = (emarks[key] | e.acc) if key in emarks else e.acc
-
-        limit = int(os.environ.get("KR_MULLER_SCC_LIMIT", 12))
-        if len(nodes) > limit:
-            print(
-                f"[KR][WARN] Muller subset enumeration truncated: SCC size "
-                f"{len(nodes)} > KR_MULLER_SCC_LIMIT={limit}; emitting the "
-                f"whole-SCC set only (raise the env var for exactness).",
-                file=sys.stderr,
-            )
-            yield tuple(nodes)
-            return
-
-        def strongly_connected(cset):
-            start = next(iter(cset))
-            if len(cset) == 1:
-                return start in succ[start]
-            seen = {start}
-            stack = [start]
-            while stack:
-                for v in succ[stack.pop()]:
-                    if v in cset and v not in seen:
-                        seen.add(v)
-                        stack.append(v)
-            if seen != cset:
-                return False
-            rseen = {start}
-            stack = [start]
-            while stack:
-                u = stack.pop()
-                for w in cset:
-                    if w not in rseen and u in succ[w]:
-                        rseen.add(w)
-                        stack.append(w)
-            return rseen == cset
-
-        acc = g.acc()
-        for r in range(1, len(nodes) + 1):
-            for combo in itertools.combinations(nodes, r):
-                cset = set(combo)
-                if not strongly_connected(cset):
-                    continue
-                mk = spot.mark_t()
-                for (u, v), m in emarks.items():
-                    if u in cset and v in cset:
-                        mk |= m
-                if acc.accepting(mk):
-                    yield combo
-
-    # ------------------------------------------------------------------
-    # Basin / "leading to accepting SCC" helpers, inspired by Spot's
-    # --decompose-scc=N / aN  (autfilt).
-    #
-    # These extract, for each accepting SCC (by index), the attraction basin:
-    # all states from which you can reach that SCC (prefix + the SCC itself).
-    # Then map to configs.
-    #
-    # This gives us per-accepting-component config sets that can flow into
-    # a specific recurrent accepting set. Perfect for good Ms in the Muller
-    # DNF (or for per-basin handling), and directly mirrors the "sub-automaton
-    # leading to the Nth accepting SCC" concept.
-    #
-    # Complements the pruned config aut + its SCCs: we can now also compute
-    # basins at the state level (or do analogous on config graph) and use
-    # the resulting config sets as precise good Ms.
-    # Uses scc_info + our BFS-style exploration (no fear of explosion for
-    # our sizes; user confirmed resources allow).
-    # ------------------------------------------------------------------
+        """See config_graph.accepting_sc_subsets (pure function of (g, nodes))."""
+        from . import config_graph as _cg
+        return _cg.accepting_sc_subsets(g, nodes)
 
     def get_accepting_scc_indices(self):
-        """Return list of 0-based indices of SCCs in the normalized D (original_aut)
-        that are non-rejecting and contain at least one accepting cycle/edge.
-        (Analogous to counting 'aN' accepting SCCs for decompose.)
-        """
-        if self.original_aut is None:
-            return []
-        import spot
-        aut = self.original_aut
-        try:
-            si = spot.scc_info(aut)
-            acc_sccs = []
-            for i in range(si.scc_count()):
-                if si.is_rejecting_scc(i):
-                    continue
-                states_in = [s for s in range(aut.num_states()) if si.scc_of(s) == i]
-                has_acc = False
-                for s in states_in:
-                    for e in aut.out(s):
-                        if e.dst in states_in and e.acc and list(e.acc.sets()):
-                            has_acc = True
-                            break
-                    if has_acc:
-                        break
-                if has_acc or len(states_in) > 1:
-                    acc_sccs.append(i)
-            return acc_sccs
-        except Exception:
-            return []
+        """See config_graph.get_accepting_scc_indices."""
+        from . import config_graph as _cg
+        return _cg.get_accepting_scc_indices(self)
 
     def states_in_basin_of_scc(self, scc_index):
-        """Return the set of states that can reach the given SCC (the 'leading to'
-        basin / attraction set, including the SCC itself).
-        This is the set of states in the sub-automaton that autfilt --decompose-scc=aN
-        or --decompose-scc=N would extract for that SCC.
-        Implemented with backward BFS from the SCC states (using predecessor lists).
-        """
-        if self.original_aut is None:
-            return set()
-        import spot
-        aut = self.original_aut
-        try:
-            si = spot.scc_info(aut)
-            target_states = {s for s in range(aut.num_states()) if si.scc_of(s) == scc_index}
-            if not target_states:
-                return set()
-            # build predecessors
-            preds = {s: [] for s in range(aut.num_states())}
-            for s in range(aut.num_states()):
-                for e in aut.out(s):
-                    preds[e.dst].append(s)
-            # backward BFS from targets
-            from collections import deque
-            visited = set(target_states)
-            q = deque(target_states)
-            while q:
-                s = q.popleft()
-                for p in preds.get(s, []):
-                    if p not in visited:
-                        visited.add(p)
-                        q.append(p)
-            return visited
-        except Exception:
-            return set()
+        """See config_graph.states_in_basin_of_scc."""
+        from . import config_graph as _cg
+        return _cg.states_in_basin_of_scc(self, scc_index)
 
     def configs_in_basin_of_scc(self, scc_index):
-        """Map the basin states (states leading to + in the SCC) to their configs.
-        The full basin includes prefixes that flow into the SCC.
-        Returns a frozenset of config tuples. Useful for prefix analysis.
-        """
-        states = self.states_in_basin_of_scc(scc_index)
-        confs = []
-        for s in states:
-            c = self.state_to_config.get(s)
-            if c is not None:
-                confs.append(c)
-        return frozenset(confs)
+        """See config_graph.configs_in_basin_of_scc."""
+        from . import config_graph as _cg
+        return _cg.configs_in_basin_of_scc(self, scc_index)
 
     def configs_in_scc(self, scc_index):
-        """Return only the configs whose states are exactly inside the given SCC
-        (the recurrent / terminal component itself, not the leading prefixes).
-        This is the precise set for a good M in the Muller DNF (the configs
-        that can be visited i.o. when the run enters this accepting SCC).
-        """
-        if self.original_aut is None:
-            return frozenset()
-        import spot
-        aut = self.original_aut
-        try:
-            si = spot.scc_info(aut)
-            states = {s for s in range(aut.num_states()) if si.scc_of(s) == scc_index}
-            confs = [self.state_to_config.get(s) for s in states if s in self.state_to_config]
-            return frozenset(c for c in confs if c is not None)
-        except Exception:
-            return frozenset()
+        """See config_graph.configs_in_scc."""
+        from . import config_graph as _cg
+        return _cg.configs_in_scc(self, scc_index)
 
     def get_good_muller_sets_from_basins(self):
-        """Return good Ms derived from accepting SCCs (using the decompose-scc=aN
-        / basin idea, but taking the precise recurrent part: the SCC configs themselves).
-        For each accepting SCC index, the configs strictly inside that SCC
-        (via configs_in_scc) form a good M -- the set that can be visited i.o.
-        when a run enters this particular accepting component.
-        The full basin (configs_in_basin_of_scc) is available separately for
-        prefix/leading-to analysis.
-        Uses scc_info + our reachability exploration. Complements the pruned
-        config-graph SCC computation.
-        """
-        acc_indices = self.get_accepting_scc_indices()
-        if not acc_indices:
-            # fallback to pruned config SCCs if available
-            if hasattr(self, 'compute_good_muller_sets'):
-                try:
-                    return self.compute_good_muller_sets()
-                except:
-                    pass
-            return []
-        good = []
-        for idx in acc_indices:
-            m = self.configs_in_scc(idx)
-            if m:
-                good.append(m)
-        return good
+        """See config_graph.get_good_muller_sets_from_basins."""
+        from . import config_graph as _cg
+        return _cg.get_good_muller_sets_from_basins(self)
 
 
 def make_trivial_cascade(n_states: int = 1) -> Cascade:
