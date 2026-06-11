@@ -32,8 +32,9 @@ from kr.reachability_operators import (
     reach_strong, reach_weak, simplify_ltl,
     _solid_stay_weak, _stay_gt0_weak,
     _dashed_change_strong, _dashed_change_weak,
-    fin_c, PAPER_REACH_CALLS, PAPER_FIN_CALLS,
+    PAPER_REACH_CALLS, PAPER_FIN_CALLS,
 )
+from kr.fin import fin_c
 from kr.reachability import reconstruct_ltl_paper_style
 
 # Reset counters

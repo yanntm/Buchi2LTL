@@ -39,10 +39,9 @@ from kr import decompose_aut
 import kr.reachability_operators as _ops
 from kr.reachability_operators import (
     reach_strong,
-    _uncond_reach_strict,
-    fin_c,
     simplify_ltl,
 )
+from kr.fin import fin_c, _uncond_reach_strict
 from ltl_diff import diff_report, to_aut
 
 

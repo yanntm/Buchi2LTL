@@ -1,18 +1,24 @@
 """
-reachability_operators.py — Reachability operators for the Krohn-Rhodes cascade LTL construction.
+reachability_operators.py — The five inductive reachability formulas.
 
-Implements the 5 inductive reachability formulas (strong/weak, solid-stay/dashed-change,
-with >0 variants) from Boker et al. (paper Sec 4.2 / algorithm.md Table 1),
-guard helpers, and fin_c (Lemma 7). All 1L special case code has been deleted;
-the path is the pure paper inductive for all cascade depths.
+Implements the 5 reachability formulas (strong/weak, solid-stay/dashed-change,
+with >0 variants) from Boker et al. paper Sec 4.2 (see
+paper/automata-to-ltl-construction.md §7; ground truth paper/Automata2LTL.txt).
+The formulas are mutually recursive (well-founded on cascade level) and are kept
+together in this module on purpose — they are one technical unit.
 
-The high-level assembly using these (plus Fin + Muller DNF) lives in reachability.py.
+Leaf utilities (guards, simplify, spot.formula builders) live in kr/ltl_builders.py.
+Fin(C) (Lemma 7) lives in kr/fin.py (imports this module one-way).
+The high-level assembly (Fin + Muller DNF) lives in kr/reachability.py.
+
 All driven uniformly by Cascade config transitions and letter valuations (no patterns
 on the automaton shape; the normalized det aut in the Cascade *is* the working D).
+Module-level state (PAPER_* counters, _reach_memo, casc registry) is reset by
+reconstruct_ltl_paper_style before each build; tests reset/read it via this module.
 """
 
 from __future__ import annotations
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 import os
 from functools import lru_cache
 
@@ -55,244 +61,27 @@ def _trace(msg: str) -> None:
     if TRACE_ON:
         print("[KR] " + msg)
 
-# ---------------------------------------------------------------------------
-# Guard helpers (valuation -> LTL prop formula string)
-# ---------------------------------------------------------------------------
+# Guard helpers, simplification, and native spot.formula builders live in
+# kr/ltl_builders.py (no kr deps). Re-imported here under their original names;
+# letters_to_prop / make_guard / simplify_ltl / normalize_ltl stay importable
+# from this module for compat.
+from kr.ltl_builders import (
+    letters_to_prop,
+    make_guard,
+    simplify_ltl,
+    normalize_ltl,
+    _normalize_ltl,
+    _tt, _ff, _ap, _And, _Or, _Not, _X, _U, _F, _G,
+    _to_f, _letters_to_f, _str_f,
+)
 
-def letters_to_prop(valuation: Dict[str, bool], aps: List[str]) -> str:
-    """Turn a valuation into a conjunction string like 'p & !q & r' for use in LTL."""
-    parts = []
-    for ap in aps:
-        if valuation.get(ap, False):
-            parts.append(ap)
-        else:
-            parts.append(f"!{ap}")
-    return " & ".join(parts) if parts else "true"
-
-
-def make_guard(valuations: List[Dict[str, bool]], aps: List[str], pred: Callable[[Dict[str, bool]], bool] = lambda v: True) -> str:
-    """Build a disjunctive guard: OR of letters satisfying pred (default: all)."""
-    good = [letters_to_prop(v, aps) for v in valuations if pred(v)]
-    if not good:
-        return "false"
-    if len(good) == 1:
-        return good[0]
-    return "(" + " | ".join(good) + ")"
-
-
-# Level-1 (1L cascade) special case code has been deleted entirely per requirements.
-# The implementation uses only the uniform generalized inductive 5 formulas + base
-# (level == num_levels -> Until) for all depths. No delegation or scalar 1L helpers in the main path.
+# Fin(C) (Lemma 7) lives in kr/fin.py (one-way dependency: fin imports this
+# module, never the reverse). Import fin_c from kr.fin directly.
 
 
 
 
-# ---------------------------------------------------------------------------
-# Fin(C) per Lemma 7 (implemented in fin_c using generalized reach; the 1L-only
-# fin_1level/inf_1level placeholders were removed as non-general and unused).
-# ---------------------------------------------------------------------------
-
-def _uncond_reach_strict(S: Tuple[int, ...], T: Tuple[int, ...], casc: "Cascade") -> str:
-    """S >0 ↝ T : eventually reach T after at least one strict step (used for C>0 ↝ C in Fin).
-    Uses full move + letter guards so that the expansion carries the paper's letter partitions.
-    """
-    key = (S, T, id(casc))
-    if key in _reach_memo:
-        return _reach_memo[key]
-    if not S:
-        res = "false"
-        _reach_memo[key] = res
-        return res
-    disjs = []
-    for li in range(casc.num_letters()):
-        try:
-            arrived = casc.move_config(S, li)
-            g = letters_to_prop(casc.letter_valuations[li], casc.aps)
-            if g in ("false", "0"):
-                continue
-            # after this letter, from arrived (0-step ok if arrived==T)
-            sub = reach_strong(arrived, None, "false", T, "true", casc)
-            disjs.append(f"({g}) & (X({sub}))")
-        except Exception:
-            continue
-    if not disjs:
-        res = "false"
-    else:
-        res = simplify_ltl(" | ".join( f"({d})" for d in disjs ))
-    _reach_memo[key] = res
-    return res
-
-
-def fin_c(C: Tuple[int, ...], casc: "Cascade") -> str:
-    """Fin(C) := ¬(ι ↝ C) ∨ ι ↝ C ( ¬ (C>0 ↝ C) ) per Lemma 7 / algorithm.md.
-
-    Uses the reach operators for the uncond shorthands (beta=false, tau=true).
-    The >0 version forces progress so that when S==T the "return" requires a move.
-    """
-    global PAPER_FIN_CALLS
-    PAPER_FIN_CALLS += 1
-    if PAPER_FIN_CALLS > 10000:
-        raise RuntimeError("Too many fin_c calls -- repeated Fin on same C exploding the construction")
-    # robust init (from the normalized det D stored in the Cascade; this D is
-    # the authoritative input to the algorithm)
-    init: Optional[Tuple[int, ...]] = None
-    if casc.original_aut is not None:
-        try:
-            init = casc.state_to_config.get(casc.original_aut.get_init_state_number())
-        except Exception:
-            pass
-    if init is None:
-        cs = casc.all_configs()
-        init = cs[0] if cs else C
-    # ι ↝ C (can be 0-step if init==C)
-    r_to = simplify_ltl(reach_strong(init, None, "false", C, "true", casc))
-    _trace(f"  fin_c for C={C}: r_to={r_to}")
-    # C>0 ↝ C : strict progress return
-    r_gt0 = simplify_ltl(_uncond_reach_strict(C, C, casc))
-    _trace(f"  fin_c for C={C}: r_gt0={r_gt0}")
-    # Paper: second disjunct is the reach parameterized with tau = ¬(C>0 ↝ C)  [plain, not G]
-    # so that when claiming at the *last* visit (future possible), the no-return holds at arrival time.
-    # The U/gt0 expansion in solid (when S==C) allows postponing the claim to future visits.
-    no_return_psi = simplify_ltl(f"!({r_gt0})")
-    _trace(f"  fin_c for C={C}: no_return_psi={no_return_psi}")
-    r_with = simplify_ltl(reach_strong(init, None, "false", C, no_return_psi, casc))
-    _trace(f"  fin_c for C={C}: r_with={r_with}")
-    fin_expr = simplify_ltl(f"!({r_to}) | ({r_with})")
-    _trace(f"  fin_c for C={C}: final={fin_expr}")
-    return fin_expr
-
-
-# 1-level projection helpers deleted entirely (were only for the removed 1L special case code).
-
-
-# ---------------------------------------------------------------------------
-# Guard / LTL simplification (cross-cutting, step 5 in roadmap)
-# ---------------------------------------------------------------------------
-
-def simplify_ltl(expr: str) -> str:
-    """Simplify an LTL formula string using Spot (if available). Reduces DNF size from
-    full letter disjunctions etc. Purely algebraic on the produced expr; no aut shape used.
-    """
-    if not expr or expr in ("true", "false"):
-        return expr
-    try:
-        import spot
-        f = spot.formula(expr)
-        fs = f.simplify()
-        s = str(fs)
-        return _normalize_ltl(s)
-    except Exception:
-        return _normalize_ltl(expr)  # keep as-is if cannot simplify
-
-
-def _normalize_ltl(s: str) -> str:
-    """Spot often uses 1/0 for true/false (parses words but outputs 0/1 in many cases).
-    Normalize for consistent I/O and tests.
-    """
-    if s in ("1", "true"):
-        return "true"
-    if s in ("0", "false"):
-        return "false"
-    return s
-
-
-def normalize_ltl(expr: str) -> str:
-    """Normalize + simplify (Spot 0/1 -> true/false words for nicer output and test I/O)."""
-    return simplify_ltl(expr)
-
-
-# ---------------------------------------------------------------------------
-# Spot formula builders (architectural adoption from reference.md)
-# Use native spot.formula for construction (DAG sharing, auto simplify, better keys).
-# This replaces string building + repeated parse/simp for subformulas.
-# Public API still returns str for compat, but internals use formulas.
-# Builders are small wrappers to make code readable.
-# ---------------------------------------------------------------------------
-
-import spot  # for native formula construction (assumed available; fallback in simplify already handles)
-
-def _tt() -> spot.formula:
-    return spot.formula.tt()
-
-def _ff() -> spot.formula:
-    return spot.formula.ff()
-
-def _ap(name: str) -> spot.formula:
-    return spot.formula.ap(name)
-
-def _And(*fs: Optional[spot.formula]) -> spot.formula:
-    fs = [f for f in fs if f is not None]
-    if not fs:
-        return _tt()
-    if len(fs) == 1:
-        return fs[0]
-    return spot.formula.And(list(fs))
-
-def _Or(*fs: Optional[spot.formula]) -> spot.formula:
-    fs = [f for f in fs if f is not None]
-    if not fs:
-        return _ff()
-    if len(fs) == 1:
-        return fs[0]
-    return spot.formula.Or(list(fs))
-
-def _Not(f: Optional[spot.formula]) -> spot.formula:
-    if f is None:
-        return _ff()
-    return spot.formula.Not(f)
-
-def _X(f: spot.formula) -> spot.formula:
-    return spot.formula.X(f)
-
-def _U(f: spot.formula, g: spot.formula) -> spot.formula:
-    return spot.formula.U(f, g)
-
-def _F(f: spot.formula) -> spot.formula:
-    return _U(_tt(), f)
-
-def _G(f: spot.formula) -> spot.formula:
-    return _Not(_F(_Not(f)))
-
-def _to_f(x: Optional[str | spot.formula]) -> spot.formula:
-    """Convert str or formula to spot.formula. Used for beta/tau inputs."""
-    if x is None:
-        return _ff()
-    if isinstance(x, spot.formula):
-        return x
-    s = str(x).strip().lower()
-    if s in ("true", "1", "t"):
-        return _tt()
-    if s in ("false", "0", "f"):
-        return _ff()
-    try:
-        return spot.formula(str(x))
-    except Exception:
-        return _tt()  # safe fallback
-
-def _letters_to_f(valuation: Dict[str, bool], aps: List[str]) -> spot.formula:
-    """Valuation to conjunction as spot.formula (replaces letters_to_prop str)."""
-    parts = []
-    for ap_name in aps:
-        v = valuation.get(ap_name, False)
-        fap = _ap(ap_name)
-        parts.append(fap if v else _Not(fap))
-    if not parts:
-        return _tt()
-    res = parts[0]
-    for p in parts[1:]:
-        res = _And(res, p)
-    return res
-
-def _str_f(f: spot.formula) -> str:
-    """Convert formula to normalized str for public API / traces / memo keys if needed."""
-    if f is None:
-        return "false"
-    try:
-        s = str(f.simplify())
-        return _normalize_ltl(s)
-    except Exception:
-        return _normalize_ltl(str(f))
-
+import spot  # used for formula types in signatures and lru keys
 
 # ---------------------------------------------------------------------------
 # Generalized inductive reachability (the 5 formulas, per kr/algorithm.md + paper Sec 4.2)
