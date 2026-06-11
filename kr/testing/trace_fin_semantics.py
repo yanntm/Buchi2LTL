@@ -159,9 +159,18 @@ def check(name: str, gt_aut, produced_ltl: str):
     not check within KR_CHECK_TIMEOUT — the sub-term was BUILT fine).
     The Spot work (translate + containment both ways, complement inside) is
     unbounded in the worst case, so it runs in a child process under the cap."""
-    print(f"    {name} = {produced_ltl}")
+    # Truncated print: sub-terms can flatten to 100MB+ (G(p->(qUr)) fin:
+    # 108MB) — dumping them burns the whole wall clock on I/O.
+    if len(produced_ltl) > 400:
+        print(f"    {name} = {produced_ltl[:400]} ...[len={len(produced_ltl)}]")
+    else:
+        print(f"    {name} = {produced_ltl}")
     if produced_ltl.startswith(("ERROR", "NOT_IMPLEMENTED")):
         print(f"      SKIP ({produced_ltl})")
+        return None
+    if len(produced_ltl) > 2_000_000:
+        print(f"      UNVERIFIED (flat formula len={len(produced_ltl)} is beyond "
+              f"any Spot translation; skipped without spawning a check)")
         return None
     payload = json.dumps({"hoa": gt_aut.to_str("hoa"), "ltl": produced_ltl, "name": name})
     try:
