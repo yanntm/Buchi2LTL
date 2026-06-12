@@ -150,10 +150,11 @@ def run_targeted_arch_test():
 
     # Canary
     print("\n--- Targeted canary: G(p | F q) roundtrip (exercises weak/Fin) ---")
-    ltl = reconstruct_ltl_paper_style(casc)
-    print("  recovered (current arch):", str(ltl)[:80], "...")
+    ltl = reconstruct_ltl_paper_style(casc)   # spot.formula DAG
+    from kr.ltl_builders import _short_f
+    print("  recovered (current arch):", _short_f(ltl, 80))
     try:
-        rec = spot.formula(str(ltl)).translate("Buchi") if ltl not in ("true","false") else spot.formula(ltl)
+        rec = ltl.translate("Buchi")
         eq = spot.are_equivalent(aut, rec)
         print("  equiv (current):", eq)
     except Exception as e:
@@ -162,9 +163,9 @@ def run_targeted_arch_test():
     print("\n--- Fa no-regression (targeted) ---")
     fa = spot.formula("Fa").translate()
     fa_casc = decompose_aut(fa)
-    fa_ltl = reconstruct_ltl_paper_style(fa_casc)
-    print("  Fa recovered:", fa_ltl)
-    fa_eq = spot.are_equivalent(fa, spot.formula(fa_ltl).translate("Buchi") if fa_ltl not in ("true","false") else spot.formula(fa_ltl))
+    fa_ltl = reconstruct_ltl_paper_style(fa_casc)   # spot.formula DAG
+    print("  Fa recovered:", _short_f(fa_ltl, 80))
+    fa_eq = spot.are_equivalent(fa, fa_ltl.translate("Buchi"))
     print("  Fa equiv:", fa_eq)
 
     # Test item 3: build_phi dispatch (targeted, falls to paper for muller)
