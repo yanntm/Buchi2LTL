@@ -63,12 +63,22 @@ unfolding that DAG.
   keyed ⟨helper, casc, S, B, β, T, τ, level⟩) — one expansion per distinct
   subproblem, BDD-style. The runaway guard counts DISTINCT subproblems
   (`KR_REACH_GUARD`, default 5M).
-- **No external calls in the hot path (policy):** we never wait on a stalled
-  outside operation. Spot serves as hash-consing/constructor-folding only;
-  `_simp_f` is identity by default (`KR_SIMP_TREE_LIMIT`: 0 never / N
-  size-capped / -1 always — diagnostics on small cases may use -1; Spot's
-  tl_simplifier is not sharing-aware and its cost is not even size-bounded on
-  these shapes).
+- **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
+  `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
+  tl_simplifier's internal cache); operators build bottom-up so every call
+  sees already-simplified children. Policy `KR_SIMP_OPTS`: hybrid (default) =
+  Spot's full rules only on nodes with unfolded size ≤ `KR_SIMP_FULL_LIMIT`
+  (2000), basics (constant folding, X(0)→0) above — full's syntactic-
+  implication pass is pairwise and sharing-blind and stalled >15s per-node on
+  `X(a&Xa)`, basics never stalls. `KR_SIMP_NODE=0` = old identity behavior.
+  Paired with the dead-tail early-out in reach_strong
+  (`reach(…,τ≡false) ≡ false`, the Table-1 base case), folded tails delete
+  their memo-key subtrees. Measured: `a&Xa` 752→311 subproblems; `G(a->Xb)`
+  distinct temporal 538→226, unfolded tree 85.5M→3.6M; `G(p->(qUr))`
+  distinct temporal 4115→559 (7.4x); `X(a&Xa)` max tail 177x smaller (counts
+  −20% only — the residual is genuine b^k wrapping, see dag_folding.md).
+  We still never WAIT on Spot: each call is one node with simplified
+  children, and the escape hatch drops Spot from the path entirely.
 
 ## Validation state
 
@@ -126,6 +136,14 @@ former CONSTRUCT_TIMEOUT class became measured verdicts in seconds:
 ~2.5×10⁸); `(a U b)|Gc` saturates the counter at 2⁶⁰. Previously-True ladder
 cases re-verified True; audit CLEAN.
 
+**Parked observation (needs user validation before any work):** our builders
+spell `G x` as `¬(1 U ¬x)` — raw U nodes. Couvreur charges one acceptance
+set per U/M (eventuality) but NONE for native `G/R/W/X`, and the str→parse
+round-trip already converts the sugar (which is why a re-parsed flat formula
+gets further into translation than the raw object). Building with Spot's
+native G/F/R/W constructors where the construction means them would cut the
+distinct-eventuality count — the acc-set driver — for free. Not started.
+
 **Object-path translation is a dead end (probed 2026-06-12,
 `probe_object_translate.py`).** Spot accepts our formula objects natively
 everywhere (`ltl_to_tgba_fm`, `translate`, `translator` class — no string
@@ -162,6 +180,13 @@ built-in budgets — a blown budget is a finding, not a nuisance).
 - `probe_object_translate.py` — can Spot translate straight from the formula
   DAG (Couvreur fm / translate / translator-class)? Answer recorded above:
   no — acc-set cap + tableau grind; kept as the measurement tool.
+- `probe_tail_anatomy.py` — per-level dissection of the helper memo:
+  subproblem counts by operator tag, DISTINCT tails/betas/(S,B,T) triples,
+  tail-size quartiles, tail growth ratios. The tool that showed tails (not
+  the avoid web) drive the explosion and measured the A-iteration.
+- `probe_case_diff.py` — containment + witness for one full roundtrip,
+  in-process build + fresh diff child via stdin (multi-MB formulas can't
+  ride argv).
 - `ltl_diff.py` — containment direction + witness words.
 - `test_kr_r4_audit.py` — structural checklist + drift grounding (gate for
   operator commits).
