@@ -109,12 +109,18 @@ no `python -c` one-liners.
   both context conventions).
 - `probe_memo_stats.py` — memo profiler (distinct subproblems vs raw calls)
   with a watchdog stack dump for stalls inside native calls.
+- `probe_tail_anatomy.py` — per-level dissection of the helper memo (the tool
+  behind the tails-drive-the-explosion finding).
+- `probe_case_diff.py` — containment + witness for one full roundtrip when the
+  flat formula cannot ride argv (in-process build, diff child via stdin).
 - `measure_formula_dag.py` — DAG vs flat-string size of the assembled formula
   (`--no-str` for cases whose flat form is 100MB+).
 - `probe_sgpdec_api.g` — hand-run GAP ground truth for the SgpDec bridge calls.
-- `test_kr_basic.py`, `test_kr_muller.py`, `test_kr_arch_adopt.py`,
-  `diag_stability.py`, `probe_sbacc.py` — basics, Muller helpers, arch prototypes,
-  stability, acceptance-marks probe.
+- `test_kr_basic.py` — normal-path smoke test (isolated per-case subprocesses).
+- `logs/` — committed baseline size censuses (before/after reference for fold work).
+
+One-shot probes (built to answer a single question) are committed, their
+finding recorded in `kr/STATUS.md`, then deleted — git history keeps them.
 
 ## Notes
 
