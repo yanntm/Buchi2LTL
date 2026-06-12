@@ -221,6 +221,22 @@ def _str_f(f: spot.formula) -> str:
     return _normalize_ltl(str(f))
 
 
+_FLATTEN_TREE_LIMIT = int(os.getenv("KR_FLATTEN_TREE_LIMIT", "250000"))
+
+
+def _str_f_gated(f: spot.formula, limit: Optional[int] = None) -> str:
+    """Flatten only when the unfolded tree is small enough; otherwise return a
+    placeholder naming the size (never pay O(tree) blind). Gate shared with
+    trace_fin: KR_FLATTEN_TREE_LIMIT, default 250k tree nodes ≈ 2MB string."""
+    if f is None:
+        return "false"
+    lim = _FLATTEN_TREE_LIMIT if limit is None else limit
+    n = _tree_size_f(f)
+    if 0 <= lim < n:
+        return f"<unflattened DAG: {n} tree nodes>"
+    return _str_f(f)
+
+
 def _short_f(f: spot.formula, n: int = 120) -> str:
     """Truncated stringification for trace lines (full str() of a huge shared
     DAG is O(unfolded size); only call under an enabled-trace guard)."""
