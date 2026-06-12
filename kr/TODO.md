@@ -17,14 +17,23 @@ Analysis, measurements and OPEN questions behind these items live in
 `kr/dag_folding.md` (item numbering there: plumbing → vacuity pruning →
 fold pass → interning). Items below are the actionable queue.
 
-1. **Own sharing-aware fold pass** (replaces nothing — Spot's tl_simplifier is
-   out of the hot path by policy). Constructor-level rewrites + vacuous-
-   structure pruning on the hash-consed DAG: dead/sink-routed tails, duplicate
-   avoid-conjuncts, Formula-5 early-outs (Enter(t)=∅ ⇒ dashed false,
-   Stay(s)=∅ ⇒ solid τ/false, unreachable pre-configs). Success metric:
-   distinct temporal subformulas of `G(p->(qUr))` (currently 4115 for a
-   3-state property) drop toward what its automaton warrants; secondary:
-   DAG nodes / unfolded size shrink across the ladder.
+1. **Fold pass — step A DONE 2026-06-12** (per-DAG-node memoized
+   tl_simplifier, hybrid full≤2000-nodes/basics policy + reach dead-tail
+   early-out): `G(p->(qUr))` distinct temporal 4115→559, `G(a->Xb)` tree
+   85.5M→3.6M, `a&Xa` subproblems 752→311. Remaining candidates, in the
+   order the tail-anatomy data suggests (probe_tail_anatomy.py: TAILS drive
+   the explosion — ×2–10 distinct tails per level — not the avoid web):
+   - **B. cascade-aware vacuity pruning** of the combined-letter enumeration
+     (unreachable pre-configs, empty Enter/Stay) — prunes memo keys at the
+     b^k base; soundness argument needed (see dag_folding.md OPEN).
+   - **C. tail normalization** (canonical letter-word prefix + continuation
+     form) — syntactic, internal, targets the wrapping count directly.
+   - **D. budgeted semantic interning** of small subterms.
+1b. **Native-operator basis (USER VALIDATION NEEDED before starting).**
+   Builders spell G as ¬(1 U ¬·): raw U nodes. Couvreur charges an acc set
+   per U/M but none for native G/R/W/X (str→parse already converts the
+   sugar). Building with native G/F/R/W could cut the distinct-eventuality
+   count — the 32-acc-set driver — for free. Interacts with item 3.
 2. ~~**Output representation**~~ **DONE 2026-06-12**: reconstruct returns the
    hash-consed `spot.formula` DAG; flattening is opt-in (`reconstruct_ltl_str`
    historical entry, `_str_f_gated` under `KR_FLATTEN_TREE_LIMIT`). The former
