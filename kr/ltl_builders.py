@@ -232,12 +232,6 @@ def _X(f: spot.formula) -> spot.formula:
 def _U(f: spot.formula, g: spot.formula) -> spot.formula:
     return spot.formula.U(f, g)
 
-def _F(f: spot.formula) -> spot.formula:
-    return _U(_tt(), f)
-
-def _G(f: spot.formula) -> spot.formula:
-    return _Not(_F(_Not(f)))
-
 def _to_f(x: Optional[str | spot.formula]) -> spot.formula:
     """Convert str or formula to spot.formula. Used for beta/tau inputs."""
     if x is None:

@@ -109,7 +109,7 @@ from kr.ltl_builders import (
     simplify_ltl,
     normalize_ltl,
     _normalize_ltl,
-    _tt, _ff, _ap, _And, _Or, _Not, _X, _U, _F, _G,
+    _tt, _ff, _ap, _And, _Or, _Not, _X, _U,
     _to_f, _letters_to_f, _str_f, _short_f, _simp_f,
 )
 
@@ -155,12 +155,9 @@ def reach_strong(
     _register_casc(casc)
 
     # lru lookup (keyed on hashables: cid + tuples + formula objs; B can be None, which is hashable)
-    res = _lru_reach_strong(cid, S, B, beta_f, T, tau_f, level)
-
-    # keep old memo for any legacy code / traces
-    key = (S, B if B is not None else (), beta_f, T, tau_f, level, cid)
-    _reach_memo[key] = res
-    return res
+    # (_reach_memo is NOT written here: fin.py uses it with its own 3-tuple
+    # keys; the old per-call 7-tuple writes were never read by anyone.)
+    return _lru_reach_strong(cid, S, B, beta_f, T, tau_f, level)
 
 
 @lru_cache(maxsize=None)
