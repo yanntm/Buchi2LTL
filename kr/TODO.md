@@ -45,9 +45,20 @@ fold pass → interning). Items below are the actionable queue.
    heads under boolean context, shrink-only, identity + BDD entailment)
    DONE + validated (test_now_eval.py, 18/18). Rule 3 (partial factoring,
    the sound form + Minato minimization of guard groups) DONE + validated
-   (test_factor_pass.py, 10/10 incl. the draft-bug regression). Remaining:
-   pipeline integration into _simp_f + measurement on the fusion-neutral
-   wall (X(a&Xa), G(a->Xa)). Background
+   (test_factor_pass.py, 10/10 incl. the draft-bug regression).
+   ~~Pipeline integration~~ **DONE 2026-06-12** (KR_SIMP_OWN per-node hook
+   in _simp_f, persistent memos, size cap 2000, shared bdd_dict; numbers
+   in STATUS — gates green, fuzz 1500 ALL EQUIVALENT). Refinement queue:
+   - **eventuality-aware rewriting**: rewrites create temporal-body
+     variants that RAISE the distinct-eventuality census (F(a&Xb) back
+     over the 32-acc cap, G(a->Xb) 85→94); accept a rewrite only when it
+     does not add distinct temporal nodes, or intern variants (item E).
+   - giant nodes are skipped by the cap, so the X(a&Xa)/reactivity wall
+     is barely moved — needs either O(n) factoring on big Ors or the
+     C/D/E fold candidates.
+   - the 32-acc abort path in equiv children dies with free(): invalid
+     pointer (teardown, cosmetic but masks the real verdict — make the
+     harness report it as ACC_CAP). Background
    (user rule set, Java lineage): Spot's
    tl_simplifier, even at full strength on 5-node inputs, does NOT do
    present-literal cofactoring or guard factoring: `a & (!a | G(!a|Xa))`
