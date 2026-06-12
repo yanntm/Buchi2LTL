@@ -52,8 +52,13 @@ unfolding that DAG.
   guard; `reach_weak` = the literal dual ¬reach(S,T,τ,B,β); literal
   wsolid/wsolid⁺; `fin_c` per Lemma 7 with ι==C postponement. Case dispatches
   compare FULL configs.
-- **Hash-consed `spot.formula` objects end-to-end** (str accepted at entry for
-  probes); stringification only at the very top, or on demand.
+- **Hash-consed `spot.formula` objects end-to-end, INCLUDING the output**:
+  `reconstruct_ltl_paper_style` / `reconstruct_ltl_1level_buchi` return the
+  formula DAG (str accepted at entry for probes). Flattening is opt-in only:
+  `reconstruct_ltl_str` (historical entry), or the size-gated `_str_f_gated`
+  (`KR_FLATTEN_TREE_LIMIT`). `PAPER_MAX_LTL_SIZE` now reports unfolded-tree
+  node count, not string chars. The non-Muller `build_phi` string sketches
+  were deleted (NotImplementedError → TODO P1).
 - **Fully memoized:** `reach_strong` (lru) AND the five helpers (decorator
   keyed ⟨helper, casc, S, B, β, T, τ, level⟩) — one expansion per distinct
   subproblem, BDD-style. The runaway guard counts DISTINCT subproblems
@@ -110,8 +115,27 @@ All test scripts carry built-in Spot budgets (`KR_SPOT_EQUIV_TIMEOUT` /
 `KR_CHECK_TIMEOUT`, 10s) and report SPOT_TIMEOUT / UNVERIFIED — never
 conflated with semantic failure. Spot authors are in the loop on
 sharing-aware translation (our outputs are the ideal client). The active work
-items (TODO P0): our own sharing-aware fold pass, formula-object/DAG output,
-compositional + word-sampling verification.
+items (TODO P0): our own sharing-aware fold pass, compositional +
+word-sampling verification.
+
+**Object-out API landed (P0 plumbing item, 2026-06-12).** With reconstruct
+returning the DAG and harnesses flattening only under `KR_FLATTEN_TREE_LIMIT`
+(survey default 5M tree nodes ≈ every case Spot equiv ever completed), the
+former CONSTRUCT_TIMEOUT class became measured verdicts in seconds:
+`G(a->Xa)` ~2k DAG nodes unfolding to **5.1×10¹¹** tree nodes (sharing
+~2.5×10⁸); `(a U b)|Gc` saturates the counter at 2⁶⁰. Previously-True ladder
+cases re-verified True; audit CLEAN.
+
+**Object-path translation is a dead end (probed 2026-06-12,
+`probe_object_translate.py`).** Spot accepts our formula objects natively
+everywhere (`ltl_to_tgba_fm`, `translate`, `translator` class — no string
+round-trip), but Couvreur allocates one acceptance set per DISTINCT
+eventuality: our 400–600 distinct temporal subterms blow the compile-time
+`mark_t` cap (32 in system Spot 2.14.5) instantly, and `Ga|Gb` ground >10s in
+the tableau before even reaching the cap — the tableau's state space is sets
+of subformulas, which hash-consing does not shrink. Verification must come
+from word sampling / compositional grounding (TODO P0), or from folding the
+eventuality count itself below the cap.
 
 ## Tooling for targeted work
 
@@ -132,8 +156,12 @@ built-in budgets — a blown budget is a finding, not a nuisance).
 - `probe_memo_stats.py` — memo profiler: distinct subproblems vs raw calls,
   helper-memo size, alarm + watchdog stack dump (names the native call when
   stuck in C++).
-- `measure_formula_dag.py` — DAG vs string size of the assembled formula;
-  `--no-str` to measure cases whose flat form is 100MB+.
+- `measure_formula_dag.py` — DAG vs string size of the assembled formula
+  (now measuring the real reconstruct output); `--no-str` to measure cases
+  whose flat form is 100MB+.
+- `probe_object_translate.py` — can Spot translate straight from the formula
+  DAG (Couvreur fm / translate / translator-class)? Answer recorded above:
+  no — acc-set cap + tableau grind; kept as the measurement tool.
 - `ltl_diff.py` — containment direction + witness words.
 - `test_kr_r4_audit.py` — structural checklist + drift grounding (gate for
   operator commits).
