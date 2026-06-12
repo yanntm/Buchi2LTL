@@ -83,6 +83,31 @@ unfolding that DAG.
   remaining ladder wall). Survey: 3 cases flipped to True (`XXXa`,
   `G(a->Xb)`, `Ga|Gb`), zero regressions; grounding: zero contradictions;
   audit CLEAN. Post-fusion log: `kr/testing/logs/fusion_measure_dag_*`.
+- **Own rewrite pass wired (2026-06-12, the "1c" iteration — kr/simplify/
+  package, KR_SIMP_OWN=1 default, size cap KR_SIMP_OWN_LIMIT=2000,
+  KR_SIMP_OWN_FACTOR toggles rule 3).** Three rules Spot lacks (validated
+  standalone 44/44 + 1500-formula random fuzz ALL EQUIVALENT, oracle
+  self-tested): (1) context pass — sibling-context propagation over the
+  boolean skeleton, identity domination incl. temporal nodes, Shannon at
+  Or, reset at temporal boundaries; (2) now-evaluation — one-step unroll
+  of G/F/U/R/W/M heads under boolean context (initial-state knowledge,
+  Bonneland et al. lineage), two-tier entailment (identity + BDD);
+  (3) sound partial factoring + Minato guard groups. Hooked per node in
+  `_simp_f` after Spot's pass (one bounded Spot re-pass when rules fire);
+  persistent package memos make it amortized O(1) per distinct node; ONE
+  shared bdd_dict per process (a second dict next to the fusion one
+  corrupted the equiv-child heap). The size cap exists because the
+  uncapped pass sent 3 reactivity cases CONSTRUCT_TIMEOUT — capped, all
+  construction times are healthy. Measured (capped, vs post-fusion):
+  `Ga`→`a & G(!a|Xa)`, `Fa`→`a | F(!a&Xa)`, `a&Xa`→literal `a & Xa`;
+  `G(a->Xb)` tree 22.6k→12.2k; `G(p->(qUr))` 55k→38.7k; `G(a->Xa)`
+  11.3M→2.0M; `(aUb)|Gc` 528M→7.7M; giants barely move under the cap
+  (`X(a&Xa)` 31G→27.9G). Survey 24 True / 0 FALSE; audit CLEAN; grounding
+  zero contradictions. KNOWN regression: rewriting creates temporal-body
+  VARIANTS that coexist across branches, raising the distinct-eventuality
+  census — `F(a&Xb)` went back over the 32-acc cap (its equiv child then
+  dies in the abort path's teardown: `free(): invalid pointer` — infra,
+  not semantic). Refinement item: eventuality-aware rewriting (TODO 1c).
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call
@@ -106,14 +131,16 @@ The ≥4-level dev guard is GONE (opt-in `KR_MAX_LEVELS` ceiling remains; the
 real runaway protection is the distinct-subproblem guard). Depth ladder
 added: `Xa` 3L → `XXa` 4L → `XXXa` 5L → `X(a & Xa)` 5L.
 
-- **MP ladder: 24 equiv=True, zero equiv=FALSE** (post letter-fusion) —
-  including **`XXXa` at 5 levels** and **`G(a->Xb)`/`Ga|Gb`** end-to-end
-  (all three flipped True by fusion). Non-True split, all
+- **MP ladder: 24 equiv=True, zero equiv=FALSE** (post fusion + own
+  rewrite pass) — including **`XXXa` at 5 levels** and
+  **`G(a->Xb)`/`Ga|Gb`** end-to-end. Non-True split, all
   verification-bound, none semantic:
-  - SPOT_TIMEOUT: `F(a&Xb)` (now past the acc cap, tableau slow).
-  - UNVERIFIED_SIZE (flatten gate): `X(a&Xa)` 3.1×10¹⁰, `G(a->Xa)` 11.3M
-    (1-AP case, fusion-neutral), `(a U b)|Gc` 528M, `GFa&GFb` 1.8×10¹⁷,
-    `FGa|FGb` / `(GFa&FGb)` 2⁶⁰-saturated.
+  - SPOT_TIMEOUT: `G(a->Xa)` (2.0M, now under the flatten gate — Spot
+    slow), `(a U b)|Gc` (7.7M).
+  - 32-acc: `F(a&Xb)` (own-pass variant diversity — see the 1c bullet;
+    the err string is the abort-path teardown crash in the child).
+  - UNVERIFIED_SIZE (flatten gate): `X(a&Xa)` 2.8×10¹⁰, `GFa&GFb`
+    1.1×10¹⁷, `FGa|FGb` / `(GFa&FGb)` 2⁶⁰-saturated.
 - **Semantic grounding (`trace_fin_semantics`, cover-aware — GTs on the config
   semiautomaton): zero contradictions across every probed case at every
   depth** (`GFa`, `a U b`, `Fa & Gb`, `Ga | Fb`, `Xa` fully OK; `G(a->Xb)`,
