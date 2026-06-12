@@ -19,7 +19,7 @@ Nets", PetriNets 2018).
 |---|---|---|---|
 | 1. Context pass | `context_pass.py` | DONE | `a & (!a \| G(!a\|Xa))` → `a & G(!a\|Xa)`; `a \| (a&b)` → `a` |
 | 2. Now-evaluation | `now_eval.py` | DONE | `a & G(!a)` → `0`; `a & (!a U b)` → `a & b`; `b & (b R c)` → `b & c` |
-| 3. Partial factoring | planned | planned | `(g1&Xt) \| (g2&Xt) \| C` → `((g1\|g2)&Xt) \| C` + Minato guard minimize |
+| 3. Partial factoring | `factor_pass.py` | DONE | `(a&Xb) \| (a&Xc) \| Xd` → `(a&(Xb\|Xc)) \| Xd`; `(a&b) \| (a&!b)` → `a` |
 
 ### Rule 2 — now-evaluation (`now_rewrite`, hooked into the context pass)
 
@@ -37,7 +37,20 @@ its own skeleton. Trivial constant folds through unary temporal heads
 (`X(0)→0` etc.) are done locally; richer folding is Spot-basics
 territory downstream.
 
-The combined entry `kr.simplify.simplify(f)` = context pass + now hook.
+### Rule 3 — partial factoring (`factor_simplify`)
+
+Greedy shared-term factoring at Or nodes, the SOUND form of the draft
+script's idea — only the disjuncts containing the chosen term are grouped,
+the rest stay outside: `(t∧A) ∨ (t∧B) ∨ C → (t∧(A∨B)) ∨ C`. Iterated on
+the most frequent conjunct (count ≥ 2), each round strictly drops the
+disjunct count; the grouped inner Or is factored recursively. Purely
+propositional Or nodes (and factored guard groups) go through the
+BDD → Minato-ISOP round-trip, accepted only when not larger.
+
+The combined entry `kr.simplify.simplify(f)` = context pass (+ now hook)
+→ factoring → one more context pass when factoring changed something.
+Closing rules like `XF!a | XFa → 1` (F-merge) are deliberately left to
+Spot's simplifier downstream of this package.
 
 ### Rule 1 — context pass (`context_simplify`)
 
