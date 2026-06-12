@@ -136,13 +136,21 @@ former CONSTRUCT_TIMEOUT class became measured verdicts in seconds:
 ~2.5×10⁸); `(a U b)|Gc` saturates the counter at 2⁶⁰. Previously-True ladder
 cases re-verified True; audit CLEAN.
 
-**Parked observation (needs user validation before any work):** our builders
-spell `G x` as `¬(1 U ¬x)` — raw U nodes. Couvreur charges one acceptance
-set per U/M (eventuality) but NONE for native `G/R/W/X`, and the str→parse
-round-trip already converts the sugar (which is why a re-parsed flat formula
-gets further into translation than the raw object). Building with Spot's
-native G/F/R/W constructors where the construction means them would cut the
-distinct-eventuality count — the acc-set driver — for free. Not started.
+**Native-operator basis: investigated and CLOSED (2026-06-12,
+`probe_native_ops` — one-shot tool, lives in git history).** The former
+"raw U sugar" observation was stale, pre-iteration-A. Measured: Spot's
+constructors do NOT rewrite sugar (`U(1,a)` and `¬(a U b)` stay raw nodes),
+but the per-node simplifier normalizes every node to negation normal form
+even in basics-only mode (`¬(1 U ¬a)`→`Ga`, `¬(b U ¬a)`→`¬b R a`); since
+the operators build bottom-up through `_simp_f`, **outputs are already in
+the native G/F/R/W basis** — census of real outputs shows `Not` only over
+atomic propositions, zero ¬-over-U anywhere. The surviving U nodes are
+GENUINE strong eventualities (distinct `¬β U τ` base cases): 94 in
+`G(a->Xb)`, 246 in `G(p->(qUr))` — the >32-acc-set driver is the genuine
+eventuality count, which no operator-basis change can reduce. Reduction
+must come from folding (TODO 1 B/C/D) or non-translation verification
+(TODO 3). Baseline size censuses for the standard cases:
+`kr/testing/logs/baseline_*_2026-06-12.txt`.
 
 **Object-path translation is a dead end (probed 2026-06-12,
 `probe_object_translate.py`).** Spot accepts our formula objects natively
@@ -159,6 +167,20 @@ eventuality count itself below the cap.
 
 All under `kr/testing/` (placed scripts only; subprocess isolation; small
 built-in budgets — a blown budget is a finding, not a nuisance).
+
+**One-shot probe lifecycle (cleanup 2026-06-12):** a probe built to answer
+ONE question is committed, its finding recorded here, then deleted — git
+history keeps it. Removed in that sweep: `probe_object_translate` (finding
+above), `probe_native_ops` (native-basis closure above), `probe_2l_rwith`,
+`probe_sbacc` (sbacc is baked into the pipeline), `test_kr_arch_adopt`
+(architecture adopted), `test_kr_muller` (Muller handling settled in
+`config_graph`), `diag_stability` (per-case subprocess isolation is now
+standard in every script). Dead code swept from the core the same day:
+unused `_F`/`_G` sugar builders (outputs get native F/G via `_simp_f` NNF),
+and the never-read legacy 7-tuple `_reach_memo` write in `reach_strong`
+(`_reach_memo` itself stays — `fin.py` caches through it).
+`kr/testing/logs/` holds committed baseline size censuses for before/after
+comparison of fold work.
 
 - `survey_mp_cascade.py` — MP-class × depth ladder; construction and
   Spot-equiv phases in separate subprocesses with separate budgets
@@ -177,9 +199,6 @@ built-in budgets — a blown budget is a finding, not a nuisance).
 - `measure_formula_dag.py` — DAG vs string size of the assembled formula
   (now measuring the real reconstruct output); `--no-str` to measure cases
   whose flat form is 100MB+.
-- `probe_object_translate.py` — can Spot translate straight from the formula
-  DAG (Couvreur fm / translate / translator-class)? Answer recorded above:
-  no — acc-set cap + tableau grind; kept as the measurement tool.
 - `probe_tail_anatomy.py` — per-level dissection of the helper memo:
   subproblem counts by operator tag, DISTINCT tails/betas/(S,B,T) triples,
   tail-size quartiles, tail growth ratios. The tool that showed tails (not
