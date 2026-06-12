@@ -152,6 +152,28 @@ unfolding that DAG.
   one-way flow + canonical order misses openings whose source sorts
   after the target (alternating direction across the pipeline's repeated
   context passes would be sound — TODO).
+- **Census anatomy + arm-padding removal (2026-06-13).** Two probes
+  answered "where does the residual census live?" conclusively
+  (`probe_census_classes`, `probe_muller_overlap` — both committed):
+  (i) the post-rules census is ~all genuinely distinct languages
+  (F(a&Xa) 26/26 classes, F(a&Xb) 74→73, G(a->Xa) 144→≤126), so
+  formula-level interning has little headroom; (ii) the Muller DNF is
+  NOT the driver — disjuncts share 83% of the census via hash-consing
+  (G(p->(qUr)): two disjuncts, 77 census each, overlap 70, whole 84);
+  (iii) **the Fin(C)/¬Fin terms ARE the driver**: per disjunct the two
+  Fin conjuncts carry census ~50 each (DAG ~285 each) while the
+  reach/invariant part is ~25 — including a census-1 conjunct that is
+  LITERALLY language-equivalent to the target body (`p -> (q U r)`
+  verified): the construction contains the small answer, buried under
+  the Muller-acceptance scaffolding. This is the evidence base for P1
+  (direct Σ₁/Π₁/Π₂/Σ₂ acceptance dispatch instead of the Muller DNF).
+  Spin-off rule from the class probe (fold_pass, validated 42/42 +
+  fuzz): **U/W/R arm-padding removal** — `(c & Xd) U g → c U g` when
+  c ⇒ d and g ⇒ d (the Xd is implied by the U dynamics; dual for R;
+  propositional-fragment entailment, sound one-way): G(p->(qUr))
+  census 98→84. NB the formula must be written `q U r` WITH SPACES —
+  `qUr` parses as ONE atomic proposition (an earlier "solved at 21
+  nodes" reading of this case was that artifact).
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call
