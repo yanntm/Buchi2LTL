@@ -166,6 +166,12 @@ def reach_strong(
 @lru_cache(maxsize=None)
 def _lru_reach_strong(cid: int, S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta_f: 'spot.formula', T: Tuple[int, ...], tau_f: 'spot.formula', level: int) -> "spot.formula":
     """Core cached implementation of reach_strong. Args are all hashable (B=None ok)."""
+    # Dead-tail early-out: reach(S,B,β,T,τ≡false) ≡ false — Table 1 base case
+    # is ¬β U false ≡ false and every inductive line conjoins τ at the claim
+    # point. With per-node simplify folding tails (σ ∧ X(0) → 0), this deletes
+    # the subproblem AND every wrapped descendant it would seed deeper down.
+    if tau_f.is_ff():
+        return _ff()
     # Guard counts MISSES only (distinct expansions; this body runs once per
     # key). Counting raw calls tripped the guard on healthy 91%-hit workloads.
     global PAPER_REACH_CALLS
