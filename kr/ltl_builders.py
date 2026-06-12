@@ -43,27 +43,73 @@ def make_guard(valuations: List[Dict[str, bool]], aps: List[str], pred: Callable
 # Simplification / normalization
 # ---------------------------------------------------------------------------
 
-# One shared simplifier for the whole construction: its internal cache persists
-# across calls, so repeatedly simplifying shared subformulas (hash-consed
-# spot.formula nodes) is amortized O(1) instead of a fresh tree walk each time.
-_tl_simp: Optional["spot.tl_simplifier"] = None
+# Shared simplifier instances for the whole construction (see _get_tl_simp):
+# their internal caches persist across calls, so repeatedly simplifying shared
+# subformulas (hash-consed spot.formula nodes) is amortized O(1) instead of a
+# fresh tree walk each time.
 
 
-# Spot tl_simplifier policy for the construction path. Pure-LTL rewriting is
-# weak on our recursive cascade shapes, and the simplifier is not fully
-# sharing-aware: a single simplify of a big Or/And can stall for minutes
-# inside C++ where even SIGALRM cannot fire (watchdogged on "(a U b) | Gc").
-# The construction therefore relies on spot.formula's constructor-level
-# trivial identities (hash-consing, constant folding, dedup) and calls
-# tl_simplifier only when asked:
-#   KR_SIMP_TREE_LIMIT = 0   (default) never simplify — hash-cons only
+# Spot tl_simplifier policy for the construction path.
+#
+# Default mode (KR_SIMP_NODE=1): simplify ONCE PER DAG NODE, memoized by
+# node id. The old failure mode was simplify-on-the-unfolded-tree (a single
+# call on a big Or/And stalled minutes inside C++, watchdogged on
+# "(a U b) | Gc"); per-node + id-memo changes the cost model: every _simp_f
+# call sees children that were already simplified (operators build bottom-up
+# through these builders), our memo prevents re-entering C++ for any node
+# seen before, and the ONE shared tl_simplifier instance keeps its internal
+# cache across calls. This is what kills vacuous structure at construction
+# time (X(0)→0, σ∧0→0, absorption …) — dead tails then collapse memo keys in
+# the operators and delete whole wrapped-descendant subtrees (see
+# kr/dag_folding.md counter-measure A). KR_SIMP_NODE=0 is the escape hatch
+# if Spot ever becomes the blocker (then we grow our own small rule set).
+#
+# Legacy tree-size policy (only when KR_SIMP_NODE=0):
+#   KR_SIMP_TREE_LIMIT = 0   never simplify — hash-cons only
 #   KR_SIMP_TREE_LIMIT = N>0 simplify only formulas with <= N unfolded nodes
-#   KR_SIMP_TREE_LIMIT < 0   always simplify (legacy behavior)
+#   KR_SIMP_TREE_LIMIT < 0   always simplify (historical behavior)
 # Skipping is always safe: simplification is cosmetic, never semantic.
-# The size guard uses the unfolded (tree) size — the honest cost proxy for a
-# sharing-blind walk — which unlike DAG size is compositional
-# (1 + sum of child sizes) and so memoizes by node id: O(arity) per NEW node.
+_SIMP_NODE = os.getenv("KR_SIMP_NODE", "1").lower() not in ("0", "false", "no", "off")
 _SIMP_TREE_LIMIT = int(os.getenv("KR_SIMP_TREE_LIMIT", "0"))
+_simp_memo: Dict[int, "spot.formula"] = {}
+
+# KR_SIMP_OPTS policy (measured 2026-06-12 on the (a&Xa) anatomy):
+#   basics — constant folding / unit rules only (X(0)→0 and friends);
+#            never stalls. a&Xa: 752→599 subproblems.
+#   full   — adds Spot's syntactic-implication machinery, which recurses
+#            operand PAIRS sharing-blind (quadratic × deep): best folding
+#            (a&Xa: 752→311) but X(a&Xa) 5L blew a 15s budget per-node.
+#   hybrid (default) — full rules for nodes whose memoized unfolded-tree
+#            size is ≤ KR_SIMP_FULL_LIMIT, basics above: full's folding
+#            where it's affordable, never the quadratic blowup on giants.
+_SIMP_OPTS = os.getenv("KR_SIMP_OPTS", "hybrid").lower()
+_SIMP_FULL_LIMIT = int(os.getenv("KR_SIMP_FULL_LIMIT", "2000"))
+_tl_simp_basic: Optional["spot.tl_simplifier"] = None
+_tl_simp_full: Optional["spot.tl_simplifier"] = None
+
+
+def _get_tl_simp(full: bool) -> "spot.tl_simplifier":
+    global _tl_simp_basic, _tl_simp_full
+    if full:
+        if _tl_simp_full is None:
+            _tl_simp_full = spot.tl_simplifier()
+        return _tl_simp_full
+    if _tl_simp_basic is None:
+        opts = spot.tl_simplifier_options(
+            True,   # basics
+            False,  # synt_impl
+            False,  # event_univ
+        )
+        _tl_simp_basic = spot.tl_simplifier(opts)
+    return _tl_simp_basic
+
+
+def _want_full(f: "spot.formula") -> bool:
+    if _SIMP_OPTS == "full":
+        return True
+    if _SIMP_OPTS == "basics":
+        return False
+    return _tree_size_f(f) <= _SIMP_FULL_LIMIT
 _SIMP_TREE_SAT = 1 << 60  # saturation: sizes beyond any cap are all equal
 _tree_size_memo: Dict[int, int] = {}
 
@@ -86,19 +132,29 @@ def _tree_size_f(f: "spot.formula") -> int:
 
 def _simp_f(f: "spot.formula") -> "spot.formula":
     """Normalize a spot.formula for the construction path (no string
-    round-trip). By default this is the identity (hash-cons only); see the
-    _SIMP_TREE_LIMIT policy note above for the opt-in tl_simplifier modes."""
-    global _tl_simp
+    round-trip). Default: per-DAG-node memoized tl_simplifier (see policy
+    note above). With KR_SIMP_NODE=0 falls back to the legacy tree-size
+    policy (_SIMP_TREE_LIMIT)."""
     if f is None:
         return _ff()
+    if _SIMP_NODE:
+        gid = f.id()
+        hit = _simp_memo.get(gid)
+        if hit is not None:
+            return hit
+        try:
+            res = _get_tl_simp(_want_full(f)).simplify(f)
+        except Exception:
+            res = f
+        _simp_memo[gid] = res
+        _simp_memo[res.id()] = res  # simplify is idempotent — fixpoint entry
+        return res
     if _SIMP_TREE_LIMIT == 0:
         return f
     if _SIMP_TREE_LIMIT > 0 and _tree_size_f(f) > _SIMP_TREE_LIMIT:
         return f
-    if _tl_simp is None:
-        _tl_simp = spot.tl_simplifier()
     try:
-        return _tl_simp.simplify(f)
+        return _get_tl_simp(_want_full(f)).simplify(f)
     except Exception:
         return f
 
