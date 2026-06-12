@@ -262,6 +262,38 @@ def _letters_to_f(valuation: Dict[str, bool], aps: List[str]) -> spot.formula:
         res = _And(res, p)
     return res
 
+# ---------------------------------------------------------------------------
+# Guard fusion (letter fusion, dag_folding.md counter-measure B)
+# ---------------------------------------------------------------------------
+
+# Process-lifetime bdd_dict + owner: spot's bdd_dict aborts the process at
+# destruction if variables stay registered, so the dict and its owning
+# twa_graph (the bindings' only accepted owner type) live as long as we do.
+_guard_bdd_dict = None
+_guard_bdd_owner = None
+
+
+def _fuse_or(fs: List["spot.formula"]) -> "spot.formula":
+    """OR of PROPOSITIONAL guards, minimized via BDD + Minato ISOP
+    (spot.bdd_to_formula). Falls back to the plain Or on any failure —
+    fusion correctness never depends on the minimization, only output size.
+    """
+    if not fs:
+        return _ff()
+    if len(fs) == 1:
+        return fs[0]
+    or_f = _Or(*fs)
+    global _guard_bdd_dict, _guard_bdd_owner
+    try:
+        if _guard_bdd_dict is None:
+            _guard_bdd_dict = spot.make_bdd_dict()
+            _guard_bdd_owner = spot.make_twa_graph(_guard_bdd_dict)
+        b = spot.formula_to_bdd(or_f, _guard_bdd_dict, _guard_bdd_owner)
+        return spot.bdd_to_formula(b, _guard_bdd_dict)
+    except Exception:
+        return or_f
+
+
 def _str_f(f: spot.formula) -> str:
     """Convert formula to normalized str — top-level output and traces ONLY.
     Pure stringification: no simplify (that was a per-conversion tree walk that
