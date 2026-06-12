@@ -11,6 +11,10 @@ this file only records the ground rules.
 - Subprocess isolation per case (Spot/buddy can segfault on state accumulation;
   rc 139 = segv) — use the existing scripts as templates.
 - Use timeouts (5–45s per case).
+- One-shot probes (single-question tools): commit the script, record the
+  finding in `kr/STATUS.md`, then delete it — git history keeps the tool.
+- Run logs are never committed; the exception is `logs/` (curated baseline
+  size censuses kept as before/after references for fold work).
 
 ## Gate before committing operator/assembly changes
 
