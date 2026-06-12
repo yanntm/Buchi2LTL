@@ -1,0 +1,78 @@
+=== DAG dump for 'F(a&Xa)' ===
+cascade: 2 levels, sizes=[2, 2]
+distinct nodes: 156
+
+--- definitions (36; xN = referenced N times) ---
+n000 x2 := (!a | X(F(a)))
+n001 := (X((!a | X((!a R F(a))))) | G((!a | X(n000))))
+n002 x2 := (!a | (X(F(a)) & n001))
+n003 := ((a | X((a R n000))) & (!a | X(n002)))
+n004 x2 := (F(a) & n002 & G(n003))
+n005 := (X((!a | X((!a R n004)))) | G((!a | X((!a | X(n004))))))
+n006 := (!a | X((!a | (X(n004) & n005))))
+n007 x3 := (!a | X(!a))
+n008 x2 := (a R n007)
+n009 x3 := (n008 & ((a & Xa) R (a | X(n008))))
+n010 x2 := (!a & X(G(a)))
+n011 x2 := (a U n010)
+n012 := (F((!a & X(n010))) & X((!a & X((!a U G(a))))))
+n013 := (!a & X((!a & (X(G(a)) | n012))))
+n014 x2 := (n011 | F((n013 | (a & X(n011)))))
+n015 := (F((a & X((a & X(n014))))) & X((a & X((a U n014)))))
+n016 := (a & X((a & (X(n014) | n015))))
+n017 x2 := (!a U (a & Xa))
+n018 x2 := (!a & X(n017))
+n019 x2 := (n017 | (n007 U n018))
+n020 := (G((!a | X((!a | X(G(a)))))) | n009 | (n019 & F(n016)))
+n021 := (F((a & Xa)) & n020 & (n009 | G(n006)))
+n022 x2 := (a | X(F(!a)))
+n023 x2 := (!a R n022)
+n024 := (X((a | X((a R F(!a))))) | G((a | X(n022))))
+n025 := (a | X((a | (X(F(!a)) & n024))))
+n026 x2 := (n023 & G((n025 & (!a | X(n023)))))
+n027 := (X((!a | X((!a R n026)))) | G((!a | X((!a | X(n026))))))
+n028 := (!a | X((!a | (X(n026) & n027))))
+n029 := (F((a & X((a & X(F(!a)))))) & (n009 | G(n028)))
+n030 x2 := X((a & Xa))
+n031 x2 := X((!a & n030))
+n032 := (n030 | (F((!a & n031)) & X(n018)))
+n033 x2 := (!a & n032)
+n034 := (n007 U ((!a & X(n033)) | (a & n031)))
+n035 := (n019 & ((a & Xa) | n033 | n034) & (n029 | n021))
+
+root = n035
+
+--- distinct temporal subformulas (33), by unfolded size ---
+[     2] F x3   F(a) : Fa
+[     2] G x2   G(a) : Ga
+[     3] F x2  F(!a) : F!a
+[     5] R x1  (!a R F(a)) : !a R Fa
+[     5] U x1  (!a U G(a)) : !a U Ga
+[     5] F x1  F((a & Xa)) : F(a & Xa)
+[     5] R x1  (a R F(!a)) : a R F!a
+[     7] U x2   n017 : !a U (a & Xa)
+[     8] R x1  (a R n000) : a R (!a | XFa)
+[     8] R x2   n008 : a R (!a | X!a)
+[     8] U x2   n011 : a U (!a & XGa)
+[     9] R x2   n023 : !a R (a | XF!a)
+[    10] G x1  G((a | X(n022))) : G(a | X(a | XF!a))
+[    10] F x1  F((a & X((a & X(F(!a)))))) : F(a & X(a & XF!a))
+[    11] G x1  G((!a | X(n000))) : G(!a | X(!a | XFa))
+[    11] F x1  F((!a & X(n010))) : F(!a & X(!a & XGa))
+[    11] G x1  G((!a | X((!a | X(G(a)))))) : G(!a | X(!a | XGa))
+[    13] F x1  F((!a & n031)) : F(!a & X(!a & X(a & Xa)))
+[    16] R x1  ((a & Xa) R (a | X(n008))) : (a & Xa) R (a | X(a R (!a | X!a)))
+[    18] U x1  (n007 U n018) : (!a | X!a) U (!a & X(!a U (a & Xa)))
+[    45] G x1  G((n025 & (!a | X(n023)))) : G((a | X(a | (XF!a & (X(a | X(a R F!a)) | G(a | X(a | XF!a)))))) & (!a | X(!a R (a | XF!a))))
+[    46] G x1  G(n003) : G((a | X(a R (!a | XFa))) & (!a | X(!a | (XFa & (X(!a | X(!a R Fa)) | G(!a | X(!a | XFa)))))))
+[    46] F x1  F((n013 | (a & X(n011)))) : F((!a & X(!a & (XGa | (F(!a & X(!a & XGa)) & X(!a & X(!a U Ga)))))) | (a & X(a U (!a & XGa))))
+[    57] U x1  (a U n014) : a U ((a U (!a & XGa)) | F((!a & X(!a & (XGa | (F(!a & X(!a & XGa)) & X(!a & X(!a U Ga)))))) | (a ...
+[    58] R x1  (!a R n026) : !a R ((!a R (a | XF!a)) & G((a | X(a | (XF!a & (X(a | X(a R F!a)) | G(a | X(a | XF!a)))))) & (!a ...
+[    58] U x1   n034 : (!a | X!a) U ((!a & X(!a & (X(a & Xa) | (F(!a & X(!a & X(a & Xa))) & X(!a & X(!a U (a & Xa)))))))...
+[    62] F x1  F((a & X((a & X(n014))))) : F(a & X(a & X((a U (!a & XGa)) | F((!a & X(!a & (XGa | (F(!a & X(!a & XGa)) & X(!a & X(!a U Ga)))...
+[    64] G x1  G((!a | X((!a | X(n026))))) : G(!a | X(!a | X((!a R (a | XF!a)) & G((a | X(a | (XF!a & (X(a | X(a R F!a)) | G(a | X(a | XF!a)))...
+[    81] R x1  (!a R n004) : !a R (Fa & (!a | (XFa & (X(!a | X(!a R Fa)) | G(!a | X(!a | XFa))))) & G((a | X(a R (!a | XFa))) ...
+[    87] G x1  G((!a | X((!a | X(n004))))) : G(!a | X(!a | X(Fa & (!a | (XFa & (X(!a | X(!a R Fa)) | G(!a | X(!a | XFa))))) & G((a | X(a R (!a...
+[   187] F x1  F(n016) : F(a & X(a & (X((a U (!a & XGa)) | F((!a & X(!a & (XGa | (F(!a & X(!a & XGa)) & X(!a & X(!a U Ga))...
+[   193] G x1  G(n028) : G(!a | X(!a | (X((!a R (a | XF!a)) & G((a | X(a | (XF!a & (X(a | X(a R F!a)) | G(a | X(a | XF!a))...
+[   262] G x1  G(n006) : G(!a | X(!a | (X(Fa & (!a | (XFa & (X(!a | X(!a R Fa)) | G(!a | X(!a | XFa))))) & G((a | X(a R (!...
