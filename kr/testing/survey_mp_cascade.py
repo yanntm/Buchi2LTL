@@ -42,10 +42,13 @@ import spot
 p = json.load(sys.stdin)
 orig_aut = spot.formula(p["orig"]).translate("Buchi")
 rec = p["rec"]
-other = spot.formula(rec)
-if rec not in ("true", "false"):
-    other = other.translate("Buchi")
-print("EQ:" + str(bool(spot.are_equivalent(orig_aut, other))))
+try:
+    other = spot.formula(rec)
+    if rec not in ("true", "false"):
+        other = other.translate("Buchi")
+    print("EQ:" + str(bool(spot.are_equivalent(orig_aut, other))))
+except Exception as e:
+    print("EQ:err:" + str(e)[:90])
 '''
 
 
@@ -63,7 +66,15 @@ def spot_equiv(orig: str, rec: str):
         return "SPOT_TIMEOUT"
     for line in (proc.stdout or "").splitlines():
         if line.startswith("EQ:"):
-            return line[3:] == "True"
+            payload = line[3:]
+            # ONLY exact True/False are verdicts; an error payload must stay
+            # an error (a previous version collapsed "err:Too many acceptance
+            # sets" into boolean False — a phantom semantic failure).
+            if payload == "True":
+                return True
+            if payload == "False":
+                return False
+            return payload  # "err:..." — verification blocked, not a verdict
     errtxt = (proc.stderr or proc.stdout or "no output").strip()
     first = next((l.strip() for l in errtxt.splitlines() if l.strip()), "no output")
     return "err:" + first[:100]
