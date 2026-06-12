@@ -128,6 +128,30 @@ unfolding that DAG.
   Diagnosis tool: `kr/testing/probe_dag_dump.py` (let-binding DAG view +
   temporal census; the F(a&Xa) dumps that drove the rules are in
   `kr/testing/logs/faxa_dag_dump*.txt`).
+- **Initial-state opening + context-aware subsumption (2026-06-13).**
+  Three additions on top of rule 4. (i) Context OPENING (context_pass):
+  temporal siblings feed their now-component into the context — Gφ
+  asserts conj(φ), R/M assert conj(g); at Or, Fφ refutes disj(φ), U/W
+  refute disj(g). Opened facts flow ONE-WAY (earlier→later in canonical
+  child order): bidirectional opening built circular support and was
+  caught UNSOUND by fuzz (witness `!(b R (Gb & (b M Gb)))` → 0; the
+  opened b erased the sibling b while the M consumed it) — one-way is
+  sound by sequential replacement; regression cases in
+  test_context_pass. (ii) G/F ABSORPTION (fold_pass): conjuncts implied
+  by a sibling Gφ dropped (small recursive entailment: X/F/G bodies,
+  U/M arms, And/Or), dual at Or. (iii) **Context-aware S1/S2**
+  (fold_pass.ctx_subsume, hooked as bool_hook into the context pass):
+  under ctx ⊨ ¬c the S1 bare-c case is discharged by knowledge, so the
+  unshifted AND the one-step-SHIFTED ladder forms fold — the shapes that
+  are provably NOT redundant in isolation. **This pushed `F(a&Xa)` under
+  the 32-acc cap: census 33→26, Spot equiv True end-to-end.** Measured:
+  `F(a&Xa)` DAG 156→111, tree 901→453; `F(a&Xb)` census 87→74;
+  `G(a|Xb)` 82→79, tree 6.8k→3.1k; survey `X(a&Xa)` flatten census
+  13.3G→1.5G. Gates: suites 19/18/10/38 CLEAN, fuzz 3×500 ALL
+  EQUIVALENT, audit CLEAN, survey 25 True / 0 FALSE. Known limitation:
+  one-way flow + canonical order misses openings whose source sorts
+  after the target (alternating direction across the pipeline's repeated
+  context passes would be sound — TODO).
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call
@@ -155,10 +179,11 @@ added: `Xa` 3L → `XXa` 4L → `XXXa` 5L → `X(a & Xa)` 5L.
   including **`XXXa` at 5 levels** and **`G(a->Xb)`/`Ga|Gb`**
   end-to-end. Non-True split, all verification-bound, none semantic:
   - SPOT_TIMEOUT: `G(a->Xa)` (1.5M, under the flatten gate — Spot slow).
-  - 32-acc: `F(a&Xb)` (census 87, down from 109 — still over the cap;
+  - 32-acc: `F(a&Xb)` (census 74, down from 109 — still over the cap;
     the err string is the abort-path teardown crash in the child).
-  - UNVERIFIED_SIZE (flatten gate): `(a U b)|Gc` 6.6M, `X(a&Xa)`
-    1.3×10¹⁰, `GFa&GFb` 9.5×10¹⁶, `FGa|FGb` / `(GFa&FGb)`
+    `F(a&Xa)` cleared the cap (census 26) and verifies True.
+  - UNVERIFIED_SIZE (flatten gate): `(a U b)|Gc` 7.0M, `X(a&Xa)`
+    1.5×10⁹, `GFa&GFb` 9.1×10¹⁶, `FGa|FGb` / `(GFa&FGb)`
     2⁶⁰-saturated.
 - **Semantic grounding (`trace_fin_semantics`, cover-aware — GTs on the config
   semiautomaton): zero contradictions across every probed case at every
