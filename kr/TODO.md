@@ -25,20 +25,23 @@ fold pass → interning). Items below are the actionable queue.
    distinct temporal subformulas of `G(p->(qUr))` (currently 4115 for a
    3-state property) drop toward what its automaton warrants; secondary:
    DAG nodes / unfolded size shrink across the ladder.
-2. **Output representation — now the TOP item**: reconstruct's str() contract
-   is the bottleneck for 7 of the 11 non-True ladder cases (post guard-drop
-   survey), including mid-size `G(a->Xa)` which flipped True →
-   CONSTRUCT_TIMEOUT when tl_simplifier left the hot path (its construction
-   is instant; only the final flat str() blows the budget). Carry
-   `spot.formula` objects to callers (str on demand only), and/or a DAG-aware
-   output format. This also feeds the user's planned BDD-style analysis
-   layer for the formulas — solve naively first, shortcuts after.
-3. **Verification beyond Spot translation** (32-acc-set limit / timeouts on
-   100+ distinct temporal subterms): compositional checking (trace_fin is the
-   per-sub-term oracle), word-sampling validator (ultimately-periodic u·v^ω,
-   construction-ref pitfall #10), equivalence-based interning of subterms.
-   Spot authors are in the loop on sharing-aware translation — our DAGs are
-   the ideal client; revisit when they ship anything.
+2. ~~**Output representation**~~ **DONE 2026-06-12**: reconstruct returns the
+   hash-consed `spot.formula` DAG; flattening is opt-in (`reconstruct_ltl_str`
+   historical entry, `_str_f_gated` under `KR_FLATTEN_TREE_LIMIT`). The former
+   CONSTRUCT_TIMEOUT cases now report measured sizes in seconds (`G(a->Xa)`:
+   5.1×10¹¹ tree nodes from ~2k DAG nodes). This is the native input for the
+   planned BDD-style analysis layer.
+3. **Verification beyond Spot translation — now the verification front**:
+   compositional checking (trace_fin is the per-sub-term oracle),
+   word-sampling validator (ultimately-periodic u·v^ω, construction-ref
+   pitfall #10), equivalence-based interning of subterms. Probed and CLOSED
+   (2026-06-12, `probe_object_translate.py`): translating from the formula
+   OBJECT (Couvreur fm / translator class) does not dodge the wall — one acc
+   set per distinct eventuality (cap 32 compile-time) and the tableau state
+   space is subformula SETS, which sharing doesn't shrink. So: either fold
+   the distinct-eventuality count below 32 (item 1 + interning), or verify
+   without translation. Spot authors are in the loop on sharing-aware
+   translation; revisit when they ship anything.
 
 ## P1 — coverage
 
