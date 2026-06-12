@@ -43,9 +43,11 @@ fold pass → interning). Items below are the actionable queue.
    (kr/simplify/testing/test_context_pass.py, 16/16 with per-case Spot
    equivalence). Rule 2 (now-evaluation: one-step unroll of G/F/U/R/W/M
    heads under boolean context, shrink-only, identity + BDD entailment)
-   DONE + validated (test_now_eval.py, 18/18). Next: rule 3 partial
-   factoring (the sound form). Then pipeline integration into _simp_f +
-   measurement on the fusion-neutral wall. Background
+   DONE + validated (test_now_eval.py, 18/18). Rule 3 (partial factoring,
+   the sound form + Minato minimization of guard groups) DONE + validated
+   (test_factor_pass.py, 10/10 incl. the draft-bug regression). Remaining:
+   pipeline integration into _simp_f + measurement on the fusion-neutral
+   wall (X(a&Xa), G(a->Xa)). Background
    (user rule set, Java lineage): Spot's
    tl_simplifier, even at full strength on 5-node inputs, does NOT do
    present-literal cofactoring or guard factoring: `a & (!a | G(!a|Xa))`
