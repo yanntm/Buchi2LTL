@@ -42,8 +42,9 @@ CASES = [
     # nested instants: each X-body gets its own context
     ("a & X(b & F(b))", "a & Xb", "inner F at the inner instant"),
     ("X(a & G(!a))", "0", "refutation inside an X body (X(0) folds)"),
-    # the Ga pipeline shape: context kills the vacuous disjunct only
-    ("a & (!a | G(!a | Xa))", "a & G(!a | Xa)", "rule 1+2 do not overfire"),
+    # the Ga pipeline shape: context kills the vacuous disjunct, then the
+    # rule-4 induction fold closes it (was `a & G(!a | Xa)` pre-fold)
+    ("a & (!a | G(!a | Xa))", "Ga", "context + induction fold close to Ga"),
     # boundary safety
     ("a & X(F(!a))", None, "no leak under X (must not change)"),
     ("a & (b U X!a)", None, "X arm opaque (must not change)"),
