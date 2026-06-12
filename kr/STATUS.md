@@ -63,6 +63,26 @@ unfolding that DAG.
   keyed ⟨helper, casc, S, B, β, T, τ, level⟩) — one expansion per distinct
   subproblem, BDD-style. The runaway guard counts DISTINCT subproblems
   (`KR_REACH_GUARD`, default 5M).
+- **Letter fusion (2026-06-12, the "B" iteration — dag_folding.md
+  counter-measure B, default ON, `KR_FUSE_LETTERS=0` restores the
+  per-letter literal shape).** At every enumeration site (solid⁺/wsolid⁺
+  last-step/leave/bad-pre, dashed enter_t/enter_b/line-3, fin's
+  `_uncond_reach_strict`) the summand reads the letter only through its
+  guard, so letters are grouped by the `_dedupe` key minus `li`
+  (enter sites key on the arrival too) and each group emits ONE summand
+  whose guard is the Minato-minimized OR (`_fuse_or` in ltl_builders:
+  BDD round-trip via `spot.formula_to_bdd`/`bdd_to_formula`,
+  process-lifetime bdd_dict, plain-Or fallback). One tail per outcome
+  class instead of per letter — the distinct-tail driver shrinks at the
+  source. Soundness argument: dag_folding.md "Letter fusion". Measured:
+  `XXa`/`XXXa` collapse to the LITERAL formulas (3/4 tree nodes; XXXa was
+  SPOT_TIMEOUT); `Xa` output is `Xa`; `G(a->Xb)` tree 3.6M→22.6k and
+  distinct temporal 226→85 (under the 32-acc-set cap → equiv=True);
+  `G(p->(qUr))` tree 84.8M→55k, 559→121; `G(a->Xa)` 5.1×10¹¹→11.3M;
+  `(a U b)|Gc` 2⁶⁰-saturated→528M; `X(a&Xa)` 6.3×10¹³→3.1×10¹⁰ (the
+  remaining ladder wall). Survey: 3 cases flipped to True (`XXXa`,
+  `G(a->Xb)`, `Ga|Gb`), zero regressions; grounding: zero contradictions;
+  audit CLEAN. Post-fusion log: `kr/testing/logs/fusion_measure_dag_*`.
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call
@@ -86,16 +106,14 @@ The ≥4-level dev guard is GONE (opt-in `KR_MAX_LEVELS` ceiling remains; the
 real runaway protection is the distinct-subproblem guard). Depth ladder
 added: `Xa` 3L → `XXa` 4L → `XXXa` 5L → `X(a & Xa)` 5L.
 
-- **MP ladder (32 formulas): 21 equiv=True, zero equiv=FALSE** — including
-  **`X X a` at 4 levels** end-to-end. Non-True split, all
-  verification/serialization-bound, none semantic:
-  - SPOT_TIMEOUT / 32-acc-set: `XXXa` (5L, builds in 0.18s), `Ga|Gb`,
-    `G(a->Xb)`, `F(a&Xb)`.
-  - CONSTRUCT_TIMEOUT, dominated by reconstruct's FINAL flat str() of
-    unsimplified output (post no-simplify policy): `G(a->Xa)` (was True
-    under legacy simplify — the one measurable regression of the policy,
-    cured by P0 output-representation work, not by reverting), `X(a&Xa)`,
-    `(a U b)|Gc`, `GFa&GFb`, `FGa|FGb`, `GFa->GFb`, `(GFa&FGb)`.
+- **MP ladder: 24 equiv=True, zero equiv=FALSE** (post letter-fusion) —
+  including **`XXXa` at 5 levels** and **`G(a->Xb)`/`Ga|Gb`** end-to-end
+  (all three flipped True by fusion). Non-True split, all
+  verification-bound, none semantic:
+  - SPOT_TIMEOUT: `F(a&Xb)` (now past the acc cap, tableau slow).
+  - UNVERIFIED_SIZE (flatten gate): `X(a&Xa)` 3.1×10¹⁰, `G(a->Xa)` 11.3M
+    (1-AP case, fusion-neutral), `(a U b)|Gc` 528M, `GFa&GFb` 1.8×10¹⁷,
+    `FGa|FGb` / `(GFa&FGb)` 2⁶⁰-saturated.
 - **Semantic grounding (`trace_fin_semantics`, cover-aware — GTs on the config
   semiautomaton): zero contradictions across every probed case at every
   depth** (`GFa`, `a U b`, `Fa & Gb`, `Ga | Fb`, `Xa` fully OK; `G(a->Xb)`,
