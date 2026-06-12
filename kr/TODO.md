@@ -29,11 +29,6 @@ fold pass → interning). Items below are the actionable queue.
    - **C. tail normalization** (canonical letter-word prefix + continuation
      form) — syntactic, internal, targets the wrapping count directly.
    - **D. budgeted semantic interning** of small subterms.
-1b. **Native-operator basis (USER VALIDATION NEEDED before starting).**
-   Builders spell G as ¬(1 U ¬·): raw U nodes. Couvreur charges an acc set
-   per U/M but none for native G/R/W/X (str→parse already converts the
-   sugar). Building with native G/F/R/W could cut the distinct-eventuality
-   count — the 32-acc-set driver — for free. Interacts with item 3.
 2. ~~**Output representation**~~ **DONE 2026-06-12**: reconstruct returns the
    hash-consed `spot.formula` DAG; flattening is opt-in (`reconstruct_ltl_str`
    historical entry, `_str_f_gated` under `KR_FLATTEN_TREE_LIMIT`). The former
