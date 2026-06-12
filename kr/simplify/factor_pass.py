@@ -89,9 +89,18 @@ def _factor_or(node: "spot.formula") -> "spot.formula":
     return spot.formula.Or(work)
 
 
+# Persistent memo (see context_pass note): per-DAG-node pipeline usage is
+# amortized O(1) per node only if results survive across calls.
+_memo: Dict["spot.formula", "spot.formula"] = {}
+
+
+def reset_cache() -> None:
+    _memo.clear()
+
+
 def factor_simplify(f: "spot.formula") -> "spot.formula":
     """Bottom-up partial factoring over the whole DAG (memoized)."""
-    memo: Dict["spot.formula", "spot.formula"] = {}
+    memo = _memo
 
     def walk(n: "spot.formula") -> "spot.formula":
         hit = memo.get(n)

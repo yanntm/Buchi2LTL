@@ -27,6 +27,17 @@ import spot
 
 _EMPTY: FrozenSet["spot.formula"] = frozenset()
 
+# Persistent memo (formulas are immutable hash-consed objects, so caching
+# across calls is safe). Key includes whether a now-hook is active — the
+# fixpoints differ. Persistence is what makes per-DAG-node pipeline usage
+# (kr.simplify.simplify_node inside _simp_f) amortized O(1) per node:
+# children of a fresh node are already memoized fixpoints.
+_memo: Dict[Tuple, "spot.formula"] = {}
+
+
+def reset_cache() -> None:
+    _memo.clear()
+
 
 def _is_bool_node(f: "spot.formula") -> bool:
     return f._is(spot.op_And) or f._is(spot.op_Or)
@@ -51,7 +62,8 @@ def context_simplify(f: "spot.formula", now_hook=None) -> "spot.formula":
     tried on every non-boolean node sitting under a non-empty context,
     BEFORE the boundary reset; a non-None replacement is at the same
     instant, so it keeps simplifying under the same context."""
-    memo: Dict[Tuple[int, FrozenSet, FrozenSet], "spot.formula"] = {}
+    memo = _memo
+    hooked = now_hook is not None
 
     def walk(node: "spot.formula", pos: FrozenSet, neg: FrozenSet) -> "spot.formula":
         # 1. domination by identity (any node kind, temporal included)
@@ -68,7 +80,7 @@ def context_simplify(f: "spot.formula", now_hook=None) -> "spot.formula":
         if node.is_tt() or node.is_ff() or node._is(spot.op_ap):
             return node
 
-        key = (node, pos, neg)
+        key = (hooked, node, pos, neg)
         hit = memo.get(key)
         if hit is not None:
             return hit
@@ -108,7 +120,7 @@ def context_simplify(f: "spot.formula", now_hook=None) -> "spot.formula":
                     return out
             # Non-boolean operator: context boundary. Visit bodies with an
             # empty context, memoized on the node alone (the common case).
-            ekey = (node, _EMPTY, _EMPTY)
+            ekey = (hooked, node, _EMPTY, _EMPTY)
             out = memo.get(ekey)
             if out is None:
                 out = _const_fold(node.map(lambda c: walk(c, _EMPTY, _EMPTY)))

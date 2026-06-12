@@ -39,6 +39,15 @@ _bdd_dict = None
 _bdd_owner = None
 
 
+def use_bdd_dict(d, owner) -> None:
+    """Inject a shared bdd_dict + owner (pipeline use). Running a second
+    dict next to the construction's own corrupted the heap in the equiv
+    children (free(): invalid pointer on F(a&Xb)); sharing one dict per
+    process avoids it. Standalone use keeps the lazily-created own dict."""
+    global _bdd_dict, _bdd_owner
+    _bdd_dict, _bdd_owner = d, owner
+
+
 def _prop_bdd(f: "spot.formula"):
     """BDD of a purely-boolean formula, or None."""
     global _bdd_dict, _bdd_owner
