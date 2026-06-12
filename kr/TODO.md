@@ -23,12 +23,43 @@ fold pass → interning). Items below are the actionable queue.
    85.5M→3.6M, `a&Xa` subproblems 752→311. Remaining candidates, in the
    order the tail-anatomy data suggests (probe_tail_anatomy.py: TAILS drive
    the explosion — ×2–10 distinct tails per level — not the avoid web):
-   - **B. cascade-aware vacuity pruning** of the combined-letter enumeration
+   - **B. letter fusion (ACTIVE — user-validated direction 2026-06-12).**
+     Equivalence classes of futures over the 2^AP letters: at every
+     enumeration site the summand depends on the letter ONLY through its
+     guard (structure fixed by the rest of the dedupe key), so fusion =
+     drop `li` from the existing `_dedupe` key and OR the guards
+     (`enter_t`/`enter_b` key on (pre-suffix, arr) — their inner solid
+     depends on the arrival). Guards accumulated as BDDs, emitted via
+     Minato ISOP (`spot.bdd_to_formula`; round-trip verified, minimal
+     guards confirmed — probe_guard_fusion). Measured site-local factor
+     ×1.6–×3.2 (grows with |AP|), compounding per level on the
+     distinct-tail population; plausible the eventuality count drops under
+     the 32-acc-set cap for mid cases (measurable hypothesis). Soundness:
+     quotient-alphabet argument for globally-equal letters; for site-local
+     grouping, guard-substitution into the summand spec (∃-position
+     ∨-distributes over the shared witnessing moment; avoid position is
+     U-left-conjunctivity (¬β₁Uτ)∧(¬β₂Uτ) ≡ ¬(β₁∨β₂)Uτ; weak by duality)
+     — short write-up goes to dag_folding.md with the change. Subsumes the
+     empty-guard half of the former vacuity-pruning candidate.
+   - **C. cascade-aware vacuity pruning** of the combined-letter enumeration
      (unreachable pre-configs, empty Enter/Stay) — prunes memo keys at the
      b^k base; soundness argument needed (see dag_folding.md OPEN).
-   - **C. tail normalization** (canonical letter-word prefix + continuation
-     form) — syntactic, internal, targets the wrapping count directly.
-   - **D. budgeted semantic interning** of small subterms.
+   - **D. tail normalization** (canonical letter-word prefix + continuation
+     form) — syntactic, internal, targets the wrapping count directly;
+     expected partially subsumed by B (fewer distinct tails by construction).
+   - **E. budgeted semantic interning** of small subterms.
+1c. **Own syntactic rewrite pass (PARKED — user has a rule set from another
+   context to contribute; revisit after fusion lands).** Spot's
+   tl_simplifier, even at full strength on 5-node inputs, does NOT do
+   present-literal cofactoring or guard factoring: `a & (!a | G(!a|Xa))`
+   (≡ Ga) and `(!a & Xa) | (a & Xa)` (≡ Xa) both survive full simplify
+   untouched (probe_guard_fusion part A). Candidate rules, sharing-aware
+   per DAG node (the "grow our own rule set" hatch in ltl_builders):
+   (i) cofactoring `a ∧ (¬a ∨ φ) → a ∧ φ`; (ii) Or-factoring
+   `(g₁∧Xt) ∨ (g₂∧Xt) → (g₁∨g₂)∧Xt` + Minato guard minimize (catches
+   tails that become equal only after simplification, which construction-
+   time fusion cannot see); (iii) induction `x ∧ G(x→Xx) ≡ Gx` (riskier,
+   parked separately).
 2. ~~**Output representation**~~ **DONE 2026-06-12**: reconstruct returns the
    hash-consed `spot.formula` DAG; flattening is opt-in (`reconstruct_ltl_str`
    historical entry, `_str_f_gated` under `KR_FLATTEN_TREE_LIMIT`). The former
