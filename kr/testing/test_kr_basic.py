@@ -56,8 +56,9 @@ try:
     aut = f.translate()
     print("CHILD_TRANSLATE_OK states=", aut.num_states(), flush=True)
     casc = decompose_aut(aut)
-    ltl = rec_clean(casc)
-    print("LTL:", ltl)
+    ltl = rec_clean(casc)   # spot.formula DAG (never implicitly flattened)
+    from kr.ltl_builders import _str_f_gated
+    print("LTL:", _str_f_gated(ltl))
     print("LEVELS:", casc.num_levels)
     print("ACC_CFGS:", len(casc.accepting_configs()))
     try:
@@ -67,12 +68,9 @@ try:
         print("MAXSZ:", getattr(_ops, 'PAPER_MAX_LTL_SIZE', -1))
     except Exception as _e:
         print("COUNTER_ERR:", _e)
-    # Basic I/O check + equiv (failing OK)
+    # Basic I/O check + equiv (failing OK) — translate straight from the object
     try:
-        if ltl in ("true", "false", "1", "0"):
-            other = spot.formula("true" if ltl in ("true","1") else "false")
-        else:
-            other = spot.formula(ltl).translate("Buchi")
+        other = ltl.translate("Buchi")
         orig = f.translate("Buchi")
         print("EQUIV:", bool(spot.are_equivalent(orig, other)))
     except Exception as e:
