@@ -97,7 +97,13 @@ try:
         "num_configs": len(casc.all_configs()),
     }}
 
-    info["recovered"] = reconstruct_ltl_1level_buchi(casc)
+    # formula DAG out; flatten only under the tree-size gate (see survey tool)
+    import os as _os
+    from kr.ltl_builders import _tree_size_f, _str_f
+    rec_f = reconstruct_ltl_1level_buchi(casc)
+    _lim = int(_os.environ.get("KR_FLATTEN_TREE_LIMIT", "5000000"))
+    info["tree_nodes"] = _tree_size_f(rec_f)
+    info["recovered"] = _str_f(rec_f) if info["tree_nodes"] <= _lim else None
 
     print("RESULT_JSON:" + json.dumps(info))
 except Exception as e:
@@ -202,8 +208,12 @@ def main():
             f"configs={res.get('num_configs')} acc_configs={res.get('num_acc_configs')}"
         )
 
-        rec = res.get("recovered", "")[:85]
-        print(f"  recovered: {rec}{'...' if len(res.get('recovered','')) > 85 else ''}")
+        rec_full = res.get("recovered") or ""
+        if not rec_full and res.get("tree_nodes"):
+            print(f"  recovered: <unflattened DAG: {res['tree_nodes']} tree nodes>")
+            print("  equiv to original? UNVERIFIED_SIZE")
+            continue
+        print(f"  recovered: {rec_full[:85]}{'...' if len(rec_full) > 85 else ''}")
 
         eq = safe_equiv(fs, res["recovered"])
         print(f"  equiv to original? {eq}")
