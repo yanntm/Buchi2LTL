@@ -255,13 +255,11 @@ def check_canary_roundtrip():
         f = spot.formula("G(p | F q)")
         aut = f.translate()
         casc = decompose_aut(aut)
-        ltl = reconstruct_ltl_paper_style(casc)
-        print("  recovered:", ltl[:100], "..." if len(ltl) > 100 else "")
+        ltl = reconstruct_ltl_paper_style(casc)   # spot.formula DAG
+        from kr.ltl_builders import _short_f
+        print("  recovered:", _short_f(ltl, 100))
         orig_b = f.translate("Buchi")
-        if ltl in ("true", "false"):
-            rec_b = spot.formula(ltl)
-        else:
-            rec_b = spot.formula(ltl).translate("Buchi")
+        rec_b = ltl.translate("Buchi")
         eq = spot.are_equivalent(orig_b, rec_b)
         print("  are_equivalent:", eq)
         print("  reach_calls=", PAPER_REACH_CALLS, "fin_calls=", PAPER_FIN_CALLS)
