@@ -29,6 +29,14 @@ _OWN_FACTOR = _os.getenv("KR_SIMP_OWN_FACTOR", "1").lower() not in ("0", "false"
 _OWN_FOLD = _os.getenv("KR_SIMP_OWN_FOLD", "1").lower() not in ("0", "false", "no", "off")
 
 
+def _ctx_simplify(f: "spot.formula") -> "spot.formula":
+    """Context pass with both hooks: now-evaluation (rule 2) on temporal
+    heads, context-aware S1/S2 subsumption (fold_pass.ctx_subsume) on
+    boolean nodes — the initial-state knowledge applied at both levels."""
+    return context_simplify(f, now_hook=now_rewrite,
+                            bool_hook=_dp.ctx_subsume)
+
+
 def simplify(f: "spot.formula") -> "spot.formula":
     """Combined pipeline: context pass (rule 1) with the now-evaluation
     hook (rule 2), then unroll-inverse folding (rule 4, unless
@@ -37,20 +45,21 @@ def simplify(f: "spot.formula") -> "spot.formula":
     one more context pass (composites can expose new absorptions) and,
     after factoring, one more fold (factoring can expose fold partners).
     Language-preserving."""
-    g = context_simplify(f, now_hook=now_rewrite)
+    _ctx = _ctx_simplify
+    g = _ctx(f)
     if _OWN_FOLD:
         h = fold_simplify(g)
         if h != g:
-            g = context_simplify(h, now_hook=now_rewrite)
+            g = _ctx(h)
     if not _OWN_FACTOR:
         return g
     h = factor_simplify(g)
     if h != g:
-        h = context_simplify(h, now_hook=now_rewrite)
+        h = _ctx(h)
         if _OWN_FOLD:
             h2 = fold_simplify(h)
             if h2 != h:
-                h = context_simplify(h2, now_hook=now_rewrite)
+                h = _ctx(h2)
     return h
 
 

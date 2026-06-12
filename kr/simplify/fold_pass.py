@@ -37,6 +37,19 @@ j ∈ [1, i-1] has c, or ¬c on [0, i-1] and the G clause at i-1 forces d@i —
 exactly c R d from position 1. S2 is the literal dual. The M/W variants are
 NOT valid (the c-never case needs no eventual c) and are excluded.
 
+Plus G/F absorption (reading Gφ through its unrolling φ ∧ XGφ): a conjunct
+sitting next to Gφ is redundant when Gφ ⇒ it; a disjunct next to Fφ is
+redundant when it ⇒ Fφ. Entailment is a small syntactic recursion (sound,
+incomplete, memoized on the node pair):
+
+    Gφ ⇒ k   if k ∈ conj(φ) ∪ {φ}; k = Xψ/Fψ/Gψ with Gφ ⇒ ψ;
+              k = ψ W χ or χ' R ψ with Gφ ⇒ ψ; And: all; Or: any.
+    k ⇒ Fφ   if k ∈ disj(φ) ∪ {φ}; k = Xψ/Fψ/Gψ with ψ ⇒ Fφ;
+              k = ψ U χ or ψ M χ with χ ⇒ Fφ; And: any; Or: all.
+
+Each clause is a one-line implication (Gφ holds on every suffix; F is
+upward closed under reachability), so absorption only ever DROPS a child.
+
 All rules are plain language equivalences for ARBITRARY c/d/f/g (no
 propositional restriction). The ¬c match is two-tier like now_eval:
 hash-consed identity against spot.formula.Not(c), then BDD complement for
@@ -51,7 +64,7 @@ from typing import Dict, List, Optional, Tuple
 import buddy
 import spot
 
-from .now_eval import _prop_bdd
+from .now_eval import _prop_bdd, _ctx_bdd, _entails, _entails_not
 
 
 def _is_neg(g: "spot.formula", c: "spot.formula") -> bool:
@@ -167,15 +180,91 @@ def _find_subsumed_and(kids: List["spot.formula"]) -> Optional[int]:
     return None
 
 
+# Entailment memos, persistent like the pass memo (hash-consed keys).
+_g_imp_memo: Dict[Tuple, bool] = {}
+_f_imp_memo: Dict[Tuple, bool] = {}
+
+
+def _g_implies(phi: "spot.formula", conj: frozenset, k: "spot.formula") -> bool:
+    """Gφ ⇒ k (sound, incomplete). `conj` = conj(φ) ∪ {φ}."""
+    if k == phi or k in conj:
+        return True
+    key = (phi, k)
+    hit = _g_imp_memo.get(key)
+    if hit is not None:
+        return hit
+    res = False
+    if k._is(spot.op_X) or k._is(spot.op_F) or k._is(spot.op_G):
+        res = _g_implies(phi, conj, k[0])
+    elif k._is(spot.op_W):                      # ψ always ⇒ ψ W χ
+        res = _g_implies(phi, conj, k[0])
+    elif k._is(spot.op_R):                      # ψ always ⇒ χ R ψ
+        res = _g_implies(phi, conj, k[1])
+    elif k._is(spot.op_And):
+        res = all(_g_implies(phi, conj, c) for c in k)
+    elif k._is(spot.op_Or):
+        res = any(_g_implies(phi, conj, c) for c in k)
+    _g_imp_memo[key] = res
+    return res
+
+
+def _implies_f(phi: "spot.formula", disj: frozenset, k: "spot.formula") -> bool:
+    """k ⇒ Fφ (sound, incomplete). `disj` = disj(φ) ∪ {φ}."""
+    if k == phi or k in disj:
+        return True
+    key = (phi, k)
+    hit = _f_imp_memo.get(key)
+    if hit is not None:
+        return hit
+    res = False
+    if k._is(spot.op_X) or k._is(spot.op_F) or k._is(spot.op_G):
+        res = _implies_f(phi, disj, k[0])
+    elif k._is(spot.op_U) or k._is(spot.op_M):  # both guarantee χ eventually
+        res = _implies_f(phi, disj, k[1])
+    elif k._is(spot.op_And):
+        res = any(_implies_f(phi, disj, c) for c in k)
+    elif k._is(spot.op_Or):
+        res = all(_implies_f(phi, disj, c) for c in k)
+    _f_imp_memo[key] = res
+    return res
+
+
+def _find_absorbed_and(kids: List["spot.formula"]) -> Optional[int]:
+    """Index of a conjunct implied by a sibling Gφ (Gφ = φ ∧ XGφ)."""
+    for g in kids:
+        if g._is(spot.op_G):
+            phi = g[0]
+            conj = frozenset(list(phi) if phi._is(spot.op_And) else [phi])
+            for i, k in enumerate(kids):
+                if k != g and _g_implies(phi, conj, k):
+                    return i
+    return None
+
+
+def _find_absorbed_or(kids: List["spot.formula"]) -> Optional[int]:
+    """Index of a disjunct that implies a sibling Fφ (Fφ = φ ∨ XFφ)."""
+    for f in kids:
+        if f._is(spot.op_F):
+            phi = f[0]
+            disj = frozenset(list(phi) if phi._is(spot.op_Or) else [phi])
+            for i, k in enumerate(kids):
+                if k != f and _implies_f(phi, disj, k):
+                    return i
+    return None
+
+
 def _fold_node(node: "spot.formula") -> "spot.formula":
     """Fold one boolean node to its fixpoint (children assumed processed)."""
     is_and = node._is(spot.op_And)
     finder = _find_fold_and if is_and else _find_fold_or
     subsumer = _find_subsumed_and if is_and else _find_subsumed_or
+    absorber = _find_absorbed_and if is_and else _find_absorbed_or
     kids = list(node)
     changed = False
     while len(kids) >= 2:
-        drop = subsumer(kids)
+        drop = absorber(kids)
+        if drop is None:
+            drop = subsumer(kids)
         if drop is not None:
             kids = [k for idx, k in enumerate(kids) if idx != drop]
             changed = True
@@ -190,6 +279,65 @@ def _fold_node(node: "spot.formula") -> "spot.formula":
     if not changed:
         return node
     return spot.formula.And(kids) if is_and else spot.formula.Or(kids)
+
+
+def ctx_subsume(node: "spot.formula", pos, neg) -> "spot.formula | None":
+    """Context-aware S1/S2 (the initial-state reading): under a context
+    refuting c, the bare-c disjunct of S1 is discharged by knowledge, so
+
+      X(c R d) ∨ G(c ∨ Xd)                    → X(c R d)         [ctx ⊨ ¬c]
+      X(c ∨ X(c R d)) ∨ G(c ∨ X(c ∨ Xd))     → X(c ∨ X(c R d))  [shifted]
+
+    and dually at And under ctx ⊨ c (F conjunct dropped next to the U
+    line). Proof of the shifted form: Gβ clause at i-2 plus ¬c on
+    [0, i-1] forces d@i for every i ≥ 2 (the i=2 case is exactly where
+    ¬c@0 from the context is needed — without it the rule is UNSOUND,
+    witness `!a; a; cycle{!a}`). Hooked into the context pass on boolean
+    nodes (bool_hook); returns the reduced node or None."""
+    is_and = node._is(spot.op_And)
+    kids = list(node)
+    kidset = set(kids)
+    ctx = _ctx_bdd(pos, neg)
+    known = (lambda c: _entails(ctx, pos, neg, c)) if is_and \
+        else (lambda c: _entails_not(ctx, pos, neg, c))
+    wrap_op = spot.formula.U if is_and else spot.formula.R
+    bool_op = spot.formula.And if is_and else spot.formula.Or
+    head_op, body_op = (spot.op_F, spot.op_And) if is_and else (spot.op_G, spot.op_Or)
+
+    drop = None
+    for i, k in enumerate(kids):
+        if not (k._is(head_op) and k[0]._is(body_op)):
+            continue
+        body = list(k[0])
+        for s in body:
+            if not s._is(spot.op_X):
+                continue
+            rest = [t for t in body if t != s]
+            c = bool_op(rest)
+            if not known(c):
+                continue
+            d = s[0]
+            # unshifted: partner X(c R d) / X(c U d)
+            if spot.formula.X(wrap_op(c, d)) in kidset:
+                drop = i
+                break
+            # shifted: d = c ∘ Xd2; partner X(c ∘ X(c R/U d2))
+            if d._is(body_op):
+                inner = list(d)
+                for s2 in inner:
+                    if s2._is(spot.op_X) and bool_op([t for t in inner if t != s2]) == c:
+                        alpha = bool_op(rest + [spot.formula.X(wrap_op(c, s2[0]))])
+                        if spot.formula.X(alpha) in kidset:
+                            drop = i
+                            break
+                if drop is not None:
+                    break
+        if drop is not None:
+            break
+    if drop is None:
+        return None
+    rem = [k for j, k in enumerate(kids) if j != drop]
+    return bool_op(rem)
 
 
 # Persistent memo (see context_pass note): per-DAG-node pipeline usage is
