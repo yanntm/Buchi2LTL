@@ -88,6 +88,39 @@ def accepting_configs(casc) -> set:
     return acc_configs
 
 
+def buchi_accepting_configs(casc) -> set:
+    """Accepting configs for the direct Büchi dispatch, COVER-AWARE.
+
+    Unlike `accepting_configs` — which maps accepting *states* to configs through
+    `state_to_config` (the lift *section*, one config per state) and so misses the
+    other configs that cover the same accepting state on a genuine holonomy cover
+    (duplicated sinks etc.) — this reads acceptance directly off the pruned config
+    automaton, which enumerates EVERY reachable config and lifts D's marks per
+    config-edge (`build_pruned_config_aut`). A config node is accepting iff the
+    mark-union on its (state-based, sbacc) out-edges satisfies `g.acc()` — the
+    same exact oracle `accepting_sc_subsets` uses.
+
+    This is the α for `φ_Büchi = ⋁_{C∈α}¬Fin(C)`: under a plain Büchi condition a
+    single state-accepting config visited i.o. already witnesses acceptance, so α
+    must be ALL such configs (a transient one only adds a `¬Fin(C)≡false` disjunct,
+    harmless). Falls back to the lift-section `accepting_configs` if the pruned
+    config aut is unavailable (degenerate / no original_aut)."""
+    g = build_pruned_config_aut(casc)
+    if g is None:
+        return accepting_configs(casc)
+    import spot
+    reach = reachable_configs(casc)   # node i <-> reach[i] (builder's ordering)
+    acc = g.acc()
+    out = set()
+    for i in range(g.num_states()):
+        mk = spot.mark_t()
+        for e in g.out(i):
+            mk |= e.acc
+        if acc.accepting(mk):
+            out.add(reach[i])
+    return out
+
+
 def reachable_configs(casc) -> list:
     """BFS from the initial config (using move_config over letters).
     Returns sorted list of reachable config tuples. Prunes irrelevant configs.
