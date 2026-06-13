@@ -120,36 +120,42 @@ def reachable_configs(casc) -> list:
     return sorted(list(visited))
 
 
-def is_absorbing_config_set(casc, M) -> bool:
-    """True iff the config set M is absorbing (terminal) in the config graph:
-    every letter from every config in M leads back into M (no edge leaves M).
+def configs_reachable_from(casc, sources) -> set:
+    """Forward-reachable config set from `sources` in the config graph
+    (`move_config` over all letters, BFS). Includes the sources themselves.
 
-    Used by the Muller-DNF assembly to fold an absorbing good set: the term
-    ⋀_{C∈M}¬Fin(C) ∧ ⋀_{C∉M}Fin(C) collapses to ⋀_{C∈M}¬Fin(C). Visiting all
-    of M i.o. (the ¬Fin conjuncts) entails the run is trapped in M — once any
-    state of an absorbing M is visited it can never leave — so every config
-    outside M is visited only finitely and the Fin(C∉M) conjuncts are implied.
-    A pure graph property (no language/containment check), so it scales; good
-    Muller sets are reachable and strongly connected, so absorbing here means
-    M is a bottom SCC of the pruned config automaton. Sound per Muller term:
-    nested strongly-connected absorbing sets cannot co-occur (an edge from the
-    smaller to the larger would break absorption), so terms fold independently.
+    Used by the Muller-DNF assembly for the per-conjunct Fin fold: for a good
+    set M, keep Fin(C) only for C ∈ reachable-from-M; drop it for every other
+    C ∉ M. Soundness (per Muller term): a run satisfying ⋀_{C'∈M}¬Fin(C') has
+    Inf(ρ) ⊇ M, and Inf(ρ) is strongly connected in the config graph (the
+    i.o.-set of a path in a finite digraph is strongly connected), so any
+    C ∈ Inf(ρ) is reachable from M within Inf(ρ). Contrapositive: C unreachable
+    from M ⟹ C ∉ Inf(ρ) ⟹ Fin(C) — so Fin(C) is implied by ⋀_{C'∈M}¬Fin(C')
+    and is droppable. A pure graph property (no language/containment check), so
+    it scales. Generalizes the absorbing-M fold: M absorbing ⟺
+    reachable-from-M == M, which drops every Fin(C∉M); a non-absorbing M still
+    drops the Fin(C) off its reachable cone.
 
-    Returns False (keep the Fin conjuncts) if absorption cannot be established
-    for any reason — the unfolded form is then larger but never unsound.
+    On any move_config failure the result is over-approximated to all configs
+    (so the caller keeps every Fin conjunct) — never unsound, only larger.
     """
-    if not M:
-        return False
+    from collections import deque
+    visited = set(sources)
+    if not visited:
+        return visited
     nletters = casc.num_letters()
-    for c in M:
+    q = deque(visited)
+    while q:
+        c = q.popleft()
         for li in range(nletters):
             try:
                 nc = casc.move_config(c, li)
             except Exception:
-                return False
-            if nc not in M:
-                return False
-    return True
+                return set(casc.all_configs()) | visited
+            if nc not in visited:
+                visited.add(nc)
+                q.append(nc)
+    return visited
 
 
 def build_pruned_config_aut(casc):

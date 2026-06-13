@@ -142,28 +142,40 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
     if trace_on:
         print("[TRACE_ASSEMBLY] good_ms=", [set(m) for m in good_ms])
         print("[TRACE_ASSEMBLY] all_configs=", all_c)
-    # Whole assembly on spot.formula objects (hash-consed DAG sharing): fin_c per
-    # config computed ONCE, reused across Muller terms; stringify only at the end.
-    fin_by_c = {c: fin_c(c, casc) for c in sorted(all_c)}
-    fold_absorbing = os.environ.get("KR_FOLD_ABSORBING_M", "1") != "0"
-    terms_f = []
+    # Per-conjunct Fin fold (default on; KR_FOLD_FIN_REACH=0 restores the full
+    # Muller term). For a good set M, keep Fin(C∉M) only for C reachable from M
+    # in the config graph: a run with Inf⊇M (the ¬Fin(C∈M) conjuncts) has Inf
+    # strongly connected, so any C∈Inf is reachable from M — hence C unreachable
+    # from M is visited finitely and its Fin(C) is implied (config_graph
+    # .configs_reachable_from). Subsumes the absorbing-M fold. We decide kept
+    # configs BEFORE building fin_c — the explosive part of the construction —
+    # so dropped configs cost nothing.
+    fold_fin = os.environ.get("KR_FOLD_FIN_REACH", "1") != "0"
+    specs = []          # (M, kept_not_M, not_M) per good set
+    needed = set()      # configs whose fin_c we actually build
     for Mf in good_ms:
         M = set(Mf)
         not_M = all_c - M
-        # Absorbing-M fold: if M is a terminal SCC of the config graph, the
-        # Fin(C∉M) conjuncts are implied by ⋀_{c∈M}¬Fin(C) and are dropped.
-        drop_fin = fold_absorbing and casc.is_absorbing_config_set(M)
+        if fold_fin:
+            reach_M = casc.configs_reachable_from(M)
+            kept_not_M = {c for c in not_M if c in reach_M}
+        else:
+            kept_not_M = not_M
+        specs.append((M, kept_not_M, not_M))
+        needed |= M
+        needed |= kept_not_M
+    # fin_c per needed config computed ONCE (hash-consed, reused across terms).
+    fin_by_c = {c: fin_c(c, casc) for c in sorted(needed)}
+    terms_f = []
+    for (M, kept_not_M, not_M) in specs:
         if trace_on:
             print(f"[TRACE_ASSEMBLY] for M={M} not_M={not_M} "
-                  f"absorbing={drop_fin}")
+                  f"kept_fin={kept_not_M} dropped_fin={not_M - kept_not_M}")
             for c in M:
                 print(f"[TRACE_ASSEMBLY]   !fin({c}) = {_short_f(_Not(fin_by_c[c]), 200)}")
-            if not drop_fin:
-                for c in not_M:
-                    print(f"[TRACE_ASSEMBLY]   fin({c}) = {_short_f(fin_by_c[c], 200)}")
-        and_parts = [_Not(fin_by_c[c]) for c in M]
-        if not drop_fin:
-            and_parts += [fin_by_c[c] for c in not_M]
+            for c in kept_not_M:
+                print(f"[TRACE_ASSEMBLY]   fin({c}) = {_short_f(fin_by_c[c], 200)}")
+        and_parts = [_Not(fin_by_c[c]) for c in M] + [fin_by_c[c] for c in kept_not_M]
         term_f = _simp_f(_And(*and_parts))
         if trace_on:
             print(f"[TRACE_ASSEMBLY]   term for M = {_short_f(term_f, 200)}")
