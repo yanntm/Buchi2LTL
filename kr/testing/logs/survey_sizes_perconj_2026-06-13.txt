@@ -1,0 +1,91 @@
+=== kr size census (subproc isolated) ===
+path=decompose  fin_reach_fold=on  34 formulas  (construction-only; budget 30s)
+
+  formula                  mp  split      L      DAG           tree  temp     shar   build
+  ----------------------------------------------------------------------------------------
+  true                     B   none(1)    1        1              1     0     1.0x   0.53s
+  false                    B   none(1)    1        1              1     0     1.0x  0.529s
+  a                        B   none(1)    2        1              1     0     1.0x  0.538s
+  Ga                       S   none(1)    1        2              2     1     1.0x  0.533s
+  G(a | b)                 S   none(1)    1       11             21     1     1.9x  0.529s
+  G(a -> X b)              S   none(1)    2      353           3100    79     8.8x  0.571s
+  a & X a                  B   none(1)    3        3              4     0     1.3x  0.536s
+  G(a -> X a)              S   none(1)    3      800        1527930   141  1909.9x  0.628s
+  G(a & X a)               S   none(1)    1        2              2     1     1.0x  0.547s
+  X a                      B   none(1)    3        2              2     0     1.0x  0.536s
+  X X a                    B   none(1)    4        3              3     0     1.0x  0.559s
+  X X X a                  B   none(1)    5        4              4     0     1.0x  0.539s
+  X(a & X a)               B   none(1)    5    23645     1537463151  4134 65022.8x  1.972s
+  Fa                       G   none(1)    1        2              2     1     1.0x  0.531s
+  a U b                    G   none(1)    2        8             13     1     1.6x  0.534s
+  F(a & b)                 G   none(1)    1       11             21     1     1.9x  0.532s
+  F(a & X b)               G   none(1)    2      282           2739    64     9.7x  0.554s
+  a | X b                  B   none(1)    3        4              4     0     1.0x  0.542s
+  Fa | Gb                  O   or(2)      2       12             21     2     1.8x  1.067s
+  Ga | Gb                  S   none(1)    2      257           6438    46    25.1x  0.569s
+  Fa & Gb                  O   none(1)    2       51            159    11     3.1x  0.547s
+  (a U b) | Gc             O   or(2)      3       92            525    18     5.7x  1.092s
+  Ga | Fb                  O   or(2)      2       12             21     2     1.8x   1.07s
+  GFa                      R   none(1)    1       23             55    10     2.4x  0.534s
+  G(a -> F b)              R   none(1)    1       19             48     4     2.5x  0.557s
+  G(a | F b)               R   none(1)    1       19             48     4     2.5x  0.551s
+  GFa & GFb                R   and(2)     3       47            111    20     2.4x  1.089s
+  GFa & GFb & GFc          R   and(3)     5       70            166    30     2.4x  1.606s
+  G(a -> F b) & G(c -> F d) R   and(2)     7       37             95     8     2.6x  1.177s
+  FGa                      P   none(1)    1       14             27     6     1.9x  0.541s
+  F(a & G b)               P   none(1)    1       32            126     7     3.9x  0.545s
+  FGa | FGb                P   none(1)    3    34548 1152921504606846976  6195 33371584595543.8x  2.703s
+  GFa -> GFb               T   none(1)    5      107            776    19     7.3x  0.545s
+  (GFa & FGb)              T   and(2)     4       62            313    17     5.0x  1.082s
+
+=== By MP class (weakest first) ===
+
+-- bottom (B) --
+  true                     split=none(1)   DAG=      1 tree=             1 temporal=   0
+  false                    split=none(1)   DAG=      1 tree=             1 temporal=   0
+  a                        split=none(1)   DAG=      1 tree=             1 temporal=   0
+  X a                      split=none(1)   DAG=      2 tree=             2 temporal=   0
+  a & X a                  split=none(1)   DAG=      3 tree=             4 temporal=   0
+  a | X b                  split=none(1)   DAG=      4 tree=             4 temporal=   0
+  X X a                    split=none(1)   DAG=      3 tree=             3 temporal=   0
+  X X X a                  split=none(1)   DAG=      4 tree=             4 temporal=   0
+  X(a & X a)               split=none(1)   DAG=  23645 tree=    1537463151 temporal=4134
+
+-- safety (S) --
+  Ga                       split=none(1)   DAG=      2 tree=             2 temporal=   1
+  G(a & X a)               split=none(1)   DAG=      2 tree=             2 temporal=   1
+  G(a | b)                 split=none(1)   DAG=     11 tree=            21 temporal=   1
+  Ga | Gb                  split=none(1)   DAG=    257 tree=          6438 temporal=  46
+  G(a -> X b)              split=none(1)   DAG=    353 tree=          3100 temporal=  79
+  G(a -> X a)              split=none(1)   DAG=    800 tree=       1527930 temporal= 141
+
+-- guarantee (G) --
+  Fa                       split=none(1)   DAG=      2 tree=             2 temporal=   1
+  F(a & b)                 split=none(1)   DAG=     11 tree=            21 temporal=   1
+  a U b                    split=none(1)   DAG=      8 tree=            13 temporal=   1
+  F(a & X b)               split=none(1)   DAG=    282 tree=          2739 temporal=  64
+
+-- obligation (O) --
+  Fa | Gb                  split=or(2)     DAG=     12 tree=            21 temporal=   2
+  Ga | Fb                  split=or(2)     DAG=     12 tree=            21 temporal=   2
+  Fa & Gb                  split=none(1)   DAG=     51 tree=           159 temporal=  11
+  (a U b) | Gc             split=or(2)     DAG=     92 tree=           525 temporal=  18
+
+-- recurrence (R) --
+  G(a -> F b)              split=none(1)   DAG=     19 tree=            48 temporal=   4
+  G(a | F b)               split=none(1)   DAG=     19 tree=            48 temporal=   4
+  GFa                      split=none(1)   DAG=     23 tree=            55 temporal=  10
+  GFa & GFb                split=and(2)    DAG=     47 tree=           111 temporal=  20
+  GFa & GFb & GFc          split=and(3)    DAG=     70 tree=           166 temporal=  30
+  G(a -> F b) & G(c -> F d) split=and(2)    DAG=     37 tree=            95 temporal=   8
+
+-- persistence (P) --
+  FGa                      split=none(1)   DAG=     14 tree=            27 temporal=   6
+  F(a & G b)               split=none(1)   DAG=     32 tree=           126 temporal=   7
+  FGa | FGb                split=none(1)   DAG=  34548 tree=1152921504606846976 temporal=6195
+
+-- reactivity (T) --
+  (GFa & FGb)              split=and(2)    DAG=     62 tree=           313 temporal=  17
+  GFa -> GFb               split=none(1)   DAG=    107 tree=           776 temporal=  19
+
+=== Totals over 34 built cases: DAG nodes=60537, distinct temporals=10823 ===
