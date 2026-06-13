@@ -32,6 +32,7 @@ from .reachability import (
     fin_c,
 )
 from .reachability_operators import TRACE_ON  # for KR_TRACE=1 dev traces of inductive construction
+from .decompose_recombine import reconstruct_decomposed, split_report
 
 __all__ = [
     "Cascade",
@@ -46,6 +47,8 @@ __all__ = [
     "extract_generators",
     "ExtractionError",
     "is_deterministic",
+    "reconstruct_decomposed",
+    "split_report",
     "reconstruct_bls",
     "reconstruct_ltl_paper_style",
     "reconstruct_ltl_str",

@@ -66,19 +66,29 @@ under a small subprocess budget (a stall is reported, never waited on).
 - `reachability.py` — `reconstruct_ltl_paper_style`: good-Muller-set DNF assembly of
   ¬Fin/Fin conjunctions. `reconstruct_bls` is the public per-cascade entry (the
   Boker-Lehtinen-Sickert construction; thin wrapper over the assembly).
+- `decompose_recombine.py` — **recommended top-level entry** `reconstruct_decomposed(aut)`:
+  root decompose-and-recombine over the BLS construction. Splits the deterministic
+  acceptance condition (AND by acceptance set / OR by strength), runs `reconstruct_bls`
+  on each acceptance-trivial piece, recombines with ⋀/⋁. Orthogonal to the core;
+  collapses the recurrence/mixed-strength census walls. See STATUS + TODO P1.
 - `gap_bridge.py`, `extract.py`, `gap/parse.py`, `bdd_utils.py` — decomposition
   pipeline and buddy-BDD stability.
 
 ## Usage
 
 ```python
-from kr import decompose_aut, reconstruct_bls
+from kr import reconstruct_decomposed
 import spot
 
-aut = spot.formula("Fa").translate()
-casc = decompose_aut(aut)
-print(casc)                 # summary + levels
-print(reconstruct_bls(casc))   # Boker-Lehtinen-Sickert construction
+# Recommended top-level entry: automaton in, LTL formula DAG out.
+aut = spot.formula("GFa & GFb").translate()
+print(reconstruct_decomposed(aut))   # root decompose-and-recombine over BLS
+
+# Lower-level, per-cascade: decompose then run the BLS construction directly.
+from kr import decompose_aut, reconstruct_bls
+casc = decompose_aut(spot.formula("Fa").translate())
+print(casc)                          # summary + levels
+print(reconstruct_bls(casc))         # Boker-Lehtinen-Sickert construction
 ```
 
 ## Dependencies
