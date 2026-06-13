@@ -7,7 +7,11 @@
 - `paper/Automata2LTL.txt` — ground truth for any formula-fidelity question
   (Sec 4.2 + Table 1 + Formulas 3/4/5 ≈ lines 440–1040). LLM summaries have twice
   introduced guard/case errors; the paper text settles disputes.
-- `buchi2ltl/` is the separate heuristic path — never mix with kr/.
+- `buchi2ltl/` is the separate heuristic path (backward labeling + f2/t2 SCC
+  heuristics). The paper construction is now stable, so it is WIRED INTO the kr
+  decompose dispatcher as a sound pre-filter gate — but ONLY through the single
+  seam `kr/heuristic_gate.py` (tried per node in `decompose_recombine`); the kr
+  core operators stay pure and import nothing from `buchi2ltl/`.
 
 ## Discipline (mandatory)
 - One file per commit (logical moves excepted); no commit without explicit user approval.
