@@ -115,39 +115,40 @@ fold pass → interning). Items below are the actionable queue.
   Σ₁/Π₁ (looping), Π₂/Σ₂ (Büchi/coBüchi), Δ₁ (weak end_in(G)) forms
   replace the Fin web for the matching input classes and keep outputs in
   the right hierarchy class. Candidate next major iteration.
-- **Decompose-and-recombine at the root — the implementable form of the
-  acceptance dispatch (NEXT, 2026-06-13).** Sound because kr is
-  language-faithful and a ROOT operator is a pure position-0 language op (no
-  temporal-placement / acceptance-coupling caveats — contrast the P4 internal
-  injection): `L(A)=⋃L(Aᵢ) ⟹ ⋁ kr(Aᵢ) ≡ L(A)`, and dually
-  `L(A)=⋂L(Aᵢ) ⟹ ⋀ kr(Aᵢ) ≡ L(A)`. Two splits, both run the EXISTING kr on
-  acceptance-trivial pieces (Fin web → singleton good-set per piece) and
-  recombine:
-  - **OR-decompose by STRENGTH** (Spot strength decomposition: weak / terminal
-    / strong sub-automata whose union is language-equivalent — Renkin &
-    Duret-Lutz, "decomposition of automata by strength"). Targets
-    disjunctive / mixed-strength: `Ga|Fb`, `FGa|FGb`, `(aUb)|Gc`.
-  - **AND-decompose by ACCEPTANCE SET** (generalized Büchi accepts iff it
-    visits every mark i.o.: `L(A)=⋂ᵢ L(A|only Sᵢ)`, each piece single-Büchi).
-    Targets conjunctive recurrence the union split can't (it's a product, not
-    a union): `GFa&GFb`, `(GFa&FGb)`.
-  This hoists the Muller disjunction/conjunction OUT of the Fin web up to the
-  root, instead of hand-coding the §9.3 Σ/Π/Δ forms above — cleaner, reuses
-  all of kr, composes with the P0 folds. SCOPE: attacks the ACCEPTANCE-driven
-  census (the reactivity/recurrence/persistence wall); does NOT help the
-  REACH/cascade-driven census (`G(a->Xb)` is pure safety, decomposes to ONE
-  piece, census 79 unchanged — that is the P0 fold/simplify job; right
-  division of labor). OPEN CHECKS before committing to it: (1) pin the exact
-  Spot strength-decomposition API and confirm the union is language-exact on
-  our normalized det parity D (not just on Büchi); (2) probe that kr on a
-  single-Büchi / single-strength piece actually yields a small census — split
-  `GFa&GFb` into its two single-Büchi pieces and compare total recombined
-  census vs the monolithic 9.1×10¹⁶-tree baseline; (3) decide where the split
-  lives (a front-end wrapper over decompose_aut + reconstruct, mirroring the
-  reverted invariant-peel front-end shape, with OR/AND assembly of the per-
-  piece DAGs). Lineage: this is the same root-soundness that makes `φ ∧ kr`
-  sound when the INITIAL state carries an arbitrary φ (position-0 assertion =
-  root conjunction); decomposition is that observation applied to ⋃/⋂.
+- **Decompose-and-recombine at the root — LANDED + now the goto path
+  (2026-06-13, `kr/decompose_recombine.py`; numbers in STATUS).** Both splits
+  implemented and validated; `reconstruct_decomposed(aut)` is the survey default
+  (`KR_DECOMPOSE=1`). Sound because kr is language-faithful and a ROOT operator
+  is a pure position-0 language op: `L(A)=⋃L(Aᵢ) ⟹ ⋁ kr(Aᵢ)` / `⋂ ⟹ ⋀`.
+  - ~~**OR-decompose by STRENGTH**~~ DONE (`decompose_scc` w/t/s, union =
+    language; Renault TACAS'13): `Ga|Fb` 499→21 tree (True), `(aUb)|Gc`
+    6.97M→637 (True flipped from UNVERIFIED).
+  - ~~**AND-decompose by ACCEPTANCE SET**~~ DONE (`top_conjuncts()` on the det
+    acceptance; determinism makes `acc=⋀cᵢ ⟹ L=⋂L(A|cᵢ)` exact): `GFa&GFb`
+    9.08e16→111 (True flipped), `(GFa&FGb)` 2⁶⁰→True, `GFa&GFb&GFc` unbuildable
+    →compositional SOUND, `G(a->Fb)&G(c->Fd)` True at L=7.
+  - Open-checks resolved: (1) the conjunctive form is `translate/postprocess`
+    deterministic-GENERIC (not parity); split BEFORE parity normalization.
+    (2) per-piece census is small (each single-Büchi piece ~10 temporals).
+    (3) front-end wrapper `_to_split_form`→dispatch→`⋀`/`⋁`. NEW finding: kr's
+    census is acutely state-count-sensitive, so `_to_split_form` must
+    `sat_minimize` the det automaton (AUTOMATON-only — `GFa&FGb` 2-state
+    postprocess explodes to 9.5e15, 1-state sat_minimize → 313).
+  Remaining work:
+  - **export from `kr/__init__.py`** + make `reconstruct_decomposed` the
+    documented top-level entry (separate one-file commit).
+  - **acceptance ABSORPTION** blocks both splits when Spot's determinization
+    folds a second component into one set/strength: `GFa&Gb` (recurrence ∧
+    safety → single `Inf(0)`, `none`, stays 89 temporals over cap) and
+    `FGa|FGb` (persistence union → single co-Büchi, `none`, 2⁶⁰). Need a way
+    to expose the absorbed component as a separate conjunct/strength, or a
+    different split basis for these.
+  - **n≥3 verification**: the recombined `⋀` trips Spot's 32-acc cap; the
+    compositional check (`kr(pieceᵢ)≡L(pieceᵢ)`) is the sound witness — wire it
+    into the survey as the verdict for over-cap recombinations (currently only
+    in `probe_and_decompose`).
+  Lineage: same root-soundness that makes `φ ∧ kr` sound when the INITIAL state
+  carries an arbitrary φ; decomposition is that applied to ⋃/⋂.
 - π-preimage exactness in the non-primary paths: `accepting_configs` and the
   config_graph fallbacks still map states through the lift only (the primary
   pruned-config-aut path is already correct via `state_of` = π). With covers
