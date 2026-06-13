@@ -373,6 +373,12 @@ class Cascade:
         from . import config_graph as _cg
         return _cg.build_pruned_config_aut(self)
 
+    def is_absorbing_config_set(self, M) -> bool:
+        """True iff M is absorbing (terminal) in the config graph.
+        See config_graph.is_absorbing_config_set."""
+        from . import config_graph as _cg
+        return _cg.is_absorbing_config_set(self, M)
+
     def compute_good_muller_sets(self):
         """Good Muller sets M on configs (strongly-connected accepting subsets of
         non-rejecting SCCs of the pruned config aut, with basin / state-SCC

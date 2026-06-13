@@ -120,6 +120,38 @@ def reachable_configs(casc) -> list:
     return sorted(list(visited))
 
 
+def is_absorbing_config_set(casc, M) -> bool:
+    """True iff the config set M is absorbing (terminal) in the config graph:
+    every letter from every config in M leads back into M (no edge leaves M).
+
+    Used by the Muller-DNF assembly to fold an absorbing good set: the term
+    ⋀_{C∈M}¬Fin(C) ∧ ⋀_{C∉M}Fin(C) collapses to ⋀_{C∈M}¬Fin(C). Visiting all
+    of M i.o. (the ¬Fin conjuncts) entails the run is trapped in M — once any
+    state of an absorbing M is visited it can never leave — so every config
+    outside M is visited only finitely and the Fin(C∉M) conjuncts are implied.
+    A pure graph property (no language/containment check), so it scales; good
+    Muller sets are reachable and strongly connected, so absorbing here means
+    M is a bottom SCC of the pruned config automaton. Sound per Muller term:
+    nested strongly-connected absorbing sets cannot co-occur (an edge from the
+    smaller to the larger would break absorption), so terms fold independently.
+
+    Returns False (keep the Fin conjuncts) if absorption cannot be established
+    for any reason — the unfolded form is then larger but never unsound.
+    """
+    if not M:
+        return False
+    nletters = casc.num_letters()
+    for c in M:
+        for li in range(nletters):
+            try:
+                nc = casc.move_config(c, li)
+            except Exception:
+                return False
+            if nc not in M:
+                return False
+    return True
+
+
 def build_pruned_config_aut(casc):
     """Return a Spot twa_graph on reachable configs only, with transitions and
     acc marks lifted from the corresponding transitions in the normalized D

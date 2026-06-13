@@ -145,17 +145,25 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
     # Whole assembly on spot.formula objects (hash-consed DAG sharing): fin_c per
     # config computed ONCE, reused across Muller terms; stringify only at the end.
     fin_by_c = {c: fin_c(c, casc) for c in sorted(all_c)}
+    fold_absorbing = os.environ.get("KR_FOLD_ABSORBING_M", "1") != "0"
     terms_f = []
     for Mf in good_ms:
         M = set(Mf)
         not_M = all_c - M
+        # Absorbing-M fold: if M is a terminal SCC of the config graph, the
+        # Fin(C∉M) conjuncts are implied by ⋀_{c∈M}¬Fin(C) and are dropped.
+        drop_fin = fold_absorbing and casc.is_absorbing_config_set(M)
         if trace_on:
-            print(f"[TRACE_ASSEMBLY] for M={M} not_M={not_M}")
+            print(f"[TRACE_ASSEMBLY] for M={M} not_M={not_M} "
+                  f"absorbing={drop_fin}")
             for c in M:
                 print(f"[TRACE_ASSEMBLY]   !fin({c}) = {_short_f(_Not(fin_by_c[c]), 200)}")
-            for c in not_M:
-                print(f"[TRACE_ASSEMBLY]   fin({c}) = {_short_f(fin_by_c[c], 200)}")
-        and_parts = [_Not(fin_by_c[c]) for c in M] + [fin_by_c[c] for c in not_M]
+            if not drop_fin:
+                for c in not_M:
+                    print(f"[TRACE_ASSEMBLY]   fin({c}) = {_short_f(fin_by_c[c], 200)}")
+        and_parts = [_Not(fin_by_c[c]) for c in M]
+        if not drop_fin:
+            and_parts += [fin_by_c[c] for c in not_M]
         term_f = _simp_f(_And(*and_parts))
         if trace_on:
             print(f"[TRACE_ASSEMBLY]   term for M = {_short_f(term_f, 200)}")
