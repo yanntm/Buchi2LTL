@@ -283,8 +283,30 @@ unfolding that DAG.
   decomposition). Totals over 35 cases DAG 47498→28207, distinct temporals
   8491→5066 (both −40%). Survey (`logs/survey_wire_cobuchi_2026-06-13`): 0/35
   equiv=FALSE, the ONLY verdict change is `FGa|FGb`'s UNVERIFIED tree shrinking;
-  audit CLEAN. NEXT: looping/weak (`reach_to`, NO Fin) for safety/guarantee/
-  obligation.
+  audit CLEAN.
+- **Acceptance dispatch — weak/looping (Δ₁/Σ₁/Π₁) WIRED but OFF by default
+  (2026-06-13, `KR_DISPATCH_WEAK`, the experimental A/B baseline).**
+  `reconstruct_weak(casc)` = `⋁ over accepting SCC G : end_in(G)`, with
+  `end_in(G) = (⋁_{C∈H} reach_to(ι,C)) ∧ (⋀_{C'∈G'} ¬reach_to(ι,C'))` — pure
+  `reach_to` (`reach_strong(ι,C,⊥,C,⊤)`), NO Fin; subsumes looping-Büchi (safety
+  `⋀¬reach_to(sink)`) and looping-coBüchi (guarantee `⋁reach_to(sink)`). Gate
+  `is_weak_cascade` = `is_weak_automaton(postprocess(.,"generic"))` (clean: all
+  weak cases T, GFa/FGa/G(p->(qUr)) declined). Placed BEFORE Büchi/coBüchi (weak
+  languages are Büchi AND coBüchi recognisable, so those would claim them first);
+  fires only when the flag is set. Correct: flag-on survey
+  (`logs/survey_weak_flagon_2026-06-13`) 0/35 equiv=FALSE. **But it is a SIZE
+  REGRESSION and is therefore kept OFF** — `probe_weak_dispatch` /
+  `probe_looping_dispatch` (both committed): the general form is worse on 6/7
+  cases; dedicated looping is mixed (2 wins `Ga|Gb` 18→14, `F(a&Xb)` 40→30; 3
+  losses `G(a->Xa)` tree 703→6263, `G(a->Xb)` 23→30, `a U b` 1→3). Root cause:
+  weak languages are already handled smaller by Büchi/coBüchi, and the residual
+  on these cases is **reach-driven** (the τ-tail), which NO acceptance form
+  touches — looping merely swaps the Fin-web for `reach_to`, paying the same
+  cascade depth. Kept in (flagged off) as the A/B baseline for the next idea: a
+  config-indexed **`Acc(c)`** weak-class construction (the previously-rejected
+  POC that collapsed exactly this fragment — `Xa&XXa`→4 — now scoped behind the
+  clean `is_weak` gate; candidate to crack the `X(a&Xa)` reach wall). NEXT:
+  prototype that.
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call

@@ -80,8 +80,12 @@ under a small subprocess budget (a stall is reported, never waited on).
   use them; α readers are cover-aware (`config_graph.buchi_accepting_configs` /
   `cobuchi_finite_configs`). The coBüchi gate recovers the natural acceptance via
   `postprocess(.,"generic")` (the parity step hides `Fin(0)` as `Inf(0)|Fin(1)`).
-  `G(p->(qUr))` 84→14 temporals; persistence totals −40%. looping/weak are TODO P1
-  (the active front — see STATUS + TODO P1).
+  `G(p->(qUr))` 84→14 temporals; persistence totals −40%. The weak/looping
+  (Δ₁/Σ₁/Π₁) form `reconstruct_weak` (pure `reach_to`, no Fin) is also wired but
+  **OFF by default** (`KR_DISPATCH_WEAK`): correct, but a size regression — weak
+  languages are already smaller under Büchi/coBüchi and the residual is
+  reach-driven. The active front is a config-indexed `Acc(c)` weak-class
+  construction (see STATUS + TODO P1).
 - `gap_bridge.py`, `extract.py`, `gap/parse.py`, `bdd_utils.py` — decomposition
   pipeline and buddy-BDD stability.
 

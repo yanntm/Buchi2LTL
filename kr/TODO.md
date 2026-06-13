@@ -161,8 +161,29 @@ fold pass → interning). Items below are the actionable queue.
     UNVERIFIED — the residual is reach-driven) / reactivity `(GFa&FGb)` 10→7
     (its persistence AND-piece dispatches); totals −40%. Survey 0/35 FALSE, only
     `FGa|FGb`'s UNVERIFIED size changed; audit CLEAN. Numbers + logs in STATUS.
-  - **NEXT: looping/weak** (`reach_to`, no Fin at all) for safety/guarantee/
-    obligation — `reach_to(ι,C)` = `reach_strong(ι,…,C,…)`, already have it.
+  - ~~**looping/weak (Δ₁/Σ₁/Π₁)**~~ **WIRED but OFF by default — 2026-06-13
+    (`KR_DISPATCH_WEAK`).** `reconstruct_weak` = `⋁_G end_in(G)` (pure `reach_to`,
+    no Fin; subsumes looping safety `⋀¬reach_to(sink)` / guarantee
+    `⋁reach_to(sink)`), gate `is_weak_automaton(postprocess(.,"generic"))`, placed
+    BEFORE Büchi/coBüchi (which else claim weak langs first). Correct (flag-on
+    survey 0/35 FALSE) but a SIZE REGRESSION, so kept OFF: probes
+    (`probe_weak_dispatch`, `probe_looping_dispatch`) show general worse 6/7,
+    dedicated looping mixed (2 wins / 3 losses). The residual on weak cases is
+    REACH-driven (τ-tail), which no acceptance form touches — looping just swaps
+    the Fin-web for `reach_to` at the same cascade depth. Kept in as the A/B
+    baseline for the Acc(c) idea below.
+- **NEW ACTIVE FRONT — config-indexed `Acc(c)` for the weak class (the better
+  way to handle weak automata; resume here).** The reach τ-tail is irreducible
+  *within* the cascade reach machinery, so weak automata need a construction that
+  bypasses `reach_to` entirely. The previously-rejected `Acc(c)` POC collapsed
+  exactly this fragment (`Xa&XXa`→4 nodes, `Xa&XXXa`→5, equiv True) — rejected
+  then as "off-thesis: safety-fragment-only, Spot ⊤/⊥ oracle, case-split". That
+  "safety-only" limit is now a FEATURE: scope it behind the validated
+  `is_weak_cascade` gate as the weak-class specialist, A/B'd against
+  `KR_DISPATCH_WEAK`. Highest upside: candidate to crack the `X(a&Xa)` reach wall
+  (1.5×10⁹, weak). See `kr/dag_folding.md` "Key-space diagnosis" for the POC
+  history. Alternatives if it stalls: state-elimination (buchi2ltl) for weak
+  inputs; exploit weakness to shrink the holonomy depth.
 - **Decompose-and-recombine at the root — LANDED + now the goto path
   (2026-06-13, `kr/decompose_recombine.py`; numbers in STATUS).** Both splits
   implemented and validated; `reconstruct_decomposed(aut)` is the survey default
