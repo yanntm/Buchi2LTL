@@ -37,6 +37,7 @@ from typing import Callable, List, Tuple
 import spot
 
 from .gap_bridge import decompose_aut
+from .heuristic_gate import try_heuristic_gate
 from .reachability import reconstruct_ltl_paper_style
 
 __all__ = ["reconstruct_decomposed", "split_report"]
@@ -115,6 +116,15 @@ def _base(aut, reconstruct, decompose_kwargs) -> "spot.formula":
 
 
 def _dispatch(aut, reconstruct, decompose_kwargs, depth, max_depth) -> "spot.formula":
+    # buchi2ltl heuristic gate, tried FIRST at every node (top + each piece):
+    # a tiny heuristic formula short-circuits the cascade. Declining nodes still
+    # split below, so the heuristic also sees the pieces — the whole point of
+    # combining it WITH decomposition. SOUND by composition: Spot makes the node
+    # a TGBA (language-preserving) and buchi2ltl is sound-by-construction
+    # (kr/heuristic_gate.py). Gate KR_GATE_BUCHI2LTL (default ON).
+    phi = try_heuristic_gate(aut)
+    if phi is not None:
+        return phi
     if depth < max_depth:
         and_p = _and_pieces(aut)
         if and_p:
@@ -150,6 +160,14 @@ def reconstruct_decomposed(
     Falls through to the monolithic kr when no split applies.
     """
     decompose_kwargs = dict(gap_cmd=gap_cmd, timeout=timeout, max_aps=max_aps)
+    # Heuristic gate on the RAW input first: buchi2ltl's backward-labeling
+    # heuristics exploit the (often nondeterministic) translate-style TGBA
+    # structure, which `_to_split_form`'s determinization destroys — e.g.
+    # determinized coBüchi (FGa|FGb) defeats the heuristic, while the raw form
+    # does not. Sound: the gate verifies are_equivalent against this same `aut`.
+    phi = try_heuristic_gate(aut)
+    if phi is not None:
+        return phi
     det = _to_split_form(aut)
     return _dispatch(det, reconstruct, decompose_kwargs, 0, max_depth)
 
