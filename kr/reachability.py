@@ -121,6 +121,15 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
         phi = reconstruct_buchi(casc)
         if phi is not None:
             return phi
+    # coBüchi (persistence, Σ₂): tried AFTER Büchi, so it only sees
+    # genuinely-not-Büchi cascades. φ = ⋀_{C∈α}Fin(C); gate recovers the natural
+    # acceptance (the parity step hides coBüchi as Inf(0)|Fin(1)). Gate
+    # KR_DISPATCH_COBUCHI, default ON.
+    if os.environ.get("KR_DISPATCH_COBUCHI", "1") != "0":
+        from .acceptance_dispatch import reconstruct_cobuchi
+        phi = reconstruct_cobuchi(casc)
+        if phi is not None:
+            return phi
     # reset counters owned by reachability_operators
     import kr.reachability_operators as _ops
     _ops.PAPER_REACH_CALLS = 0
