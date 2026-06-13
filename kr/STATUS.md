@@ -260,8 +260,31 @@ unfolding that DAG.
     byte-identical (clean fallback). **Survey
     (`logs/survey_wire_buchi_2026-06-13`): 0/35 equiv=FALSE, four walls flipped to
     True (`G(p->(qUr))`, `F(a&Xb)`, `G(a->Xa)`, `GFa&GFb&GFc`), zero regressions;
-    audit CLEAN.** NEXT: coBüchi (`⋀Fin(C)`, `Σ₂`) for the persistence walls
-    (`FGa|FGb`), then looping/weak (`reach_to`, no Fin).
+    audit CLEAN.**
+- **Acceptance dispatch — coBüchi class WIRED (2026-06-13), the mirror of Büchi.**
+  `reconstruct_cobuchi(casc)`: a deterministic **coBüchi** (persistence, `Σ₂`)
+  cascade gets `φ := ⋀_{C∈α} Fin(C)` (α = the "visit finitely"/marked configs) —
+  exact, since coBüchi acceptance is `Inf(ρ)∩Marked=∅` ≡ `⋀ Fin(C)` (a transient
+  marked C ⇒ `Fin`≡true, harmless). Wired as a SECOND pre-check after Büchi in
+  `reconstruct_ltl_paper_style` (gate `KR_DISPATCH_COBUCHI`, default ON), so it
+  only sees genuinely-not-Büchi cascades. α = `config_graph.cobuchi_finite_configs`
+  — the cover-aware DUAL of the Büchi reader (configs whose lifted marks make
+  `g.acc()` REJECT). **GATE SUBTLETY (the crux, found UNDER decomposition — the
+  raw `decompose_aut` view is misleading):** `decompose_aut`'s parity step turns
+  the natural `Fin(0)` into `Inf(0)|Fin(1)`, on which `acc().is_co_buchi()` is
+  False; the gate recovers the natural acceptance via
+  `postprocess(.,"deterministic","generic")` and tests `is_co_buchi` there. The
+  `postprocess(.,"coBuchi")` variant is UNSOUND — a recurrence cascade (`GFa`)
+  passes it. **Results (`logs/sizes_dispatch_cobuchi_2026-06-13` vs the Büchi-only
+  `..._on_...`, decompose path):** `FGa` 6→3 temporals, `F(a&Gb)` 7→4, `FGa|FGb`
+  **6195→2779** (tree 1.15×10¹⁸→3.23×10¹⁷ — census >½ off, still over the flatten
+  gate so UNVERIFIED, the residual is reach-driven not acceptance-driven), and the
+  reactivity `(GFa&FGb)` 10→7 (its `FGb` AND-piece dispatches — composes with
+  decomposition). Totals over 35 cases DAG 47498→28207, distinct temporals
+  8491→5066 (both −40%). Survey (`logs/survey_wire_cobuchi_2026-06-13`): 0/35
+  equiv=FALSE, the ONLY verdict change is `FGa|FGb`'s UNVERIFIED tree shrinking;
+  audit CLEAN. NEXT: looping/weak (`reach_to`, NO Fin) for safety/guarantee/
+  obligation.
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call

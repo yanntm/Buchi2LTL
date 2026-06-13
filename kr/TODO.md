@@ -147,12 +147,21 @@ fold pass → interning). Items below are the actionable queue.
     reader fixed it. Gates: audit CLEAN, survey 0/35 FALSE / four walls flipped
     True / zero regressions, size A/B `G(p->(qUr))` 84→14 temporals (totals −22%,
     tractable-cases −61%); numbers + logs in STATUS. ~~Cover caveat~~ RESOLVED.
-  - **NEXT: coBüchi (`Σ₂`)** `⋀_{C∈α}Fin(C)` for persistence: attacks the
-    `FGa|FGb` wall (2⁶⁰) and `FGa`. Same module, mirror of Büchi
-    (`acc().is_co_buchi()`; α = configs to be visited finitely). The wiring hook
-    and the cover-aware α reader are already in place — coBüchi adds the
-    `is_co_buchi` branch and the `⋀Fin` assembly.
-  - **THEN looping/weak** (`reach_to`, no Fin at all) for safety/guarantee/
+  - ~~**coBüchi (`Σ₂`)**~~ **WIRED — 2026-06-13.** `reconstruct_cobuchi(casc)` =
+    `⋀_{C∈α}Fin(C)` (α = `config_graph.cobuchi_finite_configs`, the cover-aware
+    DUAL of the Büchi reader), as a SECOND pre-check after Büchi in
+    `reconstruct_ltl_paper_style` (gate `KR_DISPATCH_COBUCHI`, default ON). **GATE
+    is the crux:** Spot's parity step hides coBüchi as `Inf(0)|Fin(1)`
+    (`is_co_buchi()` False), so the gate recovers the natural acceptance via
+    `postprocess(.,"generic")` and tests `is_co_buchi` there — and this MUST be
+    measured UNDER decomposition (the raw `decompose_aut` view both misleads on
+    the gate and overstates size: sat_minimize ~halves `FGa|FGb`). The
+    `postprocess(.,"coBuchi")` gate is UNSOUND (GFa passes it). Results: `FGa`
+    6→3 / `F(a&Gb)` 7→4 / **`FGa|FGb` 6195→2779 temporals** (still over the cap,
+    UNVERIFIED — the residual is reach-driven) / reactivity `(GFa&FGb)` 10→7
+    (its persistence AND-piece dispatches); totals −40%. Survey 0/35 FALSE, only
+    `FGa|FGb`'s UNVERIFIED size changed; audit CLEAN. Numbers + logs in STATUS.
+  - **NEXT: looping/weak** (`reach_to`, no Fin at all) for safety/guarantee/
     obligation — `reach_to(ι,C)` = `reach_strong(ι,…,C,…)`, already have it.
 - **Decompose-and-recombine at the root — LANDED + now the goto path
   (2026-06-13, `kr/decompose_recombine.py`; numbers in STATUS).** Both splits
