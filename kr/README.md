@@ -123,8 +123,14 @@ no `python -c` one-liners.
   behind the tails-drive-the-explosion finding).
 - `probe_case_diff.py` — containment + witness for one full roundtrip when the
   flat formula cannot ride argv (in-process build, diff child via stdin).
-- `measure_formula_dag.py` — DAG vs flat-string size of the assembled formula
-  (`--no-str` for cases whose flat form is 100MB+).
+- `measure_formula_dag.py` — DAG vs flat-string size of ONE assembled formula
+  via the monolithic `reconstruct_ltl_paper_style` (`--no-str` for cases whose
+  flat form is 100MB+).
+- `survey_sizes.py` — size census across the MP ladder on the GOTO
+  **decompose** path (`reconstruct_decomposed`): DAG/tree nodes, distinct
+  temporals, sharing, build time. `KR_SIZE_PATH=monolithic` and
+  `KR_FOLD_ABSORBING_M=0` give A/B baselines. Construction-only, subprocess
+  isolated, `KR_CONSTRUCT_TIMEOUT` budget.
 - `probe_sgpdec_api.g` — hand-run GAP ground truth for the SgpDec bridge calls.
 - `test_kr_basic.py` — normal-path smoke test (isolated per-case subprocesses).
 - `logs/` — committed baseline size censuses (before/after reference for fold work).
