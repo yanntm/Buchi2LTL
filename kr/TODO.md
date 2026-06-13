@@ -136,3 +136,51 @@ fold pass → interning). Items below are the actionable queue.
   DAG-vs-tree table in STATUS is the seed of the empirical argument).
 - Finite-word variant (weak next in wsolid, construction-ref §10) — stretch.
 - Counter-free verification for external HOA inputs (GAP IsAperiodic) — stretch.
+
+## P4 — heuristic/kr mixin via suffix-formula injection (LOW PRIO, deferred)
+
+Revisit only once the main census-wall path (P0 folds + P1 acceptance
+dispatch) is stable. The idea: hand a hard component to a heuristic that
+returns a formula φ_q labeling a state q of the original aut, then splice φ_q
+into the kr reconstruction at the precise time points where the construction
+"enters" q (config c with `state_of(c)=π(c)=q`; the config↔state map is the
+traceability bridge — `state_of`/`state_to_config` already exist). Cleanest
+realization: STUB q to terminal-accepting (its sub-automaton reduces to True,
+the cascade handles the trivial residual) and conjoin φ_q once at the
+`reach_strong(c,…)` arrival, UNDER the arriving X.
+
+Conclusions from the 2026-06-13 exploration (what kinds of φ / side effects
+work, and why — keep these; the exploratory code was reverted):
+
+- The augmented language is `L(A) ∩ L(G(at_q → φ))`, `at_q` a deterministic
+  state predicate. Always ω-regular; the question is whether kr can inject φ
+  WITHOUT paying an exponential.
+- kr has NO localized "language-from-q" subterm Ψ_q — it characterises
+  acceptance globally (Muller DNF over i.o. config sets + reach/Fin). So
+  "AND φ on top of what kr asserts at q" is well-defined as a LOCAL edit only
+  where q's contribution collapses to one point: a terminal stub (Ψ_q=True)
+  or a single transient (Fin) arrival. (Contrast: compositional
+  state-elimination / the buchi2ltl backward labeling DO have L(q), so their
+  `scc_fragments` splice is trivial — `buchi2ltl/reconstruction.py`.)
+- SOUND + cheap to inject locally  ⟺  φ is ACCEPTANCE-NEUTRAL at q:
+  * safety/invariant φ (small deterministic monitor; the extreme case is
+    G(inv), a 1-state monitor) — does not perturb the Muller condition; only
+    the loop encoding must be un-fused to expose the per-visit hook
+    `G(at_q_letter → φ ∧ …)` (a size cost, NO exponential);
+  * terminal stub — q stops participating in acceptance, so φ is asserted
+    once at the single arrival.
+- NOT a free lunch for LIVENESS φ at a RECURRENT q: the correct meaning
+  `G(at_q → φ)` changes the acceptance question, forcing the product A×B_φ and
+  re-derivation of the Muller condition. The exponential reappears in the
+  product's recurrent structure — kr pays for acceptance, and renaming the
+  liveness as "a formula on q" does not move it out of the Muller machinery.
+
+Concrete from the attempt (reverted, recorded here): per-state downstream
+invariants are computable by live-edge constancy on the aut (skip sinks =
+states not co-reachable to an accepting SCC), validated against a semantic
+oracle (`L` restarted at q ⊨ G(inv_q)); `a & XGb` is caught at the post-a
+state (init has none). The GLOBAL front-end peel (project a forced literal
+out of the input aut, run the chain, recombine `& G(inv)`; `Fa & Gb` 12→2
+census, equiv=True) was DROPPED on purpose — it is the "poor man's" degenerate
+case (init-config invariant only) and not the direction we want; per-config
+injection above subsumes it when/if pursued.
