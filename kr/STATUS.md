@@ -274,6 +274,23 @@ of subformulas, which hash-consing does not shrink. Verification must come
 from word sampling / compositional grounding (TODO P0), or from folding the
 eventuality count itself below the cap.
 
+**Next planned direction: decompose-and-recombine at the root (TODO P1,
+2026-06-13).** A session-long theory thread established that ROOT-level
+language operations recombine kr outputs soundly with no caveats (kr is
+language-faithful, and a root operator is a pure position-0 language op —
+none of the temporal-placement / acceptance-coupling problems of internal
+injection apply, see P4 note): `L(A)=⋃L(Aᵢ) ⟹ ⋁ kr(Aᵢ) ≡ L(A)` and dually
+`L(A)=⋂L(Aᵢ) ⟹ ⋀ kr(Aᵢ) ≡ L(A)`. So split the automaton into
+acceptance-trivial pieces, reconstruct each with the EXISTING kr (Fin web
+collapses to a singleton good-set per piece), and OR/AND back. This is the
+implementable form of the P1 acceptance dispatch — it hoists the Muller
+disjunction/conjunction out of the Fin web up to the root instead of
+hand-coding the §9.3 Σ/Π/Δ forms. Attacks the ACCEPTANCE-driven census
+(the reactivity/recurrence/persistence wall — `GFa&GFb`, `FGa|FGb`,
+`(GFa&FGb)`); orthogonal to the REACH/cascade-driven census (`G(a->Xb)` is
+pure safety, one piece, census 79 unchanged — that stays the P0 fold job).
+Not yet started; full plan + open checks in TODO P1.
+
 ## Tooling for targeted work
 
 All under `kr/testing/` (placed scripts only; subprocess isolation; small
