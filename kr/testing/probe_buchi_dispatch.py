@@ -34,7 +34,7 @@ CASES = [
 
 def run_case(fs: str) -> dict:
     child = f'''
-import sys, json, traceback
+import os, sys, json, traceback
 from pathlib import Path
 sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
@@ -63,7 +63,12 @@ try:
     info["dispatched"] = bf is not None
     if bf is not None:
         info["buchi_size"] = sizes(bf)
+        # Muller baseline: the dispatch is now WIRED as a pre-check in
+        # reconstruct_ltl_paper_style, so reconstruct_bls would itself dispatch;
+        # force the pure Muller form for the A/B with KR_DISPATCH_BUCHI=0.
+        os.environ["KR_DISPATCH_BUCHI"] = "0"
         info["muller_size"] = sizes(reconstruct_bls(casc))
+        os.environ.pop("KR_DISPATCH_BUCHI", None)
         orig = spot.formula(fs).translate("Buchi")
         info["equiv_orig"] = bool(spot.are_equivalent(orig, bf.translate("Buchi")))
 except Exception as e:
