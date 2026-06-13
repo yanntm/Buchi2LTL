@@ -192,11 +192,27 @@ fold pass → interning). Items below are the actionable queue.
     splicing BLS/dispatch only at the recurrent configs (`Acc(c) = BLS-from-c`
     there), extending Acc past the pure-bounded class. Mind the cover/state-vs-config
     map when splicing (cf. the Büchi cover caveat).
-- **Last MP-survey wall: `FGa|FGb`** (persistence-union absorption — recurrent,
-  coBüchi, 2779 temporals over the 32-acc cap; decomposition can't split it,
-  Acc declines). The only non-True case left in the survey. Reach-driven within
-  the coBüchi class; needs either the absorption fix (TODO P1 decompose) or a
-  coBüchi-side analogue of the Acc bounded collapse.
+- ~~**Last MP-survey wall: `FGa|FGb`**~~ **CRACKED by the buchi2ltl gate
+  (2026-06-14): 2779→3 temporals, equiv=True; MP survey now a clean sweep.** The
+  persistence-union the cascade/decompose path could not split is handled
+  directly by buchi2ltl's backward labeling on the raw (nondeterministic) form.
+  See STATUS "buchi2ltl heuristic gate". Spin-off items below.
+- **buchi2ltl gate — wired, default ON (2026-06-14, `kr/heuristic_gate.py` +
+  `decompose_recombine`). Landed; refinements:**
+  - **Spot ⊤/⊥-style dependence is now just the bounded TGBA `postprocess` in
+    the gate** (language-preserving, on the small node) — acceptable like Acc(c).
+    No per-call equiv check (sound-by-construction, audited 0/0 over ~170 randltl
+    via `fuzz_gate_decompose.py`); `KR_GATE_VERIFY` keeps the audit one env away.
+  - **gate-vs-split order:** the gate is tried on the raw input first, then per
+    split piece. Simplifying the gate output (`_simp_f`) removed the only
+    obligation-case "regressions" (they were unsimplified-output artifacts, not
+    genuine — buchi2ltl skips Spot's simplifier). If a case ever shows split <
+    gate AFTER simplification, add per-node pick-smaller (build both, keep fewer
+    temporals — construction is cheap); none observed in the 35-case census.
+  - **adopt rate ~81%** on random formulas; the ~19% it declines (and the
+    UNVERIFIED giants) are exactly the REACH/cascade cases kr carries — the two
+    paths are complementary, gate for shape-friendly + decomposition, kr for the
+    systematic fallback.
 - **Decompose-and-recombine at the root — LANDED + now the goto path
   (2026-06-13, `kr/decompose_recombine.py`; numbers in STATUS).** Both splits
   implemented and validated; `reconstruct_decomposed(aut)` is the survey default
