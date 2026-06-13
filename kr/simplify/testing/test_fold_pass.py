@@ -71,6 +71,13 @@ CASES = [
      "ctx-S2: F dropped under a"),
     ("a & (d | (X(a & X(a U c)) & F(a & X(a & Xc))))",
      "a & (d | X(a & X(a U c)))", True, "ctx-S2 shifted"),
+    # U/R/W arm-padding removal (the census-class-probe pattern)
+    ("(q & !r & X(q | r)) U (q & !r & Xr)", "(q & !r) U (q & !r & Xr)",
+     False, "U arm unpad: Xd implied by the U dynamics"),
+    ("(q & !r & X(q | r)) W (q & !r & Xr)", "(q & !r) W (q & !r & Xr)",
+     False, "W arm unpad"),
+    ("(!q | r | X(!q & !r)) R (!q | r | X(!r))", "(!q | r) R (!q | r | X(!r))",
+     False, "R arm unpad (dual conditions)"),
     # through the full pipeline
     ("c & (a | XFa) & (!c | a | XFa)", "c & Fa", True,
      "pipeline: context dedup + fold"),
@@ -89,12 +96,14 @@ CASES = [
      "G body is Or, no entailment (must not change)"),
     ("b & G(a & Fb)", None, False,
      "bare b not implied by G (must not change)"),
+    ("(q & Xq) U r", None, False,
+     "arm unpad needs g=>d too (must not change; witness q!r;cycle{!q r})"),
 ]
 
 MUST_NOT_CHANGE = {"a & XFa", "!a | XFa", "b | (a & X(a U c))", "a | F(a & Xa)",
                    "a | X(a M b) | G(a | Xb)", "a & X(a W b) & F(a & Xb)",
                    "X(a | X(a R c)) | G(a | X(a | Xc))",
-                   "Fb & G(a | Fb)", "b & G(a & Fb)"}
+                   "Fb & G(a | Fb)", "b & G(a & Fb)", "(q & Xq) U r"}
 
 
 def equiv(f: "spot.formula", g: "spot.formula") -> bool:

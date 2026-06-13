@@ -65,7 +65,13 @@ Every rule shrinks the tree AND removes a distinct temporal subformula
 now-evaluation only returns constants/arms, so the passes cannot
 ping-pong.
 
-Two later additions (same module):
+Later additions (same module):
+- **U/W/R arm-padding removal**: `(c ∧ Xd) U g → c U g` when c ⇒ d and
+  g ⇒ d (the Xd conjunct is implied by the U dynamics — every position
+  before g fires is followed by c or g), dual for R. Entailment on the
+  propositional fragments only (one-way, sound). Found by the census
+  class probe: these paddings were the dominant language-equal variant
+  pairs in real outputs.
 - **G/F absorption**: a conjunct implied by a sibling `Gφ` (the unrolled
   reading `Gφ ≡ φ ∧ XGφ` as an entailment oracle) is dropped; dually a
   disjunct implying a sibling `Fφ`. Entailment is a small syntactic

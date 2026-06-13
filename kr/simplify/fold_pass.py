@@ -281,6 +281,60 @@ def _fold_node(node: "spot.formula") -> "spot.formula":
     return spot.formula.And(kids) if is_and else spot.formula.Or(kids)
 
 
+def _prop_part_implies(x: "spot.formula", d, conjunctive: bool) -> bool:
+    """Sound one-way test using only the propositional fragment of x:
+    conjunctive — the BDD AND of x's boolean conjuncts implies d
+    (x ⇒ prop(x) ⇒ d); disjunctive — d implies the BDD OR of x's boolean
+    disjuncts (d ⇒ prop-disj(x) ⇒ x). d must be propositional."""
+    bd = _prop_bdd(d)
+    if bd is None:
+        return False
+    parts = list(x) if (x._is(spot.op_And) if conjunctive else x._is(spot.op_Or)) else [x]
+    acc = buddy.bddtrue if conjunctive else buddy.bddfalse
+    for t in parts:
+        bt = _prop_bdd(t)
+        if bt is None:
+            continue
+        acc = buddy.bdd_and(acc, bt) if conjunctive else buddy.bdd_or(acc, bt)
+    if conjunctive:   # acc ⇒ d ?
+        return buddy.bdd_and(acc, buddy.bdd_not(bd)) == buddy.bddfalse
+    return buddy.bdd_and(bd, buddy.bdd_not(acc)) == buddy.bddfalse
+
+
+def _arm_unpad(node: "spot.formula") -> "spot.formula":
+    """Arm-padding removal (the class-probe pattern, both verified):
+
+        (c ∧ Xd) U g → c U g    when c ⇒ d and g ⇒ d   (same for W)
+        (c ∨ Xd) R g → c R g    when d ⇒ c and d ⇒ g
+
+    Soundness (U): before g fires, every next position satisfies c or g,
+    both of which imply d — so the Xd conjunct never excludes anything.
+    R is the literal dual. Entailments are tested on the propositional
+    fragments only (one-way, hence sound); d must be propositional."""
+    if node._is(spot.op_U) or node._is(spot.op_W):
+        f, g = node[0], node[1]
+        if f._is(spot.op_And):
+            for s in f:
+                if s._is(spot.op_X):
+                    rest = [t for t in f if t != s]
+                    c = spot.formula.And(rest)
+                    if (_prop_part_implies(c, s[0], True)
+                            and _prop_part_implies(g, s[0], True)):
+                        op = spot.formula.U if node._is(spot.op_U) else spot.formula.W
+                        return _arm_unpad(op(c, g))
+    elif node._is(spot.op_R):
+        f, g = node[0], node[1]
+        if f._is(spot.op_Or):
+            for s in f:
+                if s._is(spot.op_X):
+                    rest = [t for t in f if t != s]
+                    c = spot.formula.Or(rest)
+                    if (_prop_part_implies(c, s[0], False)
+                            and _prop_part_implies(g, s[0], False)):
+                        return _arm_unpad(spot.formula.R(c, g))
+    return node
+
+
 def ctx_subsume(node: "spot.formula", pos, neg) -> "spot.formula | None":
     """Context-aware S1/S2 (the initial-state reading): under a context
     refuting c, the bare-c disjunct of S1 is discharged by knowledge, so
@@ -364,7 +418,7 @@ def fold_simplify(f: "spot.formula") -> "spot.formula":
             if out._is(spot.op_And) or out._is(spot.op_Or):
                 out = _fold_node(out)
         elif list(n):
-            out = n.map(walk)
+            out = _arm_unpad(n.map(walk))
         else:
             out = n
         memo[n] = out
