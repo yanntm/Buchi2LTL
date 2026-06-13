@@ -194,6 +194,31 @@ unfolding that DAG.
   reachability. The free-tail collapse the user is after needs a Fin(C)-level
   recognizer (config in an absorbing accepting class ⇒ constant Fin term), not a
   reach cut. All code reverted; finding kept here.
+- **Absorbing-M Fin fold: LANDED (2026-06-13, the first step of the
+  Fin(C)-level recognizer the bullet above asks for).**
+  `config_graph.is_absorbing_config_set(casc, M)` (delegated via
+  `Cascade`, consumed in `reconstruct_ltl_paper_style`; default on,
+  `KR_FOLD_ABSORBING_M=0` restores the full Muller term). When a good
+  Muller set M is **absorbing** — every letter from every C∈M stays in M,
+  i.e. M is a bottom SCC of the config graph, a pure graph property with NO
+  language/containment check — the Muller term ⋀_{C∈M}¬Fin(C) ∧
+  ⋀_{C∉M}Fin(C) folds to just ⋀_{C∈M}¬Fin(C). Soundness (per term): the
+  ¬Fin(C∈M) conjuncts assert Inf⊇M; one visit to an absorbing M traps the
+  run, so Inf⊆M, hence Inf=M and every Fin(C∉M) is implied; nested
+  strongly-connected absorbing sets can't co-occur, so terms fold
+  independently. This is the `a U b` answer: the three config conjuncts were
+  C1=¬Fin((1,1)) [≡`a U b`] dominating C2=Fin((1,2)), C3=Fin((2,1))
+  (verified C1⇒C2, C1⇒C3 by Spot), and the fold drops C2,C3. Measured on the
+  decompose path (`survey_sizes.py`, logs/survey_sizes_decompose_2026-06-13):
+  `a U b` tree 87→13, distinct temporals 4→1 → the LITERAL
+  `b | ((a&!b) U (a&!b&Xb))`; `(aUb)|Gc` tree 637→562 and temporals 22→19
+  (the OR-split isolates the guarantee piece, so here the census drops too);
+  `F(a&Xb)` 4251→3747 (temporals 74 UNCHANGED — still over the 32-acc cap).
+  **Scope: terminal-acceptance (guarantee/reachability) class**; a no-op
+  where M is the whole reachable set (`G(a->Xb)`, recurrence/persistence — 0
+  change). Audit CLEAN; survey 0 fail / no regressions. Follow-up (TODO P0
+  1F): per-conjunct version — Fin(C) with C∉M graph-unreachable from M is
+  implied even when M is not absorbing.
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call
