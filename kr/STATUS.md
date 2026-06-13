@@ -221,27 +221,47 @@ unfolding that DAG.
   reach-driven cases. Audit CLEAN; survey 0 fail / no regressions. Open: the
   cap cases need deeper census reduction (the kept `¬Fin(M)` / reachable-`Fin`
   part still dominates — census-anatomy finding).
-- **Acceptance dispatch — Büchi class LANDED as an orthogonal module,
-  probe-validated, NOT YET WIRED (2026-06-13). This is the structural fix the
-  census-anatomy finding pointed to.** `kr/acceptance_dispatch.py`
-  (`reconstruct_buchi(casc)`, orthogonal — reachability.py untouched). Per
-  Theorem 2 / §9.3, a deterministic **Büchi** cascade (recurrence, `Π₂`,
-  `acc=Inf(0)`) gets the DIRECT form `φ := ⋁_{C∈accepting configs} ¬Fin(C)` —
-  NO `Fin(C∉G)` web and NO good-set enumeration (the two Muller-DNF
-  explosions). Soundness: `¬Fin(C)` ≡ "C∈inf-set"; inf-set is strongly
-  connected, so Büchi `inf∩α≠∅` ≡ `⋁_{C∈α}¬Fin(C)` (transient accepting C ⇒
-  `¬Fin`≡false, harmless). `is_buchi_cascade` gates on `acc().is_buchi()`;
-  returns None otherwise (caller falls back to Muller). **Probe
-  (`kr/testing/probe_buchi_dispatch.py`, equiv-vs-ORIGINAL + size A/B):
-  `G(p->(qUr))` Muller 492/20291/**84** → Büchi 86/751/**14** — the challenge
-  case drops UNDER the 32-acc cap, equiv=True**; `GFa` 23/55/10 → 8/16/3;
-  `G(a->Fb)`/`G(a|Fb)` already minimal (19/48/4, no change); guarantee/safety
-  that normalize to Inf(0) (`Fa`,`a U b`,`Ga`) dispatch soundly with no size
-  change; `FGa` (coBüchi) correctly DECLINED. Every dispatched case equiv=True
-  vs original. NEXT (TODO P1, the resume point): wire `reconstruct_buchi` as a
-  fast-path in the per-cascade reconstruct (try it, fall back to Muller on
-  None), gate it, re-run audit+survey; then coBüchi (`⋀Fin(C)`, `Σ₂`) for the
-  persistence walls (`FGa|FGb`), then looping/weak (`reach_to`, no Fin).
+- **Acceptance dispatch — Büchi class WIRED on the default path (2026-06-13).
+  The structural fix the census-anatomy finding pointed to, now live.**
+  `kr/acceptance_dispatch.py` `reconstruct_buchi(casc)`: per Theorem 2 / §9.3 a
+  deterministic **Büchi** cascade (`acc=Inf(0)`, `Π₂`) gets the DIRECT form
+  `φ := ⋁_{C∈α} ¬Fin(C)` — NO `Fin(C∉G)` web and NO good-set enumeration (the
+  two Muller-DNF explosions). Soundness: `¬Fin(C)` ≡ "C∈inf-set"; the inf-set is
+  strongly connected, so Büchi `inf∩α≠∅` ≡ `⋁_{C∈α}¬Fin(C)` (a transient
+  accepting C ⇒ `¬Fin`≡false, harmless).
+  - **Wiring:** a TOP-LEVEL pre-check at the head of
+    `reconstruct_ltl_paper_style` (gate `KR_DISPATCH_BUCHI`, default ON; `=0`
+    restores pure Muller for A/B). The hook lives THERE — not in
+    `reconstruct_bls` — because the GOTO decompose front end
+    (`reconstruct_decomposed`) calls `reconstruct_ltl_paper_style` directly per
+    piece; the single pre-check covers BOTH entries. It cannot fire inside the
+    Muller DNF's own `fin_c` (that runs in the operators/`fin` modules, which
+    never call back). Single-condition decompose pieces are exactly Büchi/coBüchi,
+    so the dispatch fires per piece (e.g. `GFa&GFb&GFc` and(3): each conjunct
+    dispatches).
+  - **α is COVER-AWARE** (`config_graph.buchi_accepting_configs`, delegated via
+    `Cascade`): read off `build_pruned_config_aut` — every reachable config whose
+    lifted (sbacc) marks satisfy the same `g.acc()` oracle `accepting_sc_subsets`
+    uses — NOT the lift-section `accepting_configs()` (one config per state). The
+    lift section UNDER-approximates on a genuine holonomy cover: wiring first
+    flipped `F(a&Xb)` to equiv=FALSE (`L(buchi)⊊L(orig)`, α missed the duplicated
+    accepting sink), the cover reader gives the exact α={(1,1),(1,2)}. This is the
+    caveat TODO P1 flagged, now resolved.
+  - **Results (size A/B on the decompose path, `logs/sizes_dispatch_{on,off}_
+    2026-06-13`; distinct temporals = 32-acc-cap driver):** `G(p->(qUr))`
+    84→**14** (tree 20291→751, UNDER the cap → survey equiv=True — the challenge
+    case); `G(a->Xa)` 141→30 (tree 1.53M→703); `G(a->Xb)` 79→23; `F(a&Xb)` 64→40;
+    `Ga|Gb` 46→18; `GFa` 10→3; `GFa&GFb` 20→6; `GFa&GFb&GFc` 30→9; `X(a&Xa)`
+    4134→2069 (still over the flatten gate — reach-driven, needs the reach fold
+    not acceptance dispatch). Totals over 35 cases: DAG 61029→47498 (−22%),
+    distinct temporals 10907→8491 (−22%); excluding the two giants the tractable
+    cases drop 578→227 (−61%). No case grows; out-of-scope classes (coBüchi
+    `FGa|FGb`, reactivity `GFa->GFb`, persistence, already-minimal recurrence) are
+    byte-identical (clean fallback). **Survey
+    (`logs/survey_wire_buchi_2026-06-13`): 0/35 equiv=FALSE, four walls flipped to
+    True (`G(p->(qUr))`, `F(a&Xb)`, `G(a->Xa)`, `GFa&GFb&GFc`), zero regressions;
+    audit CLEAN.** NEXT: coBüchi (`⋀Fin(C)`, `Σ₂`) for the persistence walls
+    (`FGa|FGb`), then looping/weak (`reach_to`, no Fin).
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call

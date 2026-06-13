@@ -74,8 +74,11 @@ under a small subprocess budget (a stall is reported, never waited on).
 - `acceptance_dispatch.py` — **direct hierarchy-class φ per Theorem 2 / §9.3**,
   orthogonal to the Muller DNF. `reconstruct_buchi(casc)` = `⋁_{C∈α}¬Fin(C)`
   for Büchi cascades (else None → caller uses Muller); drops the `Fin(C∉G)` web.
-  Büchi DONE + probe-validated, not yet wired (`G(p->(qUr))` 84→14 temporals).
-  coBüchi/looping/weak are TODO P1 (the active front — see STATUS + TODO P1).
+  Büchi **WIRED** as a top-level pre-check in `reconstruct_ltl_paper_style`
+  (gate `KR_DISPATCH_BUCHI`, default ON), so both the monolithic and decompose
+  paths use it; α is cover-aware (`config_graph.buchi_accepting_configs`).
+  `G(p->(qUr))` 84→14 temporals (survey equiv=True, totals −22%). coBüchi/
+  looping/weak are TODO P1 (the active front — see STATUS + TODO P1).
 - `gap_bridge.py`, `extract.py`, `gap/parse.py`, `bdd_utils.py` — decomposition
   pipeline and buddy-BDD stability.
 

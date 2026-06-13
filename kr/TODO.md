@@ -133,34 +133,27 @@ fold pass → interning). Items below are the actionable queue.
   coBüchi/`Σ₂`/`⋀_{C∈α}Fin(C)`; Büchi/`Π₂`/`⋁_{C∈α}¬Fin(C)`; Muller/`Δ₂`/full
   DNF. The looping/weak forms use `reach_to` (NO Fin); Büchi/coBüchi keep ONE
   Fin per accepting config (no `Fin(C∉G)` web, no good-set enumeration).
-  - ~~**Büchi (`Π₂`)**~~ **DONE (module + probe), NOT YET WIRED — 2026-06-13.**
-    `reconstruct_buchi(casc)` = `⋁_{C∈accepting_configs}¬Fin(C)`, returns None
-    if not `acc().is_buchi()`. Probe-validated (`probe_buchi_dispatch.py`,
-    equiv-vs-ORIGINAL): **`G(p->(qUr))` 84→14 temporals (UNDER the 32-acc cap),
-    equiv=True** — the challenge case; `GFa` 10→3; already-minimal cases
-    unchanged; `FGa` correctly declined. Soundness: §9.3 + strongly-connected
-    inf-set (Büchi `inf∩α≠∅` ≡ `⋁¬Fin`); see module docstring + STATUS.
-  - **NEXT STEP (the resume task): WIRE IT IN.** Have the per-cascade
-    reconstruct try `reconstruct_buchi` first and fall back to the Muller path
-    on None — cleanest hook is in `reconstruct_bls` (or as a pre-check in
-    `reconstruct_ltl_paper_style`), since `decompose_recombine` calls
-    `reconstruct` per piece and single-condition pieces are exactly Büchi/
-    coBüchi. Gate `KR_DISPATCH_BUCHI` (propose default ON once surveyed). Then:
-    run `test_kr_r4_audit.py` (must stay CLEAN — it greps reachability_operators,
-    unaffected) + `survey_mp_cascade.py` (equiv must hold; `G(p->(qUr))` now in
-    the case list should flip to a measured/True verdict) + `survey_sizes.py`
-    (census drop). Watch: the Büchi fast-path must NOT fire inside the Muller
-    DNF's own Fin computation — it's a TOP-LEVEL reconstruct choice only.
-  - **THEN coBüchi (`Σ₂`)** `⋀_{C∈α}Fin(C)` for persistence: attacks the
+  - ~~**Büchi (`Π₂`)**~~ **WIRED on the default path — 2026-06-13.**
+    `reconstruct_buchi(casc)` = `⋁_{C∈α}¬Fin(C)`, returns None if not
+    `acc().is_buchi()`. Hooked as a TOP-LEVEL pre-check at the head of
+    `reconstruct_ltl_paper_style` (gate `KR_DISPATCH_BUCHI`, default ON; `=0`
+    restores pure Muller) — NOT in `reconstruct_bls`, because the GOTO decompose
+    front end calls `reconstruct_ltl_paper_style` directly per piece, so the
+    single pre-check covers both entries and fires per single-condition piece.
+    α is COVER-AWARE (`config_graph.buchi_accepting_configs` off
+    `build_pruned_config_aut`, not the lift-section `accepting_configs()`):
+    the wiring exposed the cover caveat below — `F(a&Xb)` first went equiv=FALSE
+    (`L⊊L(orig)`, lift α missed the duplicated accepting sink) and the cover
+    reader fixed it. Gates: audit CLEAN, survey 0/35 FALSE / four walls flipped
+    True / zero regressions, size A/B `G(p->(qUr))` 84→14 temporals (totals −22%,
+    tractable-cases −61%); numbers + logs in STATUS. ~~Cover caveat~~ RESOLVED.
+  - **NEXT: coBüchi (`Σ₂`)** `⋀_{C∈α}Fin(C)` for persistence: attacks the
     `FGa|FGb` wall (2⁶⁰) and `FGa`. Same module, mirror of Büchi
-    (`acc().is_co_buchi()`; α = configs to be visited finitely).
+    (`acc().is_co_buchi()`; α = configs to be visited finitely). The wiring hook
+    and the cover-aware α reader are already in place — coBüchi adds the
+    `is_co_buchi` branch and the `⋀Fin` assembly.
   - **THEN looping/weak** (`reach_to`, no Fin at all) for safety/guarantee/
     obligation — `reach_to(ι,C)` = `reach_strong(ι,…,C,…)`, already have it.
-  - Caveat to check when wiring: `accepting_configs()` maps states→configs via
-    the lift section, which the cover-exactness note (P1 below) flags as
-    possibly imprecise for genuine covers; if a cover case fails equiv after
-    wiring, derive α from the pruned config aut (`build_pruned_config_aut`)
-    instead. Büchi cases probed so far are cover-degenerate (all equiv=True).
 - **Decompose-and-recombine at the root — LANDED + now the goto path
   (2026-06-13, `kr/decompose_recombine.py`; numbers in STATUS).** Both splits
   implemented and validated; `reconstruct_decomposed(aut)` is the survey default
