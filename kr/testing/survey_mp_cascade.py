@@ -96,6 +96,8 @@ CANDIDATES = [
     # recurrence (Buchi / Pi2) — conjunctive recurrence AND-splits by acc set
     "GFa", "G(a -> F b)", "G(a | F b)", "GFa & GFb", "GFa & GFb & GFc",
     "G(a -> F b) & G(c -> F d)",
+    "G(p -> (q U r))",   # the challenge case (reach-driven, none(1)); track regularly
+                         # NB spaces in "q U r" — "qUr" parses as one atomic prop
     # persistence (coBuchi / Sigma2)
     "FGa", "F(a & G b)", "FGa | FGb",
     # reactivity — (GFa & FGb) is a Rabin-pair conjunct Inf&Fin that AND-splits

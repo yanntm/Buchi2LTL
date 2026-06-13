@@ -46,6 +46,8 @@ CANDIDATES = [
     "Fa | Gb", "Ga | Gb", "Fa & Gb", "(a U b) | Gc", "Ga | Fb",
     "GFa", "G(a -> F b)", "G(a | F b)", "GFa & GFb", "GFa & GFb & GFc",
     "G(a -> F b) & G(c -> F d)",
+    "G(p -> (q U r))",   # the challenge case (reach-driven, none(1)); track regularly
+                         # NB spaces in "q U r" — "qUr" parses as one atomic prop
     "FGa", "F(a & G b)", "FGa | FGb",
     "GFa -> GFb", "(GFa & FGb)",
 ]
