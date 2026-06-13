@@ -1,0 +1,34 @@
+=== decompose-and-recombine front end — revision log 2026-06-13 ===
+module: kr/decompose_recombine.py (orthogonal; AUTOMATON-in contract; _to_split_form = postprocess(det,generic)+sat_minimize)
+gates: r4_audit CLEAN; survey 8 two-level / 0 failing equiv (both KR_DECOMPOSE=0/1)
+now the survey default path (KR_DECOMPOSE=1)
+
+## wrapper dispatch sweep (test_decompose_recombine.py) ##
+=== decompose-and-recombine front end ===
+--- GFa & GFb
+    split=and(2) OK  DAG=47 temporals=20 tree=111
+    equiv? True
+--- GFa & GFb & GFc
+    split=and(3) OK  DAG=70 temporals=30 tree=166
+    equiv? SPOT_TIMEOUT>10s
+--- Ga | Fb
+    split=or(2) OK  DAG=12 temporals=2 tree=21
+    equiv? True
+--- (a U b) | Gc
+    split=or(2) OK  DAG=119 temporals=22 tree=637
+    equiv? True
+--- GFa & FGb
+    split=and(2) OK  DAG=62 temporals=17 tree=313
+    equiv? True
+--- GFa & Gb
+    split=none(1) OK  DAG=491 temporals=89 tree=16530
+    equiv? ACC_CAP:Too many acceptance sets used.  The limit is 32.
+--- FGa | FGb
+    split=none(1) OK  DAG=34548 temporals=6195 tree=1152921504606846976
+    equiv? UNVERIFIED_SIZE(1152921504606846976 tree nodes)
+--- a U b
+    split=none(1) OK  DAG=29 temporals=4 tree=87
+    equiv? True
+
+Summary: equiv True = 5/8; split-kind OK = 8
+SWEEP_EXIT=0
