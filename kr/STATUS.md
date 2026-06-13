@@ -197,16 +197,20 @@ The ≥4-level dev guard is GONE (opt-in `KR_MAX_LEVELS` ceiling remains; the
 real runaway protection is the distinct-subproblem guard). Depth ladder
 added: `Xa` 3L → `XXa` 4L → `XXXa` 5L → `X(a & Xa)` 5L.
 
-- **MP ladder: 25 equiv=True, zero equiv=FALSE** (post fold pass) —
-  including **`XXXa` at 5 levels** and **`G(a->Xb)`/`Ga|Gb`**
-  end-to-end. Non-True split, all verification-bound, none semantic:
-  - SPOT_TIMEOUT: `G(a->Xa)` (1.5M, under the flatten gate — Spot slow).
-  - 32-acc: `F(a&Xb)` (census 74, down from 109 — still over the cap;
-    the err string is the abort-path teardown crash in the child).
-    `F(a&Xa)` cleared the cap (census 26) and verifies True.
-  - UNVERIFIED_SIZE (flatten gate): `(a U b)|Gc` 7.0M, `X(a&Xa)`
-    1.5×10⁹, `GFa&GFb` 9.1×10¹⁶, `FGa|FGb` / `(GFa&FGb)`
-    2⁶⁰-saturated.
+- **MP ladder (decompose path, now the default — `survey_decompose_2026-06-13`):
+  zero equiv=FALSE, zero regressions vs the monolithic baseline, and the
+  acceptance-driven walls VERIFY**: `GFa&GFb`, `(aUb)|Gc`, `(GFa&FGb)`,
+  `GFa->GFb`, `G(a->Fb)&G(c->Fd)` (L=7) all equiv=True; `XXXa` at 5 levels and
+  `G(a->Xb)`/`Ga|Gb` end-to-end. The residual non-True split is now exactly the
+  REACH/cascade-driven cases (single piece, decomposition no-ops — the P0 fold
+  job) plus the acceptance-ABSORPTION cases:
+  - SPOT_TIMEOUT: `G(a->Xa)` (1.5M, Spot slow); `GFa&GFb&GFc` (30 temporals near
+    the cap — compositional SOUND, see below).
+  - 32-acc: `F(a&Xb)` (census 74 — reach-driven, one piece).
+  - UNVERIFIED_SIZE: `X(a&Xa)` 1.5×10⁹ (reach-driven); `FGa|FGb` 2⁶⁰
+    (persistence-union absorption — folds to one co-Büchi, no split).
+  Monolithic path (`KR_DECOMPOSE=0`) unchanged: those four walls stay
+  UNVERIFIED (`GFa&GFb` 9.1×10¹⁶ etc.) — the A/B confirms the win is the split.
 - **Semantic grounding (`trace_fin_semantics`, cover-aware — GTs on the config
   semiautomaton): zero contradictions across every probed case at every
   depth** (`GFa`, `a U b`, `Fa & Gb`, `Ga | Fb`, `Xa` fully OK; `G(a->Xb)`,
@@ -274,22 +278,75 @@ of subformulas, which hash-consing does not shrink. Verification must come
 from word sampling / compositional grounding (TODO P0), or from folding the
 eventuality count itself below the cap.
 
-**Next planned direction: decompose-and-recombine at the root (TODO P1,
-2026-06-13).** A session-long theory thread established that ROOT-level
+**Decompose-and-recombine at the root: LANDED + made the GOTO path (2026-06-13,
+`kr/decompose_recombine.py` — orthogonal module, core untouched).** ROOT-level
 language operations recombine kr outputs soundly with no caveats (kr is
-language-faithful, and a root operator is a pure position-0 language op —
-none of the temporal-placement / acceptance-coupling problems of internal
-injection apply, see P4 note): `L(A)=⋃L(Aᵢ) ⟹ ⋁ kr(Aᵢ) ≡ L(A)` and dually
-`L(A)=⋂L(Aᵢ) ⟹ ⋀ kr(Aᵢ) ≡ L(A)`. So split the automaton into
-acceptance-trivial pieces, reconstruct each with the EXISTING kr (Fin web
-collapses to a singleton good-set per piece), and OR/AND back. This is the
-implementable form of the P1 acceptance dispatch — it hoists the Muller
-disjunction/conjunction out of the Fin web up to the root instead of
-hand-coding the §9.3 Σ/Π/Δ forms. Attacks the ACCEPTANCE-driven census
-(the reactivity/recurrence/persistence wall — `GFa&GFb`, `FGa|FGb`,
-`(GFa&FGb)`); orthogonal to the REACH/cascade-driven census (`G(a->Xb)` is
-pure safety, one piece, census 79 unchanged — that stays the P0 fold job).
-Not yet started; full plan + open checks in TODO P1.
+language-faithful, a root operator is a pure position-0 language op — none of the
+temporal-placement / acceptance-coupling problems of internal injection apply,
+see P4 note): `L(A)=⋃L(Aᵢ) ⟹ ⋁ kr(Aᵢ) ≡ L(A)` and dually
+`L(A)=⋂L(Aᵢ) ⟹ ⋀ kr(Aᵢ) ≡ L(A)`. `reconstruct_decomposed(aut)` (AUTOMATON-in —
+the kr contract is an automaton/HOA, never an LTL formula) normalizes to a
+DETERMINISTIC, STATE-MINIMAL GENERIC automaton, then dispatches on the
+acceptance condition:
+  - `_to_split_form`: `postprocess(aut,"deterministic","generic")` (keeps the
+    conjunctive `⋀Inf`/Streett shape instead of collapsing to parity) THEN
+    `sat_minimize` (gated `KR_SAT_MIN_STATES`, best-effort). State minimality is
+    load-bearing: kr's census is acutely sensitive to the input state count (it
+    sets cascade depth). `GFa&FGb`: `postprocess` alone leaves 2 states whose
+    pieces explode (recombined tree 9.5e15); `sat_minimize` recovers the 1-state
+    form (tree 313) — PURELY on the automaton, no formula (`probe_min_detgeneric`).
+  - **AND by acceptance set** (`acc().get_acceptance().top_conjuncts()`): for a
+    DETERMINISTIC automaton each word has one run, so `acc=⋀cᵢ ⟹ L=⋂L(A|cᵢ)`
+    exactly; one single-condition sub-automaton per conjunct (clone via HOA
+    round-trip, `set_acceptance`+`cleanup_acceptance_here`), recombine with `⋀`.
+    Determinism is the precondition (nondet would give `⋂L(Aᵢ)⊋L(A)`).
+  - **OR by strength** (`decompose_scc` weak/terminal/strong, Renault TACAS'13):
+    union is the language for any automaton; recombine with `⋁`.
+  - else single condition → existing monolithic kr (no regression, no gain).
+Each piece runs the EXISTING `decompose_aut`+`reconstruct` (Fin web collapses to
+a singleton good-set), so the Muller ∨/∧ is hoisted out of the Fin web to the
+root — no hand-coding the §9.3 Σ/Π/Δ forms. Recurses depth-capped (a piece may
+re-split by the other operator).
+
+**It is now the survey's default path** (`survey_mp_cascade.py`, `KR_DECOMPOSE=1`
+default; `=0` restores monolithic for A/B). Decompose-path survey
+(`logs/survey_decompose_2026-06-13.txt`) vs the monolithic baseline
+(`logs/survey_mp_cascade_2026-06-13.txt`): **0 of 8 two-level cases fail equiv,
+zero regressions, and four acceptance-driven walls flip UNVERIFIED→True plus a
+new 7-level case verifies**:
+
+| case | split | monolithic verdict | decompose verdict |
+|---|---|---|---|
+| `GFa&GFb` | and(2) | UNVERIFIED 9.08×10¹⁶ | **True** (tree 111, 20 temporals) |
+| `(aUb)\|Gc` | or(2) | UNVERIFIED 6.97M | **True** (637) |
+| `(GFa&FGb)` | and(2) | UNVERIFIED 2⁶⁰ | **True** (reactivity) |
+| `GFa->GFb` | and | (n/a) | **True** |
+| `G(a->Fb)&G(c->Fd)` | and(2) | (new case) | **True** at L=7 |
+| `Ga\|Fb` | or(2) | True (tree 499) | **True** (tree 21, 2 temporals) |
+| `GFa&GFb&GFc` | and(3) | can't build (5M guard) | SPOT_TIMEOUT (30 temp, cap); compositional **SOUND** |
+
+Verification at scale: for n≥3 the recombined `⋀` itself trips Spot's 32-acc cap,
+so the sound witness is COMPOSITIONAL — `kr(pieceᵢ) ≡ L(pieceᵢ)` per single-Büchi
+piece (small, cap-safe), which by `L(A)=⋂L(pieceᵢ)` gives `⋀kr(pieceᵢ) ≡ L(A)`
+without translating the product (`probe_and_decompose.py`). Gates this revision:
+r4_audit CLEAN; survey 8/0 both paths. Kept tools: `decompose_recombine.py`
+(module), `test_decompose_recombine.py` (dispatch sweep), `probe_and_decompose.py`
+(compositional verdicts). One-shot probes folded to git history, findings recorded
+here: `probe_acc_split_api` (Spot acc-split API: `top_conjuncts()` on
+`get_acceptance()`; clone via HOA round-trip — `make_twa_graph` single-arg absent
+and `twa.prop_set` unexposed in system Spot 2.14.5) and `probe_min_detgeneric`
+(automaton-only state minimization census — `sat_minimize` recovers the minimal
+det-generic form where `postprocess` alone does not; `GFa&FGb` 2→1 state).
+KNOWN LIMITATIONS (acceptance ABSORPTION blocks both splits): `GFa&Gb`
+(recurrence ∧ safety) and `FGa|FGb` (persistence union) — Spot's determinization
+folds the second component into a single acceptance set / strength, so the split
+sees one piece (`none`) and the case stays at the monolithic wall (89-temporal /
+2⁶⁰). The principled fix (expose the absorbed component as a separate
+conjunct/strength) is blocked by that folding.
+Scope: attacks the ACCEPTANCE-driven census (recurrence/persistence/mixed-strength
+wall); orthogonal to the REACH/cascade-driven census (`G(a->Xb)`, `X(a&Xa)`,
+`G(a->Xa)`, `F(a&Xb)` unchanged — one piece each, the P0 fold job).
+Open: export from `kr/__init__.py` (separate commit); the absorption cases above.
 
 ## Tooling for targeted work
 
