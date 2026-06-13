@@ -303,10 +303,32 @@ unfolding that DAG.
   on these cases is **reach-driven** (the τ-tail), which NO acceptance form
   touches — looping merely swaps the Fin-web for `reach_to`, paying the same
   cascade depth. Kept in (flagged off) as the A/B baseline for the next idea: a
-  config-indexed **`Acc(c)`** weak-class construction (the previously-rejected
-  POC that collapsed exactly this fragment — `Xa&XXa`→4 — now scoped behind the
-  clean `is_weak` gate; candidate to crack the `X(a&Xa)` reach wall). NEXT:
-  prototype that.
+  config-indexed **`Acc(c)`** weak-class construction. **DONE — see next bullet.**
+- **Config-indexed `Acc(c)` for the BOUNDED fragment — WIRED, default ON
+  (2026-06-13). Cracks the `X(a&Xa)` reach wall: UNVERIFIED 5.1×10⁸ → equiv=True,
+  literal output.** `reconstruct_acc(casc)` (`KR_DISPATCH_ACC`, default ON, FIRST
+  in the dispatch chain). Reconstructed from the `dag_folding.md` "Key-space
+  diagnosis" spec (the original POC was reverted uncommitted). `φ := Acc(ι)` by
+  bounded unroll of the config graph: `Acc(c) = ⊤` if `L(D from state_of(c))` is
+  universal, `⊥` if empty (R1, a small Spot ⊤/⊥ oracle on the INPUT automaton D —
+  lazy + cached, NOT on the output); else `⋁_σ guard(σ) ∧ X Acc(move_config(c,σ))`
+  (R2 unroll). **SELF-GATING:** a config re-entered on the unroll path that is not
+  ⊤/⊥ is recurrent ⇒ Acc declines (None ⇒ caller falls back to the
+  Büchi/coBüchi/Muller chain), so it fires only on the bottom/bounded class. It
+  is the construction the census-anatomy/key-space diagnosis said was needed: it
+  bypasses the reach machinery entirely (no reach_to, no Fin, no τ-tail), emitting
+  the literal formula. Complexity is low: `O(|reachable configs| × |Σ|)` memoized
+  builds plus ≤ n bounded oracle calls on the small `D` (the expensive Spot
+  operation — translating the large output — is exactly what it avoids). Measured
+  (`probe_acc_dispatch`): `X(a&Xa)` BLS 11835/5.1×10⁸/2069 → Acc **4/5/0**, equiv
+  True; the whole X-ladder collapses to the literal; every recurrent control
+  (`Ga`, `a U b`, `F(a&b)`, `G(a->Xb)`, `GFa`, `FGa`) declines → BLS. **Survey
+  (`logs/survey_wire_acc_2026-06-13`): the ONLY verdict change is `X(a&Xa)`
+  UNVERIFIED→True; 0/35 FALSE, zero regressions; audit CLEAN.** After this the
+  ONLY non-True case in the MP survey is `FGa|FGb` (persistence-union absorption,
+  recurrent, over the cap). Caveat: Spot ⊤/⊥ oracle in the construction path
+  (bounded, on the small input) — the one departure from "Spot for hash-consing
+  only"; a structural sink-reachability test could replace it (TODO).
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call

@@ -172,18 +172,31 @@ fold pass → interning). Items below are the actionable queue.
     REACH-driven (τ-tail), which no acceptance form touches — looping just swaps
     the Fin-web for `reach_to` at the same cascade depth. Kept in as the A/B
     baseline for the Acc(c) idea below.
-- **NEW ACTIVE FRONT — config-indexed `Acc(c)` for the weak class (the better
-  way to handle weak automata; resume here).** The reach τ-tail is irreducible
-  *within* the cascade reach machinery, so weak automata need a construction that
-  bypasses `reach_to` entirely. The previously-rejected `Acc(c)` POC collapsed
-  exactly this fragment (`Xa&XXa`→4 nodes, `Xa&XXXa`→5, equiv True) — rejected
-  then as "off-thesis: safety-fragment-only, Spot ⊤/⊥ oracle, case-split". That
-  "safety-only" limit is now a FEATURE: scope it behind the validated
-  `is_weak_cascade` gate as the weak-class specialist, A/B'd against
-  `KR_DISPATCH_WEAK`. Highest upside: candidate to crack the `X(a&Xa)` reach wall
-  (1.5×10⁹, weak). See `kr/dag_folding.md` "Key-space diagnosis" for the POC
-  history. Alternatives if it stalls: state-elimination (buchi2ltl) for weak
-  inputs; exploit weakness to shrink the holonomy depth.
+- ~~**config-indexed `Acc(c)` for the weak/bounded class**~~ **DONE — WIRED,
+  default ON (2026-06-13, `KR_DISPATCH_ACC`).** `reconstruct_acc` = `Acc(ι)` by
+  bounded unroll (R1 ⊤/⊥ Spot oracle on the small input D + R2 one-step unroll),
+  SELF-GATING (declines → BLS on any recurrent config), first in the dispatch
+  chain. **Cracks `X(a&Xa)`: UNVERIFIED 5.1×10⁸ → equiv=True, literal output**;
+  whole X-ladder collapses to the literal; recurrent cases decline. Survey: only
+  `X(a&Xa)` changed (UNVERIFIED→True), 0/35 FALSE, zero regressions; audit CLEAN.
+  Numbers + logs in STATUS. Remaining items spun off:
+  - **Replace the Spot ⊤/⊥ oracle with a structural test.** R1 currently uses
+    `is_empty`/`are_equivalent` on D-from-q (bounded, small input, but a Spot call
+    in the construction path — the one departure from "Spot for hash-consing
+    only"). A graph test — q ⊥ iff no accepting state reachable from q; q ⊤ iff no
+    rejecting behaviour reachable (on the deterministic complete D) — would keep
+    the construction Spot-free. Soundness-check before swapping.
+  - **Per-config (not whole) fallback at recurrent configs.** Acc currently bails
+    the WHOLE construction to BLS on the first recurrent config (clean for the pure
+    bounded fragment). A transient-prefix + recurrent-core input would benefit from
+    splicing BLS/dispatch only at the recurrent configs (`Acc(c) = BLS-from-c`
+    there), extending Acc past the pure-bounded class. Mind the cover/state-vs-config
+    map when splicing (cf. the Büchi cover caveat).
+- **Last MP-survey wall: `FGa|FGb`** (persistence-union absorption — recurrent,
+  coBüchi, 2779 temporals over the 32-acc cap; decomposition can't split it,
+  Acc declines). The only non-True case left in the survey. Reach-driven within
+  the coBüchi class; needs either the absorption fix (TODO P1 decompose) or a
+  coBüchi-side analogue of the Acc bounded collapse.
 - **Decompose-and-recombine at the root — LANDED + now the goto path
   (2026-06-13, `kr/decompose_recombine.py`; numbers in STATUS).** Both splits
   implemented and validated; `reconstruct_decomposed(aut)` is the survey default

@@ -84,8 +84,11 @@ under a small subprocess budget (a stall is reported, never waited on).
   (Δ₁/Σ₁/Π₁) form `reconstruct_weak` (pure `reach_to`, no Fin) is also wired but
   **OFF by default** (`KR_DISPATCH_WEAK`): correct, but a size regression — weak
   languages are already smaller under Büchi/coBüchi and the residual is
-  reach-driven. The active front is a config-indexed `Acc(c)` weak-class
-  construction (see STATUS + TODO P1).
+  reach-driven. The config-indexed **`Acc(c)`** dispatch `reconstruct_acc`
+  (`KR_DISPATCH_ACC`, default ON, first in the chain) handles the BOUNDED fragment
+  by bounded unroll (no reach/Fin, self-declines on recurrent configs → BLS) and
+  **cracks the `X(a&Xa)` reach wall** (UNVERIFIED 5.1×10⁸ → literal, equiv=True).
+  See STATUS + TODO P1.
 - `gap_bridge.py`, `extract.py`, `gap/parse.py`, `bdd_utils.py` — decomposition
   pipeline and buddy-BDD stability.
 
