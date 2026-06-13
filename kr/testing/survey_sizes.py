@@ -21,7 +21,7 @@ Run from project root:
     python3 kr/testing/survey_sizes.py
     python3 kr/testing/survey_sizes.py "a U b" "G(a -> X b)"   # specific
     KR_SIZE_PATH=monolithic python3 kr/testing/survey_sizes.py  # A/B vs reconstruct_bls
-    KR_FOLD_ABSORBING_M=0 python3 kr/testing/survey_sizes.py    # fold off, for A/B
+    KR_FOLD_FIN_REACH=0 python3 kr/testing/survey_sizes.py      # Fin fold off, A/B
 
 Mirrors survey_mp_cascade.py's case list and isolation discipline.
 """
@@ -135,9 +135,9 @@ def main():
     args = sys.argv[1:]
     cases = args if args else CANDIDATES
     path = os.environ.get("KR_SIZE_PATH", "decompose")
-    fold = os.environ.get("KR_FOLD_ABSORBING_M", "1") != "0"
+    fold = os.environ.get("KR_FOLD_FIN_REACH", "1") != "0"
     print("=== kr size census (subproc isolated) ===")
-    print(f"path={path}  absorbing_fold={'on' if fold else 'off'}  "
+    print(f"path={path}  fin_reach_fold={'on' if fold else 'off'}  "
           f"{len(cases)} formulas  (construction-only; budget {CONSTRUCT_TIMEOUT}s)\n")
 
     hdr = (f"  {'formula':24s} {'mp':3s} {'split':9s} {'L':>2s} "

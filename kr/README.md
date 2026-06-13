@@ -129,7 +129,7 @@ no `python -c` one-liners.
 - `survey_sizes.py` — size census across the MP ladder on the GOTO
   **decompose** path (`reconstruct_decomposed`): DAG/tree nodes, distinct
   temporals, sharing, build time. `KR_SIZE_PATH=monolithic` and
-  `KR_FOLD_ABSORBING_M=0` give A/B baselines. Construction-only, subprocess
+  `KR_FOLD_FIN_REACH=0` give A/B baselines. Construction-only, subprocess
   isolated, `KR_CONSTRUCT_TIMEOUT` budget.
 - `probe_sgpdec_api.g` — hand-run GAP ground truth for the SgpDec bridge calls.
 - `test_kr_basic.py` — normal-path smoke test (isolated per-case subprocesses).
