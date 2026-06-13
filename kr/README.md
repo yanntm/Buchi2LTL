@@ -64,21 +64,21 @@ under a small subprocess budget (a stall is reported, never waited on).
   (strong/weak, solid/dashed, >0 variants) with recursion to the level-0 base,
   memo + early simplify, `KR_TRACE=1` tracing; `fin_c` (Lemma 7).
 - `reachability.py` — `reconstruct_ltl_paper_style`: good-Muller-set DNF assembly of
-  ¬Fin/Fin conjunctions. `reconstruct_ltl_1level_buchi` is the public entry
-  (name kept for compat; thin wrapper).
+  ¬Fin/Fin conjunctions. `reconstruct_bls` is the public per-cascade entry (the
+  Boker-Lehtinen-Sickert construction; thin wrapper over the assembly).
 - `gap_bridge.py`, `extract.py`, `gap/parse.py`, `bdd_utils.py` — decomposition
   pipeline and buddy-BDD stability.
 
 ## Usage
 
 ```python
-from kr import decompose_aut, reconstruct_ltl_1level_buchi
+from kr import decompose_aut, reconstruct_bls
 import spot
 
 aut = spot.formula("Fa").translate()
 casc = decompose_aut(aut)
 print(casc)                 # summary + levels
-print(reconstruct_ltl_1level_buchi(casc))
+print(reconstruct_bls(casc))   # Boker-Lehtinen-Sickert construction
 ```
 
 ## Dependencies

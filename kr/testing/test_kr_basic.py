@@ -45,7 +45,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
-from kr import decompose_aut, reconstruct_ltl_1level_buchi as rec_clean
+from kr import decompose_aut, reconstruct_bls as rec_clean
 
 fs = {formula!r}
 import sys

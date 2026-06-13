@@ -4,8 +4,9 @@ reachability.py — High-level LTL reconstruction from cascades using the paper 
 The core inductive operators (5 reachability formulas + fin_c) live in
 reachability_operators.py.
 
-This module provides the thin entry `reconstruct_ltl_1level_buchi` (name kept for
-backward compat with callers) which delegates to the paper-faithful assembly
+This module provides the entry `reconstruct_bls` — the construction of
+Boker, Lehtinen & Sickert, "On the Translation of Automata to Linear Temporal
+Logic" (FoSSaCS 2022) — which delegates to the paper-faithful assembly
 (reconstruct_ltl_paper_style): use of reach + fin_c (Lemma 7) + lifted Muller DNF
 over good recurrent config sets (from Spot scc_info). No pattern matching,
 no inf-often guessing, no special shortcuts for 1L/init-acc/trapping.
@@ -178,14 +179,17 @@ def reconstruct_ltl_str(casc: Cascade) -> str:
     return _str_f(reconstruct_ltl_paper_style(casc))
 
 
-def reconstruct_ltl_1level_buchi(casc: Cascade) -> "spot.formula":
-    """Main entry point for LTL reconstruction from a Cascade.
+def reconstruct_bls(casc: Cascade) -> "spot.formula":
+    """Reconstruct LTL from a Cascade via the BLS construction.
 
-    Delegates to the paper-faithful implementation: reachability formulas
-    (via fin_c for Lemma 7) + assembly of Muller DNF over good recurrent sets
-    (reconstruct_ltl_paper_style). This is the systematic algebraic construction
-    with no ad-hoc, no shape inspection, no inf-often approximations.
-    Returns the hash-consed spot.formula (see reconstruct_ltl_paper_style).
+    BLS = Boker, Lehtinen & Sickert, "On the Translation of Automata to Linear
+    Temporal Logic" (FoSSaCS 2022) — the systematic algebraic translation from a
+    counter-free deterministic ω-automaton to LTL over the Krohn-Rhodes / holonomy
+    reset cascade. Delegates to the paper-faithful implementation: the five
+    inductive reachability formulas (via fin_c for Lemma 7) + assembly of the
+    Muller DNF over good recurrent config sets (reconstruct_ltl_paper_style).
+    No ad-hoc, no shape inspection, no inf-often approximations. Returns the
+    hash-consed spot.formula (see reconstruct_ltl_paper_style).
     """
     # Depth guard dropped (was 3 levels during find-issues-small-first dev):
     # the ladder is green through 3L and the construction is fully memoized
@@ -220,7 +224,7 @@ def build_phi(casc: Cascade, acceptance_type: str = "muller", acceptance_data=No
 
 
 __all__ = [
-    "reconstruct_ltl_1level_buchi",
+    "reconstruct_bls",
     "reconstruct_ltl_paper_style",
     "reconstruct_ltl_str",
     "simplify_ltl",

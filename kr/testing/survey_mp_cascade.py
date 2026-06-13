@@ -114,7 +114,7 @@ from pathlib import Path
 proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 import spot
-from kr import decompose_aut, reconstruct_ltl_1level_buchi
+from kr import decompose_aut, reconstruct_bls
 from kr.decompose_recombine import reconstruct_decomposed, split_report
 
 # The decompose-and-recombine front end is the GOTO path (KR_DECOMPOSE=1,
@@ -139,7 +139,7 @@ try:
     # tree-size gate (the flat string is the double-exp artifact — an oversized
     # case reports its DAG/tree sizes instead and equiv shows UNVERIFIED_SIZE).
     from kr.ltl_builders import _tree_size_f, _str_f
-    rec_f = reconstruct_decomposed(aut) if USE_DECOMP else reconstruct_ltl_1level_buchi(casc)
+    rec_f = reconstruct_decomposed(aut) if USE_DECOMP else reconstruct_bls(casc)
     # 5M tree nodes ~ 40MB string: above every case Spot equiv has ever
     # completed, below the 64M+ monsters whose str() alone blows the budget.
     _lim = int(_os.environ.get("KR_FLATTEN_TREE_LIMIT", "5000000"))

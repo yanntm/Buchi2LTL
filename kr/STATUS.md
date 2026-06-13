@@ -53,7 +53,7 @@ unfolding that DAG.
   wsolid/wsolid⁺; `fin_c` per Lemma 7 with ι==C postponement. Case dispatches
   compare FULL configs.
 - **Hash-consed `spot.formula` objects end-to-end, INCLUDING the output**:
-  `reconstruct_ltl_paper_style` / `reconstruct_ltl_1level_buchi` return the
+  `reconstruct_ltl_paper_style` / `reconstruct_bls` return the
   formula DAG (str accepted at entry for probes). Flattening is opt-in only:
   `reconstruct_ltl_str` (historical entry), or the size-gated `_str_f_gated`
   (`KR_FLATTEN_TREE_LIMIT`). `PAPER_MAX_LTL_SIZE` now reports unfolded-tree

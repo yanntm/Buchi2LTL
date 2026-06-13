@@ -4,7 +4,7 @@ kr/testing/test_kr_reconstruct.py
 
 Verification for the pure paper reconstruction path in kr/:
 - decomp (Spot -> det parity complete -> SgpDec cascade)
-- reconstruct_ltl_1level_buchi (which uses the inductive reach formulas +
+- reconstruct_bls (which uses the inductive reach formulas +
   fin_c (Lemma 7) + Muller DNF assembly from good SCC sets)
 
 Uses subprocess isolation per case (stability: fresh python, no Spot/buddy
@@ -32,7 +32,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from kr import (
     decompose_aut,
-    reconstruct_ltl_1level_buchi,
+    reconstruct_bls,
 )
 
 # Cases chosen to exercise 0/1/multi level cascades and the paper path.
@@ -81,7 +81,7 @@ proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 
 import spot
-from kr import decompose_aut, reconstruct_ltl_1level_buchi
+from kr import decompose_aut, reconstruct_bls
 
 fs = {formula_str!r}
 try:
@@ -100,7 +100,7 @@ try:
     # formula DAG out; flatten only under the tree-size gate (see survey tool)
     import os as _os
     from kr.ltl_builders import _tree_size_f, _str_f
-    rec_f = reconstruct_ltl_1level_buchi(casc)
+    rec_f = reconstruct_bls(casc)
     _lim = int(_os.environ.get("KR_FLATTEN_TREE_LIMIT", "5000000"))
     info["tree_nodes"] = _tree_size_f(rec_f)
     info["recovered"] = _str_f(rec_f) if info["tree_nodes"] <= _lim else None

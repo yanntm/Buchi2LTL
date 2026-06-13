@@ -37,7 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
-from kr import decompose_aut, reconstruct_ltl_1level_buchi
+from kr import decompose_aut, reconstruct_bls
 from kr.reachability import _compute_good_muller_sets
 
 def describe_aut(aut, label):
@@ -152,9 +152,9 @@ def main():
         print("No pruned config aut available.")
 
     # 6. Reconstruction
-    print("\n=== Calling reconstruct_ltl_1level_buchi(casc) (with KR_TRACE=1 for steps) ===")
+    print("\n=== Calling reconstruct_bls(casc) (with KR_TRACE=1 for steps) ===")
     print("(Traces from reach_strong, fin_c, etc. should appear above if enabled)")
-    ltl = reconstruct_ltl_1level_buchi(casc)   # spot.formula DAG
+    ltl = reconstruct_bls(casc)   # spot.formula DAG
     from kr.ltl_builders import _str_f_gated
     print("\n=== Recovered LTL:", _str_f_gated(ltl))
 

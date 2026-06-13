@@ -22,7 +22,7 @@ from .gap_bridge import (
 )
 from .extract import extract_generators, ExtractionError, is_deterministic
 from .reachability import (
-    reconstruct_ltl_1level_buchi,
+    reconstruct_bls,
     reconstruct_ltl_paper_style,
     reconstruct_ltl_str,
     simplify_ltl,
@@ -46,7 +46,7 @@ __all__ = [
     "extract_generators",
     "ExtractionError",
     "is_deterministic",
-    "reconstruct_ltl_1level_buchi",
+    "reconstruct_bls",
     "reconstruct_ltl_paper_style",
     "reconstruct_ltl_str",
     "simplify_ltl",

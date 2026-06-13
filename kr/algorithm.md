@@ -108,7 +108,7 @@ This is the pure, systematic target for the kr/ folder.
 
 - `Cascade` (cascade.py) provides the cascade representation: `state_to_config` coordinate tuples, `levels`, `letter_valuations`, `move_config`, Enter/Stay/Leave helpers. Config-graph analysis (pruned config automaton, good Muller sets) is in `config_graph.py`.
 - `reachability_operators.py` implements the 5 formulas (strong/weak, solid/dashed, >0 variants) uniformly for all depths, bottoming at the level-0 plain-Until base case, plus `fin_c` (Lemma 7).
-- `reachability.py` assembles the Muller DNF (`reconstruct_ltl_paper_style`); `reconstruct_ltl_1level_buchi` is the compat-named public entry.
+- `reachability.py` assembles the Muller DNF (`reconstruct_ltl_paper_style`); `reconstruct_bls` is the public per-cascade entry (the Boker-Lehtinen-Sickert construction).
 - `decompose_aut` + gap bridge perform the decomposition (stability via `bdd_utils`, parser in `kr/gap/parse.py`).
 
 For current correctness state and remaining work, see `kr/STATUS.md` and `kr/TODO.md` (kept current; this file is the stable spec/motivation). The construction details are in `paper/automata-to-ltl-construction.md`; disputes are settled by `paper/Automata2LTL.txt`.
