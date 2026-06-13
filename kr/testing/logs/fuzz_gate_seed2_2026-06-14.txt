@@ -1,0 +1,73 @@
+=== gate soundness/adopt fuzz: N=60 aps=2 tree=12 seed=2 (per-formula 15s, gap 8s, VERIFY=1) ===
+
+  [  1/60]   ok  FG!p0                                                   adopt=1 rej=0
+  [  2/60]   ok  XF!p0                                                   adopt=1 rej=0
+  [  3/60]   ok  F(p1 & (!p0 U !p1)) U p1                                adopt=0 rej=0
+  [  4/60]   ok  ((((p0 & p1) | (!p0 & !p1)) & X!p0) | (((p0 & !p1) | (  adopt=1 rej=0
+  [  5/60]   ok  X(p1 U XG!p1)                                           adopt=1 rej=0
+  [  6/60]   ok  XX!p0                                                   adopt=1 rej=0
+  [  7/60]   ok  G(p0 | Xp0)                                             adopt=1 rej=0
+  [  8/60]   ok  !p0 | Xp1                                               adopt=1 rej=0
+  [  9/60]   ok  p0                                                      adopt=1 rej=0
+  [ 10/60]   ok  Fp0                                                     adopt=1 rej=0
+  [ 11/60]   ok  G(!p0 & X(!p0 W p1))                                    adopt=1 rej=0
+  [ 12/60]   ok  !p1                                                     adopt=1 rej=0
+  [ 13/60]   ok  p1                                                      adopt=1 rej=0
+  [ 14/60]   ok  (p1 & XF!p0) | (!p1 & XGp0)                             adopt=1 rej=0
+  [ 15/60]   ok  (p0 & F(!p1 & X((p0 & ((p0 & p1) | (!p0 & !p1))) | (!p  adopt=1 rej=0
+  [ 16/60]   ok  G(!p0 | (FGp0 R p0))                                    adopt=1 rej=0
+  [ 17/60]   ok  XF(p1 & XF(!p0 | !p1))                                  adopt=1 rej=0
+  [ 18/60]   ok  Fp0 | X!p1 | Gp1                                        adopt=1 rej=0
+  [ 19/60]   ok  Xp0                                                     adopt=1 rej=0
+  [ 20/60]   ok  (p0 & XF!p1) | (!p0 & XGp1)                             adopt=1 rej=0
+  [ 21/60]   ok  G!p1                                                    adopt=1 rej=0
+  [ 22/60]   ok  p0 U G!p1                                               adopt=1 rej=0
+  [ 23/60]   ok  XG!p0                                                   adopt=1 rej=0
+  [ 24/60]   ok  p1 W (p0 M (p1 U p0))                                   adopt=1 rej=0
+  [ 25/60]   ok  G((p0 & !p1) | (!p0 & p1) | X(((p0 & !p1) | (!p0 & p1)  adopt=0 rej=0
+  [ 26/60]   ok  F(p1 | Xp1)                                             adopt=1 rej=0
+  [ 27/60]   ok  p1 R ((!p0 & X!p1) | (p0 & Xp1))                        adopt=1 rej=0
+  [ 28/60]   ok  Gp1                                                     adopt=1 rej=0
+  [ 29/60]   ok  X!p0                                                    adopt=1 rej=0
+  [ 30/60]   ok  X(G!p0 | XXXGp0)                                        adopt=1 rej=0
+  [ 31/60]   ok  p1 M GFp1                                               adopt=1 rej=0
+  [ 32/60]   ok  XXG(!p0 & Fp1)                                          adopt=1 rej=0
+  [ 33/60]   ok  !p0 W Gp0                                               adopt=1 rej=0
+  [ 34/60]   ok  FGp0                                                    adopt=1 rej=0
+  [ 35/60]   ok  GFp1                                                    adopt=1 rej=0
+  [ 36/60]   ok  (!p0 & !p1) | Fp0                                       adopt=1 rej=0
+  [ 37/60]   ok  !p1 & Fp1                                               adopt=1 rej=0
+  [ 38/60] unv   FG(Fp0 U p1)                                            adopt=0 rej=0
+  [ 39/60]   ok  p1 | GF!p1                                              adopt=1 rej=0
+  [ 40/60]   ok  !p0                                                     adopt=1 rej=0
+  [ 41/60]   ok  ((((p0 & !p1) | (!p0 & p1)) & XG!p1) | (((p0 & p1) | (  adopt=1 rej=0
+  [ 42/60]   ok  G(XFp1 U (p1 | XGp1))                                   adopt=1 rej=0
+  [ 43/60]   ok  p0 | !p1 | (((p0 & !p1) | (!p0 & p1)) & X((p0 & !p1) W  adopt=1 rej=0
+  [ 44/60]   ok  G!p0                                                    adopt=1 rej=0
+  [ 45/60]   ok  X(!p1 | FGp0)                                           adopt=1 rej=0
+  [ 46/60]   ok  F(Gp0 | (p0 & F!p0))                                    adopt=1 rej=0
+  [ 47/60]   ok  F((!p1 & Fp0) | (p1 & G!p0))                            adopt=1 rej=0
+  [ 48/60]   ok  X((!p1 & G!p0) | (p1 & Fp0))                            adopt=1 rej=0
+  [ 49/60]  t/o  F(p1 W Fp0) U p1                                        
+  [ 50/60]   ok  XX(p0 W !p1)                                            adopt=1 rej=0
+  [ 51/60]   ok  X!p1                                                    adopt=1 rej=0
+  [ 52/60]   ok  XGp1                                                    adopt=1 rej=0
+  [ 53/60] unv   G((p1 & F!p0) | (!p1 & Gp0))                            adopt=1 rej=0
+  [ 54/60]   ok  (!p1 & F(!p1 & F!p0)) | (p1 & G(p1 | Gp0))              adopt=1 rej=0
+  [ 55/60]   ok  FGp1                                                    adopt=1 rej=0
+  [ 56/60]   ok  Fp1                                                     adopt=1 rej=0
+  [ 57/60]   ok  XG(p0 | p1)                                             adopt=1 rej=0
+  [ 58/60]   ok  F(GFp1 | (p1 & Gp0))                                    adopt=1 rej=0
+  [ 59/60]   ok  Gp0                                                     adopt=1 rej=0
+  [ 60/60]   ok  Gp0 | GFp1                                              adopt=1 rej=0
+
+=== summary ===
+  EQUIV    57
+  FALSE    0
+  UNVERIF  2
+  ERROR    0
+  TIMEOUT  1
+
+  gate: tried=65 adopted=56 rejected=0  (adopt rate 56/65=86%)
+
+  SOUNDNESS: equiv=FALSE=0, gate rejections=0  (both MUST be 0 for the no-check production path)
