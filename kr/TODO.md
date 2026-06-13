@@ -135,8 +135,9 @@ fold pass → interning). Items below are the actionable queue.
     `sat_minimize` the det automaton (AUTOMATON-only — `GFa&FGb` 2-state
     postprocess explodes to 9.5e15, 1-state sat_minimize → 313).
   Remaining work:
-  - **export from `kr/__init__.py`** + make `reconstruct_decomposed` the
-    documented top-level entry (separate one-file commit).
+  - ~~**export from `kr/__init__.py`**~~ DONE — `reconstruct_decomposed` /
+    `split_report` exported; README documents `reconstruct_decomposed(aut)` as
+    the recommended top-level entry (automaton in, formula DAG out).
   - **acceptance ABSORPTION** blocks both splits when Spot's determinization
     folds a second component into one set/strength: `GFa&Gb` (recurrence ∧
     safety → single `Inf(0)`, `none`, stays 89 temporals over cap) and
