@@ -166,13 +166,82 @@ tail-normalization target (counter-measure D in TODO numbering). Escape
 hatch `KR_FUSE_LETTERS=0` restores the per-letter literal paper shape (for
 grounding comparisons).
 
+## Key-space diagnosis & structural-reduction experiments (2026-06-13)
+
+A focused session on the reach-driven wall (`Xa & XXa` ≡ `X(a&Xa)`, depth-5,
+~24k DAG nodes for a 4-token language). Outcome: the explosion is a **key-space**
+problem, and the part of the key that cheap config-graph reasoning can touch is
+**not** the driver. Two sound structural reductions tried, both reverted.
+
+**The numbers (probes, now removed; findings here).**
+- `a & Xa` with per-node simplify OFF (`KR_SIMP_NODE=0`): 294 DAG nodes → **32
+  distinct languages**; **94 ≡ ⊥, 30 ≡ ⊤** (constants written in dozens of
+  spellings). But all are `X(0)`-towers — folded by **basics alone**
+  (`KR_SIMP_FULL_LIMIT=0` still gives 3 nodes). So `a & Xa` is NOT a wall model;
+  basics (scalable, O(1)/node) already nail it.
+- `F(a & Xa)`: 111 output nodes ≈ **89 distinct languages** — low redundancy;
+  small nodes ⇒ the per-node simplifier canonicalizes and hash-cons merges.
+- `Xa & XXa`: basics 30833 → capped-full 23676 → **uncapped-full 16724** (3.9s),
+  still ~1600× minimal. Formula-level rewriting (basic OR full, capped OR not)
+  **cannot** fold it — Spot's rules are local/pairwise-syntactic; merging
+  language-equal-but-syntactically-different BIG nodes needs per-node semantic
+  canonicalization = translate-to-automaton = the 32-acc wall.
+- Keys vs languages: `Xa & XXa` computes **41,584 helper keys / 19,775 reach
+  keys / 10,616 distinct result formulas** for **~tens** of languages
+  (Myhill-Nerode bound: 5 residuals + bounded auxiliaries). `|configs| = 7`.
+  Shallow cases are efficient (`F(a&Xa)` 167 keys / 59 langs / 4 cfg, ~3×);
+  redundancy is **depth-driven**.
+
+**Which axis explodes.** The anatomy (`probe_tail_anatomy`) already showed it:
+per level `#τ` grows 4→10→54→422→1507 while `#(S,B,T)` stays ~50–120. The driver
+is the **τ-tail**: the solid last-step decomposition rewrites `τ → σ ∧ X τ` each
+peel, so τ accumulates the **read suffix**. Two paths reaching the SAME config
+carry DIFFERENT accumulated τ but the SAME residual language → keys split,
+languages don't. τ re-encodes path history the config already determines.
+
+**Reduction 1 — target-reachability FALSE-cut (suffix-projected, avoid-free).**
+Sound (`reach ≡ false` when `T[level:]` graph-unreachable from `S`; the
+avoid=B / `T==B` variants are UNSOUND — paper avoid is β-guarded strict-before,
+Automata2LTL.txt:573). Payoff: **~zero** (fires 104×/41584 on `Xa & XXa`, census
+unchanged; zero on every other case). Reverted.
+
+**Reduction 2 — avoid-vacuity key merge.** `reach(S,B,β,T,τ) ≡
+reach(S,None,false,T,τ)` when config `B` is unreachable from `S` (avoid conjunct
+vacuous ∀β; clean proof, level-independent). Sound (audit CLEAN, equiv True).
+Payoff: **net-NEGATIVE** — `Xa & XXa` −16% (3827 merges) but `G(a->Xb)` +24%,
+`G(p->(qUr))` +24%, `Ga|Gb` +23%. Dropping `(B,β)` builds the unconstrained
+"free reach" shape, which is often LARGER and shares LESS. Reverted.
+
+**Config-indexed POC (`Acc(c)`, tried then deleted).** `Acc(c) = ` language of D
+from config c, memoized per config (key space `|configs|`, not the reach tuple).
+Rules: (R1) ⊤/⊥ base by universality/emptiness of the small sub-automaton; (R2)
+transient one-step `⋁_σ guard ∧ X Acc(δ(c,σ))`; recurrent ⇒ fall back to BLS. It
+WORKED and was equiv-True: `Xa & XXa` 23676→**4**, `Xa & XXXa` 234k→**5**. But
+rejected as **off-thesis**: it only handles the safety/transient fragment (the
+easy part), uses Spot as a ⊤/⊥ oracle (bypass, not construction), reintroduces a
+safety-vs-recurrent case split, and taken to its conclusion abandons the
+Krohn-Rhodes cascade entirely — i.e. it is a different (and narrower than
+`buchi2ltl/`) construction, not a fix to this one.
+
+**Conclusion (the wall, stated plainly).** The redundancy is the τ-tail =
+path-history re-encoding. Collapsing it = recognizing distinct accumulated τ
+denote the same residual = **language equality on τ** = exactly the unscalable
+Spot operation (32-acc wall). There is no cheap structural proxy: the `(S,B,T)`
+axis (reachable by config-graph queries) is provably NOT the driver, and the τ
+axis has no graph handle. Within the KR algebra the τ-tail blow-up on
+safety/reach-driven inputs appears **irreducible by cheap means**; the two
+escapes (a scalable language-equality oracle, or config-indexing) are
+respectively the core hard problem itself and off-thesis. **A stronger idea is
+needed** — neither structural key surgery nor formula-level rewriting reaches it.
+
 ## OPEN questions
 
-- **Soundness boundary of pruning (2).** Which vacuity arguments are
-  justified by the paper's invariants vs. by reachability facts the formulas
-  quantify over implicitly? Pruning by config-graph reachability is a
-  semantic strengthening of the construction — it needs its own correctness
-  argument (grounding gives per-case evidence, not a proof). NOT settled.
+- **Soundness boundary of pruning (2).** PARTLY SETTLED (2026-06-13, see
+  "Key-space diagnosis" above): two config-graph reductions have clean
+  correctness arguments — target-reachability FALSE-cut (suffix-projected,
+  avoid-free) and avoid-vacuity key merge (B unreachable from S). Both are
+  SOUND and both are UNHELPFUL (~zero / net-negative). The remaining vacuity
+  arguments would need to bite the τ axis, which has no config-graph handle.
 - **Hierarchy preservation under folding.** The paper's outputs land in the
   right MP class by construction (Lemma 5). Do rewrites (3) and interning
   (4) preserve the syntactic class, or do we need class-aware rule sets?

@@ -174,6 +174,26 @@ unfolding that DAG.
   census 98→84. NB the formula must be written `q U r` WITH SPACES —
   `qUr` parses as ONE atomic proposition (an earlier "solved at 21
   nodes" reading of this case was that artifact).
+- **Config-graph reach FALSE-cut: tried, NEGATIVE, reverted (2026-06-13).**
+  Hypothesis: prune `reach_strong(S,·,·,T,·)` to `false` when the target is
+  graph-unreachable from the source in the config automaton — a cheap, exact,
+  Spot-free cut at the source of the σ∧Xτ ladder. Two corrections shrank it to
+  nothing. (1) Soundness: the paper's avoid is β-guarded and STRICT-BEFORE
+  arrival (`∀j∈[0..i). δ≠B ∨ w⊭β`, Automata2LTL.txt:573), so `T==B` does NOT
+  imply false and walling B in the BFS is unsound — only avoid-FREE target
+  reachability is sound. (2) The cut must be SUFFIX-projected, not full-config:
+  at recursion level k the target is matched on `T[k:]` (the `level==n` base is
+  `(¬β)Uτ`, dropping T), so a full-config cut is the k=0 case and is unsound at
+  k>0. A read-only probe over the helper memo showed 30% "cuttable" full-config
+  — but ~all of that was the unsound over-cut; the sound suffix-projected cut
+  fires ~104×/41584 on `Xa & XXa` and changes DAG/tree/temporal census by ZERO,
+  likewise zero on `G(a->Xb)`/`G(p->(qUr))`/`F(a&Xb)`/`Ga|Gb` (audit CLEAN, all
+  equiv True throughout). Diagnosis, consistent with the census-anatomy finding
+  above: the explosion lives in the **Fin(C) acceptance scaffolding, not in
+  reach** — its redundancy is β/τ-obligation-driven, invisible to graph
+  reachability. The free-tail collapse the user is after needs a Fin(C)-level
+  recognizer (config in an absorbing accepting class ⇒ constant Fin term), not a
+  reach cut. All code reverted; finding kept here.
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call
