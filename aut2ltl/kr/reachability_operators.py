@@ -95,6 +95,22 @@ def _get_casc(cid: int) -> Optional["Cascade"]:
 def _clear_casc_registry():
     _casc_by_id.clear()
 
+def reset_build_state(casc: "Cascade") -> None:
+    """Reset the operator counters/memos for an independent fresh build, so a
+    translator's size counters are accurate. The acceptance-class members
+    (buchi/cobuchi/weak) call this before constructing."""
+    global PAPER_REACH_CALLS, PAPER_FIN_CALLS, PAPER_MAX_LTL_SIZE
+    PAPER_REACH_CALLS = 0
+    PAPER_FIN_CALLS = 0
+    PAPER_MAX_LTL_SIZE = 0
+    _reach_memo.clear()
+    _clear_casc_registry()
+    _register_casc(casc)
+    if "_lru_reach_strong" in globals():
+        _lru_reach_strong.cache_clear()
+    if "_helper_memo" in globals():
+        _helper_memo.clear()
+
 def _trace(msg: str) -> None:
     if TRACE_ON:
         print("[KR] " + msg)
