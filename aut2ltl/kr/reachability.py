@@ -79,7 +79,7 @@ def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.form
             if techniques is not None:
                 techniques |= r.technique
             return r.formula
-    # coBüchi precedes nothing relevant but follows Büchi, so it only sees
+    # coBüchi (persistence, Σ₂): tried after Büchi, so it only sees
     # genuinely-not-Büchi cascades. Gate KR_DISPATCH_COBUCHI, default ON.
     if os.environ.get("KR_DISPATCH_COBUCHI", "1") != "0":
         from .cobuchi import cobuchi
