@@ -54,9 +54,9 @@ def reconstruct_sl_driven(aut: "spot.twa_graph") -> Optional["spot.formula"]:
         out = reconstruct_ltl(tgba, scc_labeler=labeler)
     except Exception:
         return None
-    rec = out.formula      # ReconResult
-    if rec is None or (isinstance(rec, str) and "UNSUPPORTED" in rec):
+    if out.declined or out.formula is None:   # ReconResult: "not me"
         return None
+    rec = out.formula
     try:
         cand = rec if isinstance(rec, spot.formula) else spot.formula(str(rec))
     except Exception:
