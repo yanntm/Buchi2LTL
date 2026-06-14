@@ -38,7 +38,7 @@ from ltl_diff import diff_report
 p = json.load(sys.stdin)
 print(diff_report(spot.formula(p["orig"]), spot.formula(p["rec"]),
                   "original", "recovered"))
-''' % {"testdir": str(PROJECT_ROOT / "kr" / "testing")}
+''' % {"testdir": str(PROJECT_ROOT / "tests" / "kr")}
 
 
 def main():

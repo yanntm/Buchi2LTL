@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 # Make sure we can import the kr package when run directly
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from aut2ltl.kr.gap_bridge import generate_gap_script, check_gap_available, decompose_gens
 from aut2ltl.kr.cascade import Cascade, LevelInfo

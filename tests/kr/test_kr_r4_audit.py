@@ -190,7 +190,7 @@ def check_5point_checklist():
     Precise source inspection of the *bodies* of Rws0 / R4 + behavioral.
     """
     print("\n=== Path C: 5-point Rws0 / R4 checklist (source + behavioral) ===")
-    src_path = PROJECT_ROOT / "kr" / "reachability_operators.py"
+    src_path = PROJECT_ROOT / "aut2ltl" / "kr" / "reachability_operators.py"
     src = src_path.read_text()
     rws0_body = _get_func_body(src, "_stay_gt0_weak")
     rs_body = _get_func_body(src, "_solid_stay_weak")

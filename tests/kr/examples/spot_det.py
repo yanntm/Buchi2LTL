@@ -13,7 +13,7 @@ automata (the contract required by the paper's construction).
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import spot
 from aut2ltl.kr import decompose_aut, extract_generators, is_deterministic, check_gap_available
