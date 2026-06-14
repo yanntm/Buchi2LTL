@@ -65,7 +65,7 @@ import os, sys, json, traceback
 from pathlib import Path
 sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
-from aut2ltl.kr.decompose_recombine import reconstruct_decomposed
+from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
 from aut2ltl.kr.acceptance_dispatch import reconstruct_acc
 from aut2ltl.kr.ltl_builders import _tt
 

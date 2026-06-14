@@ -8,7 +8,11 @@ The implementation follows the algebraic construction of Boker, Lehtinen & Sicke
 
 No ad-hoc pattern matching or approximations on automaton structure.
 
-See kr/README.md, kr/STATUS.md, kr/algorithm.md .
+This package is the PURE cascade engine: no heuristics, no portfolio. The
+decompose-and-recombine front end and the sl gate live in `aut2ltl.portfolio`;
+the result struct lives in `aut2ltl.contract`.
+
+See aut2ltl/kr/README.md, STATUS.md, algorithm.md .
 """
 
 from .cascade import Cascade, LevelInfo, make_trivial_cascade
@@ -32,11 +36,8 @@ from .reachability import (
     fin_c,
 )
 from .reachability_operators import TRACE_ON  # for KR_TRACE=1 dev traces of inductive construction
-from .decompose_recombine import reconstruct_decomposed, split_report
-from aut2ltl.contract import ReconResult
 
 __all__ = [
-    "ReconResult",
     "Cascade",
     "LevelInfo",
     "make_trivial_cascade",
@@ -49,8 +50,6 @@ __all__ = [
     "extract_generators",
     "ExtractionError",
     "is_deterministic",
-    "reconstruct_decomposed",
-    "split_report",
     "reconstruct_bls",
     "reconstruct_ltl_paper_style",
     "reconstruct_ltl_str",

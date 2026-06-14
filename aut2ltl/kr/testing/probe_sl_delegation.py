@@ -74,7 +74,7 @@ fs = {fs!r}
 info = {{"formula": fs}}
 try:
     from aut2ltl.sl.reconstruction import reconstruct_ltl
-    from aut2ltl.kr.decompose_recombine import reconstruct_decomposed
+    from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
 
     # Deterministic TGBA: clean A_q semantics (future from q independent of prefix)
     # and the form buchi2ltl/sl operate on.

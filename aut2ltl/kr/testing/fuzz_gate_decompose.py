@@ -71,8 +71,8 @@ os.environ["KR_GATE_VERIFY"] = "1"     # AUDIT: gate re-checks every adopted pie
 from pathlib import Path
 sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
-from aut2ltl.kr.decompose_recombine import reconstruct_decomposed
-from aut2ltl.kr.heuristic_gate import gate_stats, reset_gate_stats
+from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
+from aut2ltl.portfolio.heuristic_gate import gate_stats, reset_gate_stats
 
 def tree_size(f):
     memo = {{}}

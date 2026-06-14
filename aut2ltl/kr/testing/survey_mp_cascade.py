@@ -117,7 +117,7 @@ proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 import spot
 from aut2ltl.kr import decompose_aut, reconstruct_bls
-from aut2ltl.kr.decompose_recombine import reconstruct_decomposed
+from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
 
 # The decompose-and-recombine front end is the GOTO path (KR_DECOMPOSE=1,
 # default); KR_DECOMPOSE=0 restores the monolithic path for A/B regression.

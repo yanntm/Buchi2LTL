@@ -62,7 +62,7 @@ proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 import spot
 from aut2ltl.kr import decompose_aut, reconstruct_bls
-from aut2ltl.kr.decompose_recombine import reconstruct_decomposed
+from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
 from aut2ltl.kr.ltl_builders import _tree_size_f
 
 # Default path is the GOTO decompose entry; KR_SIZE_PATH=monolithic switches

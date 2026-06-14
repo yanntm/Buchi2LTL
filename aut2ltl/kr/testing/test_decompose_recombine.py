@@ -38,7 +38,7 @@ import sys, json
 from pathlib import Path
 sys.path.insert(0, r"{root}")
 import spot
-from aut2ltl.kr.decompose_recombine import reconstruct_decomposed, split_report
+from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed, split_report
 from aut2ltl.kr.ltl_builders import _tree_size_f
 
 def dag_nodes(f):

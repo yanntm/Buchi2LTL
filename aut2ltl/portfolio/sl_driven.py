@@ -64,7 +64,7 @@ def reconstruct_sl_driven(aut: "spot.twa_graph") -> Optional["spot.formula"]:
     # Simplify on equal footing with the rest of the pipeline (buchi2ltl skips
     # Spot's simplifier; the spliced kr labels are already simplified).
     try:
-        from .ltl_builders import _simp_f
+        from aut2ltl.kr.ltl_builders import _simp_f
         cand = _simp_f(cand)
     except Exception:
         pass

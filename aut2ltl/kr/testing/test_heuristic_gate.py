@@ -70,8 +70,8 @@ def sizes(f):
 fs = {fs!r}
 info = {{"formula": fs}}
 try:
-    from aut2ltl.kr.decompose_recombine import reconstruct_decomposed, _to_split_form
-    from aut2ltl.kr.heuristic_gate import try_heuristic_gate, gate_stats, reset_gate_stats
+    from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed, _to_split_form
+    from aut2ltl.portfolio.heuristic_gate import try_heuristic_gate, gate_stats, reset_gate_stats
     orig = spot.formula(fs).translate("Buchi")
     aut = spot.formula(fs).translate()
 

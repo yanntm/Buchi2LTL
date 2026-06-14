@@ -64,8 +64,8 @@ def sizes(f):
 fs = {fs!r}
 info = {{"formula": fs}}
 try:
-    from aut2ltl.kr.sl_driven import reconstruct_sl_driven
-    from aut2ltl.kr.decompose_recombine import reconstruct_decomposed
+    from aut2ltl.portfolio.sl_driven import reconstruct_sl_driven
+    from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
     from aut2ltl.sl.reconstruction import reconstruct_ltl
     aut = spot.formula(fs).translate()
 

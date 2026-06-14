@@ -36,9 +36,9 @@ from typing import Callable, List, Tuple
 
 import spot
 
-from .gap_bridge import decompose_aut
+from aut2ltl.kr.gap_bridge import decompose_aut
 from .heuristic_gate import try_heuristic_gate
-from .reachability import reconstruct_ltl_paper_style
+from aut2ltl.kr.reachability import reconstruct_ltl_paper_style
 from aut2ltl.contract import ReconResult
 
 __all__ = ["reconstruct_decomposed", "split_report"]

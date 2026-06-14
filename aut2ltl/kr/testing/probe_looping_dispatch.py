@@ -54,7 +54,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
 from aut2ltl.kr import decompose_aut
-from aut2ltl.kr.decompose_recombine import _to_split_form
+from aut2ltl.portfolio.decompose_recombine import _to_split_form
 from aut2ltl.kr.config_graph import build_pruned_config_aut, reachable_configs
 from aut2ltl.kr.reachability_operators import reach_strong
 from aut2ltl.kr.ltl_builders import _And, _Or, _Not, _tt, _ff, _simp_f, _tree_size_f
