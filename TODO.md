@@ -2,6 +2,42 @@
 
 Project-level work items. Engine-level items live in `aut2ltl/kr/TODO.md`.
 
+## Configurability — reify the runtime context, kill the statics (active 2026-06-14)
+
+Replace the module-global flags/statics with an explicit, threaded context — the
+`OptionsCache` — built at the front end, **not a singleton**. Three compartments,
+landed in SEPARATE iterations:
+- **Options** (flags) — THIS iteration. An open key-value store (mostly bool).
+- **Caches** (construction memos, counters) — later: fold the
+  `reachability_operators` statics in; fresh on `clone`.
+- **Infra** (`bdd_dict`/buddy, DAG unifier) — later: shared-ref on `clone`.
+
+Design (settled): defaults live in the per-package `OptionSpec` (key + default +
+doc + legacy env). `Options.get(SPEC)` resolves lazily — store value if set, else
+`spec.default` — so a bare `Options()` is "all defaults", no pre-init / registry /
+module-walking. Layering: the FLOOR declares the store (`aut2ltl/options.py`, no
+engine imports); each PACKAGE declares its keys (`<pkg>/options.py` — its OPTIONS
+contract + the default source); the ROOT / front end aggregates specs and layers
+env/CLI/API overrides (the only place that knows all packages).
+
+### This iteration — the Options backbone (no call-site wiring yet)
+1. `aut2ltl/options.py` (floor): `OptionSpec(key, default, doc, env)` + `Options`
+   (`get(spec_or_key)` lazy default, `set`, `clone(overrides)`, `from_specs(env=)`).
+   Placed test: lazy default via spec, `clone` variant, env seeding.
+2. Per-package spec declarations (grep the real `os.environ` knobs first):
+   `aut2ltl/kr/options.py`, `aut2ltl/portfolio/options.py`, `aut2ltl/sl/options.py`
+   — the doc skeletons / contracts. Additive; nothing reads them yet.
+3. Root builder at the front end (`aut2ltl/cli.py`, "aut2ltl main"):
+   `build_options(overrides=None)` = aggregate the package specs + env → default
+   `Options`. Additive.
+
+### Deferred (separate iterations)
+- **Wire call sites**: thread `Options` into Translator construction, repoint each
+  `os.environ.get(...)` → `options.get(SPEC)`, ONE package at a time, survey-gated.
+- **Caches compartment**: fold `reachability_operators` globals (memos, counters,
+  `reset_build_state`) into the cache bucket; fresh-on-clone; removes the resets.
+- **Infra compartment**: `bdd_dict`/buddy + DAG unifier as shared refs.
+
 ## Architecture refactor — DONE (2026-06-14)
 
 The OO refactor is complete: a contract floor (`Language` + `LTLFormulaResult` +
