@@ -2,10 +2,11 @@
 """
 tests/kr/test_decompose.py
 
-Cross-check the new `Decompose` Composite (over leaf first_success([sl, cascade]))
-against the old `reconstruct_decomposed` on a spread of split shapes: AND, OR,
-non-splitting (gate), single. Verdicts must be language-equivalent; technique
-strings are printed (they may shift — the Composite re-minimizes per level).
+Standalone check of the `Decompose` Composite over leaf first_success([sl, cascade]):
+on a spread of split shapes (AND, OR, non-splitting, single) it produces a
+language-equivalent formula. (The port-fidelity cross-check against the old
+reconstruct_decomposed lived here while both existed — same techniques — and is
+recorded in git history.)
 
 GAP + Spot, small inputs (bounded). Run from project root:
     python3 tests/kr/test_decompose.py
@@ -22,27 +23,25 @@ from aut2ltl.combinators import first_success
 from aut2ltl.portfolio.sl import sl
 from aut2ltl.portfolio.decompose import Decompose
 from aut2ltl.kr.aut2cas import reconstruct as cascade
-from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed as old_decomposed
 
 CASES = ["GFa & FGb", "Ga | Fb", "FGa | FGb", "GFa", "a U b"]
 
 dec = Decompose(first_success([sl, cascade], name="leaf"))
 
 
-def test_decompose_matches_old() -> None:
+def test_decompose_equiv() -> None:
     for s in CASES:
         aut = spot.formula(s).translate()
-        old = old_decomposed(aut)
-        new = dec(Language.of(aut))
-        assert old.ok and new.ok, f"{s}: old={old} new={new}"
-        assert spot.are_equivalent(old.formula.translate(), new.formula.translate()), \
+        r = dec(Language.of(aut))
+        assert r.ok, f"{s}: declined"
+        assert spot.are_equivalent(r.formula.translate(), aut), \
             f"{s}: not language-equivalent"
-        print(f"  {s:12s}  old={old.technique_str():12s}  new={new.technique_str()}")
+        print(f"  {s:12s}  tech={r.technique_str()}")
 
 
 def main() -> int:
     failed = 0
-    for t in [test_decompose_matches_old]:
+    for t in [test_decompose_equiv]:
         try:
             t()
             print(f"PASS  {t.__name__}")
