@@ -191,13 +191,37 @@ def _inject_tn_fragments_and_compute_bad_states(aut, scc_fragments, state_formul
     return bad_states, state_formula
 
 
-def reconstruct_ltl(aut):
+def _sub_automaton_from(aut, q):
+    """The sub-automaton reachable from state q with q as the initial state —
+    the unit of FULL-SUFFIX delegation. L(sub) is exactly the language sl's
+    label(q) represents (sl walks the same automaton from q), so a label
+    obtained for `sub` from any sound translator is interchangeable with sl's
+    own label(q)."""
+    sub = spot.automaton(aut.to_str("hoa"))
+    sub.set_init_state(q)
+    sub.purge_unreachable_states()
+    return sub
+
+
+def reconstruct_ltl(aut, scc_labeler=None):
     """
     Backward LTL reconstruction from a TGBA.
 
     The function first tries the size-2 absorption heuristic (fusion test).
     If that produces a language-equivalent pseudo-linear automaton, the
     rest of the reconstruction runs on the massaged automaton.
+
+    `scc_labeler` (optional, default None — unchanged behavior): a callback
+    `sub_automaton -> ltl_string_or_None`. When sl reaches a state q it cannot
+    translate exactly (a multi-state SCC -> normally `UNSUPPORTED`), it instead
+    delegates the whole sub-automaton from q (`_sub_automaton_from`) to this
+    callback; a returned formula is spliced in as label(q) and the normal
+    backward labeling continues around it (it is X-wrapped at the crossing edge,
+    like any successor). This is the "kr under sl" seam: sl handles the very-weak
+    envelope exactly, the callback (kr) handles the multi-cyclic core — on a
+    SMALLER automaton than the whole. Sound when the callback is sound (the
+    delegated label plays the exact role of sl's own label(q)). If the callback
+    returns None, sl falls back to its usual `UNSUPPORTED`.
 
     Returns:
         (final_formula, state_formulas, technique)
@@ -370,6 +394,18 @@ def reconstruct_ltl(aut):
         aut, scc_fragments, state_formula, absorbed
     )
 
+    # States in a multi-state SCC (>=2 states) are sl's hard cases — whether the
+    # SCC is bottom or transient. With an scc_labeler set we delegate the whole
+    # sub-automaton from such a state (full-suffix delegation) at label() entry,
+    # which also pre-empts the `visiting` decline path that transient SCCs hit.
+    _multi_scc_states = set()
+    if scc_labeler is not None:
+        _si = spot.scc_info(aut)
+        for _s in range(_si.scc_count()):
+            _members = _si.states_of(_s)
+            if len(_members) >= 2:
+                _multi_scc_states.update(int(x) for x in _members)
+
     MAX_DEPTH = 10000
     depth = [0]
     UNSUPPORTED = "UNSUPPORTED: non-trivial cycle or complex SCC"
@@ -385,6 +421,21 @@ def reconstruct_ltl(aut):
     def label(q):
         if q in state_formula:
             return state_formula[q]
+
+        # Full-suffix delegation (kr under sl), at the label point: if q is in a
+        # multi-state SCC (sl's hard case, bottom OR transient), hand the whole
+        # sub-automaton from q to the external labeler and splice the result as
+        # label(q); the caller X-wraps it like any successor. Entry placement
+        # pre-empts both the bad_states and the `visiting` decline paths. A None
+        # result falls through to sl's usual handling (-> UNSUPPORTED).
+        if scc_labeler is not None and q in _multi_scc_states:
+            try:
+                frag = scc_labeler(_sub_automaton_from(aut, q))
+            except Exception:
+                frag = None
+            if frag:
+                state_formula[q] = f"({frag})"
+                return state_formula[q]
 
         if q in bad_states:
             state_formula[q] = UNSUPPORTED
@@ -460,12 +511,14 @@ def reconstruct_ltl(aut):
                 #     only when at least one successor leads to a known-good t2 fragment).
                 # ------------------------------------------------------------------
 
-                if e.dst in bad_states and e.dst not in state_formula and e.dst not in scc_fragments:
+                if (e.dst in bad_states and e.dst not in state_formula
+                        and e.dst not in scc_fragments and scc_labeler is None):
                     # Strict hardening: we have no reconstruction algorithm for
                     # states inside this multi-state SCC. Silently dropping the
                     # branch (as was done for t2 leniency) can produce wrong
                     # but plausible formulas. Instead, the whole current state
-                    # must be UNSUPPORTED.
+                    # must be UNSUPPORTED. (With an scc_labeler we instead fall
+                    # through so label(e.dst) can delegate the sub-automaton.)
                     if TRACE:
                         print(f"[TRACE] label({q}): encountered bad successor {e.dst} with no fragment -> UNSUPPORTED")
                     state_formula[q] = UNSUPPORTED
