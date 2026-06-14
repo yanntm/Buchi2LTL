@@ -7,7 +7,7 @@ import spot
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from aut2ltl.sl.reconstruction import reconstruct_ltl
 from testing.initial_state_rewiring import split_initial_state

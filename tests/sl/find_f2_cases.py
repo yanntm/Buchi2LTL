@@ -21,7 +21,7 @@ import spot
 # Use the production size-2 absorption heuristic (the logic that was
 # previously maintained as a separate "recovered working" copy has been
 # reinstated into the main module).
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from aut2ltl.sl.heuristics.size2_overapprox import try_size2_overapprox as try_absorb_size2_v2
 
 
@@ -146,7 +146,7 @@ def main():
             print(f"{i:3d}. {s['formula']}")
 
         # Save to samples/ as a stable set
-        out_path = Path(__file__).parent.parent / "samples" / "f2_successes.py"
+        out_path = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "f2_successes.py"
         with open(out_path, "w") as f:
             f.write('"""Formulas for which the recovered size-2 fusion heuristic (f2)\n')
             f.write('successfully produced a language-equivalent automaton.\n')

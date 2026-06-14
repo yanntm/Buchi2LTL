@@ -25,7 +25,7 @@ from pathlib import Path
 import spot
 
 # Make project importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from aut2ltl.sl.utils import simplify_ltl
 

@@ -27,7 +27,7 @@ import itertools
 
 import spot
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from aut2ltl.sl.heuristics.terminal_2scc import (
     find_nice_terminal_2sccs,
     try_terminal_2scc_with_validation,
@@ -220,7 +220,7 @@ def main():
     print(f"Full t3+ hits (technique contains t3/t4/... + equiv): {len(full_hits)}")
     print(f"Near-misses (relaxed nice-detector saw size>=3 SCC):   {len(near_misses)}")
 
-    out_dir = Path(__file__).parent.parent / "samples"
+    out_dir = Path(__file__).resolve().parents[2] / "tests" / "fixtures"
     out_path = out_dir / "tN_successes.py"
 
     with open(out_path, "w") as f:

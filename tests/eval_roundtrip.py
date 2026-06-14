@@ -30,6 +30,11 @@ from datetime import datetime
 
 import importlib.util
 import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root on path
+
 import spot
 
 from aut2ltl.sl.reconstruction import reconstruct_ltl
@@ -133,7 +138,7 @@ def main():
     sources_for_explicit = {}  # formula -> source label
 
     if args.samples:
-        samples_path = os.path.join(os.path.dirname(__file__), "samples", "formulas.py")
+        samples_path = os.path.join(os.path.dirname(__file__), "fixtures", "formulas.py")
         if not os.path.exists(samples_path):
             samples_path = "samples/formulas.py"
         loaded = load_formulas([samples_path])

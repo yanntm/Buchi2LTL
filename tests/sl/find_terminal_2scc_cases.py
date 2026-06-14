@@ -25,7 +25,7 @@ from collections import defaultdict
 import spot
 
 # Make sure we can import our local experiment code
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from testing.initial_state_rewiring import (
     split_initial_state,
@@ -193,7 +193,7 @@ def main():
         print(f"  aps={aps}, tree_size={ts}: {count}")
 
     # Save to samples/
-    out_path = Path(__file__).parent.parent / "samples" / "terminal_2scc_labeled.py"
+    out_path = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "terminal_2scc_labeled.py"
     with open(out_path, "w") as f:
         f.write('"""Formulas for which, after initial-state rewiring, we found a\n')
         f.write('terminal 2-state SCC whose incoming-OR labels L(A), L(B) are both\n')

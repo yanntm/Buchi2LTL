@@ -19,7 +19,7 @@ from pathlib import Path
 import spot
 
 # Make sure we can import from the project
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from aut2ltl.sl.heuristics.size2_overapprox import try_size2_overapprox as try_absorb_size2_v2
 

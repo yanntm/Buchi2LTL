@@ -19,7 +19,7 @@ from pathlib import Path
 
 import spot
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from aut2ltl.sl import reconstruct_ltl
 
 TIME_LIMIT = 300.0     # 5 minutes - increase if needed
@@ -96,7 +96,7 @@ def main():
     print(f"\nSearch finished after {total_time:.1f}s. Found {len(successes)} formulas.")
 
     if successes:
-        out_path = Path(__file__).parent.parent / "samples" / "t2_successes.py"
+        out_path = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "t2_successes.py"
         with open(out_path, "w") as f:
             f.write('"""Formulas for which the modern production terminal-2-SCC\n')
             f.write('heuristic (t2) activated inside reconstruct_ltl and produced\n')
