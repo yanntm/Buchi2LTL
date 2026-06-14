@@ -15,29 +15,44 @@ composition.
 """
 from __future__ import annotations
 
-from typing import Callable, Sequence, TypeVar
+from typing import Callable, Generic, Sequence, TypeVar
 
 from aut2ltl.contract import ReconResult
 
 _In = TypeVar("_In")
 
 
-def first_success(
-    stages: Sequence[Callable[[_In], ReconResult]],
-) -> Callable[[_In], ReconResult]:
-    """Compose `stages` into a single translator that returns the first stage
-    whose result is OK (language-faithful), or a DECLINE if every stage declines.
+class _FirstSuccess(Generic[_In]):
+    """The chain-of-responsibility composite as a real, named translator: it
+    obeys the Translator / CascadeTranslator interface (a fixed `name` plus a
+    `__call__`), so a composite is itself a valid stage of another composite.
 
     Each stage is self-gating: a stage that does not apply to the input returns a
     DECLINED `ReconResult`, and the chain moves on. The winning stage's result —
-    including its `technique` set — is returned unchanged.
+    including its `technique` set — is returned unchanged (the composite stamps no
+    tag of its own; its `name` is its identity, not a technique).
     """
 
-    def run(x: _In) -> ReconResult:
-        for stage in stages:
+    def __init__(
+        self, name: str, stages: Sequence[Callable[[_In], ReconResult]]
+    ) -> None:
+        self.name = name
+        self._stages = tuple(stages)
+
+    def __call__(self, x: _In) -> ReconResult:
+        for stage in self._stages:
             r = stage(x)
             if r.ok:
                 return r
         return ReconResult.decline()
 
-    return run
+
+def first_success(
+    stages: Sequence[Callable[[_In], ReconResult]],
+    *,
+    name: str,
+) -> "_FirstSuccess[_In]":
+    """Compose `stages` into a single named translator that returns the first
+    stage whose result is OK (language-faithful), or a DECLINE if every stage
+    declines. `name` is the composite's identity (passed at construction)."""
+    return _FirstSuccess(name, stages)
