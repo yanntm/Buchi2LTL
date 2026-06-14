@@ -133,10 +133,11 @@ def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.form
     # INPUT automaton — not the output — see acceptance_dispatch.)
     if os.environ.get("KR_DISPATCH_ACC", "1") != "0":
         from .acc import reconstruct_acc
-        phi = reconstruct_acc(casc)
-        if phi is not None:
-            _tag("acc")
-            return phi
+        r = reconstruct_acc(casc)        # self-gating CascadeTranslator
+        if r.ok:
+            if techniques is not None:
+                techniques |= r.technique
+            return r.formula
     # Weak (Δ₁) / looping (Σ₁/Π₁): EXPERIMENTAL, OFF by default. Placed BEFORE
     # Büchi/coBüchi because weak languages are Büchi AND coBüchi recognizable —
     # those would otherwise claim them first — so weak only ever fires when its

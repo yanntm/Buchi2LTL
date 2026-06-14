@@ -15,17 +15,17 @@ chain. The ⊤/⊥ test is a Spot oracle on the small INPUT automaton D (per sta
 lazy + cached), never on the output formula; the build is
 O(|reachable configs| × |Σ|) memoized.
 
-This is a Translator in spirit (input automaton → formula-or-decline) but takes
-a Cascade and returns Optional[formula] rather than implementing
-aut2ltl.contract.Translator.
+This leaf is a self-contained CascadeTranslator: it decides on its own whether
+the input is in the bounded fragment (no external predicate) and returns a
+language-faithful ReconResult or a DECLINE.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import aut2ltl.kr.reachability_operators as _ops
 from aut2ltl.kr.ltl_builders import _And, _Or, _X, _tt, _ff, _simp_f, _tree_size_f, _letters_to_f
 from aut2ltl.kr.cascade import Cascade
+from aut2ltl.contract import ReconResult
 
 
 class _Recurrent(Exception):
@@ -33,9 +33,9 @@ class _Recurrent(Exception):
     bounded fragment); aborts Acc so the caller falls back to BLS."""
 
 
-def reconstruct_acc(casc: Cascade) -> Optional["spot.formula"]:
+def reconstruct_acc(casc: Cascade) -> ReconResult:
     """φ := Acc(ι), the language of D from the initial config, by bounded unroll;
-    None if any reachable config is recurrent (not the bounded fragment).
+    DECLINES if any reachable config is recurrent (not the bounded fragment).
 
       Acc(c) = ⊤  if L(D from state_of(c)) is universal,           (R1 base)
              = ⊥  if it is empty,
@@ -45,7 +45,7 @@ def reconstruct_acc(casc: Cascade) -> Optional["spot.formula"]:
     pays only for the few states on the path before the first cycle, not all n."""
     D = casc.original_aut
     if D is None or casc.num_levels == 0:
-        return None
+        return ReconResult.decline()
     import spot
 
     # Lazy ⊤/⊥ oracle on D from a state q (cached). D is the small input
@@ -80,7 +80,7 @@ def reconstruct_acc(casc: Cascade) -> Optional["spot.formula"]:
         r = casc.reachable_configs()
         iota = r[0] if r else None
     if iota is None:
-        return None
+        return ReconResult.decline()
 
     nl = casc.num_letters()
     memo: dict = {}
@@ -109,9 +109,9 @@ def reconstruct_acc(casc: Cascade) -> Optional["spot.formula"]:
     try:
         res = acc(iota)
     except _Recurrent:
-        return None
+        return ReconResult.decline()
     _ops.PAPER_MAX_LTL_SIZE = _tree_size_f(res)
-    return res
+    return ReconResult(formula=res, technique={"acc"})
 
 
 __all__ = ["reconstruct_acc"]
