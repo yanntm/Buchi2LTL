@@ -44,14 +44,21 @@ buchi `is_buchi`, acc `original_aut`), so the chain does nothing form-specific.
    `decompose_aut` → cascade → member); endpoint singleton `reconstruct =
    as_translator(hierarchy_class)`. The `KR_MAX_LEVELS` depth guard is carried
    here (it was the only live part of `reconstruct_bls`).
-4. ⏳ **Integrate (this iteration).** Wire `reconstruct`/`hierarchy_class` into
-   `kr/__init__.py`; repoint the ~20 callers (7× `reconstruct_bls(casc)`, ~10×
-   `reconstruct_ltl_paper_style(casc)` incl. the r4 gate and
-   `portfolio/decompose_recombine.py`) — cascade-level callers →
-   `hierarchy_class(casc).formula`, twa-level entries → `reconstruct(twa)`;
-   DELETE `reconstruct_bls`, `reconstruct_ltl_paper_style`, `build_phi` and trim
-   `reachability.py` to the operator module. Add a placed test validating the
-   endpoint against the old path, then run BOTH gates in full.
+4. ✅ **Integrated.** `kr/__init__.py` exports `hierarchy_class`/`reconstruct`;
+   the functional caller (`portfolio/decompose_recombine.py`, default leaf →
+   `hierarchy_class`) and the maintained survey/gate scripts (`survey_mp_cascade`,
+   `survey_sizes`, `test_kr_r4_audit`) repointed to `hierarchy_class(casc).formula`;
+   `reconstruct_bls`, `reconstruct_ltl_paper_style`, `build_phi` DELETED and
+   `reachability.py` trimmed to the operator re-export hub. Gates GREEN on the new
+   path — r4 CLEAN, MP survey 70/70 equiv=True (verdicts byte-identical to
+   baseline; behaviour-preserving).
+   LEFT FOR LATER (one-shot probes + secondary tests — break on import, NOT gates;
+   patch or prune when next needed): the ~9 `probe_*.py`,
+   `test_kr_{reconstruct,zoom,basic}.py`, `measure_formula_dag.py`.
+
+Deferred passes (own iterations): the flags/options/**counters** cleanup (the
+module-global build state in `reachability_operators.py` — see Known debt) and the
+Phase-2 portfolio OO + `Language` reification (`aut2ltl/kr/TODO.md`).
 
 ### Known debt (flagged by user, deferred)
 - **Module-global mutable state** in `reachability_operators.py` (counters +
