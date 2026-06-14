@@ -54,7 +54,7 @@ def main():
         print("state->config:", casc.state_to_config)
     else:
         print("\nGAP + SgpDec not available — skipping the actual decomposition.")
-        print("Install with ./kr/install.sh and re-run.")
+        print("Install with ./aut2ltl/kr/gap/install.sh and re-run.")
 
 
 if __name__ == "__main__":

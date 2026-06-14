@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# kr/install.sh — Install GAP + SgpDec for the Krohn-Rhodes experimental path.
+# kr/gap/install.sh — Install GAP + SgpDec for the Krohn-Rhodes experimental path.
 #
 # Supports: Fedora (dnf), Debian/Ubuntu (apt), and generic "build from source" fallback.
 # Prefers a user-local installation under ~/.gap (no root required for the SgpDec part).
 # After success, `gap --no-window -c 'LoadPackage("SgpDec"); Print("SgpDec OK\n");'` should work.
 #
 # Usage:
-#   ./kr/install.sh
-#   ./kr/install.sh --check-only
+#   ./aut2ltl/kr/gap/install.sh
+#   ./aut2ltl/kr/gap/install.sh --check-only
 #
 set -euo pipefail
 
@@ -154,7 +154,7 @@ main() {
   verify_sgpdec
 
   log "All done."
-  log "You can now run Python code that calls into kr/gap_bridge.py."
+  log "You can now run Python code that calls into kr/gap/ (decompose_aut)."
   log "Example verification command:"
   echo "    $GAP_CMD --no-window -c 'LoadPackage(\"SgpDec\"); Print(\"HolonomyCascadeSemigroup example:\\n\"); T:=Semigroup([Transformation([2,1,3])]); HT:=HolonomyCascadeSemigroup(T); Print(HT, \"\\n\"); QUIT;'"
 }
