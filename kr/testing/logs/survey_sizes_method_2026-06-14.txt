@@ -1,0 +1,93 @@
+=== kr size census (subproc isolated) ===
+path=decompose  fin_reach_fold=on  35 formulas  (construction-only; budget 30s)
+
+  formula                  mp  split      L      DAG           tree  temp     shar   build
+  ----------------------------------------------------------------------------------------
+  true                     B   none(1)    1        1              1     0     1.0x  0.003s sl            
+  false                    B   none(1)    1        1              1     0     1.0x  0.003s sl            
+  a                        B   none(1)    2        1              1     0     1.0x  0.003s sl            
+  Ga                       S   none(1)    1        2              2     1     1.0x  0.003s sl            
+  G(a | b)                 S   none(1)    1        4              4     1     1.0x  0.003s sl            
+  G(a -> X b)              S   none(1)    2        6              6     1     1.0x  0.004s sl+t2         
+  a & X a                  B   none(1)    3        3              4     0     1.3x  0.003s sl            
+  G(a -> X a)              S   none(1)    3        4              5     2     1.2x  0.002s sl            
+  G(a & X a)               S   none(1)    1        2              2     1     1.0x  0.003s sl            
+  X a                      B   none(1)    3        2              2     0     1.0x  0.003s sl            
+  X X a                    B   none(1)    4        3              3     0     1.0x  0.003s sl            
+  X X X a                  B   none(1)    5        4              4     0     1.0x  0.003s sl            
+  X(a & X a)               B   none(1)    5        4              5     0     1.2x  0.003s sl            
+  Fa                       G   none(1)    1        2              2     1     1.0x  0.003s sl            
+  a U b                    G   none(1)    2        5              6     1     1.2x  0.003s sl            
+  F(a & b)                 G   none(1)    1        4              4     1     1.0x  0.003s sl            
+  F(a & X b)               G   none(1)    2      181            829    40     4.6x  0.559s buchi         
+  a | X b                  B   none(1)    3        4              4     0     1.0x  0.004s sl            
+  Fa | Gb                  O   or(2)      2       10             13     2     1.3x  0.004s sl            
+  Ga | Gb                  S   none(1)    2       11             15     3     1.4x  0.004s sl            
+  Fa & Gb                  O   none(1)    2        7             10     2     1.4x  0.003s sl            
+  (a U b) | Gc             O   or(2)      3       15             24     3     1.6x  0.005s sl            
+  Ga | Fb                  O   or(2)      2       10             13     2     1.3x  0.004s sl            
+  GFa                      R   none(1)    1        3              3     2     1.0x  0.003s sl            
+  G(a -> F b)              R   none(1)    1       19             48     4     2.5x  0.542s buchi         
+  G(a | F b)               R   none(1)    1       19             48     4     2.5x  0.535s buchi         
+  GFa & GFb                R   and(2)     3        6              6     3     1.0x  0.003s sl            
+  GFa & GFb & GFc          R   and(3)     5        8              8     4     1.0x  0.004s sl            
+  G(a -> F b) & G(c -> F d) R   and(2)     7       37             95     8     2.6x  1.175s and+buchi     
+  G(p -> (q U r))          R   none(1)    2       86            751    14     8.7x  0.563s buchi         
+  FGa                      P   none(1)    1        3              3     2     1.0x  0.003s sl            
+  F(a & G b)               P   none(1)    1        5              5     2     1.0x  0.003s sl            
+  FGa | FGb                P   none(1)    3        6              6     3     1.0x  0.003s sl            
+  GFa -> GFb               T   none(1)    5        9             10     4     1.1x  0.003s sl            
+  (GFa & FGb)              T   and(2)     4        7              8     3     1.1x  0.003s sl            
+
+=== By MP class (weakest first) ===
+
+-- bottom (B) --
+  true                     split=none(1)   DAG=      1 tree=             1 temporal=   0 tech=sl
+  false                    split=none(1)   DAG=      1 tree=             1 temporal=   0 tech=sl
+  a                        split=none(1)   DAG=      1 tree=             1 temporal=   0 tech=sl
+  X a                      split=none(1)   DAG=      2 tree=             2 temporal=   0 tech=sl
+  a & X a                  split=none(1)   DAG=      3 tree=             4 temporal=   0 tech=sl
+  a | X b                  split=none(1)   DAG=      4 tree=             4 temporal=   0 tech=sl
+  X X a                    split=none(1)   DAG=      3 tree=             3 temporal=   0 tech=sl
+  X X X a                  split=none(1)   DAG=      4 tree=             4 temporal=   0 tech=sl
+  X(a & X a)               split=none(1)   DAG=      4 tree=             5 temporal=   0 tech=sl
+
+-- safety (S) --
+  Ga                       split=none(1)   DAG=      2 tree=             2 temporal=   1 tech=sl
+  G(a & X a)               split=none(1)   DAG=      2 tree=             2 temporal=   1 tech=sl
+  G(a | b)                 split=none(1)   DAG=      4 tree=             4 temporal=   1 tech=sl
+  G(a -> X b)              split=none(1)   DAG=      6 tree=             6 temporal=   1 tech=sl+t2
+  Ga | Gb                  split=none(1)   DAG=     11 tree=            15 temporal=   3 tech=sl
+  G(a -> X a)              split=none(1)   DAG=      4 tree=             5 temporal=   2 tech=sl
+
+-- guarantee (G) --
+  Fa                       split=none(1)   DAG=      2 tree=             2 temporal=   1 tech=sl
+  F(a & b)                 split=none(1)   DAG=      4 tree=             4 temporal=   1 tech=sl
+  a U b                    split=none(1)   DAG=      5 tree=             6 temporal=   1 tech=sl
+  F(a & X b)               split=none(1)   DAG=    181 tree=           829 temporal=  40 tech=buchi
+
+-- obligation (O) --
+  Fa & Gb                  split=none(1)   DAG=      7 tree=            10 temporal=   2 tech=sl
+  Fa | Gb                  split=or(2)     DAG=     10 tree=            13 temporal=   2 tech=sl
+  Ga | Fb                  split=or(2)     DAG=     10 tree=            13 temporal=   2 tech=sl
+  (a U b) | Gc             split=or(2)     DAG=     15 tree=            24 temporal=   3 tech=sl
+
+-- recurrence (R) --
+  GFa                      split=none(1)   DAG=      3 tree=             3 temporal=   2 tech=sl
+  G(a -> F b)              split=none(1)   DAG=     19 tree=            48 temporal=   4 tech=buchi
+  G(a | F b)               split=none(1)   DAG=     19 tree=            48 temporal=   4 tech=buchi
+  G(p -> (q U r))          split=none(1)   DAG=     86 tree=           751 temporal=  14 tech=buchi
+  GFa & GFb                split=and(2)    DAG=      6 tree=             6 temporal=   3 tech=sl
+  GFa & GFb & GFc          split=and(3)    DAG=      8 tree=             8 temporal=   4 tech=sl
+  G(a -> F b) & G(c -> F d) split=and(2)    DAG=     37 tree=            95 temporal=   8 tech=and+buchi
+
+-- persistence (P) --
+  FGa                      split=none(1)   DAG=      3 tree=             3 temporal=   2 tech=sl
+  F(a & G b)               split=none(1)   DAG=      5 tree=             5 temporal=   2 tech=sl
+  FGa | FGb                split=none(1)   DAG=      6 tree=             6 temporal=   3 tech=sl
+
+-- reactivity (T) --
+  (GFa & FGb)              split=and(2)    DAG=      7 tree=             8 temporal=   3 tech=sl
+  GFa -> GFb               split=none(1)   DAG=      9 tree=            10 temporal=   4 tech=sl
+
+=== Totals over 35 built cases: DAG nodes=494, distinct temporals=114 ===
