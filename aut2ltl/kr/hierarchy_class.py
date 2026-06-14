@@ -12,19 +12,24 @@ leaf's method tag (`acc`/`weak`/`buchi`/`cobuchi`/`bls`); the formula it carries
 is the hash-consed `spot.formula` DAG (serialization to text is a separate
 concern — `ltl_builders._str_f` — never done here).
 
-Per-leaf gates: KR_DISPATCH_ACC / _WEAK / _BUCHI / _COBUCHI (=0 disables a leaf;
-weak is off by default). The cleanup of these env knobs (and the build-state
-counters) is a separate pass; left as-is for now. The module builds one default
-singleton, `hierarchy_class`.
+Per-leaf gates are the `kr.dispatch.*` Options (declared in `kr/options.py`,
+seeded from the legacy KR_DISPATCH_* env vars): each =False drops a leaf; weak is
+off by default. The chain membership is read once, HERE, at construction — passing
+a different `Options` builds a different chain (the A/B move). The build-state
+counters are a separate (Caches) pass. The module builds one default singleton,
+`hierarchy_class`, from the env-seeded default Options.
 """
 
 from __future__ import annotations
 
-import os
-from typing import List
+from typing import List, Optional
 
 from aut2ltl.contract import CascadeTranslator
 from aut2ltl.combinators import first_success
+from aut2ltl.options import Options
+from .options import (
+    KR_DISPATCH_OPTIONS, DISPATCH_ACC, DISPATCH_WEAK, DISPATCH_BUCHI, DISPATCH_COBUCHI,
+)
 from .acc import acc as _acc
 from .buchi import buchi as _buchi
 from .cobuchi import cobuchi as _cobuchi
@@ -32,25 +37,28 @@ from .weak import weak as _weak
 from .bls import bls as _bls
 
 
-def make_hierarchy_class() -> CascadeTranslator:
+def make_hierarchy_class(options: Optional[Options] = None) -> CascadeTranslator:
     """Build the hierarchy-class chain: a named `first_success` over the
     acceptance-class leaves in order acc → weak → buchi → cobuchi → bls, honoring
-    the per-leaf KR_DISPATCH_* gates. `bls` is always last and never declines."""
+    the per-leaf `kr.dispatch.*` Options. `bls` is always last and never declines.
+    `options=None` ⇒ the env-seeded default (legacy KR_DISPATCH_* behaviour)."""
+    if options is None:
+        options = Options.from_specs(KR_DISPATCH_OPTIONS)
     members: List[CascadeTranslator] = []
     # Acc(c): the bounded / transient (X-ladder) fragment — self-gating, so safe
-    # first in the chain and smallest for bounded inputs. Gate KR_DISPATCH_ACC.
-    if os.environ.get("KR_DISPATCH_ACC", "1") != "0":
+    # first in the chain and smallest for bounded inputs. Gate kr.dispatch.acc.
+    if options.get(DISPATCH_ACC):
         members.append(_acc)
-    # Weak (Δ₁): off by default (KR_DISPATCH_WEAK). Placed before Büchi/coBüchi —
+    # Weak (Δ₁): off by default (kr.dispatch.weak). Placed before Büchi/coBüchi —
     # weak languages are Büchi AND coBüchi recognizable, so they would otherwise
     # claim weak cases first; this only fires when its gate is enabled.
-    if os.environ.get("KR_DISPATCH_WEAK", "0") != "0":
+    if options.get(DISPATCH_WEAK):
         members.append(_weak)
-    if os.environ.get("KR_DISPATCH_BUCHI", "1") != "0":
+    if options.get(DISPATCH_BUCHI):
         members.append(_buchi)
     # coBüchi (persistence, Σ₂): tried after Büchi, so it only sees
-    # genuinely-not-Büchi cascades. Gate KR_DISPATCH_COBUCHI, default ON.
-    if os.environ.get("KR_DISPATCH_COBUCHI", "1") != "0":
+    # genuinely-not-Büchi cascades. Gate kr.dispatch.cobuchi, default ON.
+    if options.get(DISPATCH_COBUCHI):
         members.append(_cobuchi)
     # No simpler acceptance class applied: fall back to the general-case `bls`
     # member (the full Muller-DNF construction), which always produces a formula.

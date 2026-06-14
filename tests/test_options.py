@@ -84,6 +84,32 @@ def test_effective_is_pure() -> None:
     assert o.as_dict() == {"demo.flag": False}   # not mutated by effective()
 
 
+def test_package_contracts_wellformed() -> None:
+    """The declared per-package contracts import and are well-formed: dotted
+    package-owned keys, unique across packages, every spec carries an env bridge,
+    and the Bucket-1 dispatch sub-list is a subset of the full kr contract with
+    the in-code defaults."""
+    from aut2ltl.kr.options import (
+        KR_OPTIONS, KR_DISPATCH_OPTIONS,
+        DISPATCH_ACC, DISPATCH_WEAK, DISPATCH_BUCHI, DISPATCH_COBUCHI,
+    )
+    from aut2ltl.portfolio.options import PORTFOLIO_OPTIONS
+
+    all_specs = KR_OPTIONS + PORTFOLIO_OPTIONS
+    keys = [s.key for s in all_specs]
+    assert len(keys) == len(set(keys)), "duplicate option keys across contracts"
+    for s in all_specs:
+        assert "." in s.key, f"{s.key} is not dotted/package-owned"
+        assert s.env, f"{s.key} has no env bridge"
+        assert s.doc, f"{s.key} has no doc"
+    assert all(s in KR_OPTIONS for s in KR_DISPATCH_OPTIONS)
+    # Bucket-1 dispatch defaults mirror hierarchy_class.py (acc/buchi/cobuchi ON,
+    # weak OFF).
+    assert (DISPATCH_ACC.default, DISPATCH_BUCHI.default,
+            DISPATCH_COBUCHI.default) == (True, True, True)
+    assert DISPATCH_WEAK.default is False
+
+
 def main() -> int:
     tests = [
         test_lazy_default,
@@ -92,6 +118,7 @@ def main() -> int:
         test_clone_is_independent,
         test_from_specs_env_seeding,
         test_effective_is_pure,
+        test_package_contracts_wellformed,
     ]
     failed = 0
     for t in tests:

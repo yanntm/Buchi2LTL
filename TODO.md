@@ -27,13 +27,12 @@ env/CLI/API overrides (the only place that knows all packages).
 2. Per-package spec declarations (real `os.environ` knobs gathered — see below):
    - ✅ `aut2ltl/portfolio/options.py` — `portfolio.sl.*` keys (the exemplar;
      naming convention set).
-   - ⏳ `aut2ltl/kr/options.py` — the big one, ~18 knobs. Hierarchical sub-namespaces:
-     `kr.dispatch.{acc,weak,buchi,cobuchi}`, `kr.fold_fin_reach`, `kr.fuse_letters`,
-     `kr.reach_guard`, `kr.max_levels`, `kr.muller_scc_limit`, `kr.simp.*`
-     (own/fold/factor/limit/node/opts/full_limit/tree_limit), `kr.flatten_tree_limit`,
-     `kr.trace`. `env=` the matching current `KR_*` / `RECONSTRUCT_TRACE`.
-     (`KR_SAT_MIN_STATES` is read in floor `language.py` — give it a `language.*`
-     key or fold into kr; decide when wiring.)
+   - ✅ `aut2ltl/kr/options.py` — the full kr contract, all ~18 knobs grouped by
+     bucket (`kr.dispatch.*`, `kr.fold_fin_reach`, `kr.fuse_letters`, `kr.reach_guard`,
+     `kr.max_levels`, `kr.muller_scc_limit`, `kr.simp.*`, `kr.flatten_tree_limit`,
+     `kr.trace`). `KR_OPTIONS` (full) + `KR_DISPATCH_OPTIONS` (Bucket-1 sub-list).
+   - ✅ `aut2ltl/language.py` — tiny floor contract `language.sat_min_states`
+     (`KR_SAT_MIN_STATES`), declared inline (single module, not a package).
    - ⏸ `aut2ltl/sl/options.py` — DEFERRED to the sl refactor: sl's flags are read
      in `portfolio/sl.py` today, and its f2/t2 heuristics are unwrapped `Translator`s;
      sl gets its own contract when those are wrapped.
@@ -45,6 +44,81 @@ env/CLI/API overrides (the only place that knows all packages).
 (e.g. `portfolio.sl.enabled`, not `…gate.buchi2ltl`); no backward-compat
 constraints on the dotted keys. `env=` keeps the current legacy var as the seeding
 bridge only.
+
+### Wiring analysis — scope cut (2026-06-15)
+Audited every `os.environ`/`getenv` read in `aut2ltl/`. Only a SMALL subset is
+genuine instance config worth construct-time OO threading; the rest is process-
+global by nature and STAYS env. The kr leaves are already objects (`Bls`/`Acc`/
+`Buchi`/`Cobuchi`/`Weak`) and the chain is built by a builder
+(`make_hierarchy_class`), so the real config sits at object/builder boundaries —
+no need to thread `options` into the recursive reachability core.
+
+**Declaration vs. wiring are separate.** A package's `options.py` is the COMPLETE
+contract: it declares EVERY env knob the package reads as an `OptionSpec` (with
+`env=` + `doc`), so the knobs are discoverable/self-documenting in one place — this
+holds for all three buckets. The bucket split governs only WIRING effort: which
+specs get their call sites repointed `os.environ.get(...)` → `options.get(SPEC)`
+this iteration. A declared-but-not-yet-wired spec keeps reading `os.environ`
+directly; its `default` must MIRROR the current in-code default until repointed
+(the spec becomes the single source on repoint).
+
+- **Bucket 1 — declare AND wire to construct-time Options (THIS iteration):**
+  `portfolio.sl.{enabled,max_states,verify}` (all inside the `Sl` object) and
+  `kr.dispatch.{acc,weak,buchi,cobuchi}` (already read at BUILD time in
+  `make_hierarchy_class`, not per-call).
+- **Bucket 2 — declare now; real A/B knobs but DEEP (pervasive in the recursion/
+  simplifier), so LEAVE the call sites on env for now:** `KR_FUSE_LETTERS`,
+  `KR_FOLD_FIN_REACH`, `KR_SIMP_OWN`/`KR_SIMP_OWN_FOLD`. Sound optimizations,
+  always-on in practice, flipped only in size experiments — process scope is fine.
+  Wire later only if per-instance optimization A/B is ever needed (the owning
+  object passes `options` to its one call site).
+- **Bucket 3 — declare now; NOT instance config, so LEAVE the call sites on env:**
+  all tracing (`KR_TRACE`, `RECONSTRUCT_TRACE`, `F2_TRACE`, `T2_TRACE`); resource/
+  safety limits (`KR_REACH_GUARD`, `KR_MAX_LEVELS`, `KR_MULLER_SCC_LIMIT`,
+  `KR_SAT_MIN_STATES`, `KR_FLATTEN_TREE_LIMIT`, the `KR_SIMP_*` tuning thresholds).
+  Process-wide scope is the correct scope; the spec just documents them.
+- **Counters are NOT Options** (`PAPER_REACH_CALLS`/`_FIN_CALLS`/`_MAX_LTL_SIZE`):
+  `_MAX_LTL_SIZE` is DEAD (reset, never incremented/read); `_FIN_CALLS` is pure
+  profiling (read only by the `measure_formula_dag` probe); `_REACH_CALLS` is the
+  runaway-guard's distinct-subproblem counter — redundant with the reach-memo size.
+  → deferred to the **Caches compartment**: guard reads cache size, drop the dead
+  one, demote profiling, and `reset_build_state` dies with the per-build cache.
+
+### Step plan — Bucket 1 wiring (APPROVED 2026-06-15; steps 1–4 DONE, gates green; step 5 deferred)
+Steps 1–4 landed; all gates green on the wired tree (options test 7/7, r4 audit
+CLEAN, MP survey 70/70 equiv=True — verdicts identical to baseline). Bucket 1 now
+reads from the injected `Options`; module singletons stay env-seeded defaults.
+Threading model: each Translator takes `options: Optional[Options] = None` at
+construction; `None` ⇒ a default built from that package's specs with the env
+bridge (`Options.from_specs(<specs>)`), so bare `Sl()` / the module singletons
+behave EXACTLY as today (env still honored — surveys' subprocess A/B unaffected).
+The assembled graph threads ONE shared `Options` to every node. Semantic shift
+(stated, intended): per-call env reads become per-instance frozen.
+
+One file per commit; both gates (r4 audit CLEAN + MP survey all equiv=True) before
+each commit that touches a translator.
+
+1. `aut2ltl/kr/options.py` (NEW) — the COMPLETE kr contract: declare ALL kr env
+   knobs as `OptionSpec`s (Buckets 1+2+3), grouped/commented by bucket, each
+   `env=` its current `KR_*`/`RECONSTRUCT_TRACE` and `default` MIRRORING the
+   in-code default. Export a `KR_OPTIONS` list (all) and a `KR_DISPATCH_OPTIONS`
+   sub-list (the Bucket-1 dispatch specs the builder threads now). `KR_SAT_MIN_STATES`
+   lives in floor `language.py` — give it a `language.*` spec (own tiny
+   `language/options.py` or a `LANGUAGE_OPTIONS` here; decide at write time).
+   Extend `tests/test_options.py` if useful.
+2. `aut2ltl/kr/hierarchy_class.py` — `make_hierarchy_class(options=None)` reads
+   `options.get(DISPATCH_*)` (default `Options.from_specs(KR_DISPATCH_OPTIONS)`);
+   drop the four `os.environ.get` reads. Singleton built with the default. GATE.
+3. `aut2ltl/portfolio/sl.py` — `Sl(options=None)` reads `SL_ENABLED/MAX_STATES/
+   VERIFY` from `options` (default `Options.from_specs(PORTFOLIO_OPTIONS)`); drop
+   the module `_MAX_STATES` const and the three `os.environ` reads. GATE.
+4. `aut2ltl/portfolio/__init__.py` — build ONE shared default `Options`
+   (`from_specs(PORTFOLIO_OPTIONS + KR_OPTIONS)` — seed the env bridge for the full
+   contract even though only Bucket 1 is consulted via `options.get` yet); construct the graph with
+   it: `Sl(options)`, `make_hierarchy_class(options)` → `as_translator(hc)` for the
+   cascade, threaded through `Decompose`/`SlDriven`. GATE.
+5. (defer to next iteration) Root `build_options()` in `cli.py` (TODO step 3) — the
+   front end that aggregates specs + layers CLI/API overrides. Out of scope here.
 
 ### Deferred (separate iterations)
 - **Wire call sites**: thread `Options` into Translator construction, repoint each

@@ -27,37 +27,44 @@ it (a wrong guess is simply not adopted). The opt-in KR_GATE_VERIFY audit below 
 CONFIRMATION of all this, not its foundation (it found zero rejections over ~170
 randltl formulas).
 
-Env knobs (the cleanup of these is a separate pass): KR_GATE_BUCHI2LTL (default
-ON; =0 declines always — the pure-kr A/B), KR_GATE_MAX_STATES (skip a
-pathologically large input), KR_GATE_VERIFY (opt-in audit: re-check
-are_equivalent, default OFF — confirmation, not the foundation).
+Config is the `portfolio.sl.*` Options (declared in `portfolio/options.py`, seeded
+from the legacy KR_GATE_* env vars), held at construction: `enabled` (default ON;
+False declines always — the pure-kr A/B), `max_states` (skip a pathologically large
+input), `verify` (opt-in audit: re-check are_equivalent, default OFF — confirmation,
+not the foundation). `options=None` ⇒ the env-seeded default (legacy behaviour).
 """
 from __future__ import annotations
 
 import contextlib
 import io
-import os
+from typing import Optional
 
 import spot
 
 from aut2ltl.contract import LTLFormulaResult, Translator
 from aut2ltl.language import Language
-
-# sl is cheap on our small explicit-letter domain; this only guards against
-# handing it a pathologically large automaton.
-_MAX_STATES = int(os.environ.get("KR_GATE_MAX_STATES", "60"))
+from aut2ltl.options import Options
+from .options import PORTFOLIO_OPTIONS, SL_ENABLED, SL_MAX_STATES, SL_VERIFY
 
 
 class Sl:
-    """The sl engine as a Translator: `Language -> LTLFormulaResult`."""
+    """The sl engine as a Translator: `Language -> LTLFormulaResult`.
+
+    Reads its `portfolio.sl.*` config from the `Options` passed at construction
+    (env-seeded default when omitted)."""
 
     name = "sl"
 
+    def __init__(self, options: Optional[Options] = None) -> None:
+        self._options = options if options is not None else Options.from_specs(PORTFOLIO_OPTIONS)
+
     def __call__(self, lang: Language) -> LTLFormulaResult:
-        if os.environ.get("KR_GATE_BUCHI2LTL", "1") == "0":
+        if not self._options.get(SL_ENABLED):
             return LTLFormulaResult.decline()
         tgba = lang.tgba()
-        if tgba.num_states() > _MAX_STATES:
+        # sl is cheap on our small explicit-letter domain; max_states only guards
+        # against handing it a pathologically large automaton.
+        if tgba.num_states() > self._options.get(SL_MAX_STATES):
             return LTLFormulaResult.decline()
         try:
             from aut2ltl.sl.reconstruction import reconstruct_ltl
@@ -81,7 +88,7 @@ class Sl:
         except Exception:
             pass
         # Opt-in soundness audit (default OFF): re-verify against the language.
-        if os.environ.get("KR_GATE_VERIFY", "0") != "0":
+        if self._options.get(SL_VERIFY):
             try:
                 if not spot.are_equivalent(tgba, cand.translate()):
                     return LTLFormulaResult.decline()

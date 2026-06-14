@@ -22,12 +22,25 @@ and terminates.
 from __future__ import annotations
 
 from aut2ltl.combinators import first_success
-from aut2ltl.kr.aut2cas import reconstruct as cascade
-from .sl import Sl, sl
+from aut2ltl.options import Options
+from aut2ltl.kr.options import KR_OPTIONS
+from aut2ltl.kr.aut2cas import as_translator
+from aut2ltl.kr.hierarchy_class import make_hierarchy_class
+from .options import PORTFOLIO_OPTIONS
+from .sl import Sl
 from .sl_driven import SlDriven
 from .decompose import Decompose, split_report
 
+# One shared default Options threaded through the whole graph: the object graph IS
+# the config graph. Seeded from the full contract (portfolio + kr) so the legacy
+# env bridge covers every declared knob, even those not yet read via options.get.
+# A caller wanting a variant rebuilds the graph with `make_*`/constructors and a
+# cloned Options (the A/B move); these module singletons are the env-seeded default.
+_options = Options.from_specs(PORTFOLIO_OPTIONS + KR_OPTIONS)
+
 # The assembled default portfolio Translators (all Language -> LTLFormulaResult).
+sl = Sl(_options)                                          # the sl gate
+cascade = as_translator(make_hierarchy_class(_options))    # the kr cascade Translator
 core = Decompose(first_success([sl, cascade], name="core"))
 sl_driven = SlDriven(delegate=core)
 reconstruct_decomposed = Decompose(first_success([sl_driven, cascade], name="top"))

@@ -81,6 +81,9 @@ landed, the soundness arguments, and the measurements):
   → coBüchi `⋀Fin` (`KR_DISPATCH_COBUCHI`). Weak/looping `reconstruct_weak`
   (`KR_DISPATCH_WEAK`) is wired but **OFF** (correct, size regression). Direct
   hierarchy-class φ per Theorem 2 / §9.3; cover-aware α readers.
+  Chain membership is now read from an injected `Options` (`kr.dispatch.*`,
+  declared in `kr/options.py`) at `make_hierarchy_class` construction — the legacy
+  `KR_DISPATCH_*` env vars are the seeding bridge for the default singleton.
 
 The portfolio (the composition layer) lives in `aut2ltl/portfolio/`: every method
 is a `Translator` (`Language -> LTLFormulaResult`) — `Sl` (the sl gate), `SlDriven`

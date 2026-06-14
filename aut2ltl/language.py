@@ -25,10 +25,22 @@ from typing import Optional, Union
 
 import spot
 
+from aut2ltl.options import OptionSpec
+
 # kr's census is acutely state-count sensitive, so the decomposition wants a
 # state-minimal form; SAT minimization is state-optimal but exponential, so it is
 # gated to small automata (our domain — explicit 2^|AP| letters, few states).
 _SAT_MIN_STATES = int(os.environ.get("KR_SAT_MIN_STATES", "30"))
+
+# The floor's tiny OPTIONS contract (one knob). Declared for discoverability; the
+# call site above still reads os.environ (Bucket 3 — a process-wide perf gate, not
+# instance config). `default` mirrors the in-code default.
+SAT_MIN_STATES = OptionSpec(
+    "language.sat_min_states", 30,
+    "SAT-minimize the input automaton only at or below this state count",
+    env="KR_SAT_MIN_STATES")
+
+LANGUAGE_OPTIONS = [SAT_MIN_STATES]
 
 
 class Language:
