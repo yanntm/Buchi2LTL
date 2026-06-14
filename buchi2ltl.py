@@ -84,7 +84,7 @@ if __name__ == "__main__":
             print("\n" + "=" * 80)
             aut, _ = ltl_to_tgba(original_str)
             res = reconstruct_ltl(aut)
-            recovered = res.formula              # spot.formula or UNSUPPORTED str
+            recovered = res.formula              # spot.formula, or None if declined
             technique = res.technique_str()
 
             print(f"Original LTL : {original_str}")
@@ -92,8 +92,8 @@ if __name__ == "__main__":
             print(f"Recovered    : {recovered}")
             print(f"Technique    : {technique}")
 
-            if isinstance(recovered, str) and recovered.startswith("UNSUPPORTED"):
-                print("Status       : UNSUPPORTED")
+            if res.declined:
+                print("Status       : DECLINED")
             else:
                 orig_f = spot.formula(original_str)
                 rec_f = recovered if isinstance(recovered, spot.formula) else spot.formula(str(recovered))
