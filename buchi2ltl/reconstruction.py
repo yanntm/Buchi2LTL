@@ -37,9 +37,10 @@ def _is_unsupported(val):
 
 
 def reconstruct_ltl(aut, scc_labeler=None):
-    """Backward LTL reconstruction from a TGBA. Returns (final_formula,
-    state_formula, technique); final_formula is a spot.formula on success, or
-    the UNSUPPORTED string on decline.
+    """Backward LTL reconstruction from a TGBA. Returns a `ReconResult`
+    (`kr.recon_result`): `.formula` is a spot.formula on success or the
+    UNSUPPORTED string on decline; `.technique` is the method-token set
+    (e.g. {"sl","t2"}). Uniform with the kr portfolio result.
 
     `scc_labeler` (optional, default None): a callback `sub_automaton ->
     spot.formula_or_None`. When sl reaches a state q it cannot translate
@@ -302,4 +303,9 @@ def reconstruct_ltl(aut, scc_labeler=None):
     init = aut.get_init_state_number()
     final = label(init)
     technique = _compute_technique(absorbed, nice_terminal_sccs)
-    return final, state_formula, technique
+    # Lazy import: buchi2ltl is the separate engine; the shared result struct
+    # lives in kr/ for now (the resulting import cycle is deferred to a later
+    # `util` extraction — agreed 2026-06-14). No load-time cycle: `import kr`
+    # does not import buchi2ltl (the gate's buchi2ltl import is lazy).
+    from kr.recon_result import ReconResult
+    return ReconResult(final, set(technique.split("+")) if technique else set())

@@ -227,16 +227,18 @@ def main():
                     row["error"] = f"too_many_states:{states}"
                     row["equivalent"] = "skipped"
                 else:
-                    recovered, _, technique = reconstruct_ltl(aut)
-                    row["recovered"] = recovered
+                    res = reconstruct_ltl(aut)
+                    recovered = res.formula      # spot.formula or UNSUPPORTED str
+                    technique = res.technique_str()
+                    row["recovered"] = str(recovered)
                     row["technique"] = technique
 
-                    if recovered.startswith("UNSUPPORTED"):
+                    if isinstance(recovered, str) and recovered.startswith("UNSUPPORTED"):
                         # Expected limitation — record cleanly instead of crashing later
                         row["equivalent"] = "unsupported"
                         failures += 1
                     else:
-                        rec_f = spot.formula(recovered)
+                        rec_f = recovered if isinstance(recovered, spot.formula) else spot.formula(str(recovered))
                         eq = spot.are_equivalent(f, rec_f)
                         row["equivalent"] = "yes" if eq else "no"
                         if not eq:

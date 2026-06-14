@@ -86,8 +86,12 @@ def _compute_good_muller_sets(casc: Cascade) -> list:
     return good
 
 
-def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
+def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.formula":
     """Paper-faithful top-level assembly (steps 5-6 / Lemma 7 in algorithm.md).
+
+    `techniques` (optional, default None): a SET the leaf records its method tag
+    into (`acc`/`weak`/`buchi`/`cobuchi`/`bls`) for the portfolio report
+    (`kr.recon_result.ReconResult`). None = no recording (the historical callers).
 
     Uses the reachability operators (the 5 formulas) inside fin_c / Fin(C), then
     for the lifted Müller condition α' = good_Ms on configs (w.r.t. the normalized
@@ -116,6 +120,10 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
     back here. Gate KR_DISPATCH_BUCHI (default ON); =0 restores the pure Muller
     form (e.g. for size A/B baselines).
     """
+    def _tag(t):
+        if techniques is not None:
+            techniques.add(t)
+
     # Config-indexed Acc(c) for the BOUNDED / transient fragment (the X-ladder):
     # bypasses the cascade reach machinery, emitting the literal small formula
     # where BLS pays the reach τ-tail. SELF-GATING (declines → None on any
@@ -127,6 +135,7 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
         from .acceptance_dispatch import reconstruct_acc
         phi = reconstruct_acc(casc)
         if phi is not None:
+            _tag("acc")
             return phi
     # Weak (Δ₁) / looping (Σ₁/Π₁): EXPERIMENTAL, OFF by default. Placed BEFORE
     # Büchi/coBüchi because weak languages are Büchi AND coBüchi recognizable —
@@ -138,11 +147,13 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
         from .acceptance_dispatch import reconstruct_weak
         phi = reconstruct_weak(casc)
         if phi is not None:
+            _tag("weak")
             return phi
     if os.environ.get("KR_DISPATCH_BUCHI", "1") != "0":
         from .acceptance_dispatch import reconstruct_buchi
         phi = reconstruct_buchi(casc)
         if phi is not None:
+            _tag("buchi")
             return phi
     # coBüchi (persistence, Σ₂): tried AFTER Büchi, so it only sees
     # genuinely-not-Büchi cascades. φ = ⋀_{C∈α}Fin(C); gate recovers the natural
@@ -152,7 +163,11 @@ def reconstruct_ltl_paper_style(casc: Cascade) -> "spot.formula":
         from .acceptance_dispatch import reconstruct_cobuchi
         phi = reconstruct_cobuchi(casc)
         if phi is not None:
+            _tag("cobuchi")
             return phi
+    # Committed to the general Muller-DNF cascade (the BLS core): every return
+    # below this point is `bls` (trivial T/F, empty, or the assembled DNF).
+    _tag("bls")
     # reset counters owned by reachability_operators
     import kr.reachability_operators as _ops
     _ops.PAPER_REACH_CALLS = 0

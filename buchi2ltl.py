@@ -83,34 +83,35 @@ if __name__ == "__main__":
         for original_str in test_cases:
             print("\n" + "=" * 80)
             aut, _ = ltl_to_tgba(original_str)
-            recovered, per_state, technique = reconstruct_ltl(aut)
+            res = reconstruct_ltl(aut)
+            recovered = res.formula              # spot.formula or UNSUPPORTED str
+            technique = res.technique_str()
 
             print(f"Original LTL : {original_str}")
             print(f"States       : {aut.num_states()}")
             print(f"Recovered    : {recovered}")
             print(f"Technique    : {technique}")
 
-            if recovered.startswith("UNSUPPORTED"):
+            if isinstance(recovered, str) and recovered.startswith("UNSUPPORTED"):
                 print("Status       : UNSUPPORTED")
             else:
                 orig_f = spot.formula(original_str)
-                rec_f = spot.formula(recovered)
+                rec_f = recovered if isinstance(recovered, spot.formula) else spot.formula(str(recovered))
                 eq = spot.are_equivalent(orig_f, rec_f)
                 print(f"Equivalent?  : {eq}")
-                simplified = simplify_ltl(recovered)
+                simplified = simplify_ltl(str(recovered))
                 print(f"After ltlfilt --simplify : {simplified}")
         sys.exit(0)
 
     # --- New single-input mode ---
     aut, orig_formula = load_automaton(args.input)
 
-    recovered, _, technique = reconstruct_ltl(aut)
+    res = reconstruct_ltl(aut)
+    recovered = res.formula
+    technique = res.technique_str()
 
     # Clean output by default (what the user asked for)
-    if recovered.startswith("UNSUPPORTED"):
-        print(recovered)
-    else:
-        print(recovered)
+    print(recovered)
 
     if args.verbose:
         print(f"\nTechnique : {technique}")

@@ -92,7 +92,7 @@ def reset_gate_stats() -> None:
         _STATS[k] = 0
 
 
-def try_heuristic_gate(aut: "spot.twa_graph") -> Optional["spot.formula"]:
+def try_heuristic_gate(aut: "spot.twa_graph", *, techniques=None) -> Optional["spot.formula"]:
     """Run the buchi2ltl heuristic on `aut`; return a hash-consed formula DAG
     for its language, or None to fall through to the kr cascade.
 
@@ -100,6 +100,10 @@ def try_heuristic_gate(aut: "spot.twa_graph") -> Optional["spot.formula"]:
     None. Gate KR_GATE_BUCHI2LTL (default ON; =0 restores the pure kr decompose
     path). Opt-in audit KR_GATE_VERIFY (default OFF) declines any candidate that
     is not are_equivalent to `aut` and counts it in `rejected`.
+
+    `techniques` (optional, default None): a SET into which the adopted
+    buchi2ltl technique tokens (e.g. 'sl', 't2', 'f2') are recorded for the
+    portfolio report (`kr.recon_result.ReconResult`).
     """
     if os.environ.get("KR_GATE_BUCHI2LTL", "1") == "0":
         return None
@@ -116,7 +120,8 @@ def try_heuristic_gate(aut: "spot.twa_graph") -> Optional["spot.formula"]:
     except Exception:
         _STATS["errored"] += 1
         return None
-    rec = out[0] if isinstance(out, (tuple, list)) else out
+    rec = out.formula      # ReconResult
+    tech_tokens = out.technique
     if rec is None:
         return None
     try:
@@ -146,4 +151,7 @@ def try_heuristic_gate(aut: "spot.twa_graph") -> Optional["spot.formula"]:
             _STATS["rejected"] += 1
             return None
     _STATS["adopted"] += 1
+    if techniques is not None:
+        # Record the buchi2ltl technique tokens (e.g. {"sl","t2"}).
+        techniques.update(tech_tokens or {"sl"})
     return cand

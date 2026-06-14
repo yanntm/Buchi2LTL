@@ -45,7 +45,7 @@ def reconstruct_sl_driven(aut: "spot.twa_graph") -> Optional["spot.formula"]:
         # as a child node WITHOUT flattening — the whole point of the rewrite.
         # A high-sharing core that would explode str() now costs only its DAG.
         try:
-            return reconstruct_decomposed(sub)
+            return reconstruct_decomposed(sub).formula
         except Exception:
             return None
 
@@ -54,7 +54,7 @@ def reconstruct_sl_driven(aut: "spot.twa_graph") -> Optional["spot.formula"]:
         out = reconstruct_ltl(tgba, scc_labeler=labeler)
     except Exception:
         return None
-    rec = out[0] if isinstance(out, (tuple, list)) else out
+    rec = out.formula      # ReconResult
     if rec is None or (isinstance(rec, str) and "UNSUPPORTED" in rec):
         return None
     try:

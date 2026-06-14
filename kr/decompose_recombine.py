@@ -39,6 +39,7 @@ import spot
 from .gap_bridge import decompose_aut
 from .heuristic_gate import try_heuristic_gate
 from .reachability import reconstruct_ltl_paper_style
+from .recon_result import ReconResult
 
 __all__ = ["reconstruct_decomposed", "split_report"]
 
@@ -109,36 +110,57 @@ def _or_pieces(aut: "spot.twa_graph") -> List["spot.twa_graph"]:
     return pieces if len(pieces) >= 2 else []
 
 
-def _base(aut, reconstruct, decompose_kwargs) -> "spot.formula":
+def _base(aut, reconstruct, decompose_kwargs, techniques) -> "spot.formula":
     """Acceptance-trivial piece -> existing monolithic kr."""
     casc = decompose_aut(aut, **decompose_kwargs)
-    return reconstruct(casc)
+    # The leaf method tag is knowable only INSIDE reconstruct_ltl_paper_style,
+    # so thread the accumulator into the default reconstruct. Custom reconstructs
+    # (probe stubs) don't take it; record a generic 'base' for them.
+    if reconstruct is reconstruct_ltl_paper_style:
+        return reconstruct(casc, techniques=techniques)
+    phi = reconstruct(casc)
+    if techniques is not None:
+        techniques.add("base")
+    return phi
 
 
-def _dispatch(aut, reconstruct, decompose_kwargs, depth, max_depth) -> "spot.formula":
-    # buchi2ltl heuristic gate, tried FIRST at every node (top + each piece):
-    # a tiny heuristic formula short-circuits the cascade. Declining nodes still
-    # split below, so the heuristic also sees the pieces — the whole point of
-    # combining it WITH decomposition. SOUND by composition: Spot makes the node
-    # a TGBA (language-preserving) and buchi2ltl is sound-by-construction
-    # (kr/heuristic_gate.py). Gate KR_GATE_BUCHI2LTL (default ON).
-    phi = try_heuristic_gate(aut)
-    if phi is not None:
-        return phi
+def _dispatch(aut, reconstruct, decompose_kwargs, depth, max_depth, techniques) -> "spot.formula":
+    # Gate placement vs decomposition. KR_GATE_UNDER_DECOMP (default ON): the
+    # buchi2ltl gate goes UNDER decomposition — split FIRST, gate only the
+    # leaves that no longer split (so a decomposable input is always cut into
+    # pieces, even when the gate could take it whole; we then gate each piece).
+    # =0 restores the old order (gate first at every node, short-circuiting the
+    # split). SOUND either way: a ROOT boolean op is a position-0 language op and
+    # the gate is sound-by-construction (kr/heuristic_gate.py).
+    under_decomp = os.environ.get("KR_GATE_UNDER_DECOMP", "1") != "0"
+
+    if not under_decomp:
+        phi = try_heuristic_gate(aut, techniques=techniques)
+        if phi is not None:
+            return phi
     if depth < max_depth:
         and_p = _and_pieces(aut)
         if and_p:
+            if techniques is not None:
+                techniques.add(f"and{len(and_p)}")
             return spot.formula.And(
-                [_dispatch(p, reconstruct, decompose_kwargs, depth + 1, max_depth)
+                [_dispatch(p, reconstruct, decompose_kwargs, depth + 1, max_depth, techniques)
                  for p in and_p]
             )
         or_p = _or_pieces(aut)
         if or_p:
+            if techniques is not None:
+                techniques.add(f"or{len(or_p)}")
             return spot.formula.Or(
-                [_dispatch(p, reconstruct, decompose_kwargs, depth + 1, max_depth)
+                [_dispatch(p, reconstruct, decompose_kwargs, depth + 1, max_depth, techniques)
                  for p in or_p]
             )
-    return _base(aut, reconstruct, decompose_kwargs)
+    # Leaf (no further split): gate now (if not already tried), else the cascade.
+    if under_decomp:
+        phi = try_heuristic_gate(aut, techniques=techniques)
+        if phi is not None:
+            return phi
+    return _base(aut, reconstruct, decompose_kwargs, techniques)
 
 
 def reconstruct_decomposed(
@@ -149,27 +171,42 @@ def reconstruct_decomposed(
     gap_cmd: str = "gap",
     timeout: int = 180,
     max_aps: int = 5,
-) -> "spot.formula":
+) -> ReconResult:
     """Root decompose-and-recombine: deterministic-generic state-minimal
     normalize, split the acceptance condition (AND by conjunct / OR by
     strength), run the existing kr on each acceptance-trivial piece, recombine
     with the root ⋀/⋁.
 
     `aut` is an automaton (the kr input contract — HOA, never an LTL formula).
-    Returns a hash-consed spot.formula DAG (same contract as reconstruct_*).
-    Falls through to the monolithic kr when no split applies.
+    Returns a `ReconResult` (`.formula` is the hash-consed spot.formula DAG;
+    `.technique` is the set of methods that contributed). Falls through to the
+    monolithic kr when no split applies.
     """
     decompose_kwargs = dict(gap_cmd=gap_cmd, timeout=timeout, max_aps=max_aps)
-    # Heuristic gate on the RAW input first: buchi2ltl's backward-labeling
-    # heuristics exploit the (often nondeterministic) translate-style TGBA
-    # structure, which `_to_split_form`'s determinization destroys — e.g.
-    # determinized coBüchi (FGa|FGb) defeats the heuristic, while the raw form
-    # does not. Sound: the gate verifies are_equivalent against this same `aut`.
-    phi = try_heuristic_gate(aut)
-    if phi is not None:
-        return phi
+    techniques: set = set()
+    under_decomp = os.environ.get("KR_GATE_UNDER_DECOMP", "1") != "0"
+
+    if not under_decomp:
+        # OLD order: gate on the RAW input first, preempting decomposition.
+        phi = try_heuristic_gate(aut, techniques=techniques)
+        if phi is not None:
+            return ReconResult(phi, techniques)
+        det = _to_split_form(aut)
+        phi = _dispatch(det, reconstruct, decompose_kwargs, 0, max_depth, techniques)
+        return ReconResult(phi, techniques)
+
+    # NEW (default): decomposition takes precedence over the gate. But if the
+    # ROOT does not split, gate the RAW (pre-determinization) input — buchi2ltl's
+    # backward labeling exploits the nondeterministic translate-style TGBA, which
+    # `_to_split_form`'s determinization can destroy (e.g. coBüchi FGa|FGb). So
+    # the raw-form advantage is kept exactly for the non-decomposable inputs.
     det = _to_split_form(aut)
-    return _dispatch(det, reconstruct, decompose_kwargs, 0, max_depth)
+    if not (_and_pieces(det) or _or_pieces(det)):
+        phi = try_heuristic_gate(aut, techniques=techniques)
+        if phi is not None:
+            return ReconResult(phi, techniques)
+    phi = _dispatch(det, reconstruct, decompose_kwargs, 0, max_depth, techniques)
+    return ReconResult(phi, techniques)
 
 
 def split_report(aut: "spot.twa_graph") -> Tuple[str, int]:
