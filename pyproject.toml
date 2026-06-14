@@ -1,0 +1,28 @@
+# aut2ltl — package metadata (P-ARCH step 10, 2026-06-14).
+# Python's nearest analog to a package manifest; pairs with the per-package
+# __init__.py docstrings (the package-info equivalent) for documentation.
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aut2ltl"
+version = "0.1.0"
+description = "Automaton-to-LTL translation: a Krohn-Rhodes / holonomy-cascade engine (Boker–Lehtinen–Sickert, FoSSaCS 2022) and a backward-labeling heuristic engine, composed by a portfolio."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Yann Thierry-Mieg", email = "yann.thierrymieg@gmail.com" }]
+keywords = ["LTL", "omega-automata", "Buchi", "Krohn-Rhodes", "holonomy", "temporal-logic"]
+
+# Runtime requirements are NOT pip-installable and are intentionally omitted:
+#   * Spot (the `spot` and `buddy` Python bindings) — install at system level.
+#   * GAP 4.12+ with the SgpDec package — needed only by the kr cascade engine;
+#     see README.md and aut2ltl/kr/install.sh.
+dependencies = []
+
+# A console-script entry point awaits refactoring aut2ltl/cli.py's __main__
+# block into a main() function; until then run `python3 -m aut2ltl.cli`.
+
+[tool.setuptools.packages.find]
+include = ["aut2ltl*"]

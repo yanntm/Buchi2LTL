@@ -9,12 +9,13 @@ __pycache__/
 .vscode/
 
 # Heavy debug artifacts from t2 / f2 development sessions
-testing/debug_images/
-testing/debug_reconstruction.py   # transient instrumentation, not part of the feature
+tests/sl/debug_images/
 decomp/
 
-# kr/ (Krohn-Rhodes experimental) generated outputs and caches
-kr/examples/generated/
-kr/**/__pycache__/
-kr/**/*.pyc
+# generated outputs and caches
+tests/kr/examples/generated/
+aut2ltl/**/__pycache__/
+aut2ltl/**/*.pyc
+tests/**/__pycache__/
+tests/**/*.pyc
 
