@@ -76,8 +76,50 @@ Python realization, chosen when we implement.
   proper has no portfolio coupling). Resolves the `buchi2ltl→kr` edge
   (`[[technique-report-struct]]`).
 
-**Incremental, code-driven plan (each step small; gates green after each —
-`test_kr_r4_audit` CLEAN + `survey_mp_cascade` previously-True stay True).**
+**THE MOVE CAMPAIGN — finalized 2026-06-14, IN PROGRESS. Checkpoint-approved
+(pause + show + get commit OK at each natural checkpoint). Decisions locked:**
+NESTED root package `aut2ltl/`; heuristic engine named `sl/`; `evaluate.py` →
+`tests/eval_roundtrip.py`; `samples/` → `tests/fixtures/`. `git mv` everywhere
+(preserve blame). Gates green at each checkpoint: `test_kr_r4_audit` CLEAN +
+`survey_mp_cascade` clean sweep. Layering (acyclic): `aut2ltl/contract.py` ←
+`{aut2ltl/kr, aut2ltl/sl}` ← `aut2ltl/portfolio` ← `aut2ltl/cli` + `__init__`.
+
+Target tree:
+```
+aut2ltl/
+  __init__.py  contract.py(ReconResult/Translator)  cli.py
+  kr/      pure cascade FoSSaCS engine (cascade, config_graph, extract,
+           gap_bridge, reachability(_operators), fin, acceptance_dispatch,
+           ltl_builders, bdd_utils, gap/, simplify/) — heuristics REMOVED,
+           no portfolio exports
+  sl/      heuristic engine (was buchi2ltl/: reconstruction(_helpers),
+           invariants, utils, heuristics/)
+  portfolio/  decompose_recombine, heuristic_gate (the kr↔sl seam), sl_driven
+tests/     kr/ (was kr/testing/ +simplify/testing +examples), sl/ (was top
+           testing/), fixtures/ (was samples/), eval_roundtrip.py
+```
+
+Steps (mark done inline as we go; ~46 files import `kr`, ~17 import `buchi2ltl`,
+mostly tests; internal relative imports survive a whole-package `git mv`):
+1. Scaffold `aut2ltl/__init__.py` + `.gitignore` (__pycache__, *.pyc, gen artifacts).
+2. `git mv kr aut2ltl/kr`; rewrite external `kr` imports → `aut2ltl.kr`. GATE.
+3. `git mv buchi2ltl aut2ltl/sl`; rewrite `buchi2ltl` imports → `aut2ltl.sl`. GATE.
+4. `git mv aut2ltl/kr/recon_result.py aut2ltl/contract.py`; repoint importers. GATE.
+5. `git mv` decompose_recombine/heuristic_gate/sl_driven → `aut2ltl/portfolio/`;
+   trim `aut2ltl/kr/__init__.py`; add `portfolio/__init__.py`. GATE (the load-bearing
+   one: r4 audit + MP survey).
+6. Consolidate tests: kr/testing→tests/kr, kr/simplify/testing→tests/kr/simplify,
+   kr/examples→tests/kr/examples, top testing→tests/sl, samples→tests/fixtures,
+   evaluate.py→tests/eval_roundtrip.py; fix script imports. GATE from new paths.
+7. `git mv buchi2ltl.py aut2ltl/cli.py`; repoint.
+8. Delete (history-recoverable): root current_*.csv/results.csv/trace_aut_*,
+   old_results/, testing/*.csv + debug_images/, kr/examples/generated/*, empty kr/tests/.
+9. Docs: CLAUDE.md, README.md, kr/README→aut2ltl/kr/README, STATUS/TODO pointers,
+   memory project_kr.
+
+**Incremental, code-driven plan (superseded above by the concrete campaign;
+kept for the rationale). Each step small; gates green after each —
+`test_kr_r4_audit` CLEAN + `survey_mp_cascade` previously-True stay True.**
 1. ~~**Reify the contract in place (no folders move yet).**~~ **DONE 2026-06-14.**
    `ReconResult` got an explicit `status` (OK / DECLINED) + `decline()` /
    `.declined` / `.ok`; the `UNSUPPORTED`-in-`.formula` sentinel is gone from the
