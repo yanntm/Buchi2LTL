@@ -118,8 +118,10 @@ try:
     info["delegations"] = deleg
     info["result"] = "OK"
     # Print the (fast, small) delegation result FIRST so an explosive baseline
-    # below cannot hide it.
-    print("RESULT_JSON:" + json.dumps(info))
+    # below cannot hide it. FLUSH: stdout is block-buffered in the subprocess, so
+    # without this the buffered line is lost if the kr_full baseline hangs and the
+    # process is killed.
+    print("RESULT_JSON:" + json.dumps(info), flush=True)
     # Baseline to beat: kr on the FULL automaton. May explode/timeout — that is
     # itself the finding; we already emitted the delegation numbers.
     full = reconstruct_decomposed(aut)
@@ -138,9 +140,14 @@ def run(fs):
     try:
         p = subprocess.run([sys.executable, "-c", child], capture_output=True,
                            text=True, timeout=PER, cwd=PROJECT_ROOT)
-    except subprocess.TimeoutExpired:
-        return {"formula": fs, "result": "TIMEOUT"}
-    out = (p.stdout or "") + (p.stderr or "")
+        out = (p.stdout or "") + (p.stderr or "")
+    except subprocess.TimeoutExpired as e:
+        # Recover the flushed delegation RESULT_JSON: a hang in the explosive
+        # kr_full baseline must not discard the already-emitted result. Streams
+        # come back as BYTES on timeout, so decode.
+        so, se = e.stdout or b"", e.stderr or b""
+        out = (so.decode("utf-8", "replace") if isinstance(so, bytes) else so) + \
+              (se.decode("utf-8", "replace") if isinstance(se, bytes) else se)
     res = None
     krfull = "TIMEOUT/explode"
     for line in out.splitlines():
