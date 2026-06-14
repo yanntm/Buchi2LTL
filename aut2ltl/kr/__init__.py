@@ -26,8 +26,6 @@ from .gap import (
 )
 from .extract import extract_generators, ExtractionError, is_deterministic
 from .reachability import (
-    reconstruct_bls,
-    reconstruct_ltl_paper_style,
     simplify_ltl,
     normalize_ltl,
     reach_strong,
@@ -51,8 +49,6 @@ __all__ = [
     "extract_generators",
     "ExtractionError",
     "is_deterministic",
-    "reconstruct_bls",
-    "reconstruct_ltl_paper_style",
     "make_hierarchy_class",
     "hierarchy_class",
     "as_translator",
