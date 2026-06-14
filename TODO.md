@@ -25,24 +25,26 @@ env/CLI/API overrides (the only place that knows all packages).
    (`get(spec_or_key)` lazy default, `set`, `clone(overrides)`, `from_specs(env=)`)
    + `tests/test_options.py` (6/6 green).
 2. Per-package spec declarations (real `os.environ` knobs gathered — see below):
-   - ✅ `aut2ltl/portfolio/options.py` — gate flags (the exemplar).
-   - ⏳ `aut2ltl/kr/options.py` — the big one, ~18 knobs. Group with sub-namespaces:
+   - ✅ `aut2ltl/portfolio/options.py` — `portfolio.sl.*` keys (the exemplar;
+     naming convention set).
+   - ⏳ `aut2ltl/kr/options.py` — the big one, ~18 knobs. Hierarchical sub-namespaces:
      `kr.dispatch.{acc,weak,buchi,cobuchi}`, `kr.fold_fin_reach`, `kr.fuse_letters`,
      `kr.reach_guard`, `kr.max_levels`, `kr.muller_scc_limit`, `kr.simp.*`
      (own/fold/factor/limit/node/opts/full_limit/tree_limit), `kr.flatten_tree_limit`,
-     `kr.trace`. Envs: the matching `KR_*` / `RECONSTRUCT_TRACE`.
+     `kr.trace`. `env=` the matching current `KR_*` / `RECONSTRUCT_TRACE`.
      (`KR_SAT_MIN_STATES` is read in floor `language.py` — give it a `language.*`
      key or fold into kr; decide when wiring.)
-   - ⏳ `aut2ltl/sl/options.py` — sl's own flags are all read in `portfolio/sl.py`,
-     so the `sl/` engine may need NO contract of its own (confirm).
+   - ⏸ `aut2ltl/sl/options.py` — DEFERRED to the sl refactor: sl's flags are read
+     in `portfolio/sl.py` today, and its f2/t2 heuristics are unwrapped `Translator`s;
+     sl gets its own contract when those are wrapped.
 3. ⏳ Root builder at the front end (`aut2ltl/cli.py`, "aut2ltl main"):
    `build_options(overrides=None)` = aggregate the per-package spec lists + env →
    default `Options`. Additive.
 
-**OPEN (decide next session):** key naming — meaning-based (`portfolio.gate.enabled`)
-vs legacy-flavored (`portfolio.gate.buchi2ltl`, as committed). Leaning meaning-based;
-if so, rename the portfolio exemplar's keys (env= stays the bridge). Settle this
-BEFORE writing `kr/options.py` so all ~18 keys are named consistently.
+**Key naming — SETTLED:** hierarchical, meaning-based, reflecting CURRENT code
+(e.g. `portfolio.sl.enabled`, not `…gate.buchi2ltl`); no backward-compat
+constraints on the dotted keys. `env=` keeps the current legacy var as the seeding
+bridge only.
 
 ### Deferred (separate iterations)
 - **Wire call sites**: thread `Options` into Translator construction, repoint each
