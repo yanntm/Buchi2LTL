@@ -53,10 +53,6 @@ def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.form
     Per-leaf gates: KR_DISPATCH_ACC / _WEAK / _BUCHI / _COBUCHI (=0 disables a
     leaf; weak is off by default).
     """
-    def _tag(t):
-        if techniques is not None:
-            techniques.add(t)
-
     # Acc(c): the bounded / transient (X-ladder) fragment — self-gating, so safe
     # first in the chain and smallest for bounded inputs. Gate KR_DISPATCH_ACC.
     if os.environ.get("KR_DISPATCH_ACC", "1") != "0":
@@ -66,34 +62,32 @@ def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.form
             if techniques is not None:
                 techniques |= r.technique
             return r.formula
-    # Weak (Δ₁) / looping (Σ₁/Π₁): EXPERIMENTAL, OFF by default. Placed BEFORE
-    # Büchi/coBüchi because weak languages are Büchi AND coBüchi recognizable —
-    # those would otherwise claim them first — so weak only ever fires when its
-    # gate is explicitly enabled. The cascade weak form is a size regression (the
-    # residual is reach-driven); kept in, flagged off, for A/B against the coming
-    # config-indexed Acc(c) weak-class construction. Gate KR_DISPATCH_WEAK.
+    # Weak (Δ₁): off by default (KR_DISPATCH_WEAK). Placed before Büchi/coBüchi —
+    # weak languages are Büchi AND coBüchi recognizable, so they would otherwise
+    # claim weak cases first; this only fires when its gate is enabled.
     if os.environ.get("KR_DISPATCH_WEAK", "0") != "0":
-        from .acceptance_dispatch import reconstruct_weak
-        phi = reconstruct_weak(casc)
-        if phi is not None:
-            _tag("weak")
-            return phi
+        from .weak import weak
+        r = weak(casc)
+        if r.ok:
+            if techniques is not None:
+                techniques |= r.technique
+            return r.formula
     if os.environ.get("KR_DISPATCH_BUCHI", "1") != "0":
-        from .acceptance_dispatch import reconstruct_buchi
-        phi = reconstruct_buchi(casc)
-        if phi is not None:
-            _tag("buchi")
-            return phi
-    # coBüchi (persistence, Σ₂): tried AFTER Büchi, so it only sees
-    # genuinely-not-Büchi cascades. φ = ⋀_{C∈α}Fin(C); gate recovers the natural
-    # acceptance (the parity step hides coBüchi as Inf(0)|Fin(1)). Gate
-    # KR_DISPATCH_COBUCHI, default ON.
+        from .buchi import buchi
+        r = buchi(casc)
+        if r.ok:
+            if techniques is not None:
+                techniques |= r.technique
+            return r.formula
+    # coBüchi precedes nothing relevant but follows Büchi, so it only sees
+    # genuinely-not-Büchi cascades. Gate KR_DISPATCH_COBUCHI, default ON.
     if os.environ.get("KR_DISPATCH_COBUCHI", "1") != "0":
-        from .acceptance_dispatch import reconstruct_cobuchi
-        phi = reconstruct_cobuchi(casc)
-        if phi is not None:
-            _tag("cobuchi")
-            return phi
+        from .cobuchi import cobuchi
+        r = cobuchi(casc)
+        if r.ok:
+            if techniques is not None:
+                techniques |= r.technique
+            return r.formula
     # No simpler acceptance class applied: fall back to the general-case `bls`
     # member (the full Muller-DNF construction), which always produces a formula.
     from .bls import bls
