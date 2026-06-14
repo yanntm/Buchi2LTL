@@ -36,7 +36,7 @@ from aut2ltl.kr.reachability_operators import (
     PAPER_REACH_CALLS, PAPER_FIN_CALLS,
 )
 from aut2ltl.kr.fin import fin_c
-from aut2ltl.kr.reachability import reconstruct_ltl_paper_style
+from aut2ltl.kr.hierarchy_class import hierarchy_class
 
 # Reset counters
 def _reset_counters():
@@ -255,7 +255,7 @@ def check_canary_roundtrip():
         f = spot.formula("G(p | F q)")
         aut = f.translate()
         casc = decompose_aut(aut)
-        ltl = reconstruct_ltl_paper_style(casc)   # spot.formula DAG
+        ltl = hierarchy_class(casc).formula   # spot.formula DAG
         from aut2ltl.kr.ltl_builders import _short_f
         print("  recovered:", _short_f(ltl, 100))
         orig_b = f.translate("Buchi")
