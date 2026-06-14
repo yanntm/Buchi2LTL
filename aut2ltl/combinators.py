@@ -2,7 +2,7 @@
 aut2ltl/combinators.py — composite translators built over the contract.
 
 A composite is itself a translator: it delegates to a collection of
-sub-translators and combines their `ReconResult`s. Because every sub-result obeys
+sub-translators and combines their `LTLFormulaResult`s. Because every sub-result obeys
 the contract invariant (language-faithful or DECLINED, never wrong), the
 composite is sound by construction. The combinators here are generic over the
 input type, so they apply to both `Translator` (automaton in) and
@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import Callable, Generic, Sequence, TypeVar
 
-from aut2ltl.contract import ReconResult
+from aut2ltl.contract import LTLFormulaResult
 
 _In = TypeVar("_In")
 
@@ -28,27 +28,27 @@ class _FirstSuccess(Generic[_In]):
     `__call__`), so a composite is itself a valid stage of another composite.
 
     Each stage is self-gating: a stage that does not apply to the input returns a
-    DECLINED `ReconResult`, and the chain moves on. The winning stage's result —
+    DECLINED `LTLFormulaResult`, and the chain moves on. The winning stage's result —
     including its `technique` set — is returned unchanged (the composite stamps no
     tag of its own; its `name` is its identity, not a technique).
     """
 
     def __init__(
-        self, name: str, stages: Sequence[Callable[[_In], ReconResult]]
+        self, name: str, stages: Sequence[Callable[[_In], LTLFormulaResult]]
     ) -> None:
         self.name = name
         self._stages = tuple(stages)
 
-    def __call__(self, x: _In) -> ReconResult:
+    def __call__(self, x: _In) -> LTLFormulaResult:
         for stage in self._stages:
             r = stage(x)
             if r.ok:
                 return r
-        return ReconResult.decline()
+        return LTLFormulaResult.decline()
 
 
 def first_success(
-    stages: Sequence[Callable[[_In], ReconResult]],
+    stages: Sequence[Callable[[_In], LTLFormulaResult]],
     *,
     name: str,
 ) -> "_FirstSuccess[_In]":

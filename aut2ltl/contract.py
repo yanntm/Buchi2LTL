@@ -25,7 +25,7 @@ MT-safe by construction: the accumulator is a per-call local threaded by
 reference through the dispatch, never a module-level/global recorder.
 
 This module is the contract FLOOR both engines depend on: the data signature
-`ReconResult` and the behavioral signatures `Translator` (automaton in) and
+`LTLFormulaResult` and the behavioral signatures `Translator` (automaton in) and
 `CascadeTranslator` (decomposed cascade in). The key reification is an explicit
 `status` (OK / DECLINED) — "not me" is no longer smuggled as the `UNSUPPORTED`
 string inside `.formula`. `status` plus the dataclass being the single extension
@@ -51,10 +51,10 @@ _LEGACY_UNSUPPORTED = "UNSUPPORTED"
 
 
 @dataclass
-class ReconResult:
+class LTLFormulaResult:
     """A reconstructed formula DAG, the set of methods that built it, and an
     explicit status. On DECLINE `.formula` is None and `.status` is DECLINED
-    (use `ReconResult.decline(...)`); never a sentinel string in `.formula`."""
+    (use `LTLFormulaResult.decline(...)`); never a sentinel string in `.formula`."""
     formula: Optional["spot.formula"]
     technique: Set[str] = field(default_factory=set)
     status: str = OK
@@ -74,7 +74,7 @@ class ReconResult:
         return not self.declined
 
     @classmethod
-    def decline(cls, technique: Optional[Set[str]] = None) -> "ReconResult":
+    def decline(cls, technique: Optional[Set[str]] = None) -> "LTLFormulaResult":
         """The "not me" result: no formula, DECLINED status."""
         return cls(formula=None, technique=technique or set(), status=DECLINED)
 
@@ -87,19 +87,19 @@ class ReconResult:
 class Translator(Protocol):
     """The behavioral contract: translate a HOA automaton to LTL.
 
-    A Translator is a callable `twa -> ReconResult`. Current realizations are
+    A Translator is a callable `twa -> LTLFormulaResult`. Current realizations are
     plain module functions (`reconstruct_decomposed`, buchi2ltl's
     `reconstruct_ltl`, the acceptance-dispatch leaves); this Protocol documents
     the shared signature, and the portfolio combinators (Gate / Decompose /
     SlDriven / Portfolio) are themselves Translators over Translators.
 
     Contract invariant (NOT type-checkable, the load-bearing rule): the returned
-    ReconResult is either language-faithful (`status` OK, `.formula` ≡ L(twa)) or
+    LTLFormulaResult is either language-faithful (`status` OK, `.formula` ≡ L(twa)) or
     DECLINED — NEVER a wrong formula. That single rule is what makes composition
     sound.
     """
 
-    def __call__(self, twa: "spot.twa_graph") -> "ReconResult": ...
+    def __call__(self, twa: "spot.twa_graph") -> "LTLFormulaResult": ...
 
 
 @runtime_checkable
@@ -107,7 +107,7 @@ class CascadeTranslator(Protocol):
     """The cascade-level peer of `Translator`: translate a Krohn-Rhodes Cascade
     to LTL.
 
-    Same `ReconResult` and the same load-bearing invariant — the result is
+    Same `LTLFormulaResult` and the same load-bearing invariant — the result is
     language-faithful (OK) or DECLINED, never wrong — but the input is an already
     decomposed `Cascade` instead of a raw automaton.
 
@@ -115,7 +115,7 @@ class CascadeTranslator(Protocol):
     (singleton instance) with a fixed `name` (its technique identity, e.g.
     'acc' / 'buchi' / 'cobuchi' / 'weak' / 'bls') and a `__call__` that is
     self-gating (it inspects the cascade and either builds its faithful form or
-    DECLINES). The member stamps its own `name` into the ReconResult's technique,
+    DECLINES). The member stamps its own `name` into the LTLFormulaResult's technique,
     so composites (`first_success`) need no out-of-band tagging. `decompose_aut`
     is the adapter that lifts a member up to a `Translator` (twa -> Cascade ->
     result).
@@ -126,4 +126,4 @@ class CascadeTranslator(Protocol):
 
     name: str
 
-    def __call__(self, casc: "Cascade") -> "ReconResult": ...
+    def __call__(self, casc: "Cascade") -> "LTLFormulaResult": ...

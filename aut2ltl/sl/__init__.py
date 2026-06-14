@@ -10,7 +10,7 @@ verify-before-use guess-and-check. Sound by construction, so the portfolio gate
 
 Imports only the contract floor (`aut2ltl.contract`); a peer of `aut2ltl.kr`,
 importing neither it nor the portfolio. Public entry: `reconstruct_ltl(twa) ->
-ReconResult`.
+LTLFormulaResult`.
 """
 
 from .reconstruction import reconstruct_ltl

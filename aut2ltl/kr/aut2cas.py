@@ -5,11 +5,11 @@ A CascadeTranslator works on an already-decomposed `Cascade`; a `Translator`
 (the twa-level contract) works on a raw automaton. `as_translator` is the adapter
 that closes the gap: given an automaton it builds the Krohn-Rhodes cascade with
 `decompose_aut` (Spot normalization to deterministic parity + GAP SgpDec
-holonomy) and runs the cascade-translator on it. The result `ReconResult`
+holonomy) and runs the cascade-translator on it. The result `LTLFormulaResult`
 (formula + technique) is forwarded unchanged.
 
 The module builds the default endpoint singleton `reconstruct`
-(= `as_translator(hierarchy_class)`): the pure-kr twa -> ReconResult entry, the
+(= `as_translator(hierarchy_class)`): the pure-kr twa -> LTLFormulaResult entry, the
 cascade-level construction lifted to the automaton level.
 """
 
@@ -18,7 +18,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from aut2ltl.contract import ReconResult, Translator, CascadeTranslator
+from aut2ltl.contract import LTLFormulaResult, Translator, CascadeTranslator
 from .gap import decompose_aut
 from .hierarchy_class import hierarchy_class
 
@@ -37,7 +37,7 @@ def as_translator(
     cascade (GAP) and run `ct` on it. Decomposition options are captured at build
     time; the returned Translator takes only the automaton (the contract shape)."""
 
-    def reconstruct(twa: "spot.twa_graph") -> ReconResult:
+    def reconstruct(twa: "spot.twa_graph") -> LTLFormulaResult:
         casc = decompose_aut(twa, gap_cmd=gap_cmd, timeout=timeout, max_aps=max_aps)
         # Depth guard dropped (was 3 levels during find-issues-small-first dev):
         # the ladder is green through 3L and the construction is fully memoized

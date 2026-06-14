@@ -39,7 +39,7 @@ import spot
 from aut2ltl.kr.gap import decompose_aut
 from .heuristic_gate import try_heuristic_gate
 from aut2ltl.kr.hierarchy_class import hierarchy_class
-from aut2ltl.contract import ReconResult
+from aut2ltl.contract import LTLFormulaResult
 
 __all__ = ["reconstruct_decomposed", "split_report"]
 
@@ -50,7 +50,7 @@ __all__ = ["reconstruct_decomposed", "split_report"]
 _SAT_MIN_STATES = int(os.environ.get("KR_SAT_MIN_STATES", "30"))
 
 # A reconstruct function applied per acceptance-trivial piece. The default is the
-# hierarchy_class CascadeTranslator (Cascade -> ReconResult); custom probe
+# hierarchy_class CascadeTranslator (Cascade -> LTLFormulaResult); custom probe
 # reconstructs return a bare Cascade -> spot.formula.
 ReconstructFn = Callable[..., "spot.formula"]
 
@@ -115,7 +115,7 @@ def _or_pieces(aut: "spot.twa_graph") -> List["spot.twa_graph"]:
 def _base(aut, reconstruct, decompose_kwargs, techniques) -> "spot.formula":
     """Acceptance-trivial piece -> existing monolithic kr."""
     casc = decompose_aut(aut, **decompose_kwargs)
-    # The default leaf is the hierarchy_class CascadeTranslator: its ReconResult
+    # The default leaf is the hierarchy_class CascadeTranslator: its LTLFormulaResult
     # .technique names the firing leaf (acc/buchi/cobuchi/weak/bls), merged into
     # the accumulator. Custom reconstructs (probe stubs) return a bare formula;
     # record a generic 'base' for them.
@@ -177,14 +177,14 @@ def reconstruct_decomposed(
     gap_cmd: str = "gap",
     timeout: int = 180,
     max_aps: int = 5,
-) -> ReconResult:
+) -> LTLFormulaResult:
     """Root decompose-and-recombine: deterministic-generic state-minimal
     normalize, split the acceptance condition (AND by conjunct / OR by
     strength), run the existing kr on each acceptance-trivial piece, recombine
     with the root ⋀/⋁.
 
     `aut` is an automaton (the kr input contract — HOA, never an LTL formula).
-    Returns a `ReconResult` (`.formula` is the hash-consed spot.formula DAG;
+    Returns a `LTLFormulaResult` (`.formula` is the hash-consed spot.formula DAG;
     `.technique` is the set of methods that contributed). Falls through to the
     monolithic kr when no split applies.
     """
@@ -196,10 +196,10 @@ def reconstruct_decomposed(
         # OLD order: gate on the RAW input first, preempting decomposition.
         phi = try_heuristic_gate(aut, techniques=techniques)
         if phi is not None:
-            return ReconResult(phi, techniques)
+            return LTLFormulaResult(phi, techniques)
         det = _to_split_form(aut)
         phi = _dispatch(det, reconstruct, decompose_kwargs, 0, max_depth, techniques)
-        return ReconResult(phi, techniques)
+        return LTLFormulaResult(phi, techniques)
 
     # NEW (default): decomposition takes precedence over the gate. But if the
     # ROOT does not split, gate the RAW (pre-determinization) input — buchi2ltl's
@@ -210,9 +210,9 @@ def reconstruct_decomposed(
     if not (_and_pieces(det) or _or_pieces(det)):
         phi = try_heuristic_gate(aut, techniques=techniques)
         if phi is not None:
-            return ReconResult(phi, techniques)
+            return LTLFormulaResult(phi, techniques)
     phi = _dispatch(det, reconstruct, decompose_kwargs, 0, max_depth, techniques)
-    return ReconResult(phi, techniques)
+    return LTLFormulaResult(phi, techniques)
 
 
 def split_report(aut: "spot.twa_graph") -> Tuple[str, int]:

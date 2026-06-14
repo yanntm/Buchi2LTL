@@ -3,7 +3,7 @@ aut2ltl — automaton-to-LTL translation: contract, engines, portfolio, CLI.
 
 Root package (P-ARCH, 2026-06-14). Layering, acyclic:
 
-    contract  (ReconResult, Translator, status)         the floor
+    contract  (LTLFormulaResult, Translator, status)         the floor
       ↑
     kr  (pure cascade FoSSaCS engine)   sl  (heuristic engine)
       ↑

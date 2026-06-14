@@ -17,7 +17,7 @@ from __future__ import annotations
 import aut2ltl.kr.reachability_operators as _ops
 from aut2ltl.kr.ltl_builders import _And, _Or, _Not, _tt, _ff, _simp_f, _tree_size_f
 from aut2ltl.kr.cascade import Cascade
-from aut2ltl.contract import ReconResult, CascadeTranslator
+from aut2ltl.contract import LTLFormulaResult, CascadeTranslator
 
 
 def is_weak_cascade(casc: Cascade) -> bool:
@@ -59,15 +59,15 @@ class Weak:
 
     name = "weak"
 
-    def __call__(self, casc: Cascade) -> ReconResult:
+    def __call__(self, casc: Cascade) -> LTLFormulaResult:
         if not is_weak_cascade(casc):
-            return ReconResult.decline()
+            return LTLFormulaResult.decline()
         from aut2ltl.kr.cascade import build_pruned_config_aut, reachable_configs
         import spot
         _ops.reset_build_state(casc)
         g = build_pruned_config_aut(casc)
         if g is None:
-            return ReconResult.decline()
+            return LTLFormulaResult.decline()
         reach = reachable_configs(casc)         # node i <-> reach[i]
         iota = _init_config(casc)
         si = spot.scc_info(g)
@@ -93,7 +93,7 @@ class Weak:
             terms.append(_And(reach_in, avoid_out))
         res = _ff() if not terms else _simp_f(_Or(*terms))   # no accepting SCC -> empty
         _ops.PAPER_MAX_LTL_SIZE = _tree_size_f(res)
-        return ReconResult(formula=res, technique={self.name})
+        return LTLFormulaResult(formula=res, technique={self.name})
 
 
 weak: CascadeTranslator = Weak()

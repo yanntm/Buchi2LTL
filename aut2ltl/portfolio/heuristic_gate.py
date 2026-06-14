@@ -103,7 +103,7 @@ def try_heuristic_gate(aut: "spot.twa_graph", *, techniques=None) -> Optional["s
 
     `techniques` (optional, default None): a SET into which the adopted
     buchi2ltl technique tokens (e.g. 'sl', 't2', 'f2') are recorded for the
-    portfolio report (`aut2ltl.contract.ReconResult`).
+    portfolio report (`aut2ltl.contract.LTLFormulaResult`).
     """
     if os.environ.get("KR_GATE_BUCHI2LTL", "1") == "0":
         return None
@@ -121,7 +121,7 @@ def try_heuristic_gate(aut: "spot.twa_graph", *, techniques=None) -> Optional["s
         _STATS["errored"] += 1
         return None
     tech_tokens = out.technique
-    if out.declined:       # ReconResult: "not me"
+    if out.declined:       # LTLFormulaResult: "not me"
         return None
     rec = out.formula
     try:

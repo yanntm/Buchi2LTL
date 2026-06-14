@@ -54,7 +54,7 @@ def reconstruct_sl_driven(aut: "spot.twa_graph") -> Optional["spot.formula"]:
         out = reconstruct_ltl(tgba, scc_labeler=labeler)
     except Exception:
         return None
-    if out.declined or out.formula is None:   # ReconResult: "not me"
+    if out.declined or out.formula is None:   # LTLFormulaResult: "not me"
         return None
     rec = out.formula
     try:

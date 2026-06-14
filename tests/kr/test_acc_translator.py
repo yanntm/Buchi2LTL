@@ -3,7 +3,7 @@
 tests/kr/test_acc_translator.py
 
 Validate that the Acc member (kr/acc.acc) honors the CascadeTranslator
-contract: casc -> ReconResult, self-gating, language-faithful when it fires.
+contract: casc -> LTLFormulaResult, self-gating, language-faithful when it fires.
 
 - Bounded-fragment cases (X-ladder): result is OK, technique == {'acc'}, and the
   formula is equivalent to the original language.
@@ -22,7 +22,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.contract import ReconResult, CascadeTranslator
+from aut2ltl.contract import LTLFormulaResult, CascadeTranslator
 from aut2ltl.kr.gap import decompose_aut
 from aut2ltl.kr.acc import acc
 
@@ -30,7 +30,7 @@ BOUNDED = ["a", "X a", "X X a", "a & X a", "X(a & X a)", "a | X b"]
 RECURRENT = ["G a", "a U b", "F(a & b)", "G(a -> X b)", "GFa", "FGa"]
 
 
-def _result(fs: str) -> ReconResult:
+def _result(fs: str) -> LTLFormulaResult:
     return acc(decompose_aut(spot.formula(fs).translate()))
 
 

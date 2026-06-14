@@ -7,7 +7,7 @@ This package owns the cross-engine mixing (the runtime mutual recursion between
 kr and sl); the engines themselves stay PEERS that import neither each other nor
 this layer — only the contract floor (`aut2ltl.contract`).
 
-Public entry: `reconstruct_decomposed(twa) -> ReconResult` (automaton in,
+Public entry: `reconstruct_decomposed(twa) -> LTLFormulaResult` (automaton in,
 formula DAG + technique out). See aut2ltl/kr/TODO.md "THE MOVE CAMPAIGN".
 """
 

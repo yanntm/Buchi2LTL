@@ -16,7 +16,7 @@ output formula; the build is O(|reachable configs| × |Σ|) memoized.
 
 `Acc` is a self-contained CascadeTranslator member: it decides on its own whether
 the input is in the bounded fragment (no external predicate) and returns a
-language-faithful ReconResult or a DECLINE.
+language-faithful LTLFormulaResult or a DECLINE.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from typing import Optional
 import aut2ltl.kr.reachability_operators as _ops
 from aut2ltl.kr.ltl_builders import _And, _Or, _X, _tt, _ff, _simp_f, _tree_size_f, _letters_to_f
 from aut2ltl.kr.cascade import Cascade
-from aut2ltl.contract import ReconResult, CascadeTranslator
+from aut2ltl.contract import LTLFormulaResult, CascadeTranslator
 
 
 class _Recurrent(Exception):
@@ -36,7 +36,7 @@ class _Recurrent(Exception):
 def _unroll(casc: Cascade) -> Optional["spot.formula"]:
     """The bounded Acc(ι) unroll: the formula for L(D) from the initial config,
     or None if any reachable config is recurrent (input outside the bounded
-    fragment). `Acc` wraps this into a ReconResult.
+    fragment). `Acc` wraps this into a LTLFormulaResult.
 
       Acc(c) = ⊤  if L(D from state_of(c)) is universal,           (R1 base)
              = ⊥  if it is empty,
@@ -121,11 +121,11 @@ class Acc:
 
     name = "acc"
 
-    def __call__(self, casc: Cascade) -> ReconResult:
+    def __call__(self, casc: Cascade) -> LTLFormulaResult:
         phi = _unroll(casc)
         if phi is None:
-            return ReconResult.decline()
-        return ReconResult(formula=phi, technique={self.name})
+            return LTLFormulaResult.decline()
+        return LTLFormulaResult(formula=phi, technique={self.name})
 
 
 acc: CascadeTranslator = Acc()
