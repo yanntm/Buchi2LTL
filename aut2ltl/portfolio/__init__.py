@@ -1,23 +1,46 @@
 """
 aut2ltl.portfolio — the composition layer (combinators) over the engines.
 
-A HOA is translated by whichever method wins at each node: the buchi2ltl/sl
-gate, an AND/OR strength/acceptance split, or one of kr's leaf acceptance forms.
-This package owns the cross-engine mixing (the runtime mutual recursion between
-kr and sl); the engines themselves stay PEERS that import neither each other nor
-this layer — only the contract floor (`aut2ltl.contract`).
+A `Language` is translated by whichever Translator wins at each node: the sl gate,
+an AND/OR strength/acceptance split (`Decompose`), the sl-driven blaster, or the
+kr cascade. Every piece is a Translator (`Language -> LTLFormulaResult`); the
+engines stay PEERS importing only the contract floor (`aut2ltl.contract` /
+`aut2ltl.language`).
 
-Public entry: `reconstruct_decomposed(twa) -> LTLFormulaResult` (automaton in,
-formula DAG + technique out). See aut2ltl/kr/TODO.md "THE MOVE CAMPAIGN".
+The default entry `reconstruct_decomposed` is the assembled composition:
+
+    cascade   = aut2cas.reconstruct                        # the kr cascade Translator
+    core      = Decompose(first_success([sl, cascade]))    # SlDriven's non-recursing delegate
+    sl_driven = SlDriven(delegate=core)                    # the blaster ("kr under sl")
+    reconstruct_decomposed = Decompose(first_success([sl_driven, cascade]))
+
+`reconstruct_decomposed` splits the input, then hands each atom to the blaster
+(sl envelope + delegated cores), with the cascade as the always-succeeds floor.
+`core` does NOT contain `SlDriven`, so the kr↔sl recursion shrinks to the cascade
+and terminates.
 """
+from __future__ import annotations
 
-from .decompose_recombine import reconstruct_decomposed, split_report
-from .heuristic_gate import try_heuristic_gate
-from .sl_driven import reconstruct_sl_driven
+from aut2ltl.combinators import first_success
+from aut2ltl.kr.aut2cas import reconstruct as cascade
+from .sl import Sl, sl
+from .sl_driven import SlDriven
+from .decompose import Decompose, split_report
+
+# The assembled default portfolio Translators (all Language -> LTLFormulaResult).
+core = Decompose(first_success([sl, cascade], name="core"))
+sl_driven = SlDriven(delegate=core)
+reconstruct_decomposed = Decompose(first_success([sl_driven, cascade], name="top"))
 
 __all__ = [
     "reconstruct_decomposed",
     "split_report",
-    "try_heuristic_gate",
-    "reconstruct_sl_driven",
+    "Sl",
+    "sl",
+    "SlDriven",
+    "sl_driven",
+    "Decompose",
+    "cascade",
+    "core",
+    "first_success",
 ]

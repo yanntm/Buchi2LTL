@@ -6,12 +6,26 @@ portfolio/sl.py — the `Sl` Translator: the sl engine as a contract Translator.
 nondeterministic) TGBA the sl engine exploits — `Language.tgba()` — runs sl, and
 simplifies on equal footing with the cascade (`_simp_f`).
 
-Self-gating, sound BY CONSTRUCTION (not post-hoc): sl is EXACT on the very-weak
-(1-weak) fragment — automata whose only cycles are self-loops — and DECLINES off
-it (its `UNSUPPORTED` sentinel surfaces as `LTLFormulaResult.declined`); a wrong
-formula is never emitted. (The full soundness essay, incl. the f2/t2
-verify-before-use layer, lives in heuristic_gate.py until that file is retired
-into this one.)
+Self-gating, sound BY CONSTRUCTION (not post-hoc). sl partitions each state's
+outgoing edges into self-loops and exits, recurses (memoized) on the exit
+targets, and assembles the language from that state by fixed rules — G(⋁self) &
+GF(⋁acc) when accepting; [G(⋁self)&GF(⋁acc)] | (⋁self U ⋁exit) with exits;
+(⋁self) U (⋁exit) non-accepting; ⋁(cond & X succ) for exits-only — with per-edge
+downstream invariants conjoined. This is EXACT precisely on the VERY-WEAK (1-weak)
+fragment (automata whose only cycles are self-loops); there the U/G/GF encoding is
+the standard provably-correct translation. OFF that fragment sl DECLINES (a state
+re-entered on the recursion stack, or a successor inside a genuine multi-state SCC
+with no validated fragment): the engine's `UNSUPPORTED` sentinel poisons upward
+and surfaces here as `LTLFormulaResult.declined`; a wrong formula is never
+emitted. So soundness is BY CONSTRUCTION (exact-on-fragment + decline-otherwise),
+not post-hoc checking.
+
+The f2 (size-2 overapprox) and t2 (terminal-2-SCC) heuristics are a SEPARATE,
+verify-before-use layer inside the sl engine: they PROPOSE an LTL fragment for a
+2-state / terminal SCC and VALIDATE it by language equivalence before sl may use
+it (a wrong guess is simply not adopted). The opt-in KR_GATE_VERIFY audit below is
+CONFIRMATION of all this, not its foundation (it found zero rejections over ~170
+randltl formulas).
 
 Env knobs (the cleanup of these is a separate pass): KR_GATE_BUCHI2LTL (default
 ON; =0 declines always — the pure-kr A/B), KR_GATE_MAX_STATES (skip a
