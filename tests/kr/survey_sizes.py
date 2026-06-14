@@ -20,7 +20,7 @@ waited on.
 Run from project root:
     python3 kr/testing/survey_sizes.py
     python3 kr/testing/survey_sizes.py "a U b" "G(a -> X b)"   # specific
-    KR_SIZE_PATH=monolithic python3 kr/testing/survey_sizes.py  # A/B vs reconstruct_bls
+    KR_SIZE_PATH=monolithic python3 kr/testing/survey_sizes.py  # A/B vs hierarchy_class
     KR_FOLD_FIN_REACH=0 python3 kr/testing/survey_sizes.py      # Fin fold off, A/B
 
 Mirrors survey_mp_cascade.py's case list and isolation discipline.
@@ -61,12 +61,12 @@ from pathlib import Path
 proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 import spot
-from aut2ltl.kr import decompose_aut, reconstruct_bls
+from aut2ltl.kr import decompose_aut, hierarchy_class
 from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
 from aut2ltl.kr.ltl_builders import _tree_size_f
 
 # Default path is the GOTO decompose entry; KR_SIZE_PATH=monolithic switches
-# to per-cascade reconstruct_bls for A/B.
+# to per-cascade hierarchy_class for A/B.
 PATH = _os.environ.get("KR_SIZE_PATH", "decompose")
 
 def dag_unique_and_kinds(f):
@@ -97,8 +97,9 @@ try:
 
     t0 = time.monotonic()
     if PATH == "monolithic":
-        rec_f = reconstruct_bls(casc)
-        info["technique"] = "bls"
+        _rr = hierarchy_class(casc)
+        rec_f = _rr.formula
+        info["technique"] = _rr.technique_str()
     else:
         _rr = reconstruct_decomposed(aut)
         rec_f = _rr.formula
