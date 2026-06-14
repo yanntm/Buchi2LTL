@@ -38,11 +38,11 @@ def reconstruct_sl_driven(aut: "spot.twa_graph") -> Optional["spot.formula"]:
     """sl-driven reconstruction with kr delegation. Returns a hash-consed
     formula DAG, or None if sl declines AND every delegation also declined
     (i.e. the whole thing is unreconstructable by this composition)."""
-    from buchi2ltl.reconstruction_dag import reconstruct_ltl_dag
+    from buchi2ltl.reconstruction import reconstruct_ltl
 
     def labeler(sub: "spot.twa_graph") -> Optional["spot.formula"]:
-        # Return the kr DAG DIRECTLY (no str()): the DAG engine splices it as a
-        # child node WITHOUT flattening — this is the whole point of the rewrite.
+        # Return the kr DAG DIRECTLY (no str()): the DAG-native engine splices it
+        # as a child node WITHOUT flattening — the whole point of the rewrite.
         # A high-sharing core that would explode str() now costs only its DAG.
         try:
             return reconstruct_decomposed(sub)
@@ -51,7 +51,7 @@ def reconstruct_sl_driven(aut: "spot.twa_graph") -> Optional["spot.formula"]:
 
     tgba = spot.postprocess(aut, "TGBA", "Small", "High")
     try:
-        out = reconstruct_ltl_dag(tgba, scc_labeler=labeler)
+        out = reconstruct_ltl(tgba, scc_labeler=labeler)
     except Exception:
         return None
     rec = out[0] if isinstance(out, (tuple, list)) else out
