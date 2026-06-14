@@ -421,6 +421,19 @@ unfolding that DAG.
     at all call sites. (The `ReconResult` lives in `kr/` and buchi2ltl imports it
     lazily — a temporary cross-package edge to be lifted into a shared `util`
     later; no load-time cycle since `import kr` does not import buchi2ltl.)
+  - **Contract reification — `status` (P-ARCH step 1, DONE 2026-06-14).**
+    `ReconResult` now carries an explicit `status` (OK / DECLINED) with
+    `ReconResult.decline()` / `.declined` / `.ok`; "not me" is no longer the
+    `UNSUPPORTED` string smuggled inside `.formula` (engines still use that string
+    INTERNALLY in their backward-labeling recursion — translated to DECLINED at the
+    boundary return of `buchi2ltl.reconstruction.reconstruct_ltl`). Consumers branch
+    on `.declined`: `heuristic_gate`, `sl_driven`, and the root CLIs
+    (`buchi2ltl.py`, `evaluate.py`). The `Translator` Protocol (callable
+    `twa -> ReconResult`; invariant: language-faithful OR declines, never wrong) is
+    documented in `recon_result.py`. A transitional legacy-string sniff in
+    `.declined` keeps each one-file commit green; drop it once no boundary emits the
+    sentinel. Gates: r4 audit CLEAN, MP survey clean sweep
+    (`logs/survey_parch_step1_2026-06-14.txt`). See TODO P-ARCH.
 - **kr UNDER sl — full-suffix delegation prototype (2026-06-14; orthogonal:
   `kr/sl_driven.py` + one optional `buchi2ltl` hook). The mirror of the decompose
   gate; attacks BLS's state-count explosiveness by handing kr SMALLER automata.**
