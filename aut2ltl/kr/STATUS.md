@@ -82,8 +82,17 @@ landed, the soundness arguments, and the measurements):
   (`KR_DISPATCH_WEAK`) is wired but **OFF** (correct, size regression). Direct
   hierarchy-class φ per Theorem 2 / §9.3; cover-aware α readers.
 
-The portfolio front end and the sl gate live in `aut2ltl/portfolio/` (see that
-package + STATUS "Validation"); the contract struct in `aut2ltl/contract.py`.
+The portfolio (the composition layer) lives in `aut2ltl/portfolio/`: every method
+is a `Translator` (`Language -> LTLFormulaResult`) — `Sl` (the sl gate), `SlDriven`
+(sl-driven with delegated cores, "kr under sl"), and `Decompose` (the AND/OR split
+Composite over a leaf Translator) — composed by `first_success` over the kr cascade
+Translator (`kr/aut2cas.reconstruct`). The default entry `reconstruct_decomposed`
+is `Decompose(first_success([sl_driven, cascade]))`. The input is a `Language`
+(`aut2ltl/language.py`, lazy/cached language-equivalent automaton representations;
+each Translator pulls the form it wants). The contract floor — `LTLFormulaResult`
++ the `Translator` / `CascadeTranslator` protocols — is in `aut2ltl/contract.py`,
+with the `Language`/cascade adapter (`CascadeTranslator -> Translator`) in
+`kr/aut2cas.py` over the GAP-native `kr/gap/decompose_lang.py`.
 
 ## Validation state
 
