@@ -145,7 +145,7 @@ try:
         info["declined"] = True
         print("RESULT_JSON:" + json.dumps(info)); raise SystemExit
     # --- BUILD under decomposition; emit size BEFORE equiv ---
-    phi = reconstruct_decomposed(aut, reconstruct=weak_form)
+    phi = reconstruct_decomposed(aut, reconstruct=weak_form).formula
     info["weak_size"] = sizes(phi)
     info["built"] = True
     print("BUILD_JSON:" + json.dumps(info), flush=True)

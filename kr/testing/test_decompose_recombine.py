@@ -65,7 +65,7 @@ fs = {fs!r}
 # convenient way to name a case; we translate to an automaton and feed THAT.
 aut = spot.formula(fs).translate()
 kind, npieces = split_report(aut)
-rec = reconstruct_decomposed(aut)
+rec = reconstruct_decomposed(aut).formula
 ntree = _tree_size_f(rec)
 # Flatten only under the gate: huge fall-through cases (e.g. FGa|FGb at 2^60)
 # must not str()-explode. Over the gate -> UNVERIFIED_SIZE.

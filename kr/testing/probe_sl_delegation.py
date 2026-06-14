@@ -85,7 +85,7 @@ try:
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             out = reconstruct_ltl(spot.postprocess(aut, "TGBA", "Small"))
-        rec = out[0] if isinstance(out,(tuple,list)) else out
+        rec = out.formula
         info["sl_whole"] = "UNSUPPORTED" if (rec is None or (isinstance(rec,str) and "UNSUPPORTED" in rec)) else "ok"
     except Exception as e:
         info["sl_whole"] = "ERR:" + str(e)[:40]
@@ -111,7 +111,7 @@ try:
                     entries.add(int(e.dst))
         for q in sorted(entries):
             Aq = sub_from(aut, q)
-            kq = reconstruct_decomposed(Aq)
+            kq = reconstruct_decomposed(Aq).formula
             equiv = bool(spot.are_equivalent(Aq, kq.translate()))
             deleg.append({{"q": q, "Aq_states": Aq.num_states(),
                            "kr_Aq": sizes(kq), "equiv": equiv}})
@@ -124,7 +124,7 @@ try:
     print("RESULT_JSON:" + json.dumps(info), flush=True)
     # Baseline to beat: kr on the FULL automaton. May explode/timeout — that is
     # itself the finding; we already emitted the delegation numbers.
-    full = reconstruct_decomposed(aut)
+    full = reconstruct_decomposed(aut).formula
     print("KRFULL_JSON:" + json.dumps(sizes(full)))
 except Exception as e:
     import traceback

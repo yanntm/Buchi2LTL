@@ -87,7 +87,7 @@ info = {{"formula": fs}}
 try:
     aut = spot.formula(fs).translate()
     reset_gate_stats()
-    rec = reconstruct_decomposed(aut, timeout={GAP})
+    rec = reconstruct_decomposed(aut, timeout={GAP}).formula
     info["stats"] = gate_stats()
     ts = tree_size(rec)
     info["tree"] = ts

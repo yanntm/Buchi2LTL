@@ -117,7 +117,7 @@ proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 import spot
 from kr import decompose_aut, reconstruct_bls
-from kr.decompose_recombine import reconstruct_decomposed, split_report
+from kr.decompose_recombine import reconstruct_decomposed
 
 # The decompose-and-recombine front end is the GOTO path (KR_DECOMPOSE=1,
 # default); KR_DECOMPOSE=0 restores the monolithic path for A/B regression.
@@ -135,13 +135,17 @@ try:
     info["level_sizes"] = [lv.size for lv in casc.levels]
     info["states"] = casc.num_states
     info["configs"] = len(casc.all_configs())
-    kind, npieces = split_report(aut)
-    info["split"] = f"{{kind}}({{npieces}})"
     # reconstruct returns the hash-consed formula DAG; flatten ONLY under the
     # tree-size gate (the flat string is the double-exp artifact — an oversized
     # case reports its DAG/tree sizes instead and equiv shows UNVERIFIED_SIZE).
     from kr.ltl_builders import _tree_size_f, _str_f
-    rec_f = reconstruct_decomposed(aut) if USE_DECOMP else reconstruct_bls(casc)
+    if USE_DECOMP:
+        _rr = reconstruct_decomposed(aut)
+        rec_f = _rr.formula
+        info["technique"] = _rr.technique_str()
+    else:
+        rec_f = reconstruct_bls(casc)
+        info["technique"] = "bls"
     # 5M tree nodes ~ 40MB string: above every case Spot equiv has ever
     # completed, below the 64M+ monsters whose str() alone blows the budget.
     _lim = int(_os.environ.get("KR_FLATTEN_TREE_LIMIT", "5000000"))
@@ -209,7 +213,8 @@ def main():
             rec = (res.get("recovered") or "")[:48]
             print(f"  {fs:24s}  mp={res['mp']}({MP_NAME.get(res['mp'],'?'):11s}) "
                   f"L={res['levels']} sizes={res['level_sizes']} "
-                  f"split={res.get('split','?'):8s} equiv={eqs} rec={rec}")
+                  f"tech={res.get('technique','-'):16s} "
+                  f"equiv={eqs} rec={rec}")
 
     # Group by MP class, weakest first; highlight 2L cases.
     print("\n=== By MP class (weakest first) — 2-level cases marked ** ===")
@@ -223,7 +228,8 @@ def main():
         mark = "**" if r["levels"] == 2 else "  "
         eq = {True: "equiv=True", False: "equiv=FALSE",
               None: "equiv=n/a"}.get(r.get("equiv"), f"equiv={r.get('equiv')}")
-        print(f" {mark} L={r['levels']} sizes={r['level_sizes']} {eq:12s} {r['formula']}")
+        print(f" {mark} L={r['levels']} sizes={r['level_sizes']} {eq:12s} "
+              f"tech={r.get('technique','-'):14s} {r['formula']}")
 
     two_l = [r for r in ok if r["levels"] == 2]
     two_l_fail = [r for r in two_l if r.get("equiv") is False]

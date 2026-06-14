@@ -101,14 +101,14 @@ try:
     # --- end-to-end gate ON (default) ---
     os.environ.pop("KR_GATE_BUCHI2LTL", None)
     reset_gate_stats()
-    on = reconstruct_decomposed(aut)
+    on = reconstruct_decomposed(aut).formula
     info["on_size"] = sizes(on)
     info["on_equiv"] = eq_guarded(on)
     info["stats"] = gate_stats()
 
     # --- end-to-end gate OFF ---
     os.environ["KR_GATE_BUCHI2LTL"] = "0"
-    off = reconstruct_decomposed(aut)
+    off = reconstruct_decomposed(aut).formula
     info["off_size"] = sizes(off)
     info["off_equiv"] = eq_guarded(off)
     info["result"] = "OK"

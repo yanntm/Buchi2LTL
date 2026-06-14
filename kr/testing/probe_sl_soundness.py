@@ -72,7 +72,7 @@ try:
     aut = spot.formula(fs).translate("GeneralizedBuchi", "Small", "High")
     with contextlib.redirect_stdout(io.StringIO()):
         out = reconstruct_ltl(aut)
-    rec = out[0] if isinstance(out, (tuple, list)) else out
+    rec = out.formula
     if rec is None or (isinstance(rec, str) and "UNSUPPORTED" in rec):
         info["bucket"] = "DECLINES"
     else:

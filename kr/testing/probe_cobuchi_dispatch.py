@@ -123,7 +123,7 @@ try:
     except Exception as _e:
         info["casc_cobuchi_recog"] = "err:" + str(_e)[:40]
     # --- BUILD under decomposition; emit size BEFORE the equiv attempt ---
-    phi = reconstruct_decomposed(aut, reconstruct=cobuchi_reconstruct)
+    phi = reconstruct_decomposed(aut, reconstruct=cobuchi_reconstruct).formula
     info["cobuchi_size"] = sizes(phi)
     info["built"] = True
     print("BUILD_JSON:" + json.dumps(info), flush=True)

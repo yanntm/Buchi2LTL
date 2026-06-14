@@ -62,7 +62,7 @@ proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 import spot
 from kr import decompose_aut, reconstruct_bls
-from kr.decompose_recombine import reconstruct_decomposed, split_report
+from kr.decompose_recombine import reconstruct_decomposed
 from kr.ltl_builders import _tree_size_f
 
 # Default path is the GOTO decompose entry; KR_SIZE_PATH=monolithic switches
@@ -94,11 +94,15 @@ try:
     info["levels"] = casc.num_levels
     info["level_sizes"] = [lv.size for lv in casc.levels]
     info["configs"] = len(casc.all_configs())
-    kind, npieces = split_report(aut)
-    info["split"] = f"{{kind}}({{npieces}})"
 
     t0 = time.monotonic()
-    rec_f = reconstruct_bls(casc) if PATH == "monolithic" else reconstruct_decomposed(aut)
+    if PATH == "monolithic":
+        rec_f = reconstruct_bls(casc)
+        info["technique"] = "bls"
+    else:
+        _rr = reconstruct_decomposed(aut)
+        rec_f = _rr.formula
+        info["technique"] = _rr.technique_str()
     info["build_s"] = round(time.monotonic() - t0, 3)
 
     n_unique, kinds = dag_unique_and_kinds(rec_f)
@@ -142,8 +146,8 @@ def main():
     print(f"path={path}  fin_reach_fold={'on' if fold else 'off'}  "
           f"{len(cases)} formulas  (construction-only; budget {CONSTRUCT_TIMEOUT}s)\n")
 
-    hdr = (f"  {'formula':24s} {'mp':3s} {'split':9s} {'L':>2s} "
-           f"{'DAG':>8s} {'tree':>14s} {'temp':>5s} {'shar':>8s} {'build':>7s}")
+    hdr = (f"  {'formula':24s} {'mp':3s} {'L':>2s} "
+           f"{'DAG':>8s} {'tree':>14s} {'temp':>5s} {'shar':>8s} {'build':>7s} {'tech':16s}")
     print(hdr)
     print("  " + "-" * (len(hdr) - 2))
 
@@ -154,10 +158,10 @@ def main():
         if "error" in res:
             print(f"  {fs:24s} ERROR: {res['error']}")
             continue
-        print(f"  {fs:24s} {res['mp']:3s} {res.get('split','?'):9s} "
+        print(f"  {fs:24s} {res['mp']:3s} "
               f"{res['levels']:>2d} {res['dag_nodes']:>8d} {res['tree_nodes']:>14d} "
               f"{res['temporal']:>5d} {str(res['sharing'])+'x':>8s} "
-              f"{str(res['build_s'])+'s':>7s}")
+              f"{str(res['build_s'])+'s':>7s} {res.get('technique','-'):16s}")
 
     ok = [r for r in results if "error" not in r]
     ok.sort(key=lambda r: (MP_ORDER.get(r["mp"], 9), r["levels"], r["dag_nodes"]))
@@ -167,9 +171,9 @@ def main():
         if r["mp"] != cur:
             cur = r["mp"]
             print(f"\n-- {MP_NAME.get(cur, cur)} ({cur}) --")
-        print(f"  {r['formula']:24s} split={r.get('split','?'):9s} "
+        print(f"  {r['formula']:24s} "
               f"DAG={r['dag_nodes']:>7d} tree={r['tree_nodes']:>14d} "
-              f"temporal={r['temporal']:>4d}")
+              f"temporal={r['temporal']:>4d} tech={r.get('technique','-')}")
 
     if ok:
         tot_dag = sum(r["dag_nodes"] for r in ok)

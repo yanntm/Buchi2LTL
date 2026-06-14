@@ -73,7 +73,7 @@ try:
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             o = reconstruct_ltl(spot.postprocess(aut, "TGBA", "Small"))
-        r0 = o[0] if isinstance(o,(tuple,list)) else o
+        r0 = o.formula
         info["sl_alone"] = "UNSUPPORTED" if (r0 is None or (isinstance(r0,str) and "UNSUPPORTED" in r0)) else "ok"
     except Exception as e:
         info["sl_alone"] = "ERR"
@@ -93,7 +93,7 @@ try:
     # baseline below can hang and get the process killed, which would lose this
     # (already-complete) sl_driven result. Flush so it always reaches the parent.
     print("RESULT_JSON:" + json.dumps(info), flush=True)
-    full = reconstruct_decomposed(aut)
+    full = reconstruct_decomposed(aut).formula
     print("KRFULL_JSON:" + json.dumps(sizes(full)))
 except Exception as e:
     import traceback
