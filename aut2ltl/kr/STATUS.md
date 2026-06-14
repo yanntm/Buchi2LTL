@@ -105,26 +105,25 @@ runaway protection is the distinct-subproblem guard). Depth ladder: `Xa` 3L →
 
 ## Open front: representation & verification at scale (not fidelity)
 
-Full analysis, thesis and candidate counter-measures: `dag_folding.md`. Summary:
-the construction is cheap; the flat form is not. Current measurements
-(`tests/kr/measure_formula_dag.py`):
+The construction is cheap; the flat form is the cost driver. Two consequences
+remain live: (i) Spot translation hits the 32-acceptance-set tableau limit (one
+set per distinct temporal subformula) on the biggest cases; (ii) the largest
+flat strings still blow up. All test scripts carry built-in Spot budgets
+(`KR_SPOT_EQUIV_TIMEOUT` / `KR_CHECK_TIMEOUT`, 10s) and report SPOT_TIMEOUT /
+UNVERIFIED — never conflated with semantic failure. Full analysis and candidate
+counter-measures: `dag_folding.md`; probed dead ends in `docs/HISTORY.md`.
 
-| case | build | DAG nodes | unfolded tree | sharing |
-|---|---|---|---|---|
-| `G(a->Xb)` | 0.08s | ~1.2k | ~1.5M | >1200x |
-| `Ga\|Gb` | 0.08s | ~1k | 2M | >2000x |
-| `G(p->(qUr))` | 0.14s | 9k | 64.8M | 7179x |
-| `(a U b)\|Gc` | 9.5s | (284k subproblems) | — | — |
+**Size numbers are not pinned here** — they move with every fold change, so the
+table that used to live in this section was stale. Measure on demand and diff:
 
-Consequences: (i) Spot translation hits the 32-acceptance-set tableau limit (one
-set per distinct temporal subformula; we carry 100s–1000s) or times out; (ii)
-flat strings reach 100MB+ (one `G(p->(qUr))` fin sub-term: 108MB), so the str()
-API contract itself becomes the bottleneck for the biggest cases. All test
-scripts carry built-in Spot budgets (`KR_SPOT_EQUIV_TIMEOUT` / `KR_CHECK_TIMEOUT`,
-10s) and report SPOT_TIMEOUT / UNVERIFIED — never conflated with semantic failure.
-The active work items (TODO P0): our own sharing-aware fold pass, compositional +
-word-sampling verification. Probed dead ends (object-path / object-out
-translation, native-operator basis) are recorded in `docs/HISTORY.md`.
+- `tests/kr/survey_sizes.py` — size census (DAG / unfolded-tree / distinct-temporal
+  nodes, sharing factor, build time) across the MP ladder on the shipped
+  `reconstruct_decomposed` path. A/B knobs documented in its header.
+- `tests/kr/compare_sizes.py OLD.txt NEW.txt` — per-case delta between two census
+  logs; the distinct-temporal column (the 32-acc-cap driver) is the headline.
+- `tests/kr/measure_formula_dag.py "<formula>"` — single-case DAG-vs-string blow-up
+  (`--no-str` for the cases whose flat form is 100MB+).
+- `tests/kr/logs/survey_sizes_*.txt` — persisted baselines for the diffs.
 
 ## Tooling for targeted work
 
