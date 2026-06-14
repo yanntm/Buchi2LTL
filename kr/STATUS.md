@@ -393,6 +393,42 @@ unfolding that DAG.
     the pure kr decompose path). Side-by-side comparison of the two paths:
     `testing/run_mp_through_buchi2ltl.py` (30/35 handled standalone, 0 FALSE; the
     5 it declines whole are carried by kr under the gate).
+- **kr UNDER sl — full-suffix delegation prototype (2026-06-14; orthogonal:
+  `kr/sl_driven.py` + one optional `buchi2ltl` hook). The mirror of the decompose
+  gate; attacks BLS's state-count explosiveness by handing kr SMALLER automata.**
+  `reconstruct_sl_driven(aut)` runs sl as the DRIVER; at any multi-state-SCC state
+  (sl's hard case, bottom OR transient) it delegates the whole sub-automaton A_q
+  to the normal `reconstruct_decomposed` (decompose + gate + cascade) and
+  reattaches the label. sl does the very-weak envelope exactly + tiny; kr does the
+  multi-cyclic core on a smaller automaton (kr cost ~ cascade depth ~ state count).
+  - **Seam:** optional `scc_labeler` callback on `buchi2ltl.reconstruct_ltl`
+    (default None = byte-identical behavior; gate + r4 unregressed). Delegation at
+    the `label()` entry, keyed on multi-state-SCC membership (`spot.scc_info`), so
+    it covers BOTH the bad_states and the `visiting` decline paths.
+    Termination/no-ping-pong: delegated kr uses the sl GATE (no labeler) → declines
+    the core → cascade; never re-enters the driver.
+  - **Soundness:** the delegated label is L(A_q) = exactly the language sl's own
+    label(q) represents, so a sound translator's label is interchangeable; the
+    validated sl construction composes it (X-wrapped, invariants re-added). Probe
+    `probe_sl_compose`: **0 equiv=FALSE.**
+  - **Results (`probe_sl_compose`, `probe_sl_delegation`):** X-prefix envelopes
+    are big wins — `XX(G(a->Fb))` kr-on-full **979 temporals → sl-driven 4**
+    (sl-alone declines), `XX(F(a&Xb))` 464→40, `c U (G(a->Fb))` kr-on-full
+    TIMEOUT/explode → sl-driven **5**. Mixed where the prefix entangles with the
+    core (`a U (F(b&Xc))` 40 vs kr-full 30 — the until's multi-state SCC spans
+    prefix+core so A_q ≈ whole).
+  - **KNOWN LIMITATION — the NEXT PRIORITY.** buchi2ltl is STRING-based:
+    `label()` concatenates strings and `reconstruct_ltl` returns a string, so the
+    delegated kr DAG is FLATTENED at the boundary via
+    `str(reconstruct_decomposed(A_q))`. Cost is the core's UNFOLDED-TREE size, not
+    its DAG size; a high-sharing core (small DAG, huge tree) would explode `str()`
+    before sl ever sees it. The gate inside `reconstruct_decomposed` keeps cores
+    small in practice, but the boundary defeats kr's DAG-compactness. Proper fix
+    queued (TODO P0): make buchi2ltl build hash-consed `spot.formula` DAGs end to
+    end instead of strings — kr's representation is the right one; sl is just an
+    API over strings.
+  - Not wired into any default path (a top-level chooser between the gate-path and
+    sl-driven, plus a scale soundness fuzz, are later steps).
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
   `_simp_f` simplifies each hash-consed node ONCE (id-keyed memo + the shared
   tl_simplifier's internal cache); operators build bottom-up so every call
