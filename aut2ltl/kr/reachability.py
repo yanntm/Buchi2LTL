@@ -33,7 +33,6 @@ from .reachability_operators import (  # noqa: F401
     PAPER_MAX_LTL_SIZE,
 )
 from .fin import fin_c  # noqa: F401
-from .ltl_builders import _str_f
 
 from .cascade import Cascade
 
@@ -44,8 +43,8 @@ def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.form
     cobuchi — each self-gating (it returns a faithful form or declines), and
     falls back to the general Muller-DNF core (`muller.reconstruct_muller`, the
     `bls` leaf) when none applies. Each leaf drops the explosive Fin web that the
-    Muller form pays. Returns the hash-consed `spot.formula` DAG (callers needing
-    text use `reconstruct_ltl_str` under their own budgets).
+    Muller form pays. Returns the hash-consed `spot.formula` DAG; serialization
+    to text is a separate concern (`ltl_builders._str_f`), never done here.
 
     `techniques` (optional, default None): a SET the winning leaf's method tag is
     merged into (`acc`/`weak`/`buchi`/`cobuchi`/`bls`) for the portfolio report
@@ -102,14 +101,6 @@ def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.form
     return reconstruct_muller(casc)
 
 
-def reconstruct_ltl_str(casc: Cascade) -> str:
-    """Historical flat-string entry point. Unfolds the shared DAG into text —
-    O(tree), which on multi-level cases is the double-exp the DAG avoids.
-    Kept only for callers that genuinely need LTL text (file export, external
-    tools); everything in-process should consume the formula object."""
-    return _str_f(reconstruct_ltl_paper_style(casc))
-
-
 def reconstruct_bls(casc: Cascade) -> "spot.formula":
     """Reconstruct LTL from a Cascade via the BLS construction.
 
@@ -157,7 +148,6 @@ def build_phi(casc: Cascade, acceptance_type: str = "muller", acceptance_data=No
 __all__ = [
     "reconstruct_bls",
     "reconstruct_ltl_paper_style",
-    "reconstruct_ltl_str",
     "simplify_ltl",
     "normalize_ltl",
     "reach_strong",
