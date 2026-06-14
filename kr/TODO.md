@@ -17,6 +17,23 @@ Analysis, measurements and OPEN questions behind these items live in
 `kr/dag_folding.md` (item numbering there: plumbing → vacuity pruning →
 fold pass → interning). Items below are the actionable queue.
 
+0. **buchi2ltl on hash-consed `spot.formula` DAGs (NEXT PRIORITY, 2026-06-14).**
+   buchi2ltl is string-based — `label()` concatenates strings and
+   `reconstruct_ltl` returns a string — so every formula it touches is FLATTENED.
+   This defeats kr's DAG-compactness exactly at the kr-under-sl delegation
+   boundary (`str(reconstruct_decomposed(A_q))` unfolds the kr DAG; cost is the
+   core's unfolded-tree size, not its DAG size — a high-sharing core would explode
+   `str()` before sl sees it). kr's representation is the right one; sl is just an
+   API over strings. Refactor `label()`/`reconstruct_ltl` to build and return
+   hash-consed `spot.formula` objects (`spot.formula.And/Or/X/G/U/...`) end to end:
+   - the scc_labeler returns a formula (not a string), spliced as a child node;
+   - `state_formula` holds formula objects; `_simp_f`/Spot simplify per node;
+   - the UNSUPPORTED sentinel stays a distinct marker (not a formula).
+   Validate: the existing gate (`test_heuristic_gate`) and the historical-failure
+   soundness audit (`probe_sl_soundness`) must stay clean; re-run `probe_sl_compose`
+   and confirm a high-sharing delegated core no longer flattens. Then sl-driven can
+   delegate arbitrarily explosive cores at DAG cost.
+
 1. **Fold pass — step A DONE 2026-06-12** (per-DAG-node memoized
    tl_simplifier, hybrid full≤2000-nodes/basics policy + reach dead-tail
    early-out): `G(p->(qUr))` distinct temporal 4115→559, `G(a->Xb)` tree
