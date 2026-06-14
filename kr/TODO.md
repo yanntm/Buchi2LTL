@@ -11,6 +11,82 @@ so far builds a small hash-consed DAG in fractions of a second while only the
 unfolded tree/string explodes. P0 below is the work that turns that
 observation into a usable pipeline (and a SOTA claim).
 
+## P-ARCH — aut2ltl contract layer + engine separation (NEXT, active 2026-06-14)
+
+**Context / why.** The project has grown to ~15 flat `kr/` modules (~3900 LOC) +
+the separate `buchi2ltl/` engine, and recent iterations turned it into a
+PORTFOLIO: a HOA is translated by whichever method wins at each node — the
+buchi2ltl gate, AND/OR decomposition, or one of the leaf acceptance forms
+(acc/weak/buchi/cobuchi/bls). The sl⇄kr mixing is genuinely mutually recursive
+at RUNTIME (kr-under-sl via `sl_driven`'s `scc_labeler=reconstruct_decomposed`;
+sl-under-kr via `decompose_recombine`→`heuristic_gate`→buchi2ltl). But the only
+STATIC import edge between the packages is `buchi2ltl → kr.recon_result`
+(everything else is runtime callbacks). The tangle exists only because the
+mixing code lives INSIDE `kr/` and reaches sideways into `buchi2ltl/`.
+
+**Vision (contract-first).** Make a new top-level **`aut2ltl`** that DEFINES THE
+CONTRACT — the data + behavioral signatures of "translate a HOA to LTL" — and is
+the user front-end (HOA in, formula out, lots of flags). `kr`, `buchi2ltl`, and
+the portfolio strategies become IMPLEMENTATIONS of that contract.
+- **The data signature: `ReconResult`** — `formula` + `technique` (set[str]) +
+  an explicit `status` (OK / DECLINED; no more `UNSUPPORTED` smuggled inside
+  `.formula`). Reified as a struct precisely so it is EXTENSIBLE (add a
+  `cost`/size field when the pick-smaller combinator needs an ordering, etc.).
+- **The behavioral signature: `Translator`** — `translate(twa) -> ReconResult`
+  (DECLINED status = "not me"). Contract invariant (not type-checkable):
+  language-faithful OR declines, never wrong. That single rule is what makes
+  composition sound.
+- **The algebra = combinators that are themselves `Translator`s over
+  `Translator`s** — the system is a COMPOSITE + DP: a tree of Translators
+  (leaves = buchi2ltl, kr's acceptance forms; combinators = Gate(primary,
+  fallback) / Decompose(leaf) / SlDriven(core) / Portfolio([…], key=cost)),
+  with the recursion's value MEMOIZED (the hash-consed `spot.formula` DAG +
+  per-subproblem caches). Every current entry point (reconstruct_decomposed,
+  sl_driven, the gate, even kr's acc→…→bls FirstSuccess chain) is one expression
+  in this algebra; `.technique` is the trace of which leaves fired.
+
+**Why this dissolves the cycle.** Lifting the mixing UP into `aut2ltl` (the
+composition root) and the contract DOWN into a floor both engines depend on makes
+`kr` and `buchi2ltl` PEERS that import neither each other nor the root. Layers,
+acyclic: **contract floor → engines (kr, buchi2ltl) → combinators → composition
+root / CLI.** The mutual recursion stays — as a runtime EXPRESSION the root
+assembles — which is exactly where "the cycle is normal" belongs.
+
+**Settled decisions (2026-06-14).** (1) explicit `status` on `ReconResult`, not a
+formula sentinel; (2) the struct is the extension point — add fields (cost/size)
+when a combinator needs them, no separate side-comparator; (3) `technique` is an
+open `set[str]`; (4) combinator PLACEMENT is deferred — decide it from the actual
+code as we refactor (cross-engine combinators likely up in `aut2ltl`,
+intra-engine dispatch likely stays in the engine, but read it off the code);
+(5) clean API separation is the goal — Protocol vs ABC vs registry is just the
+Python realization, chosen when we implement.
+
+**Incremental, code-driven plan (each step small; gates green after each —
+`test_kr_r4_audit` CLEAN + `survey_mp_cascade` previously-True stay True).**
+1. **Reify the contract in place (no folders move yet).** Give `ReconResult` a
+   `status`; replace the `UNSUPPORTED`-in-`.formula` convention at its ~4 call
+   sites (heuristic_gate, sl_driven, the sl probes, the root CLIs); write the
+   `Translator` signature down as the documented contract. Reading those call
+   sites IS the survey that tells us where the real seams are. (Also a genuine
+   cleanup independent of any reorg.)
+2. **Then decide the first folder move from what step 1 taught us** — most likely
+   `core/` (or `aut2ltl/api`) for the contract, since both engines already depend
+   only on `recon_result`. Resolves the deferred `[[technique-report-struct]]`
+   import-edge item.
+3. **Move the portfolio (the "daddy") up** — `heuristic_gate`,
+   `decompose_recombine`, `sl_driven` out of `kr/` into the composition layer;
+   `kr` stops exporting `reconstruct_decomposed` (its public API shrinks to the
+   pure algebraic engine). Combinator shape emerges here.
+4. **Fold the root CLIs** (`buchi2ltl.py`, `evaluate.py`) into the `aut2ltl`
+   front-end with the flag surface.
+
+**Open / to decide as we go.** (a) physically NESTED (`aut2ltl/kr/…`, big import
+churn) vs SIBLING packages (`aut2ltl`+`kr`+`buchi2ltl`+`core` top-level, `aut2ltl`
+imports the others — much less churn; recommended) — set this before any move;
+(b) does `buchi2ltl` keep its top-level identity or become "the sl engine"
+alongside `kr`; (c) whether the CLIs collapse into one `aut2ltl/cli.py`;
+(d) combinator placement (see decision 4). Expect iteration.
+
 ## P0 — practice beats the bound (active)
 
 Analysis, measurements and OPEN questions behind these items live in
