@@ -17,7 +17,22 @@ Analysis, measurements and OPEN questions behind these items live in
 `kr/dag_folding.md` (item numbering there: plumbing → vacuity pruning →
 fold pass → interning). Items below are the actionable queue.
 
-0. **buchi2ltl on hash-consed `spot.formula` DAGs (NEXT PRIORITY, 2026-06-14).**
+0. **buchi2ltl on hash-consed `spot.formula` DAGs (IN PROGRESS, 2026-06-14).**
+   **Done:** DAG-native engine in `buchi2ltl/reconstruction_dag.py`
+   (`reconstruct_ltl_dag`) — a TEMPORARY parallel module (shares the pure helpers;
+   `label()` builds `spot.formula` DAGs, splices an adopted scc_labeler formula
+   WITHOUT flattening). Cross-oracled against the string engine
+   (`probe_dag_oracle.py`): MP ladder 30 MATCH / 4 DECL_BOTH, randltl 95 MATCH /
+   5 DECL_BOTH, **0 divergences** — and the DAG output is consistently smaller
+   (Spot simplifies on construction). `sl_driven` is now WIRED to the DAG engine
+   (2026-06-14): it drives `reconstruct_ltl_dag` and its labeler returns the kr
+   `spot.formula` DAG directly (no `str()`), spliced without flattening. The
+   no-flatten payoff is confirmed in `probe_sl_compose` (all equiv=True): high-
+   sharing delegated cores stay tiny while kr-on-the-whole explodes —
+   `XX(G(a->Fb))` 21 nodes vs 1.2×10¹⁴-tree, `c U (G(a->Fb))` 28 nodes vs
+   TIMEOUT. **Remaining:** flip the default (route the gate path / a top-level
+   chooser to the DAG engine) + DELETE the string engine (keep only DAG). The
+   original problem statement:
    buchi2ltl is string-based — `label()` concatenates strings and
    `reconstruct_ltl` returns a string — so every formula it touches is FLATTENED.
    This defeats kr's DAG-compactness exactly at the kr-under-sl delegation

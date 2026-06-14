@@ -401,8 +401,9 @@ unfolding that DAG.
   to the normal `reconstruct_decomposed` (decompose + gate + cascade) and
   reattaches the label. sl does the very-weak envelope exactly + tiny; kr does the
   multi-cyclic core on a smaller automaton (kr cost ~ cascade depth ~ state count).
-  - **Seam:** optional `scc_labeler` callback on `buchi2ltl.reconstruct_ltl`
-    (default None = byte-identical behavior; gate + r4 unregressed). Delegation at
+  - **Seam:** optional `scc_labeler` callback on the DAG-native engine
+    `buchi2ltl.reconstruction_dag.reconstruct_ltl_dag` (the labeler returns a
+    `spot.formula` DAG, spliced as a child node WITHOUT flattening). Delegation at
     the `label()` entry, keyed on multi-state-SCC membership (`spot.scc_info`), so
     it covers BOTH the bad_states and the `visiting` decline paths.
     Termination/no-ping-pong: delegated kr uses the sl GATE (no labeler) → declines
@@ -417,16 +418,19 @@ unfolding that DAG.
     TIMEOUT/explode → sl-driven **5**. Mixed where the prefix entangles with the
     core (`a U (F(b&Xc))` 40 vs kr-full 30 — the until's multi-state SCC spans
     prefix+core so A_q ≈ whole).
-  - **KNOWN LIMITATION — the NEXT PRIORITY.** buchi2ltl is STRING-based:
-    `label()` concatenates strings and `reconstruct_ltl` returns a string, so the
-    delegated kr DAG is FLATTENED at the boundary via
-    `str(reconstruct_decomposed(A_q))`. Cost is the core's UNFOLDED-TREE size, not
-    its DAG size; a high-sharing core (small DAG, huge tree) would explode `str()`
-    before sl ever sees it. The gate inside `reconstruct_decomposed` keeps cores
-    small in practice, but the boundary defeats kr's DAG-compactness. Proper fix
-    queued (TODO P0): make buchi2ltl build hash-consed `spot.formula` DAGs end to
-    end instead of strings — kr's representation is the right one; sl is just an
-    API over strings.
+  - **Boundary flattening — RESOLVED 2026-06-14 (DAG-native engine wired).**
+    Formerly buchi2ltl was STRING-based, so the delegated kr DAG was FLATTENED at
+    the boundary via `str(reconstruct_decomposed(A_q))` — cost was the core's
+    unfolded-TREE size, and a high-sharing core (small DAG, huge tree) would
+    explode `str()` before sl ever saw it. Now `sl_driven` drives the DAG-native
+    `reconstruct_ltl_dag` and the labeler returns the kr `spot.formula` DAG
+    directly (no `str()`), spliced as a child node. The payoff shows in
+    `probe_sl_compose`: `XX(G(a->Fb))` kr-on-full 5596 DAG / **1.2×10¹⁴ tree** →
+    sl-driven **21 nodes**; `c U (G(a->Fb))` kr-on-full TIMEOUT/explode →
+    sl-driven **28**; `XX(F(a&Xb))` kr-on-full 2957 DAG / **1.1×10⁹ tree** → 183.
+    All equiv=True. The DAG engine is cross-oracled against the string engine
+    (`probe_dag_oracle.py`, 0 divergences); flipping it the default + deleting the
+    string engine is the remaining TODO-P0 step.
   - Not wired into any default path (a top-level chooser between the gate-path and
     sl-driven, plus a scale soundness fuzz, are later steps).
 - **Per-DAG-node memoized simplification (2026-06-12, the "A" iteration).**
