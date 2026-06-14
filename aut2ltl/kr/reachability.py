@@ -132,7 +132,7 @@ def reconstruct_ltl_paper_style(casc: Cascade, *, techniques=None) -> "spot.form
     # KR_DISPATCH_ACC, default ON. (Uses a bounded Spot ⊤/⊥ oracle on the small
     # INPUT automaton — not the output — see acceptance_dispatch.)
     if os.environ.get("KR_DISPATCH_ACC", "1") != "0":
-        from .acceptance_dispatch import reconstruct_acc
+        from .acc import reconstruct_acc
         phi = reconstruct_acc(casc)
         if phi is not None:
             _tag("acc")
