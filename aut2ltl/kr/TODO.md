@@ -110,25 +110,19 @@ mostly tests; internal relative imports survive a whole-package `git mv`):
 4. ~~Extract `aut2ltl/contract.py`; repoint importers.~~ DONE (20c9737).
 5. ~~Lift portfolio → `aut2ltl/portfolio/`; trim `kr/__init__`.~~ DONE (7c76cb0,
    FULL gate green: r4 CLEAN + MP survey clean sweep).
-6. Consolidate tests: kr/testing→tests/kr (parents[2] stays root, no edits),
-   kr/simplify/testing→tests/kr/simplify (parents[3] stays root), kr/examples→
-   tests/kr/examples (FIX parents[2]→[3], depth+1), top testing→tests/sl (FIX
-   parent.parent depth+1 + the historical `samples` imports), samples→tests/fixtures
-   (historical fixtures — minimal importer fixups), evaluate.py→tests/eval_roundtrip.py.
-   GATE from new paths (no PYTHONPATH needed once parents[N] realign).
-7. `git mv buchi2ltl.py aut2ltl/cli.py`; repoint.
-8. Delete (history-recoverable): MOST root current_*.csv/results.csv/trace_aut_* +
-   old_results/ are already gitignored (untracked) — only TRACKED stragglers need
-   `git rm` (testing/debug_images/*). Plus empty kr/tests/.
-9. Docs: CLAUDE.md, README.md, kr/README→aut2ltl/kr/README, STATUS/TODO pointers,
-   memory project_kr.
-10. Package metadata + per-package docs (user ask 2026-06-14). Add a
-    `pyproject.toml` (project info: name `aut2ltl`, version, deps, packages) —
-    Python's nearest "package manifest". Give EVERY package a documenting
-    `__init__.py` module docstring (the Python analog of Java's
-    `package-info.java`): `aut2ltl`, `aut2ltl.kr`, `aut2ltl.sl`,
-    `aut2ltl.portfolio`, plus `aut2ltl.contract`. State each package's role +
-    its place in the contract→engines→portfolio→cli layering.
+6. ~~Consolidate tests~~ DONE (6a 602b81b: kr test tree → tests/kr,
+   tests/kr/simplify, tests/kr/examples; 6b b002b6e: top testing→tests/sl,
+   samples→tests/fixtures, evaluate.py→tests/eval_roundtrip.py). Gates green
+   from new paths, no PYTHONPATH.
+7. ~~`git mv buchi2ltl.py aut2ltl/cli.py`~~ DONE (edb5734; `-m aut2ltl.cli`
+   verified).
+8. ~~Delete tracked stale artifacts~~ DONE (1dcb4eb: debug_images/ +
+   examples/generated/; untracked gitignored clutter left as-is).
+9. ~~Docs: README + CLAUDE + kr/README repoint~~ DONE (ea7a7ff, 41adafc).
+   Remaining doc bit: memory project_kr (this session).
+10. ~~Package metadata + per-package docstrings~~ DONE (ea7a7ff: pyproject.toml +
+    docstrings on aut2ltl/{kr,sl,portfolio,contract} + root).
+11. ~~Doc compaction → docs/HISTORY.md, lean STATUS~~ DONE (fef59db).
 11. Doc compaction (user ask 2026-06-14). Split current-status from
     construction-history: create top-level `docs/` with `docs/HISTORY.md` and
     UNPACK the dated "DONE/WIRED/LANDED/reverted" narrative out of
