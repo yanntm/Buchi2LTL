@@ -2,8 +2,9 @@
 Core backward LTL reconstruction logic (DAG-native).
 
 `reconstruct_ltl` runs self-loop backward labeling over a TGBA and returns a
-hash-consed `spot.formula` DAG (or the UNSUPPORTED string sentinel on decline).
-Every formula is built as a `spot.formula` — an adopted `scc_labeler` formula
+`ReconResult` (`kr.recon_result`): a hash-consed `spot.formula` DAG on success,
+or `status=DECLINED` (`.formula` None) when no exact label exists. Every formula
+is built as a `spot.formula` — an adopted `scc_labeler` formula
 is spliced as a child node WITHOUT flattening (the kr-under-sl payoff: a
 high-sharing core costs only its DAG, never its unfolded `str()`).
 
@@ -11,8 +12,13 @@ The shared automaton-side helpers live in `reconstruction_helpers.py`; this
 module is just the engine + its recursive `label`.
 """
 
+from typing import Callable, Optional, TYPE_CHECKING
+
 import spot
 import buddy
+
+if TYPE_CHECKING:
+    from kr.recon_result import ReconResult
 
 # The two heuristics that can "rescue" certain multi-state SCCs before we
 # give up and emit UNSUPPORTED.  Both are tried (and validated) early.
@@ -36,11 +42,15 @@ def _is_unsupported(val):
     return isinstance(val, str) and "UNSUPPORTED" in val
 
 
-def reconstruct_ltl(aut, scc_labeler=None):
+def reconstruct_ltl(
+    aut: "spot.twa_graph",
+    scc_labeler: Optional[Callable[["spot.twa_graph"], Optional["spot.formula"]]] = None,
+) -> "ReconResult":
     """Backward LTL reconstruction from a TGBA. Returns a `ReconResult`
-    (`kr.recon_result`): `.formula` is a spot.formula on success or the
-    UNSUPPORTED string on decline; `.technique` is the method-token set
-    (e.g. {"sl","t2"}). Uniform with the kr portfolio result.
+    (`kr.recon_result`): on success `.formula` is a spot.formula and `.status`
+    is OK; on decline `.status` is DECLINED and `.formula` is None. `.technique`
+    is the method-token set (e.g. {"sl","t2"}). Uniform with the kr portfolio
+    result.
 
     `scc_labeler` (optional, default None): a callback `sub_automaton ->
     spot.formula_or_None`. When sl reaches a state q it cannot translate
@@ -308,4 +318,9 @@ def reconstruct_ltl(aut, scc_labeler=None):
     # `util` extraction — agreed 2026-06-14). No load-time cycle: `import kr`
     # does not import buchi2ltl (the gate's buchi2ltl import is lazy).
     from kr.recon_result import ReconResult
-    return ReconResult(final, set(technique.split("+")) if technique else set())
+    techset = set(technique.split("+")) if technique else set()
+    if _is_unsupported(final):
+        # Contract boundary: the internal UNSUPPORTED sentinel becomes an
+        # explicit DECLINED status (no sentinel string in `.formula`).
+        return ReconResult.decline(techset)
+    return ReconResult(final, techset)
