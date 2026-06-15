@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import spot
 
+from aut2ltl.proc import setup_signals
 from aut2ltl.options import Options, OptionSpec
 from aut2ltl.language import Language, LANGUAGE_OPTIONS
 from aut2ltl.portfolio import PORTFOLIO_OPTIONS, build_portfolio, TECHNIQUES
@@ -171,6 +172,9 @@ def _parse_techniques(use: Optional[str]) -> Optional[List[str]]:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    # Forward interrupts to any external child group (GAP) before we exit, so a
+    # Ctrl-C / SIGTERM doesn't orphan a multi-GB process. See aut2ltl/proc.py.
+    setup_signals()
     args = build_parser().parse_args(argv)
 
     if args.list_techniques:
