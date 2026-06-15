@@ -15,7 +15,7 @@ the result struct lives in `aut2ltl.contract`.
 See aut2ltl/kr/README.md, STATUS.md, algorithm.md .
 """
 
-from .cascade import Cascade, LevelInfo, make_trivial_cascade
+from .cascade import Cascade, CascadeHolder, LevelInfo, make_trivial_cascade
 from .gap import (
     decompose_gens,
     decompose_aut,
@@ -38,6 +38,7 @@ from .reachability_operators import TRACE_ON  # for KR_TRACE=1 dev traces of ind
 
 __all__ = [
     "Cascade",
+    "CascadeHolder",
     "LevelInfo",
     "make_trivial_cascade",
     "decompose_gens",
