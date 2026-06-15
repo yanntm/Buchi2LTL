@@ -51,6 +51,13 @@ check(getattr(wrapped, "name", None) == "decompose", "decompose,acc,bls -> Decom
 driven = build_portfolio(_opts, ["sl_driven", "buchi"])
 check(getattr(driven, "name", None) == "sl_driven", "sl_driven,buchi -> SlDriven outer")
 
+# --- str: the integrated cascade as a producer ---
+bare_str = build_portfolio(_opts, ["str"])
+check(callable(bare_str), "build {'str'} is callable")
+check(getattr(bare_str, "name", None) != "decompose", "bare str is not wrapped")
+str_decomp = build_portfolio(_opts, ["decompose", "str"])
+check(getattr(str_decomp, "name", None) == "decompose", "decompose,str -> Decompose outer")
+
 # --- validation ---
 for bad, why in [({"nope"}, "unknown technique"), ({"decompose"}, "producer-free citation")]:
     try:
@@ -59,8 +66,8 @@ for bad, why in [({"nope"}, "unknown technique"), ({"decompose"}, "producer-free
     except ValueError:
         check(True, f"{why} raises ValueError")
 
-check(set(TECHNIQUES) == {"acc", "weak", "buchi", "cobuchi", "bls", "sl",
-                          "sl_driven", "decompose"}, "TECHNIQUES vocabulary is the 8 names")
+check(set(TECHNIQUES) == {"acc", "weak", "buchi", "cobuchi", "bls", "str", "sl",
+                          "sl_driven", "decompose"}, "TECHNIQUES vocabulary is the 9 names")
 
 # --- one GAP-free functional run: sl gate on a very-weak formula ---
 sl_only = build_portfolio(_opts, ["sl"])

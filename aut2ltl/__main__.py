@@ -50,16 +50,17 @@ def _coerce(value: str, like: object) -> object:
 
 
 def _epilog() -> str:
-    prod = "acc, weak, buchi, cobuchi, bls, sl"
+    prod = "acc, weak, buchi, cobuchi, bls, str, sl"
     wrap = "sl_driven, decompose"
     return (
         "techniques (--use), cited order = priority, no implicit fallback:\n"
         f"  producers (ladder rungs): {prod}\n"
         f"  wrappers  (wrap the ladder): {wrap}\n"
         "  --use bls            pure BLS-from-Muller\n"
+        "  --use str            the integrated kr cascade (full Theorem-2 dispatch, incl. acc)\n"
+        "  --use decompose,str  the kr core under AND/OR strength decomposition\n"
         "  --use buchi          Buchi leaf only; DECLINES off the Buchi class\n"
         "  --use sl,buchi,bls   first_success ladder, tried in that order\n"
-        "  --use decompose,acc,bls   Decompose wrapping the acc/bls ladder\n"
         "  (omit --use)         the best default portfolio\n\n"
         "examples:\n"
         "  python3 -m aut2ltl 'GFa & GFb'\n"
@@ -119,7 +120,7 @@ def build_parser() -> argparse.ArgumentParser:
 def _list_techniques() -> int:
     print("Techniques for --use (cited order = priority; no implicit fallback):")
     print("  producers (ladder rungs):")
-    for t in ("acc", "weak", "buchi", "cobuchi", "bls", "sl"):
+    for t in ("acc", "weak", "buchi", "cobuchi", "bls", "str", "sl"):
         print(f"    {t}")
     print("  wrappers (wrap the ladder when cited):")
     for t in ("sl_driven", "decompose"):

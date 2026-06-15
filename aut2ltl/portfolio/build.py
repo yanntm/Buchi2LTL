@@ -26,11 +26,16 @@ Two modes, one entry point (`build_portfolio`):
   and DECLINES on a non-Büchi language (no fallback); `--use sl,buchi,bls` is a
   flat ladder tried in that order; `--use decompose,acc,bls` wraps the ladder.
 
-Producers vs wrappers. Six names are PRODUCERS (leaf Translators that can be a
-ladder rung): the five kr acceptance leaves `acc / weak / buchi / cobuchi / bls`
-and the heuristic `sl` gate. Two are WRAPPERS (they take a leaf/delegate, so they
-wrap the ladder rather than sit in it): `sl_driven` and `decompose`. A citation
-with no producer (e.g. `--use decompose` alone) is an error — nothing to produce.
+Producers vs wrappers. Seven names are PRODUCERS (Translators that can be a
+ladder rung): the five kr acceptance leaves `acc / weak / buchi / cobuchi / bls`,
+the integrated default cascade `str` (= `make_hierarchy_class`, the full
+Theorem-2 dispatch chain INCLUDING acc — the kr core as ONE producer, the same
+object the default portfolio calls `cascade`, NOT a first_success of separate
+leaves), and the heuristic `sl` gate. Two are WRAPPERS (they take a leaf/delegate,
+so they wrap the ladder rather than sit in it): `sl_driven` and `decompose`. A
+citation with no producer (e.g. `--use decompose` alone) is an error — nothing to
+produce. `--use str` is the bare kr cascade; `--use decompose,str` is the kr core
+under the AND/OR strength decomposition (the default minus the sl gate).
 
 Cost note: the kr acceptance leaves all read the SAME holonomy cascade, so the
 cited kr leaves are grouped into a single cascade-level `first_success` lifted
@@ -69,7 +74,9 @@ _KR_MEMBERS: Dict[str, CascadeTranslator] = {
     "bls": _bls,
 }
 # Producers in canonical (architecture) order, used only for messages/help.
-PRODUCERS: Tuple[str, ...] = ("acc", "weak", "buchi", "cobuchi", "bls", "sl")
+# `str` is the integrated cascade (make_hierarchy_class), not a member of
+# _KR_MEMBERS — it is lifted on its own in _from_techniques.
+PRODUCERS: Tuple[str, ...] = ("acc", "weak", "buchi", "cobuchi", "bls", "str", "sl")
 WRAPPERS: Tuple[str, ...] = ("sl_driven", "decompose")
 TECHNIQUES: Tuple[str, ...] = PRODUCERS + WRAPPERS
 
@@ -109,6 +116,10 @@ def _from_techniques(options: Options, techniques: Iterable[str]) -> Translator:
                 )
                 rungs.append(as_translator(chain))
                 kr_rung_placed = True
+        elif t == "str":
+            # The integrated default cascade as ONE producer (its own lift,
+            # independent of any individually cited kr leaves).
+            rungs.append(as_translator(make_hierarchy_class(options)))
         elif t == "sl":
             rungs.append(Sl(options))
         # 'sl_driven' / 'decompose' are wrappers, applied below.
