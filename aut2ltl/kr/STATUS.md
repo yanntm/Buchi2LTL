@@ -3,7 +3,7 @@
 Factual snapshot of the **current** state — read this to start a session.
 Construction history (the dated "DONE / WIRED / LANDED / reverted" log) lives in
 `docs/HISTORY.md`; work items in `TODO.md`; doc map in `README.md`; research
-notes in `dag_folding.md`.
+notes in `../../docs/dag_folding.md`.
 
 **Bottom line: the FoSSaCS'22 construction is implemented end-to-end and
 semantically validated.** The five reachability formulas are the literal paper
@@ -144,48 +144,36 @@ set per distinct temporal subformula) on the biggest cases; (ii) the largest
 flat strings still blow up. All test scripts carry built-in Spot budgets
 (`KR_SPOT_EQUIV_TIMEOUT` / `KR_CHECK_TIMEOUT`, 10s) and report SPOT_TIMEOUT /
 UNVERIFIED — never conflated with semantic failure. Full analysis and candidate
-counter-measures: `dag_folding.md`; probed dead ends in `docs/HISTORY.md`.
+counter-measures: `../../docs/dag_folding.md`; probed dead ends in `docs/HISTORY.md`.
 
-**Size numbers are not pinned here** — they move with every fold change, so the
-table that used to live in this section was stale. Measure on demand and diff:
+**Size numbers are not pinned here** — they move with every fold change. Measure
+on demand and diff:
 
-- `tests/kr/survey_sizes.py` — size census (DAG / unfolded-tree / distinct-temporal
-  nodes, sharing factor, build time) across the MP ladder on the shipped
-  `reconstruct_decomposed` path. A/B knobs documented in its header.
-- `tests/kr/compare_sizes.py OLD.txt NEW.txt` — per-case delta between two census
-  logs; the distinct-temporal column (the 32-acc-cap driver) is the headline.
+- `tests/survey.py` / `tests/survey_sweep.sh` — the front-end survey and its
+  per-`--use` sweep; the CSV carries DAG / temporals / tree nodes per formula.
+- `tests/survey_diff.py OLD.csv NEW.csv` — per-case delta between two survey CSVs;
+  the distinct-temporal column (the 32-acc-cap driver) is the headline.
 - `tests/kr/measure_formula_dag.py "<formula>"` — single-case DAG-vs-string blow-up
   (`--no-str` for the cases whose flat form is 100MB+).
-- `tests/kr/logs/survey_sizes_*.txt` — persisted baselines for the diffs.
+- `tests/logs/reference/` — the committed release-baseline sweep for diffs.
 
 ## Tooling for targeted work
 
-All under `tests/kr/` (placed scripts only; subprocess isolation; small built-in
-budgets — a blown budget is a finding, not a nuisance). One-shot probes are
-committed, their finding recorded in `docs/HISTORY.md`, then deleted (git history
-keeps them). `tests/kr/logs/` holds committed baseline size censuses for
-before/after comparison of fold work.
+Mostly under `tests/kr/` (placed scripts; subprocess isolation; small built-in
+budgets — a blown budget is a finding). One-shot probes are committed, their
+finding recorded in `docs/HISTORY.md`, then deleted (git history keeps them).
 
-- `survey_mp_cascade.py` — MP-class × depth ladder; construction and Spot-equiv
-  phases in separate subprocesses with separate budgets (`KR_CONSTRUCT_TIMEOUT`
-  30s / `KR_SPOT_EQUIV_TIMEOUT` 10s).
-- `survey_sizes.py` — size census across the MP ladder on the decompose path
-  (DAG/tree nodes, distinct temporals, sharing, build time; A/B knobs).
+- `tests/survey.py` — the corpus correctness gate (front-end build + a Spot
+  oracle; ends SUCCESS/FAIL). `tests/survey_sweep.sh` sweeps every `--use` config.
 - `trace_fin_semantics.py` — per-config semantic grounding of fin_c sub-terms vs
-  GTs on the config semiautomaton (cover-aware), witness words, per-check
-  subprocess cap; verdicts OK/BAD/UNVERIFIED.
+  GTs on the config semiautomaton (cover-aware), witness words; OK/BAD/UNVERIFIED.
 - `probe_reset_consistency.py` — soundness precondition: every combined letter
   acts identity-or-reset per level under both context conventions.
-- `probe_sgpdec_api.g` — hand-run GAP ground truth for the SgpDec bridge calls.
-- `probe_memo_stats.py` — memo profiler: distinct subproblems vs raw calls,
-  helper-memo size, alarm + watchdog stack dump.
-- `measure_formula_dag.py` — DAG vs string size of the assembled formula
-  (`--no-str` for cases whose flat form is 100MB+).
-- `probe_tail_anatomy.py` — per-level dissection of the helper memo.
-- `probe_case_diff.py` — containment + witness for one full roundtrip (in-process
-  build + fresh diff child via stdin).
+- `gap/probe_sgpdec_api.g` — hand-run GAP ground truth for the SgpDec bridge calls.
+- `measure_formula_dag.py` — DAG vs string size of the assembled formula.
 - `ltl_diff.py` — containment direction + witness words.
 - `test_kr_r4_audit.py` — structural checklist + drift grounding (gate for
   operator commits).
 - `test_kr_zoom.py` / `test_kr_reconstruct.py` — single-case full trace /
   multi-case roundtrip with isolated equiv.
+- `fuzz_gate_decompose.py` — sl-gate/decompose soundness fuzzer (reusable).

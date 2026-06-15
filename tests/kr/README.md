@@ -1,8 +1,8 @@
-# kr/testing/
+# tests/kr/
 
 Development and verification scripts for the kr/ algebraic path.
-The script-by-script overview lives in `kr/README.md` ("Verification" section);
-this file only records the ground rules.
+The script-by-script overview lives in `aut2ltl/kr/STATUS.md` ("Tooling for
+targeted work"); this file only records the ground rules.
 
 ## Rules
 
@@ -12,18 +12,18 @@ this file only records the ground rules.
   rc 139 = segv) — use the existing scripts as templates.
 - Use timeouts (5–45s per case).
 - One-shot probes (single-question tools): commit the script, record the
-  finding in `kr/STATUS.md`, then delete it — git history keeps the tool.
-- Run logs are never committed; the exception is `logs/` (curated baseline
-  size censuses kept as before/after references for fold work).
+  finding in `docs/HISTORY.md`, then delete it — git history keeps the tool.
+- Run logs are never committed; the exception is the curated release baseline
+  under `tests/logs/reference/` (the committed survey sweep).
 
 ## Gate before committing operator/assembly changes
 
-    python3 kr/testing/test_kr_r4_audit.py        # must report CLEAN
-    python3 kr/testing/survey_mp_cascade.py        # previously-True must stay True
+    python3 tests/kr/test_kr_r4_audit.py     # must report CLEAN
+    python3 tests/survey.py                  # must end SUCCESS (no verified non-equiv)
 
 ## Debug method (contradiction milking)
 
-1. `survey_mp_cascade.py` — pick the smallest failing case (weakest MP class).
+1. `tests/survey.py "<formula>"` — survey one case; check that it validates.
 2. `trace_fin_semantics.py "<formula>"` — ground each fin_c sub-term against
    ground-truth automata; find the first diverging sub-term + witness word.
 3. `ltl_diff.py "<A>" "<B>"` — containment direction + witness for any two formulas.

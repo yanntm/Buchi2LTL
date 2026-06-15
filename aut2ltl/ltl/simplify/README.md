@@ -1,11 +1,11 @@
-# kr/simplify — LTL simplification rules (generic, formula-level)
+# aut2ltl/ltl/simplify — LTL simplification rules (generic, formula-level)
 
 Standalone LTL simplification over hash-consed `spot.formula` DAGs. This
 package is deliberately **independent of the kr/ decomposition**: the rules
 apply to any LTL formula. It exists because Spot's `tl_simplifier` — even at
 full strength — does none of the rules below (measured: `a & (!a | Fb)` and
-`(!a & Xa) | (a & Xa)` survive full simplify untouched; see
-`kr/testing/probe_guard_fusion.py` and git history).
+`(!a & Xa) | (a & Xa)` survive full simplify untouched; measurement recorded in
+git history / `docs/HISTORY.md`).
 
 Lineage: the rules adapt the boolean-context machinery of the user's Java
 engine (`Simplifier.simplifyBoolean`, `LogicSimplifier.evalInInitial` — the
@@ -147,9 +147,9 @@ Wired into the kr/ construction pipeline since 2026-06-12: `_simp_f` calls
 `simplify_node` per DAG node (KR_SIMP_OWN, size cap KR_SIMP_OWN_LIMIT);
 KR_SIMP_OWN_FOLD=0 / KR_SIMP_OWN_FACTOR=0 disable rules 4 / 3.
 
-## Testing (`kr/simplify/testing/`)
+## Testing (`tests/kr/simplify/`)
 
-Same ground rules as `kr/testing/`: placed scripts, run from project root,
+Same ground rules as `tests/kr/`: placed scripts, run from project root,
 timeouts. Every test case validates **language equivalence** of input vs
 output via Spot (`spot.are_equivalent` / containment both ways) in addition
 to any expected-shape check — a rule that fires is only PASS if the

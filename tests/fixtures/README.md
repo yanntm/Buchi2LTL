@@ -1,6 +1,6 @@
 # Samples
 
-This folder contains interesting LTL formulas and automata (in HOA format) used during development of the BuchiToLTL prototype.
+This folder contains interesting LTL formulas and automata (in HOA format) used during development of the aut2ltl prototype.
 
 Useful for:
 - Manual testing

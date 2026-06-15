@@ -10,27 +10,29 @@ pattern-matching on the automaton's shape — and produces a hash-consed
 
 Translation is a family of **`CascadeTranslator` members** composed into a chain.
 
-- **Contract** (`aut2ltl/contract.py`, the floor): `ReconResult` (a formula DAG +
-  technique set + OK/DECLINED status) and the `CascadeTranslator` protocol —
-  `casc → ReconResult`, with a fixed `name`. A member is a small class
+- **Contract** (`aut2ltl/contract.py`, the floor): `LTLFormulaResult` (a formula
+  DAG + technique set + OK/DECLINED status) and the `CascadeTranslator` protocol —
+  `holder → LTLFormulaResult`, with a fixed `name`. A member is a small class
   (singleton instance) that is **self-gating**: it inspects the cascade and
   either returns a language-faithful result or DECLINES; it stamps its own
   `name` into the technique.
 
-- **Members** (`casc → ReconResult`):
+- **Members** (`holder → LTLFormulaResult`):
   - `acc.py` — `Acc` / `acc`: the bounded ("X-ladder") fragment, by direct
     bounded unroll over a ⊤/⊥ oracle on the input automaton. Orthogonal to the
     reach machinery; declines on any recurrent config.
   - `bls.py` — `Bls` / `bls`: the general case (the full Muller-DNF
     construction). The chain's fallback; accepts every LTL-expressible cascade.
-  - `acceptance_dispatch.py` — the direct hierarchy-class forms `buchi`
-    (`⋁¬Fin`), `cobuchi` (`⋀Fin`), `weak` (reach-only). *(Being brought into the
-    same member shape as `acc`/`bls`.)*
+  - `buchi.py` / `cobuchi.py` / `weak.py` — the direct hierarchy-class members
+    `buchi` (`⋁¬Fin`), `cobuchi` (`⋀Fin`), `weak` (reach-only), each self-gating
+    on its class (`is_{buchi,cobuchi,weak}_cascade`).
 
 - **Composition** (`aut2ltl/combinators.py`): `first_success([...])` — try the
-  members in order, take the first OK, else DECLINE. The dispatch chain
-  `acc → weak → buchi → cobuchi → bls` (in `reachability.py`) is one such
-  composition; per-member gates are `KR_DISPATCH_*`.
+  members in order, take the first OK, else DECLINE. The acceptance-dispatch
+  chain `acc → weak → buchi → cobuchi → bls` is assembled by
+  `make_hierarchy_class` (`hierarchy_class.py`); per-member gates are read from
+  the injected `Options` (`kr.dispatch.*`, env bridge `KR_DISPATCH_*`). The CLI
+  exposes the whole chain as the `str` technique.
 
 - **Support** (build a formula, *not* translators):
   - `reachability_operators.py` + `fin.py` — the five inductive reachability
@@ -52,16 +54,16 @@ normalize → deterministic, complete, minimized, state-based-acceptance parity
   → extract one generator per concrete letter (extract.py)
   → GAP / SgpDec holonomy decomposition, parsed back        (kr.gap — see its README)
   ▼
-Cascade                              (cascade.py + config_graph.py)
-  │  the dispatch chain of CascadeTranslator members         (reachability.py)
+Cascade                              (cascade/model.py + cascade/config_graph.py)
+  │  the dispatch chain of CascadeTranslator members         (hierarchy_class.py)
   ▼
-ReconResult  (hash-consed spot.formula DAG + winning technique)
+LTLFormulaResult  (hash-consed spot.formula DAG + winning technique)
 ```
 
 `decompose_aut` and the GAP/SgpDec bridge live in the **`kr.gap`** subpackage
-(its own README). `cascade.py` is the data model (levels, state↔config, letter
-valuations, `move_config`); `config_graph.py` does the config-automaton analysis
-(reachable/accepting configs, good Muller sets).
+(its own README). `cascade/model.py` is the data model (levels, state↔config,
+letter valuations, `move_config`); `cascade/config_graph.py` does the
+config-automaton analysis (reachable/accepting configs, good Muller sets).
 
 ## Usage
 
@@ -75,8 +77,8 @@ print(phi)
 ```
 
 The recommended top-level entry is the portfolio front end
-`aut2ltl.portfolio.reconstruct_decomposed(aut)` (automaton in, `ReconResult`
-out), which composes `kr` with the `sl` heuristic gate.
+`aut2ltl.portfolio.reconstruct_decomposed(Language.of(aut))` (a `Language` in, an
+`LTLFormulaResult` out), which composes `kr` with the `sl` heuristic gate.
 
 ## Dependencies
 
@@ -87,9 +89,9 @@ GAP (≥ 4.12) with the SgpDec package on `PATH`. Install once:
 
 - `paper/Automata2LTL.txt` — ground truth for any formula-fidelity question.
 - `paper/automata-to-ltl-construction.md` — the construction reference.
-- `algorithm.md` — scope/policy and module mapping.
+- `../../docs/algorithm.md` — scope/policy and module mapping.
 - `STATUS.md` / `TODO.md` — current state / work items.
-- `dag_folding.md` — the size-explosion analysis (open research direction).
-- Tests live under `tests/kr/` (placed scripts, subprocess-isolated, small
-  budgets); `test_kr_r4_audit.py` is the structural gate, `survey_mp_cascade.py`
-  the Manna–Pnueli equivalence survey.
+- `../../docs/dag_folding.md` — the size-explosion analysis (open research).
+- Tests: `tests/kr/` holds the cascade unit tests + debug tools
+  (`test_kr_r4_audit.py` is the structural gate); the correctness gate is the
+  front-end survey `tests/survey.py` (ends SUCCESS/FAIL).
