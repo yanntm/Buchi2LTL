@@ -58,10 +58,14 @@ compare FULL configs.
 Construction is **hash-consed `spot.formula` DAGs end-to-end including the
 output** (`reconstruct_ltl_paper_style` / `reconstruct_bls`; flattening opt-in
 via `reconstruct_ltl_str` / size-gated `_str_f_gated` under
-`KR_FLATTEN_TREE_LIMIT`), and **fully memoized** (`reach_strong` lru + the five
-helpers keyed ⟨helper, casc, S, B, β, T, τ, level⟩; distinct-subproblem runaway
-guard `KR_REACH_GUARD`, default 5M). Spot is used for hash-consing only — no
-external calls on the hot path.
+`KR_FLATTEN_TREE_LIMIT`), and **fully memoized per build on the `CascadeHolder`**
+(`reach_strong` + the five helpers keyed ⟨helper, S, B, β, T, τ, level⟩ in
+`holder.reach_memo` / `holder.helper_memo`; distinct-subproblem runaway guard
+`KR_REACH_GUARD`, default 5M, counting `holder.reach_calls`). The holder
+(`kr/cascade/holder.py`) is a pure `Cascade` wrapped with this build's memos +
+counters, created once in `aut2cas` and threaded as the CascadeTranslator input
+(no module-global build state, no `reset_build_state`). Spot is used for
+hash-consing only — no external calls on the hot path.
 
 Layered on top (all default-ON unless noted; see `docs/HISTORY.md` for how each
 landed, the soundness arguments, and the measurements):
