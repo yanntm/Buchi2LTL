@@ -1,0 +1,62 @@
+# tests/
+
+The test and data-collection harness. Everything runs the engine through the
+real front end (`python3 -m aut2ltl`), so it tests what a user runs. Subdirs with
+their own README (`kr/`, `fixtures/`, `samples/kinska/`) keep the detail; this
+file is just the index.
+
+## Ground rules
+
+- Run from the project root; scripts put the root on `sys.path` themselves.
+- Placed scripts only — no `/tmp`, no `python -c` one-liners (see `CLAUDE.md`).
+- Each case runs in its own `-m aut2ltl` subprocess under a STRICT per-phase
+  budget (15s, `KR_SURVEY_TIMEOUT`). The budget is enforced with
+  `timeout --signal=INT --kill-after=1`, so a runaway GAP child is reaped by the
+  interrupt handler in `aut2ltl/proc.py` (then SIGKILLed after a 1s grace) and
+  never orphaned. A blown budget IS a finding (reported `BUILD_TIMEOUT`), not a
+  failure to wait on.
+- Run logs are never committed, except the curated baseline under
+  `logs/reference/` (and `samples/kinska/logs/reference/`).
+
+## Gate before committing engine changes
+
+    python3 tests/kr/test_kr_r4_audit.py     # must report CLEAN
+    python3 tests/survey.py                  # must end SUCCESS (no verified non-equiv)
+
+## Survey & sweeps (end-to-end data collection)
+
+- `survey.py` — the single survey: per case, BUILD via the CLI tool then VERIFY
+  via a test-only spot oracle (classify + `are_equivalent`). The SUCCESS gate.
+- `survey_sweep.sh` — sweep `survey.py` across `--use` configurations
+  (techniques/flags head-to-head) on the curated corpus; per-config CSV + `.txt`
+  and a cross-config `SUMMARY.txt`.
+- `kinska_sweep.sh` — `survey.py` over the Kinská sample corpus
+  (`samples/kinska/`) with the DEFAULT portfolio only, strict 15s/run, one flat
+  log (`kinska.csv`/`.txt` + `SUMMARY.txt`) into `samples/kinska/logs/reference/`.
+- `survey_formulas.py` — the curated survey corpus, in isolation (the formula
+  list `survey.py` sweeps when given no inputs).
+- `survey_diff.py` — quantitative diff of two survey CSVs (regression triage).
+
+## Unit / smoke tests (fast, mostly GAP-free)
+
+- `test_build_portfolio.py` — building a `Translator` triggers NO GAP.
+- `test_contract_combinators.py` — the pure contract-floor combinator algebra.
+- `test_language.py` — the contract-floor `Language` constructors build
+  language-equivalent automata from both an automaton and an LTL source.
+- `test_ltl_metrics.py` — `ltl.metrics` + `ltl.printers`.
+- `test_options.py` — the contract-floor `Options` flags compartment.
+- `test_sl_member.py` — the `Sl` Translator either declines or returns a
+  language-equivalent formula (sound by construction).
+
+## Folders
+
+- `kr/` — development & verification scripts for the `kr/` algebraic path
+  (audit, tracing, language-diff tools). See `kr/README.md`.
+- `sl/` — case-finder probes for the heuristic `sl` engine (f2/t2 SCC patterns)
+  plus debug artifacts.
+- `fixtures/` — interesting LTL formulas and HOA automata used in development.
+  See `fixtures/README.md`.
+- `samples/` — external benchmark corpora. `samples/kinska/` is the Kinská
+  thesis Büchi automata + source formulae (see its README).
+- `logs/` — survey run outputs; throwaway except the committed `reference/`
+  release baseline.
