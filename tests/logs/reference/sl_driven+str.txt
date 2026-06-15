@@ -1,5 +1,5 @@
 survey: 35 formulas  (--use sl_driven,str)
 answers 34/35: validated 34, spot_timeout 0, unverified 0, spot_err 0, false 0
-declined 0, build_timeout 1, build_crash 0
-totals over answers: DAG=457 temporals=106 build=2.244s
+declined 0, not_ltl 0, build_timeout 1, build_crash 0
+totals over answers: DAG=454 temporals=106 build=4.280s
 SUCCESS

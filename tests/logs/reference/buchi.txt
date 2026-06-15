@@ -1,5 +1,5 @@
 survey: 35 formulas  (--use buchi)
 answers 27/35: validated 24, spot_timeout 1, unverified 2, spot_err 0, false 0
-declined 6, build_timeout 2, build_crash 0
-totals over answers: DAG=20342 temporals=3552 build=16.952s
+declined 6, not_ltl 1, build_timeout 1, build_crash 0
+totals over answers: DAG=20342 temporals=3552 build=19.832s
 SUCCESS

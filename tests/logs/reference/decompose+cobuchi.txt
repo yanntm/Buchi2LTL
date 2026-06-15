@@ -1,5 +1,5 @@
 survey: 35 formulas  (--use decompose,cobuchi)
 answers 3/35: validated 2, spot_timeout 0, unverified 1, spot_err 0, false 0
-declined 32, build_timeout 0, build_crash 0
-totals over answers: DAG=36912 temporals=6836 build=4.733s
+declined 32, not_ltl 0, build_timeout 0, build_crash 0
+totals over answers: DAG=36992 temporals=6838 build=5.764s
 SUCCESS

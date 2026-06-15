@@ -1,36 +1,36 @@
 formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
-true,B,B,sl,1,0,1,1.0,0.001,True,1
-false,B,B,sl,1,0,1,1.0,0.001,True,0
-a,G,B,sl,1,0,1,1.0,0.001,True,a
-Ga,S,S,sl,2,1,2,1.0,0.001,True,Ga
-G(a | b),S,S,sl,4,1,4,1.0,0.002,True,G(a | b)
-G(a -> X b),S,S,sl+t2,6,1,6,1.0,0.002,True,G(!a | Xb)
-a & X a,S,B,sl,3,0,4,1.3,0.002,True,a & Xa
-G(a -> X a),S,S,sl,4,2,5,1.2,0.002,True,!a W Ga
-G(a & X a),S,S,sl,2,1,2,1.0,0.001,True,Ga
-X a,G,B,sl,2,0,2,1.0,0.002,True,Xa
-X X a,G,B,sl,3,0,3,1.0,0.002,True,XXa
-X X X a,G,B,sl,4,0,4,1.0,0.002,True,XXXa
-X(a & X a),G,B,sl,4,0,5,1.2,0.002,True,X(a & Xa)
-Fa,G,G,sl,2,1,2,1.0,0.001,True,Fa
-a U b,G,G,sl,5,1,6,1.2,0.002,True,(a & !b) U b
-F(a & b),G,G,sl,4,1,4,1.0,0.002,True,F(a & b)
-F(a & X b),G,G,-,,,,,,DECLINED,
-a | X b,G,B,sl,4,0,4,1.0,0.002,True,a | Xb
-Fa | Gb,O,O,sl,10,2,13,1.3,0.002,True,(!a & b) W (a | (!b & XFa))
-Ga | Gb,O,S,sl,11,3,15,1.4,0.002,True,(a & b) W ((!a & Gb) | (!b & Ga))
-Fa & Gb,O,O,sl,7,2,10,1.4,0.002,True,(!a & Gb) U (a & Gb)
-(a U b) | Gc,O,O,sl,15,3,24,1.6,0.003,True,(a & !b & c) W (b | (a & !c & X((a & !b) U b)) | (!a & Gc))
-Ga | Fb,O,O,sl,10,2,13,1.3,0.002,True,(a & !b) W (b | (!a & XFb))
-GFa,R,R,sl,3,2,3,1.0,0.002,True,GFa
-G(a -> F b),R,R,-,,,,,,DECLINED,
-G(a | F b),R,R,-,,,,,,DECLINED,
-GFa & GFb,R,R,sl,6,3,6,1.0,0.002,True,G(Fa & Fb)
-GFa & GFb & GFc,R,R,sl,8,4,8,1.0,0.003,True,G(Fa & Fb & Fc)
-G(a -> F b) & G(c -> F d),R,R,-,,,,,,DECLINED,
-G(p -> (q U r)),R,R,-,,,,,,DECLINED,
-FGa,P,P,sl,3,2,3,1.0,0.002,True,FGa
-F(a & G b),P,P,sl,5,2,5,1.0,0.002,True,F(a & Gb)
-FGa | FGb,P,P,sl,6,3,6,1.0,0.002,True,F(Ga | Gb)
-GFa -> GFb,T,T,sl,9,4,10,1.1,0.002,True,F(G!a | (b & GFb))
-GFa & FGb,T,T,sl,7,3,8,1.1,0.002,True,F(a & G(b & Fa))
+true,B,B,sl,1,0,1,1.0,0.059,True,1
+false,B,B,sl,1,0,1,1.0,0.062,True,0
+a,G,B,sl,1,0,1,1.0,0.061,True,a
+Ga,S,S,sl,2,1,2,1.0,0.062,True,Ga
+G(a | b),S,S,sl,4,1,4,1.0,0.063,True,G(a | b)
+G(a -> X b),S,S,sl+t2,6,1,6,1.0,0.062,True,G(!a | Xb)
+a & X a,S,B,sl,3,0,4,1.3,0.061,True,a & Xa
+G(a -> X a),S,S,sl,4,2,5,1.2,0.061,True,!a W Ga
+G(a & X a),S,S,sl,2,1,2,1.0,0.061,True,Ga
+X a,G,B,sl,2,0,2,1.0,0.059,True,Xa
+X X a,G,B,sl,3,0,3,1.0,0.062,True,XXa
+X X X a,G,B,sl,4,0,4,1.0,0.061,True,XXXa
+X(a & X a),G,B,sl,4,0,5,1.2,0.059,True,X(a & Xa)
+Fa,G,G,sl,2,1,2,1.0,0.061,True,Fa
+a U b,G,G,sl,3,1,3,1.0,0.061,True,a U b
+F(a & b),G,G,sl,4,1,4,1.0,0.061,True,F(a & b)
+F(a & X b),G,G,-,,,,,0.061,DECLINED,
+a | X b,G,B,sl,4,0,4,1.0,0.062,True,a | Xb
+Fa | Gb,O,O,sl,10,2,13,1.3,0.060,True,(!a & b) W (a | (!b & XFa))
+Ga | Gb,O,S,sl,11,3,15,1.4,0.063,True,(a & b) W ((!a & Gb) | (!b & Ga))
+Fa & Gb,O,O,sl,7,2,10,1.4,0.062,True,(!a & Gb) U (a & Gb)
+(a U b) | Gc,O,O,sl,14,3,21,1.5,0.060,True,(a & !b & c) W (b | (!a & Gc) | (a & !c & X(a U b)))
+Ga | Fb,O,O,sl,10,2,13,1.3,0.064,True,(a & !b) W (b | (!a & XFb))
+GFa,R,R,sl,3,2,3,1.0,0.062,True,GFa
+G(a -> F b),R,R,-,,,,,0.059,DECLINED,
+G(a | F b),R,R,-,,,,,0.061,DECLINED,
+GFa & GFb,R,R,sl,6,3,6,1.0,0.062,True,G(Fa & Fb)
+GFa & GFb & GFc,R,R,sl,8,4,8,1.0,0.064,True,G(Fa & Fb & Fc)
+G(a -> F b) & G(c -> F d),R,R,-,,,,,0.063,DECLINED,
+G(p -> (q U r)),R,R,-,,,,,0.061,DECLINED,
+FGa,P,P,sl,3,2,3,1.0,0.061,True,FGa
+F(a & G b),P,P,sl,5,2,5,1.0,0.061,True,F(a & Gb)
+FGa | FGb,P,P,sl,6,3,6,1.0,0.062,True,F(Ga | Gb)
+GFa -> GFb,T,T,sl,9,4,10,1.1,0.062,True,F(G!a | (b & GFb))
+GFa & FGb,T,T,sl,7,3,8,1.1,0.062,True,F(a & G(b & Fa))
