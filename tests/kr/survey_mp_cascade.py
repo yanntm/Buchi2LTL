@@ -116,7 +116,7 @@ from pathlib import Path
 proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 import spot
-from aut2ltl.kr import decompose_aut, hierarchy_class
+from aut2ltl.kr import decompose_aut, hierarchy_class, CascadeHolder
 from aut2ltl.language import Language
 from aut2ltl.portfolio import reconstruct_decomposed
 
@@ -145,7 +145,7 @@ try:
         rec_f = _rr.formula
         info["technique"] = _rr.technique_str()
     else:
-        _rr = hierarchy_class(casc)
+        _rr = hierarchy_class(CascadeHolder(casc))
         rec_f = _rr.formula
         info["technique"] = _rr.technique_str()
     # 5M tree nodes ~ 40MB string: above every case Spot equiv has ever
