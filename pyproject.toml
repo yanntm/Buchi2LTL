@@ -21,8 +21,10 @@ keywords = ["LTL", "omega-automata", "Buchi", "Krohn-Rhodes", "holonomy", "tempo
 #     see README.md and aut2ltl/kr/install.sh.
 dependencies = []
 
-# A console-script entry point awaits refactoring aut2ltl/cli.py's __main__
-# block into a main() function; until then run `python3 -m aut2ltl.cli`.
+[project.scripts]
+# The portfolio front end (aut2ltl/__main__.py:main). Equivalent to
+# `python3 -m aut2ltl`. The legacy sl-only demo stays at `python3 -m aut2ltl.cli`.
+aut2ltl = "aut2ltl.__main__:main"
 
 [tool.setuptools.packages.find]
 include = ["aut2ltl*"]
