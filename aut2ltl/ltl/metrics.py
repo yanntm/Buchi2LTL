@@ -24,12 +24,19 @@ if TYPE_CHECKING:
     import spot
 
 
+# Temporal operators that mint a Spot acceptance set (the 32-set tableau driver);
+# X is excluded — it does not create an acceptance condition.
+_TEMPORAL_KINDS = frozenset({"U", "M", "R", "W", "F", "G"})
+
+
 @dataclass(frozen=True)
 class DagMetrics:
-    """DAG vs unfolded-tree size of one formula (the sharing story)."""
+    """DAG vs unfolded-tree size of one formula (the sharing story), plus the
+    count of distinct temporal nodes (the acceptance-set driver)."""
 
     dag_nodes: int
     tree_nodes: int
+    temporal_nodes: int = 0
 
     @property
     def sharing(self) -> float:
@@ -80,9 +87,38 @@ def tree_node_count(f: "spot.formula", limit: Optional[int] = None) -> int:
     return rec(f)
 
 
+def temporal_node_count(f: "spot.formula") -> int:
+    """Distinct temporal-operator nodes (kindstr in U/M/R/W/F/G — the Spot
+    acceptance-set driver; X excluded). Sharing-aware: each node id once."""
+    if f is None:
+        return 0
+    seen: set = set()
+    temporal: set = set()
+    stack = [f]
+    while stack:
+        g = stack.pop()
+        gid = g.id()
+        if gid in seen:
+            continue
+        seen.add(gid)
+        if g.kindstr() in _TEMPORAL_KINDS:
+            temporal.add(gid)
+        for child in g:
+            stack.append(child)
+    return len(temporal)
+
+
 def dag_metrics(f: "spot.formula") -> DagMetrics:
-    """DAG node count + unfolded-tree node count (+ sharing via the property)."""
-    return DagMetrics(dag_nodes=dag_node_count(f), tree_nodes=tree_node_count(f))
+    """DAG node count + unfolded-tree node count + distinct-temporal count
+    (+ sharing via the property)."""
+    return DagMetrics(
+        dag_nodes=dag_node_count(f),
+        tree_nodes=tree_node_count(f),
+        temporal_nodes=temporal_node_count(f),
+    )
 
 
-__all__ = ["DagMetrics", "dag_node_count", "tree_node_count", "dag_metrics"]
+__all__ = [
+    "DagMetrics", "dag_node_count", "tree_node_count",
+    "temporal_node_count", "dag_metrics",
+]

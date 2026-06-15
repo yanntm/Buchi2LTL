@@ -210,6 +210,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         report = (
             f"technique : {res.technique_str()}\n"
             f"DAG nodes : {m.dag_nodes}\n"
+            f"temporals : {m.temporal_nodes}\n"
             f"tree nodes: {m.tree_nodes}\n"
             f"sharing   : {m.sharing:.1f}x\n"
             f"build time: {dt:.3f}s"
