@@ -75,6 +75,16 @@ class Cascade:
     letter_valuations: List[Dict[str, bool]] = field(default_factory=list)
     original_aut: Any = None  # the normalized det parity aut (our working D)
 
+    # LTL-definability oracle (kr/gap/export.py emits APERIODIC: from GAP's
+    # IsAperiodicSemigroup(T) over the transition monoid of D). True  => the
+    # language is LTL/star-free; False => it is NOT LTL-definable (T carries a
+    # non-trivial group, so a holonomy level is a real GROUP, not the reset the
+    # parser otherwise assumes). None => unknown (legacy / not computed). The
+    # cascade-consuming members read this to return the NOT_LTL verdict instead
+    # of an unsound formula. NB: a False reading is rigorous only when D is
+    # state-minimal — the caller decides conclusive vs. probable (see contract).
+    aperiodic: Optional[bool] = None
+
     # True cascade transitions: config -> {letter_idx: next_config}, over the
     # BFS closure of the state lifts under the SgpDec-lifted generators
     # (TRANS lines from the GAP script). Holonomy coordinatization is a COVER:

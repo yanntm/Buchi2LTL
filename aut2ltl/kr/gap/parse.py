@@ -30,6 +30,7 @@ _LEVEL_LINE = re.compile(r"^LEVEL\s+(\d+)\s+SIZE\s+(\d+)\s+KIND\s+(\S+)(?:\s+STR
 _NUM_LEVELS = re.compile(r"^NUM_LEVELS:\s*(\d+)", re.MULTILINE)
 _NUM_STATES = re.compile(r"^NUM_STATES:\s*(\d+)", re.MULTILINE)
 _SEMI_SIZE = re.compile(r"^SEMI_GROUP_SIZE:\s*(\d+)", re.MULTILINE)
+_APERIODIC = re.compile(r"^APERIODIC:\s*(true|false)", re.MULTILINE)
 _TRANS_LINE = re.compile(r"^TRANS\s+\[([^\]]*)\]\s+GEN\s+(\d+)\s+TO\s+\[([^\]]*)\]", re.MULTILINE)
 _PI_LINE = re.compile(r"^PI\s+\[([^\]]*)\]\s+POINT\s+(\d+)", re.MULTILINE)
 
@@ -104,6 +105,11 @@ def parse_cascade_output(raw: str, generators: Optional[List[List[int]]] = None)
     if m_ss:
         meta["semigroup_size"] = int(m_ss.group(1))
 
+    # LTL-definability oracle (GAP IsAperiodicSemigroup). None if the script
+    # predates the APERIODIC line (legacy output).
+    m_ap = _APERIODIC.search(raw)
+    aperiodic = (m_ap.group(1) == "true") if m_ap else None
+
     if "CASCADE_START" not in raw or "CASCADE_END" not in raw:
         # Still try to return what we got; the caller can decide if it's usable.
         meta["warning"] = "CASCADE markers not found — partial parse"
@@ -118,4 +124,5 @@ def parse_cascade_output(raw: str, generators: Optional[List[List[int]]] = None)
         raw_output=raw,
         metadata=meta,
         transitions=transitions,
+        aperiodic=aperiodic,
     )
