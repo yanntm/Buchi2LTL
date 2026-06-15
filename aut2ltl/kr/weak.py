@@ -15,8 +15,8 @@ reach-driven A/B alternative rather than the default.
 from __future__ import annotations
 
 import aut2ltl.kr.reachability_operators as _ops
-from aut2ltl.kr.ltl_builders import _And, _Or, _Not, _tt, _ff, _simp_f, _tree_size_f
-from aut2ltl.kr.cascade import Cascade
+from aut2ltl.kr.ltl_builders import _And, _Or, _Not, _tt, _ff, _simp_f
+from aut2ltl.kr.cascade import Cascade, CascadeHolder
 from aut2ltl.contract import LTLFormulaResult, CascadeTranslator
 
 
@@ -59,12 +59,11 @@ class Weak:
 
     name = "weak"
 
-    def __call__(self, casc: Cascade) -> LTLFormulaResult:
+    def __call__(self, casc: CascadeHolder) -> LTLFormulaResult:
         if not is_weak_cascade(casc):
             return LTLFormulaResult.decline()
         from aut2ltl.kr.cascade import build_pruned_config_aut, reachable_configs
         import spot
-        _ops.reset_build_state(casc)
         g = build_pruned_config_aut(casc)
         if g is None:
             return LTLFormulaResult.decline()
@@ -92,7 +91,6 @@ class Weak:
                          if gprime else _tt())
             terms.append(_And(reach_in, avoid_out))
         res = _ff() if not terms else _simp_f(_Or(*terms))   # no accepting SCC -> empty
-        _ops.PAPER_MAX_LTL_SIZE = _tree_size_f(res)
         return LTLFormulaResult(formula=res, technique={self.name})
 
 
