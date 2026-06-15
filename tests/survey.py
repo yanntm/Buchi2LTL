@@ -26,7 +26,8 @@ equiv verdicts:
   SPOT_TIMEOUT    — verification ran out of budget (NOT a failure; construction OK)
   UNVERIFIED_SIZE — formula too big to flatten (gated off), so not checkable here
   SPOT_ERR:...    — Spot could not translate (e.g. >32 acceptance sets)
-build-phase outcomes (no equiv): DECLINED / BUILD_TIMEOUT / ERROR:...
+build-phase outcomes (no equiv, no DAG): DECLINED / BUILD_TIMEOUT (construction
+exceeded budget) / CRASH:... (the tool threw — a real defect)
 
 Outputs a dense CSV (default tests/logs/survey_<timestamp>.csv) and prints the
 overall report as the LAST lines of stdout.
@@ -129,8 +130,10 @@ def run_build(formula: str, use: Optional[str] = None,
               timeout: int = BUILD_TIMEOUT) -> Dict[str, object]:
     """Reconstruct `formula` via the front-end tool (passing `--use <use>`
     through when given). Returns the parsed report plus `status` (OK / DECLINED
-    / BUILD_TIMEOUT / ERROR:...) and `rec` (the formula on stdout, or the
-    `<unflattened ...>` placeholder)."""
+    / BUILD_TIMEOUT / CRASH:...) and `rec` (the formula on stdout, or the
+    `<unflattened ...>` placeholder). BUILD_TIMEOUT is a construction-budget
+    overrun — flattening is size-gated in the tool, so the wall time is the
+    cascade build, not rendering."""
     cmd = [sys.executable, "-m", "aut2ltl", formula, "--ltl"]
     if use:
         cmd += ["--use", use]
@@ -142,13 +145,17 @@ def run_build(formula: str, use: Optional[str] = None,
     except subprocess.TimeoutExpired:
         return {"status": f"BUILD_TIMEOUT>{timeout}s"}
     stdout = (proc.stdout or "").strip()
-    info = _parse_report(proc.stderr or "")
-    if proc.returncode == 1:
+    stderr = proc.stderr or ""
+    info = _parse_report(stderr)
+    # A clean DECLINE is exit 1 WITH the tool's decline message; any other exit-1
+    # (or other nonzero, or empty stdout) is the tool crashing — a real error, not
+    # a decline (a DAG was NOT produced).
+    if proc.returncode == 1 and "DECLINED" in stderr:
         info["status"] = "DECLINED"
         return info
     if proc.returncode != 0 or not stdout:
-        msg = (proc.stderr or proc.stdout or "no output").strip().splitlines()
-        info["status"] = "ERROR:" + (msg[-1][:90] if msg else "no output")
+        msg = (stderr or proc.stdout or "no output").strip().splitlines()
+        info["status"] = "CRASH:" + (msg[-1][:90] if msg else "no output")
         return info
     info["status"] = "OK"
     info["rec"] = stdout
@@ -251,7 +258,9 @@ def _category(equiv: str) -> str:
         return "declined"
     if equiv.startswith("SPOT_ERR"):
         return "spot_err"
-    return "build_problem"   # BUILD_TIMEOUT / ERROR
+    if equiv.startswith("BUILD_TIMEOUT"):
+        return "build_timeout"   # construction exceeded budget (no DAG produced)
+    return "build_crash"         # the tool actually threw (a real defect)
 
 
 def _num(v: object) -> float:
@@ -282,7 +291,8 @@ def _report(rows: List[Dict[str, object]], use: Optional[str]) -> List[str]:
         f"answers {len(answers)}/{len(rows)}: validated {cat.get('validated', 0)}, "
         f"spot_timeout {cat.get('spot_timeout', 0)}, unverified {cat.get('unverified', 0)}, "
         f"spot_err {cat.get('spot_err', 0)}, false {cat.get('false', 0)}",
-        f"declined {cat.get('declined', 0)}, build_problem {cat.get('build_problem', 0)}",
+        f"declined {cat.get('declined', 0)}, build_timeout {cat.get('build_timeout', 0)}, "
+        f"build_crash {cat.get('build_crash', 0)}",
         f"totals over answers: DAG={dag} temporals={temp} build={build:.3f}s",
         verdict,
     ]
