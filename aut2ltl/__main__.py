@@ -197,6 +197,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     res = translator(lang)
     dt = time.monotonic() - t0
 
+    if res.not_ltl:
+        # Positive impossibility verdict (non-aperiodic transition monoid), not a
+        # decline: the language is (probably) not LTL-definable, so no formula
+        # exists. Distinct exit code (3) so callers can tell it from DECLINED (1).
+        label = "NOT_LTL" if res.conclusive else "PROBABLY_NOT_LTL"
+        qualifier = "not" if res.conclusive else "probably not"
+        msg = f"aut2ltl: {label} — the language is {qualifier} LTL-definable"
+        if res.note:
+            msg += f"\n  ({res.note})"
+        print(msg, file=sys.stderr)
+        return 3
+
     if res.declined or res.formula is None:
         print("aut2ltl: DECLINED — no cited technique translated this language",
               file=sys.stderr)
