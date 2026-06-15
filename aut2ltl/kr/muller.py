@@ -18,30 +18,18 @@ import os
 
 import aut2ltl.kr.reachability_operators as _ops
 from .fin import fin_c
-from .ltl_builders import _And, _Or, _Not, _tt, _ff, _simp_f, _short_f, _tree_size_f
-from .cascade import Cascade, good_muller_sets
+from .ltl_builders import _And, _Or, _Not, _tt, _ff, _simp_f, _short_f
+from .cascade import CascadeHolder, good_muller_sets
 
 
-def assemble_muller_dnf(casc: Cascade) -> "spot.formula":
+def assemble_muller_dnf(casc: CascadeHolder) -> "spot.formula":
     """Assemble the general Muller DNF over the good config-sets of `casc`.
 
     Returns the hash-consed spot.formula DAG (never serialized here). Trivial
     cascades collapse to ⊤/⊥; an empty good-set family is the empty language ⊥.
+    A fresh CascadeHolder carries empty memos and zeroed counters, so no reset is
+    needed here.
     """
-    # reset counters owned by reachability_operators
-    _ops.PAPER_REACH_CALLS = 0
-    _ops.PAPER_FIN_CALLS = 0
-    _ops.PAPER_MAX_LTL_SIZE = 0
-    if hasattr(_ops, "_reach_memo"):
-        _ops._reach_memo.clear()
-    _ops._clear_casc_registry()
-    cid = _ops._register_casc(casc)
-    # clear lru on R* for fresh construction (arch adoption)
-    if hasattr(_ops, "_lru_reach_strong"):
-        _ops._lru_reach_strong.cache_clear()
-    if hasattr(_ops, "_helper_memo"):
-        _ops._helper_memo.clear()
-
     if casc.num_levels == 0:
         # trivial (num_levels==0 is degenerate; normally we have the normalized D)
         if casc.original_aut is not None:
@@ -107,9 +95,6 @@ def assemble_muller_dnf(casc: Cascade) -> "spot.formula":
     res_f = _simp_f(_Or(*terms_f))
     if trace_on:
         print("[TRACE_ASSEMBLY] final =", _short_f(res_f, 200))
-    # Size metric is now the unfolded-tree node count (memoized O(DAG) walk),
-    # not the flat string length — the DAG is never serialized here.
-    _ops.PAPER_MAX_LTL_SIZE = _tree_size_f(res_f)
     return res_f
 
 
