@@ -28,23 +28,19 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
-from aut2ltl.kr import decompose_aut
+from aut2ltl.kr import decompose_aut, CascadeHolder
 from aut2ltl.kr.reachability_operators import (
     reach_strong, reach_weak, simplify_ltl,
     _solid_stay_weak, _stay_gt0_weak,
     _dashed_change_strong,
-    PAPER_REACH_CALLS, PAPER_FIN_CALLS,
 )
 from aut2ltl.kr.fin import fin_c
 from aut2ltl.kr.hierarchy_class import hierarchy_class
 
-# Reset counters
 def _reset_counters():
-    import aut2ltl.kr.reachability_operators as ops
-    ops.PAPER_REACH_CALLS = 0
-    ops.PAPER_FIN_CALLS = 0
-    if hasattr(ops, "_reach_memo"):
-        ops._reach_memo.clear()
+    # No-op: build state (memos + counters) now lives on a per-build CascadeHolder,
+    # not module globals. Kept so existing call sites read clearly.
+    pass
 
 def describe_simple_1l_reset():
     """Create/return a simple 1L reset cascade for audit (s=0, b=1, t=0 case).
@@ -73,7 +69,7 @@ def check_drift_forever_semantics():
     while the high-level semantics say it should for weak.
     """
     print("\n=== Path A: Drift-forever grounding (pure stay, S=T, no block) ===")
-    casc = describe_simple_1l_reset()
+    casc = CascadeHolder(describe_simple_1l_reset())
     # For 1L, configs are 1-tuples. Pick S=(1,), T=(1,), B=(2,) or similar from the map.
     # Use reachable to pick.
     reach = casc.reachable_configs()
@@ -211,7 +207,7 @@ def check_5point_checklist():
             all_ok = False
     # Behavioral: exercise a same-top target case with complex tau (postpone for last-visit/Fin).
     # Use semantic implication style check where possible.
-    casc = describe_simple_1l_reset()
+    casc = CascadeHolder(describe_simple_1l_reset())
     reach = casc.reachable_configs()
     if reach:
         S = reach[0]
@@ -254,15 +250,15 @@ def check_canary_roundtrip():
     try:
         f = spot.formula("G(p | F q)")
         aut = f.translate()
-        casc = decompose_aut(aut)
-        ltl = hierarchy_class(casc).formula   # spot.formula DAG
+        holder = CascadeHolder(decompose_aut(aut))
+        ltl = hierarchy_class(holder).formula   # spot.formula DAG
         from aut2ltl.kr.ltl_builders import _short_f
         print("  recovered:", _short_f(ltl, 100))
         orig_b = f.translate("Buchi")
         rec_b = ltl.translate("Buchi")
         eq = spot.are_equivalent(orig_b, rec_b)
         print("  are_equivalent:", eq)
-        print("  reach_calls=", PAPER_REACH_CALLS, "fin_calls=", PAPER_FIN_CALLS)
+        print("  reach_calls=", holder.reach_calls, "fin_calls=", holder.fin_calls)
         return eq
     except Exception as e:
         print("  ERROR in canary:", e)
