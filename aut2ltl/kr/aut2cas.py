@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 from aut2ltl.contract import LTLFormulaResult, Translator, CascadeTranslator
 from .gap import decompose_lang
+from .cascade import CascadeHolder
 from .hierarchy_class import hierarchy_class
 
 if TYPE_CHECKING:
@@ -49,7 +50,10 @@ def as_translator(
                 f"Reconstruction depth ceiling KR_MAX_LEVELS={max_levels} "
                 f"(got {casc.num_levels} levels)."
             )
-        return ct(casc)
+        # The CascadeHolder carries this build's memos + counters (no module
+        # globals, no reset); discarding it after the build IS the reset.
+        holder = CascadeHolder(casc)
+        return ct(holder)
 
     return reconstruct
 
