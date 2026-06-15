@@ -72,6 +72,16 @@ Later additions (same module):
   propositional fragments only (one-way, sound). Found by the census
   class probe: these paddings were the dominant language-equal variant
   pairs in real outputs.
+- **Boolean left-arm cofactoring** (`_arm_cofactor`): for a binary
+  temporal with BOTH arms purely propositional, the left arm is evaluated
+  only on the positions where the right arm has not yet fired, so it can be
+  restricted to that care-set: `φ U ψ → φ' U ψ` with φ' agreeing with φ on
+  `{ψ false}` (same for W); `φ R ψ → φ' R ψ` with φ' agreeing on `{ψ true}`
+  (same for M, via `φ R ψ ≡ ¬(¬φ U ¬ψ)`). e.g. `(a∧¬b) U b → a U b`,
+  `(e∧¬h) U (e∧h) → e U (e∧h)`. φ' is the Coudert–Madre restrict of φ to the
+  care-set (`now_eval.prop_cofactor`, `buddy.bdd_simplify` + BDD→ISOP),
+  accepted only when strictly smaller — no temporal node added/removed, so
+  the Couvreur acc-set census is untouched.
 - **G/F absorption**: a conjunct implied by a sibling `Gφ` (the unrolled
   reading `Gφ ≡ φ ∧ XGφ` as an entailment oracle) is dropped; dually a
   disjunct implying a sibling `Fφ`. Entailment is a small syntactic

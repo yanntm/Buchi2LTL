@@ -64,7 +64,8 @@ from typing import Dict, List, Optional, Tuple
 import buddy
 import spot
 
-from .now_eval import _prop_bdd, _ctx_bdd, _entails, _entails_not
+from .now_eval import _prop_bdd, _ctx_bdd, _entails, _entails_not, prop_cofactor
+from .factor_pass import _tree_size
 
 
 def _is_neg(g: "spot.formula", c: "spot.formula") -> bool:
@@ -335,6 +336,36 @@ def _arm_unpad(node: "spot.formula") -> "spot.formula":
     return node
 
 
+def _arm_cofactor(node: "spot.formula") -> "spot.formula":
+    """Boolean left-arm cofactoring of a binary temporal (both arms pure
+    propositional):
+
+        φ U ψ ≡ φ' U ψ    when φ' agrees with φ on {ψ false}   (same for W)
+        φ R ψ ≡ φ' R ψ    when φ' agrees with φ on {ψ true}    (same for M)
+
+    e.g. `(a ∧ ¬b) U b → a U b`. Soundness (U): the earliest position
+    where ψ fires is the canonical witness; at every position strictly
+    before it ψ is false, and the left arm is evaluated only there — so any
+    φ' that matches φ wherever ψ is false yields the same word set. R/M are
+    the literal duals (left arm matters only where ψ holds), via `φ R ψ ≡
+    ¬(¬φ U ¬ψ)`. The Couvreur acc-set census is untouched (no temporal node
+    added/removed); the left arm is the restrict of φ to that care-set,
+    re-expressed by Minato-ISOP and accepted only when strictly smaller."""
+    if node._is(spot.op_U) or node._is(spot.op_W):
+        f, g = node[0], node[1]
+        f2 = prop_cofactor(f, g, care_true=False)        # care-set {ψ false}
+        if f2 is not None and _tree_size(f2) < _tree_size(f):
+            op = spot.formula.U if node._is(spot.op_U) else spot.formula.W
+            return op(f2, g)
+    elif node._is(spot.op_R) or node._is(spot.op_M):
+        f, g = node[0], node[1]
+        f2 = prop_cofactor(f, g, care_true=True)          # care-set {ψ true}
+        if f2 is not None and _tree_size(f2) < _tree_size(f):
+            op = spot.formula.R if node._is(spot.op_R) else spot.formula.M
+            return op(f2, g)
+    return node
+
+
 def ctx_subsume(node: "spot.formula", pos, neg) -> "spot.formula | None":
     """Context-aware S1/S2 (the initial-state reading): under a context
     refuting c, the bare-c disjunct of S1 is discharged by knowledge, so
@@ -418,7 +449,7 @@ def fold_simplify(f: "spot.formula") -> "spot.formula":
             if out._is(spot.op_And) or out._is(spot.op_Or):
                 out = _fold_node(out)
         elif list(n):
-            out = _arm_unpad(n.map(walk))
+            out = _arm_cofactor(_arm_unpad(n.map(walk)))
         else:
             out = n
         memo[n] = out

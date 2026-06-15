@@ -113,6 +113,28 @@ def prop_minimize(f: "spot.formula") -> Optional["spot.formula"]:
         return None
 
 
+def prop_cofactor(f: "spot.formula", g: "spot.formula",
+                  care_true: bool) -> Optional["spot.formula"]:
+    """Minato-ISOP form of `f` restricted to the care-set where `g` holds
+    (care_true=True → {g}, False → {¬g}); both must be purely propositional.
+
+    The result agrees with `f` on the care-set and is free to differ off it
+    (Coudert–Madre restrict, `bdd_simplify`), then re-expressed via the
+    BDD → ISOP round-trip. Returns None when either side isn't propositional,
+    the restrict left `f` unchanged, or the round-trip failed."""
+    bf, bg = _prop_bdd(f), _prop_bdd(g)
+    if bf is None or bg is None:
+        return None
+    care = bg if care_true else buddy.bdd_not(bg)
+    bf2 = buddy.bdd_simplify(bf, care)   # restrict f to the care domain
+    if bf2 == bf:
+        return None
+    try:
+        return spot.bdd_to_formula(bf2, _bdd_dict)
+    except Exception:
+        return None
+
+
 def now_rewrite(node: "spot.formula", pos: FrozenSet, neg: FrozenSet) -> Optional["spot.formula"]:
     """One shrinking rewrite of a temporal head under the context, or None.
     The result is at the same instant as `node` (same context applies)."""

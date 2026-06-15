@@ -424,3 +424,26 @@ Harness, same day: tests/survey.py enforces the per-case budget via
 `timeout --signal=INT --kill-after=1` so a runaway GAP is reaped (no orphan), and
 reports external wall time as build_s for every outcome. tests/kinska_sweep.sh
 sweeps the corpus at a strict 15s/run (prunes its own logs/ from discovery).
+
+## 2026-06-15 — simplify rule 4: boolean left-arm cofactoring (DONE)
+
+New rule in `aut2ltl/ltl/simplify` (fold_pass `_arm_cofactor`, helper
+`now_eval.prop_cofactor`): for a binary temporal with both arms purely
+propositional, the left arm matters only on the positions where the right
+arm has not yet fired, so restrict it to that care-set —
+`φ U ψ → φ' U ψ` with φ' agreeing with φ on `{ψ false}` (W same);
+`φ R ψ → φ' R ψ` agreeing on `{ψ true}` (M same, via `φ R ψ ≡ ¬(¬φ U ¬ψ)`).
+φ' = Coudert–Madre restrict (`buddy.bdd_simplify(f, care)` — empirically
+arg order is (f, care), NOT the manual's (d, f)) round-tripped through
+BDD→ISOP, accepted only when strictly smaller. No temporal node
+added/removed (Couvreur census untouched); wired after `_arm_unpad` in the
+fold walk.
+
+Motivating real case (polish/kinska sweep, 8ap-ba/randltl-10-a-hoa-5.txt,
+source `h M e`): reference emitted `(e & !h) U (e & h)`; the rule reduces it
+to `e U (e & h)`, which Spot prettifies back to `h M e`.
+
+Tests: new `tests/kr/simplify/test_arm_cofactor.py` (10 shape+equiv cases,
+SUCCESS); fold/now/factor/context suites CLEAN; `test_random_equiv.py`
+500-formula fuzz ALL EQUIVALENT (28% changed); `test_kr_r4_audit.py` CLEAN;
+`tests/survey.py` SUCCESS 35/35.
