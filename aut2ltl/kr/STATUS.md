@@ -101,6 +101,23 @@ each Translator pulls the form it wants). The contract floor — `LTLFormulaResu
 with the `Language`/cascade adapter (`CascadeTranslator -> Translator`) in
 `kr/aut2cas.py` over the GAP-native `kr/gap/decompose_lang.py`.
 
+## Front end (CLI)
+
+`aut2ltl/__main__.py` (`python3 -m aut2ltl`, console script `aut2ltl`) is the
+portfolio front end: an LTL string or HOA file in (auto-detected; `--ltl`/`--hoa`
+force), an equivalent LTL formula out. `--use T1,T2,...` cites the techniques that
+may participate (cited order = priority, NO implicit floor) — assembled by
+`portfolio/build.py:build_portfolio(options, techniques)` into a `first_success`
+ladder of producers (`acc/weak/buchi/cobuchi/bls/sl`) optionally wrapped by
+`sl_driven`/`decompose`; omit `--use` for the hand-tuned default. `-O key=value`
+overrides any declared `OptionSpec` (`--list-options`/`--list-techniques` to
+discover). Output: the formula on stdout (gated by `--flatten-limit` since the flat
+string can explode), a verbose report (technique, DAG/tree sizes via
+`ltl/metrics.py`, build time) on stderr unless `-q`; `--dag` dumps the formula DAG
+as graphviz dot (`ltl/printers.py:to_dot`, boolean subterms collapsed — O(distinct
+nodes), no blowup); `-o FILE` writes the formula; DECLINE ⇒ exit 1.
+`reconstruct_decomposed` is now `build_portfolio(_options)` (behavior-preserving).
+
 ## Validation state
 
 The ≥4-level dev guard is GONE (opt-in `KR_MAX_LEVELS` ceiling remains; the real

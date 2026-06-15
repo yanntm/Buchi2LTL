@@ -21,7 +21,8 @@ soundly. On the Manna-Pnueli class ladder the combined path is a clean sweep
 ```
 aut2ltl/                  the root package (layering: floor -> engines -> portfolio -> cli)
   contract.py            ReconResult + Translator (the contract floor)
-  cli.py                 command-line front-end:  python3 -m aut2ltl.cli
+  __main__.py            the portfolio front end:  python3 -m aut2ltl  (console: aut2ltl)
+  cli.py                 legacy sl-engine demo:  python3 -m aut2ltl.cli
   kr/                    pure cascade FoSSaCS engine (cascade, reachability,
                          fin, acceptance_dispatch, gap_bridge, simplify/, ...)
   sl/                    heuristic engine (backward labeling + f2/tN heuristics)
@@ -37,9 +38,33 @@ paper/                   construction reference + ground-truth paper text
 ## Quick start
 
 ```bash
-# sl-engine CLI demo (original vs recovered LTL, technique, equivalence)
+# The front end: an LTL formula or a HOA file in, an equivalent LTL formula out.
+python3 -m aut2ltl 'GFa & GFb'          # (or the `aut2ltl` console script)
+python3 -m aut2ltl model.hoa            # HOA file (auto-detected; --ltl/--hoa force)
+python3 -m aut2ltl 'F(a & X b)' -q | ltlfilt --simplify   # quiet: formula only
+
+# Cite the techniques that may participate (cited order = priority, NO fallback):
+python3 -m aut2ltl 'FG a' --use bls          # pure BLS-from-Muller
+python3 -m aut2ltl 'FG a' --use buchi        # Buchi leaf only -> DECLINES (exit 1)
+python3 -m aut2ltl 'FG a' --use buchi,cobuchi   # ladder: buchi declines, cobuchi wins
+
+# Output: verbose report (technique, DAG/tree sizes, build time) on stderr by
+# default; -q silences it. The formula is a hash-consed DAG — the flat string can
+# explode, so it is gated (--flatten-limit), or dump the DAG itself:
+python3 -m aut2ltl 'GFa & GFb' --dag | dot -Tpng -o dag.png
+
+python3 -m aut2ltl --list-techniques     # the --use vocabulary
+python3 -m aut2ltl --list-options        # every -O key, its default and doc
+python3 -m aut2ltl --help
+
+# Legacy sl-engine demo (original vs recovered LTL, technique, equivalence):
 python3 -m aut2ltl.cli
 ```
+
+Menu for `--use`: producers `acc weak buchi cobuchi bls sl` (ladder rungs, tried
+in cited order) and wrappers `sl_driven decompose` (wrap the ladder). Omit `--use`
+for the best default portfolio. Any declared option is overridable with
+`-O key=value` (e.g. `-O kr.fuse_letters=0`).
 
 ```python
 # Recommended top-level entry: automaton in, LTL formula DAG + technique out.
