@@ -400,3 +400,27 @@ history keeps it. Removed in that sweep: `probe_object_translate`, `probe_native
 is now standard). Dead code swept the same day: unused `_F`/`_G` sugar builders (outputs get
 native F/G via `_simp_f` NNF), and the never-read legacy 7-tuple `_reach_memo` write in
 `reach_strong` (`_reach_memo` itself stays — `fin.py` caches through it).
+
+## sl_driven full-suffix delegation — invariant-strip soundness fix (2026-06-15)
+
+Kinská counting cases 06/07/09/10 reconstructed to unsound under-approximations
+(06: L = (a.!a)*.a^w came out as bare `a`). Root cause: `reconstruct_ltl` strips
+each state's downstream invariant off the automaton
+(`_apply_downstream_invariants`), sound only because the linear walk re-adds it,
+timed (X-wrapped), as it ENTERS the owning state. Full-suffix delegation skips
+that walk; when the init state is itself in a multi-state SCC, `label(init)`
+delegates the whole automaton up front, so a stripped INTERIOR invariant (a
+terminal sink's `G a`) is never re-added and the delegate translates a widened
+language. Not a loop-back/prefix issue (the sink is terminal) and not fixable by
+a single end-AND (the invariant is interior, not global to the suffix, so it has
+a temporal moment lost in the opaque fragment). Fix: keep `pristine_aut`
+(pre-strip) and root `_sub_automaton_from` on it — numbering is preserved, the
+delegate sees the invariant intact. 06/07 -> sound UNVERIFIED_SIZE; 09/10 ->
+correctly NOT_LTL (the bogus `a` had masked the aperiodicity gate). Full kinska
+sweep FALSE 4 -> 0. Tools kept: tests/sl/trace_sl_driven.py,
+tests/sl/init_scc_report.py, tests/kr/diff_hoa.py, tests/kinska_breakdown.py.
+
+Harness, same day: tests/survey.py enforces the per-case budget via
+`timeout --signal=INT --kill-after=1` so a runaway GAP is reaped (no orphan), and
+reports external wall time as build_s for every outcome. tests/kinska_sweep.sh
+sweeps the corpus at a strict 15s/run (prunes its own logs/ from discovery).
