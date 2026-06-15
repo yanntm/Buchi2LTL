@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import spot
 
 from aut2ltl.ltl.metrics import dag_node_count, tree_node_count, dag_metrics
-from aut2ltl.ltl.printers import format_gated
+from aut2ltl.ltl.printers import format_gated, to_dot
 
 _fail = []
 
@@ -43,6 +43,25 @@ check(format_gated(big, limit=-1) == "a", "limit<0 always flattens")
 check(format_gated(f, limit=1).startswith("<unflattened DAG:"),
       "tiny limit -> placeholder")
 check(format_gated(f, limit=10_000) == str(f), "generous limit -> flat string")
+
+# to_dot: pure-boolean subformula collapses to a single node; temporal sharing
+# yields one node with multiple in-edges.
+g = spot.formula("G(a | b) & X(a | b)")  # `a | b` is pure boolean (shared)
+dot = to_dot(g)
+check(dot.startswith("digraph formula {") and dot.rstrip().endswith("}"),
+      "to_dot emits a digraph")
+n_nodes = sum(1 for ln in dot.splitlines() if "[label=" in ln and "->" not in ln)
+n_edges = dot.count("->")
+# nodes: And, G, X, and one collapsed `a | b` leaf = 4; edges G->bool, X->bool,
+# And->G, And->X = 4 (the boolean leaf is shared, one node, two in-edges).
+check(n_nodes == 4, f"pure-boolean 'a|b' collapses to one node (got {n_nodes} nodes)")
+check(n_edges == 4, f"4 edges incl. two into the shared boolean leaf (got {n_edges})")
+check('label="a | b"' in dot or 'label="b | a"' in dot, "boolean leaf labelled by its spot string")
+_bool_nodes = sum(1 for ln in to_dot(spot.formula("a & b")).splitlines()
+                  if "[label=" in ln and "->" not in ln)
+check(_bool_nodes == 1, "pure-boolean formula -> single node")
+print("--- sample to_dot('G(a|b) & X(a|b)') ---")
+print(dot)
 
 print()
 if _fail:
