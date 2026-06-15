@@ -45,7 +45,7 @@ from aut2ltl.kr.reachability_operators import (
     simplify_ltl,
 )
 from aut2ltl.kr.fin import fin_c, _uncond_reach_strict
-from aut2ltl.kr.ltl_builders import _Not, _to_f, _tree_size_f
+from aut2ltl.ltl.builders import _Not, _to_f, _tree_size_f
 from ltl_diff import diff_report, to_aut
 
 # Flatten gate: sub-terms are kept as formula OBJECTS and only stringified

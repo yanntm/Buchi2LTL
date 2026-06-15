@@ -22,7 +22,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.kr.simplify import context_simplify
+from aut2ltl.ltl.simplify import context_simplify
 
 # (input, expected_output or None, note) — expected None = only equivalence
 # + change/no-change is checked.

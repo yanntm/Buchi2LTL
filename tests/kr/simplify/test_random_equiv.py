@@ -24,7 +24,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.kr.simplify import simplify
+from aut2ltl.ltl.simplify import simplify
 
 
 def tree_size(f: "spot.formula") -> int:

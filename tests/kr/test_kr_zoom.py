@@ -155,7 +155,7 @@ def main():
     print("\n=== Calling reconstruct_bls(casc) (with KR_TRACE=1 for steps) ===")
     print("(Traces from reach_strong, fin_c, etc. should appear above if enabled)")
     ltl = reconstruct_bls(casc)   # spot.formula DAG
-    from aut2ltl.kr.ltl_builders import _str_f_gated
+    from aut2ltl.ltl.builders import _str_f_gated
     print("\n=== Recovered LTL:", _str_f_gated(ltl))
 
     # 7. Equiv check (translate straight from the formula object)

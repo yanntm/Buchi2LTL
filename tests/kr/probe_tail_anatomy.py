@@ -33,7 +33,7 @@ import spot
 
 from aut2ltl.kr import decompose_aut
 import aut2ltl.kr.reachability_operators as _ops
-from aut2ltl.kr.ltl_builders import _tree_size_f
+from aut2ltl.ltl.builders import _tree_size_f
 from aut2ltl.kr.reachability import reconstruct_ltl_paper_style
 
 

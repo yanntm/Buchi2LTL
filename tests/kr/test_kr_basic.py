@@ -57,7 +57,7 @@ try:
     print("CHILD_TRANSLATE_OK states=", aut.num_states(), flush=True)
     casc = decompose_aut(aut)
     ltl = rec_clean(casc)   # spot.formula DAG (never implicitly flattened)
-    from aut2ltl.kr.ltl_builders import _str_f_gated
+    from aut2ltl.ltl.builders import _str_f_gated
     print("LTL:", _str_f_gated(ltl))
     print("LEVELS:", casc.num_levels)
     print("ACC_CFGS:", len(casc.accepting_configs()))

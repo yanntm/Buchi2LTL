@@ -20,7 +20,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.kr.simplify import factor_simplify, simplify
+from aut2ltl.ltl.simplify import factor_simplify, simplify
 
 # (input, expected or None, use_pipeline, note)
 CASES = [

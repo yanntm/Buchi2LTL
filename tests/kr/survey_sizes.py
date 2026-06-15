@@ -64,7 +64,7 @@ import spot
 from aut2ltl.kr import decompose_aut, hierarchy_class, CascadeHolder
 from aut2ltl.language import Language
 from aut2ltl.portfolio import reconstruct_decomposed
-from aut2ltl.kr.ltl_builders import _tree_size_f
+from aut2ltl.ltl.builders import _tree_size_f
 
 # Default path is the GOTO decompose entry; KR_SIZE_PATH=monolithic switches
 # to per-cascade hierarchy_class for A/B.

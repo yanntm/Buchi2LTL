@@ -74,7 +74,7 @@ class SlDriven:
         # Simplify on equal footing with the rest of the pipeline (sl skips Spot's
         # simplifier; the spliced delegate labels are already simplified).
         try:
-            from aut2ltl.kr.ltl_builders import _simp_f
+            from aut2ltl.ltl.builders import _simp_f
             cand = _simp_f(cand)
         except Exception:
             pass

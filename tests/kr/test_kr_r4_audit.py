@@ -252,7 +252,7 @@ def check_canary_roundtrip():
         aut = f.translate()
         holder = CascadeHolder(decompose_aut(aut))
         ltl = hierarchy_class(holder).formula   # spot.formula DAG
-        from aut2ltl.kr.ltl_builders import _short_f
+        from aut2ltl.ltl.builders import _short_f
         print("  recovered:", _short_f(ltl, 100))
         orig_b = f.translate("Buchi")
         rec_b = ltl.translate("Buchi")

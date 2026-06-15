@@ -27,7 +27,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 from aut2ltl.kr import decompose_aut, reconstruct_ltl_paper_style
-from aut2ltl.kr.ltl_builders import _tree_size_f
+from aut2ltl.ltl.builders import _tree_size_f
 
 TREE_CAP = 50_000_000
 EQUIV_TIMEOUT = int(os.environ.get("KR_SPOT_EQUIV_TIMEOUT", "10"))

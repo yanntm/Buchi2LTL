@@ -32,7 +32,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.kr.ltl_builders import _simp_f, _get_tl_simp
+from aut2ltl.ltl.builders import _simp_f, _get_tl_simp
 
 
 def part_a_simplifier_rules():

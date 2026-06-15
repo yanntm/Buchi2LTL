@@ -139,7 +139,7 @@ try:
     # reconstruct returns the hash-consed formula DAG; flatten ONLY under the
     # tree-size gate (the flat string is the double-exp artifact — an oversized
     # case reports its DAG/tree sizes instead and equiv shows UNVERIFIED_SIZE).
-    from aut2ltl.kr.ltl_builders import _tree_size_f, _str_f
+    from aut2ltl.ltl.builders import _tree_size_f, _str_f
     if USE_DECOMP:
         _rr = reconstruct_decomposed(Language.of(aut))
         rec_f = _rr.formula

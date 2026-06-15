@@ -1,10 +1,11 @@
 """
-ltl_builders.py — LTL guard helpers, simplification, and native spot.formula builders.
+ltl/builders.py — LTL guard helpers, simplification, and native spot.formula builders.
 
-Shared leaf utilities for the KR construction: valuation→guard strings,
-Spot-based simplification/normalization, and small wrappers over spot.formula
-for native DAG construction (sharing, auto simplify, hashable cache keys).
-No dependencies on other kr/ modules.
+Generic, engine-agnostic leaf utilities (the `aut2ltl.ltl` floor package):
+valuation→guard strings, Spot-based simplification/normalization (the own-rules
+pass in `aut2ltl.ltl.simplify`), and small wrappers over spot.formula for native
+DAG construction (sharing, auto simplify, hashable cache keys). Imports no engine
+(`kr`/`sl`) — only `aut2ltl.ltl.simplify`, `spot`, and `buddy`.
 """
 
 from __future__ import annotations
@@ -152,7 +153,7 @@ def _own_simp(f: "spot.formula") -> "spot.formula":
         return f
     try:
         global _guard_bdd_dict, _guard_bdd_owner, _own_dict_shared
-        from aut2ltl.kr import simplify as _krs
+        from aut2ltl.ltl import simplify as _krs
         if not _own_dict_shared:
             # one bdd_dict per process: a second dict next to the fusion
             # one corrupted the heap in equiv children (F(a&Xb) crash)

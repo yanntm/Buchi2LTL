@@ -15,7 +15,7 @@ only in traces (guarded) or by callers via _str_f/simplify_ltl.
 from __future__ import annotations
 from typing import Optional, Tuple
 
-from aut2ltl.kr.ltl_builders import _And, _Or, _Not, _X, _ff, _tt, _letters_to_f, _simp_f, _short_f, _fuse_or
+from aut2ltl.ltl.builders import _And, _Or, _Not, _X, _ff, _tt, _letters_to_f, _simp_f, _short_f, _fuse_or
 import aut2ltl.kr.reachability_operators as _ops
 from aut2ltl.kr.reachability_operators import reach_strong, _trace, TRACE_ON
 

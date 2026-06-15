@@ -40,7 +40,7 @@ sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
 from aut2ltl.kr import decompose_aut, reconstruct_bls
 from aut2ltl.kr.buchi import is_buchi_cascade, buchi
-from aut2ltl.kr.ltl_builders import _tree_size_f
+from aut2ltl.ltl.builders import _tree_size_f
 
 def sizes(f):
     seen, kinds, st = set(), {{}}, [f]

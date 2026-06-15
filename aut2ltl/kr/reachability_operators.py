@@ -71,7 +71,7 @@ def _trace(msg: str) -> None:
 # kr/ltl_builders.py (no kr deps). Re-imported here under their original names;
 # letters_to_prop / make_guard / simplify_ltl / normalize_ltl stay importable
 # from this module for compat.
-from aut2ltl.kr.ltl_builders import (
+from aut2ltl.ltl.builders import (
     letters_to_prop,
     make_guard,
     simplify_ltl,

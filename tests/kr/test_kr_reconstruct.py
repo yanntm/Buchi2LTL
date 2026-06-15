@@ -99,7 +99,7 @@ try:
 
     # formula DAG out; flatten only under the tree-size gate (see survey tool)
     import os as _os
-    from aut2ltl.kr.ltl_builders import _tree_size_f, _str_f
+    from aut2ltl.ltl.builders import _tree_size_f, _str_f
     rec_f = reconstruct_bls(casc)
     _lim = int(_os.environ.get("KR_FLATTEN_TREE_LIMIT", "5000000"))
     info["tree_nodes"] = _tree_size_f(rec_f)

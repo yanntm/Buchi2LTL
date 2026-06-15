@@ -37,9 +37,10 @@ Translation is a family of **`CascadeTranslator` members** composed into a chain
     formulas and `Fin(C)` (Lemma 7): the mutually-recursive core.
   - `muller.py` — `assemble_muller_dnf`: the general Δ₂ Muller-DNF over the good
     config sets. `Bls` wraps it.
-  - `ltl_builders.py` — hash-consed formula builders, simplify hook, and the
-    only place that serializes a DAG to text (`_str_f`).
-  - `simplify/` — own simplify/fold passes (context, now-eval, factoring, folds).
+  - LTL utilities moved OUT of kr to the floor package `aut2ltl/ltl/` (shared by
+    kr/sl/portfolio): `ltl/builders.py` (hash-consed formula builders, the simplify
+    hook, DAG→text `_str_f`), `ltl/simplify/` (own simplify/fold passes), and
+    `ltl/bdd_utils.py` (buddy-BDD letter classification, used by `kr/extract.py`).
 
 ## Pipeline
 

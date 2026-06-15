@@ -19,8 +19,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.kr.simplify import simplify
-from aut2ltl.kr.ltl_builders import _simp_f
+from aut2ltl.ltl.simplify import simplify
+from aut2ltl.ltl.builders import _simp_f
 
 
 def main() -> int:

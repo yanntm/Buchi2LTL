@@ -25,7 +25,7 @@ import itertools
 import spot
 import buddy
 
-from .bdd_utils import get_ap_bdd_vars, build_point_bdd as _build_point_bdd
+from aut2ltl.ltl.bdd_utils import get_ap_bdd_vars, build_point_bdd as _build_point_bdd
 
 
 class ExtractionError(RuntimeError):

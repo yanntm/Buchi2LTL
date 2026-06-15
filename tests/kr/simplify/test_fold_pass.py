@@ -20,8 +20,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.kr.simplify import simplify
-from aut2ltl.kr.simplify.fold_pass import fold_simplify
+from aut2ltl.ltl.simplify import simplify
+from aut2ltl.ltl.simplify.fold_pass import fold_simplify
 
 # (input, expected or None, use_pipeline, note)
 CASES = [

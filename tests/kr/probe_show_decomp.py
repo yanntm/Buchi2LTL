@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(r"{root}").resolve()))
 import spot
 from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
-from aut2ltl.kr.ltl_builders import _str_f, _tree_size_f
+from aut2ltl.ltl.builders import _str_f, _tree_size_f
 
 def temporals(f):
     seen, st, t = set(), [f], 0

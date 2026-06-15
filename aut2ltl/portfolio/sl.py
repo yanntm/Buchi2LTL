@@ -83,7 +83,7 @@ class Sl:
         # padded; route it through `_simp_f` so it is on equal footing with the
         # cascade (language-preserving).
         try:
-            from aut2ltl.kr.ltl_builders import _simp_f
+            from aut2ltl.ltl.builders import _simp_f
             cand = _simp_f(cand)
         except Exception:
             pass

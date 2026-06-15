@@ -61,7 +61,7 @@ from aut2ltl.kr import decompose_aut
 from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed, _to_split_form, split_report
 from aut2ltl.kr.cascade import build_pruned_config_aut, reachable_configs
 from aut2ltl.kr.fin import fin_c
-from aut2ltl.kr.ltl_builders import _And, _simp_f, _tree_size_f
+from aut2ltl.ltl.builders import _And, _simp_f, _tree_size_f
 
 def sizes(f):
     seen, kinds, st = set(), {{}}, [f]

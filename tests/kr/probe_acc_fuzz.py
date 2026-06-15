@@ -67,7 +67,7 @@ sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
 from aut2ltl.portfolio.decompose_recombine import reconstruct_decomposed
 from aut2ltl.kr.acc import acc
-from aut2ltl.kr.ltl_builders import _tt
+from aut2ltl.ltl.builders import _tt
 
 fs = {fs!r}
 info = {{"formula": fs}}

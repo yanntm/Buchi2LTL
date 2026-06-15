@@ -18,7 +18,7 @@ import os
 
 import aut2ltl.kr.reachability_operators as _ops
 from .fin import fin_c
-from .ltl_builders import _And, _Or, _Not, _tt, _ff, _simp_f, _short_f
+from aut2ltl.ltl.builders import _And, _Or, _Not, _tt, _ff, _simp_f, _short_f
 from .cascade import CascadeHolder, good_muller_sets
 
 
