@@ -31,7 +31,7 @@ from aut2ltl.language import Language, LANGUAGE_OPTIONS
 from aut2ltl.portfolio import PORTFOLIO_OPTIONS, build_portfolio, TECHNIQUES
 from aut2ltl.kr.options import KR_OPTIONS, FLATTEN_TREE_LIMIT
 from aut2ltl.ltl.metrics import dag_metrics
-from aut2ltl.ltl.printers import format_gated
+from aut2ltl.ltl.printers import format_gated, to_dot
 
 # The full declared option contract (every -O key, every --list-options row).
 ALL_SPECS: List[OptionSpec] = list(PORTFOLIO_OPTIONS) + list(KR_OPTIONS) + list(LANGUAGE_OPTIONS)
@@ -65,6 +65,7 @@ def _epilog() -> str:
         "  python3 -m aut2ltl 'GFa & GFb'\n"
         "  python3 -m aut2ltl model.hoa --use bls -O kr.fuse_letters=0\n"
         "  python3 -m aut2ltl 'F(a & X b)' -q | ltlfilt --simplify\n"
+        "  python3 -m aut2ltl 'GFa & GFb' --dag | dot -Tpng -o dag.png\n"
         "  python3 -m aut2ltl --list-options\n"
     )
 
@@ -98,6 +99,10 @@ def build_parser() -> argparse.ArgumentParser:
                             "(over it: a placeholder); sugar for -O kr.flatten_tree_limit=N")
 
     g_out = p.add_argument_group("output")
+    g_out.add_argument("--dag", action="store_true",
+                       help="emit the formula as a graphviz dot DAG instead of LTL text "
+                            "(O(distinct nodes); pure-boolean subformulas collapse to one "
+                            "node) — does not explode where the flat string would")
     g_out.add_argument("-q", "--quiet", action="store_true",
                        help="print only the formula on stdout (silence the stderr report)")
     g_out.add_argument("-o", "--output", metavar="FILE",
@@ -193,7 +198,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 1
 
     limit = options.get(FLATTEN_TREE_LIMIT)
-    text = format_gated(res.formula, limit)
+    text = to_dot(res.formula) if args.dag else format_gated(res.formula, limit)
     print(text)
 
     if args.output:
