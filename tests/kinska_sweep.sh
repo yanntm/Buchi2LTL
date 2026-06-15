@@ -33,8 +33,11 @@ OUTDIR="${1:-$CORPUS/logs/reference}"
 ROOTS=("$@"); [ "${#ROOTS[@]}" -eq 0 ] && ROOTS=("$CORPUS")
 
 # Discover every regular input file under the requested roots (HOA automata and
-# LTL formula lists alike — survey.py tells them apart by content).
-mapfile -t FILES < <(find "${ROOTS[@]}" -type f -name '*.txt' | sort)
+# LTL formula lists alike — survey.py tells them apart by content). Prune the
+# logs/ subtree: the output dir lives inside the corpus, so without this the
+# sweep re-ingests its own kinska.txt/SUMMARY.txt and feeds them to the tool
+# (spot then chokes with "ignoring trailing garbage").
+mapfile -t FILES < <(find "${ROOTS[@]}" -type f -name '*.txt' -not -path '*/logs/*' | sort)
 if [ "${#FILES[@]}" -eq 0 ]; then
   echo "no .txt inputs under: ${ROOTS[*]}" >&2
   exit 1
