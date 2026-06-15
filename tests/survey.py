@@ -80,18 +80,31 @@ import spot
 p = json.load(sys.stdin)
 out = {}
 orig = p["orig"]
-try:
-    fo = spot.formula(orig)
-    out["mp"] = spot.mp_class(fo)            # B/S/G/O/R/P/T
-except Exception as e:
-    out["mp"] = "?"
-    out["mp_err"] = str(e)[:90]
+is_hoa = p.get("is_hoa", False)
+if is_hoa:
+    # HOA-file original: the language is the automaton itself, so there is no
+    # source formula to classify with mp_class. Load it once for equivalence.
+    try:
+        orig_aut = spot.automaton(orig)
+        out["mp"] = "?"
+    except Exception as e:
+        orig_aut = None
+        out["mp"] = "?"
+        out["mp_err"] = str(e)[:90]
+else:
+    try:
+        fo = spot.formula(orig)
+        out["mp"] = spot.mp_class(fo)        # B/S/G/O/R/P/T
+    except Exception as e:
+        out["mp"] = "?"
+        out["mp_err"] = str(e)[:90]
 rec = p.get("rec")
 if rec is None:
     out["equiv"] = None                      # nothing to verify (gated off / build failed)
 else:
     try:
-        orig_aut = spot.formula(orig).translate("Buchi")
+        if not is_hoa:
+            orig_aut = spot.formula(orig).translate("Buchi")
         other = spot.formula(rec)
         if rec not in ("true", "false"):
             other = other.translate("Buchi")
@@ -108,6 +121,22 @@ else:
             out["equiv"] = "SPOT_ERR:" + msg[:80]
 print("VERIFY_JSON:" + json.dumps(out))
 '''
+
+
+def _is_hoa(s: str) -> bool:
+    """True iff `s` is a path to an existing HOA automaton file (first non-blank
+    line `HOA:`). Such inputs are fed whole to `--hoa`; an ordinary text file is
+    still read as a one-formula-per-line list (see `_load_inputs`)."""
+    p = Path(s)
+    if not p.is_file():
+        return False
+    try:
+        for line in p.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                return line.lstrip().startswith("HOA:")
+    except OSError:
+        return False
+    return False
 
 
 def _parse_report(stderr: str) -> Dict[str, object]:
@@ -142,7 +171,10 @@ def run_build(formula: str, use: Optional[str] = None,
     `<unflattened ...>` placeholder). BUILD_TIMEOUT is a construction-budget
     overrun — flattening is size-gated in the tool, so the wall time is the
     cascade build, not rendering."""
-    cmd = [sys.executable, "-m", "aut2ltl", formula, "--ltl"]
+    if _is_hoa(formula):
+        cmd = [sys.executable, "-m", "aut2ltl", "--hoa", formula]
+    else:
+        cmd = [sys.executable, "-m", "aut2ltl", formula, "--ltl"]
     if use:
         cmd += ["--use", use]
     try:
@@ -161,6 +193,12 @@ def run_build(formula: str, use: Optional[str] = None,
     if proc.returncode == 1 and "DECLINED" in stderr:
         info["status"] = "DECLINED"
         return info
+    # Exit 3 is the NOT_LTL-family verdict (the language is (probably) not
+    # LTL-definable — non-aperiodic transition monoid). Not a crash, not an answer.
+    if proc.returncode == 3 and "NOT_LTL" in stderr:
+        info["status"] = ("PROBABLY_NOT_LTL" if "PROBABLY_NOT_LTL" in stderr
+                          else "NOT_LTL")
+        return info
     if proc.returncode != 0 or not stdout:
         msg = (stderr or proc.stdout or "no output").strip().splitlines()
         info["status"] = "CRASH:" + (msg[-1][:90] if msg else "no output")
@@ -177,7 +215,7 @@ def run_verify(orig: str, rec: Optional[str],
     try:
         proc = subprocess.run(
             [sys.executable, "-c", _VERIFY_CHILD],
-            input=json.dumps({"orig": orig, "rec": rec}),
+            input=json.dumps({"orig": orig, "rec": rec, "is_hoa": _is_hoa(orig)}),
             capture_output=True, text=True, timeout=timeout, cwd=PROJECT_ROOT,
         )
     except subprocess.TimeoutExpired:
@@ -190,8 +228,11 @@ def run_verify(orig: str, rec: Optional[str],
 
 def survey_one(formula: str, use: Optional[str] = None) -> Dict[str, object]:
     """Full per-formula record: BUILD (front end) then VERIFY (spot oracle)."""
+    # HOA inputs are file paths; record just the file name in the report/CSV
+    # (the full path stays in `formula` for build/verify below).
+    display = Path(formula).name if _is_hoa(formula) else formula
     rec_row: Dict[str, object] = {
-        "formula": formula,
+        "formula": display,
         "class": KLASS_OF.get(formula, "?"),
         "mp": "?",
         "technique": "-",
@@ -239,7 +280,9 @@ def _load_inputs(args: List[str]) -> List[str]:
     formulas: List[str] = []
     for a in args:
         p = Path(a)
-        if p.is_file():
+        if _is_hoa(a):
+            formulas.append(a)               # a HOA file is ONE input, fed to --hoa
+        elif p.is_file():
             for line in p.read_text(encoding="utf-8").splitlines():
                 line = line.split("#", 1)[0].strip()
                 if line:
@@ -266,6 +309,8 @@ def _category(equiv: str) -> str:
         return "unverified"
     if equiv == "DECLINED":
         return "declined"
+    if equiv in ("NOT_LTL", "PROBABLY_NOT_LTL"):
+        return "not_ltl"
     if equiv.startswith("SPOT_ERR"):
         return "spot_err"
     if equiv.startswith("BUILD_TIMEOUT"):
@@ -301,7 +346,8 @@ def _report(rows: List[Dict[str, object]], use: Optional[str]) -> List[str]:
         f"answers {len(answers)}/{len(rows)}: validated {cat.get('validated', 0)}, "
         f"spot_timeout {cat.get('spot_timeout', 0)}, unverified {cat.get('unverified', 0)}, "
         f"spot_err {cat.get('spot_err', 0)}, false {cat.get('false', 0)}",
-        f"declined {cat.get('declined', 0)}, build_timeout {cat.get('build_timeout', 0)}, "
+        f"declined {cat.get('declined', 0)}, not_ltl {cat.get('not_ltl', 0)}, "
+        f"build_timeout {cat.get('build_timeout', 0)}, "
         f"build_crash {cat.get('build_crash', 0)}",
         f"totals over answers: DAG={dag} temporals={temp} build={build:.3f}s",
         verdict,
