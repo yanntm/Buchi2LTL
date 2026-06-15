@@ -12,10 +12,9 @@ accepts -> true.
 
 from __future__ import annotations
 
-import aut2ltl.kr.reachability_operators as _ops
 from aut2ltl.kr.fin import fin_c
-from aut2ltl.kr.ltl_builders import _And, _tt, _simp_f, _tree_size_f
-from aut2ltl.kr.cascade import Cascade
+from aut2ltl.kr.ltl_builders import _And, _tt, _simp_f
+from aut2ltl.kr.cascade import Cascade, CascadeHolder
 from aut2ltl.contract import LTLFormulaResult, CascadeTranslator
 
 
@@ -37,16 +36,14 @@ class CoBuchi:
 
     name = "cobuchi"
 
-    def __call__(self, casc: Cascade) -> LTLFormulaResult:
+    def __call__(self, casc: CascadeHolder) -> LTLFormulaResult:
         if not is_cobuchi_cascade(casc):
             return LTLFormulaResult.decline()
-        _ops.reset_build_state(casc)
         fin_cfgs = sorted(casc.cobuchi_finite_configs())
         if not fin_cfgs:
             res = _tt()    # coBüchi with no marked config -> all runs accept
         else:
             res = _simp_f(_And(*[fin_c(c, casc) for c in fin_cfgs]))
-        _ops.PAPER_MAX_LTL_SIZE = _tree_size_f(res)
         return LTLFormulaResult(formula=res, technique={self.name})
 
 
