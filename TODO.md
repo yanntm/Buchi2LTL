@@ -229,8 +229,21 @@ Deferred passes (own iterations, agreed):
 
 ## Other
 
-- **Real CLI** over `reconstruct_decomposed` (current `cli.py` is an sl-only
-  stub). See `STATUS.md` "CLI".
+- **Real CLI / main** over the portfolio (current `cli.py` is an sl-only stub).
+  THE MAIN CAMPAIGN (2026-06-15):
+  1. ✅ `portfolio/build.py` — `build_portfolio(options, techniques=None)`:
+     `None` ⇒ the best default; a cited set ⇒ a `first_success` ladder in cited
+     order (cited order = priority, NO implicit floor) + the `sl_driven`/`decompose`
+     wrappers. Menu: `acc/weak/buchi/cobuchi/bls/sl` (producers) + `sl_driven`/
+     `decompose` (wrappers). `--use bls` = pure BLS; `--use buchi` DECLINES off
+     the Büchi class. Smoke: `tests/test_build_portfolio.py`.
+  2. ⏳ `portfolio/__init__.py` — `reconstruct_decomposed = build_portfolio(_options)`;
+     export `build_portfolio` (behavior-preserving).
+  3. ⏳ `aut2ltl/__main__.py` — `main(argv)`: HOA/LTL input, `--use` techniques,
+     `-O key=value` + `--list-options`, verbose-by-default report (formula text w/
+     flatten limit, techniques, DAG+tree sizes, build time), `-q`, `-o FILE`.
+  4. ⏳ `pyproject.toml` — `[project.scripts] aut2ltl = "aut2ltl.__main__:main"`.
+  5. ⏳ STATUS/TODO/README.
 - Engine work items: see `aut2ltl/kr/TODO.md`.
 - The per-file LOC inventory that used to live here is **stale** after this
   session (cascade→package, gap_bridge→gap/, acceptance_dispatch split into
