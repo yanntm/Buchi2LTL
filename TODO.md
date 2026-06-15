@@ -123,8 +123,17 @@ each commit that touches a translator.
 ### Deferred (separate iterations)
 - **Wire call sites**: thread `Options` into Translator construction, repoint each
   `os.environ.get(...)` → `options.get(SPEC)`, ONE package at a time, survey-gated.
-- **Caches compartment**: fold `reachability_operators` globals (memos, counters,
-  `reset_build_state`) into the cache bucket; fresh-on-clone; removes the resets.
+- ✅ **Caches compartment** (DONE 2026-06-15): the `reachability_operators` globals
+  (the reach/helper memos, the `id(casc)` registry, the `PAPER_*` counters) and
+  `reset_build_state` are GONE — folded onto a per-build `CascadeHolder`
+  (`kr/cascade/holder.py`): a pure `Cascade` wrapped with `reach_memo`/`helper_memo`/
+  `uncond_memo` + `reach_calls`/`fin_calls`, `__getattr__`-delegating to the cascade.
+  The holder is created once per build in `aut2cas` and threaded as the
+  CascadeTranslator input (the floor forward-ref now names `CascadeHolder`). A fresh
+  holder IS the reset, which also fixed the `id(casc)`-reuse hazard and the
+  acc/bls-don't-reset inconsistency. `PAPER_MAX_LTL_SIZE` (dead) deleted; the runaway
+  guard reads `holder.reach_calls`. No module mirror for the metric — callers that
+  want it create/hold the holder (gates do). Gates green: r4 CLEAN, MP survey 70/70.
 - **Infra compartment**: `bdd_dict`/buddy + DAG unifier as shared refs.
 
 ## Architecture refactor — DONE (2026-06-14)
@@ -191,18 +200,21 @@ Deferred passes (own iterations, agreed):
   `best_of([...], key=cost)` sibling of `first_success` + a `cost`/size field on
   `LTLFormulaResult` (the dataclass is pre-shaped for it). Until then, chain
   order is the only size heuristic.
-- **flags/options/counters cleanup** — the module-global build state in
-  `reachability_operators.py` (counters + `reset_build_state`); load-bearing under
-  composition (Decompose recursing while SlDriven delegates). See Known debt.
-- **`KR_DISPATCH_*` / `KR_GATE_*` env knobs** — left verbatim through the refactor;
-  fold into constructor args once the above lands.
-- **broken probes + secondary tests** (import the retired symbols; NOT gates):
-  `tests/kr/probe_*.py`, `fuzz_gate_decompose.py`, `test_kr_{reconstruct,zoom,basic}.py`,
-  `measure_formula_dag.py`. Patch or prune when next needed.
+- ✅ **counters/caches cleanup** (DONE 2026-06-15) — the module-global build state in
+  `reachability_operators.py` (memos + counters + `reset_build_state`) moved onto the
+  per-build `CascadeHolder`. See the Configurability "Caches compartment" entry.
+- ✅ **`KR_DISPATCH_*` / `KR_GATE_*` env knobs** (DONE 2026-06-15) — now read from an
+  injected `Options` at construction (Bucket 1); the env vars are the seeding bridge.
+- **broken probes + secondary tests** (NOT gates) — import retired symbols (`PAPER_*`,
+  `reset_build_state`) or call the reach operators with a raw `Cascade` (they now take
+  a `CascadeHolder`): `tests/kr/probe_*.py`, `fuzz_gate_decompose.py`,
+  `test_kr_{reconstruct,zoom,basic}.py`, `measure_formula_dag.py`. Patch (wrap in
+  `CascadeHolder`, read counts off it) or prune when next needed.
 
 ### Known debt (flagged by user, deferred)
-- **Module-global mutable state** in `reachability_operators.py` (counters +
-  memos; `reset_build_state` is a band-aid) — bad design; move to instance/context.
+- ✅ **Module-global mutable state** in `reachability_operators.py` (counters +
+  memos; `reset_build_state`) — RESOLVED 2026-06-15: moved onto the per-build
+  `CascadeHolder` (see Configurability "Caches compartment").
 - `kr/README.old` to delete once the new `kr/README.md` is settled.
 
 ### Gates & discipline (do not skip)
