@@ -1,9 +1,0 @@
-=== coBüchi dispatch fact-finding, UNDER decomposition (subproc isolated, 15s/case) ===
-
-  formula              split    det_acc          det.co casc_acc         gate  equiv   DAG/tree/temp       
-  --------------------------------------------------------------------------------------------------------------
-  FGa                  none(1)  Fin(0)           T      Inf(0) | Fin(1)  T     True    8/16/3              
-  F(a & G b)           none(1)  Fin(0)           T      Inf(0) | Fin(1)  T     True    19/48/4             
-  FG(a | b)            none(1)  Fin(0)           T      Inf(0) | Fin(1)  T     True    26/136/4            
-  FGa | FGb            none(1)  Fin(0)           T      Inf(0) | Fin(1)  T     SPOTto  15281/323160872044005558/2779
-  F G a | F G b | F G c ERROR: BUILD TIMEOUT >15s (construction blew budget)
