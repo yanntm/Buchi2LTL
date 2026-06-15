@@ -11,6 +11,7 @@ Re-exported here so callers use `aut2ltl.kr.cascade` as one module.
 """
 
 from .model import Cascade, LevelInfo, Config, make_trivial_cascade
+from .holder import CascadeHolder
 from .config_graph import (
     build_pruned_config_aut,
     reachable_configs,
@@ -19,6 +20,7 @@ from .config_graph import (
 
 __all__ = [
     "Cascade",
+    "CascadeHolder",
     "LevelInfo",
     "Config",
     "make_trivial_cascade",
