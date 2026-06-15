@@ -109,6 +109,34 @@ def _find_fold_or(kids: List["spot.formula"]) -> Optional[Tuple[int, int, "spot.
                     rest = spot.formula.And([t for t in subs if t != s])
                     if rest == u[0]:
                         return i, j, u
+    # ----------------------------------------------------------------------
+    # INDEPENDENT RULE (logically unrelated to the X-unrolling folds above;
+    # shares only this finder's (i, j, rep) return protocol). The weak-until
+    # law  f W g ≡ G f ∨ (f U g), with the construction's ¬g-strengthened G
+    # body, which is sound because  G(f ∧ ¬g) ∨ (f U g) ≡ G f ∨ (f U g):
+    #     G f         ∨ (f U g)   → f W g
+    #     G(f ∧ ¬g)   ∨ (f U g)   → f W g
+    # Trades two temporals (G, U) for one (W) — an acc-set census win like the
+    # rules above. Match on the U disjunct's arms; the G body must be exactly
+    # f, or f with a single ¬g conjunct added (any other extra conjunct makes
+    # G(body) strictly stronger than G f, so the fold would be UNSOUND).
+    for j, u in enumerate(kids):
+        if not u._is(spot.op_U):
+            continue
+        f, g = u[0], u[1]
+        for i, k in enumerate(kids):
+            if i == j or not k._is(spot.op_G):
+                continue
+            body = k[0]
+            if body == f:
+                return i, j, spot.formula.W(f, g)
+            if body._is(spot.op_And):
+                conj = list(body)
+                for s in conj:
+                    if _is_neg(s, g) and \
+                            spot.formula.And([t for t in conj if t != s]) == f:
+                        return i, j, spot.formula.W(f, g)
+    # ----------------------------------------------------------------------
     return None
 
 
@@ -144,6 +172,32 @@ def _find_fold_and(kids: List["spot.formula"]) -> Optional[Tuple[int, int, "spot
                     rest = spot.formula.Or([t for t in subs if t != s])
                     if rest == r[0]:
                         return i, j, r
+    # ----------------------------------------------------------------------
+    # INDEPENDENT RULE — the dual of the W-fold in _find_fold_or: the strong
+    # release law  f M g ≡ F f ∧ (f R g), with the ¬g-weakened F body, sound
+    # because  F(f ∨ ¬g) ∧ (f R g) ≡ F f ∧ (f R g):
+    #     F f         ∧ (f R g)   → f M g
+    #     F(f ∨ ¬g)   ∧ (f R g)   → f M g
+    # Match on the R conjunct's arms; the F body must be exactly f, or f with
+    # a single ¬g disjunct added (any other extra disjunct makes F(body)
+    # strictly weaker than F f, so the fold would be UNSOUND).
+    for j, r in enumerate(kids):
+        if not r._is(spot.op_R):
+            continue
+        f, g = r[0], r[1]
+        for i, k in enumerate(kids):
+            if i == j or not k._is(spot.op_F):
+                continue
+            body = k[0]
+            if body == f:
+                return i, j, spot.formula.M(f, g)
+            if body._is(spot.op_Or):
+                disj = list(body)
+                for s in disj:
+                    if _is_neg(s, g) and \
+                            spot.formula.Or([t for t in disj if t != s]) == f:
+                        return i, j, spot.formula.M(f, g)
+    # ----------------------------------------------------------------------
     return None
 
 

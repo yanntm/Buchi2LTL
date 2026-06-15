@@ -72,6 +72,16 @@ Later additions (same module):
   propositional fragments only (one-way, sound). Found by the census
   class probe: these paddings were the dominant language-equal variant
   pairs in real outputs.
+- **W/M expansion fold** (in `_find_fold_or` / `_find_fold_and`, flagged
+  there as an independent rule): the weak-until / strong-release laws
+  `f W g ≡ Gf ∨ (f U g)` and `f M g ≡ Ff ∧ (f R g)`, accepting the
+  construction's ¬g-strengthened modal body — `G(f ∧ ¬g) ∨ (f U g) → f W g`
+  (sound since `G(f∧¬g) ∨ (fUg) ≡ Gf ∨ (fUg)`), dual `F(f ∨ ¬g) ∧ (f R g) →
+  f M g`. The body must be exactly `f` or `f` plus a single ¬g conjunct (any
+  other extra conjunct makes `G(body)` strictly stronger — unsound). Trades
+  two temporals (G,U) for one (W), so it composes with the cofactoring rule
+  in the same bottom-up walk: e.g. `G(!b & h) | ((!b & h) U b)` →cofactor→
+  `G(!b & h) | (h U b)` →W-fold→ `h W b` (the source).
 - **Boolean left-arm cofactoring** (`_arm_cofactor`): for a binary
   temporal with BOTH arms purely propositional, the left arm is evaluated
   only on the positions where the right arm has not yet fired, so it can be

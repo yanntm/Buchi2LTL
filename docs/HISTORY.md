@@ -447,3 +447,29 @@ Tests: new `tests/kr/simplify/test_arm_cofactor.py` (10 shape+equiv cases,
 SUCCESS); fold/now/factor/context suites CLEAN; `test_random_equiv.py`
 500-formula fuzz ALL EQUIVALENT (28% changed); `test_kr_r4_audit.py` CLEAN;
 `tests/survey.py` SUCCESS 35/35.
+
+## 2026-06-16 — simplify rule 4: W/M expansion fold (DONE)
+
+New independent fold in `fold_pass` (`_find_fold_or` / `_find_fold_and`,
+commented there as logically separate from the X-unrolling folds): the
+weak-until / strong-release laws `f W g ≡ Gf ∨ (f U g)` and
+`f M g ≡ Ff ∧ (f R g)`, accepting the construction's ¬g-strengthened modal
+body —
+    G f         ∨ (f U g)   → f W g
+    G(f ∧ ¬g)   ∨ (f U g)   → f W g      (sound: G(f∧¬g)∨(fUg) ≡ Gf∨(fUg))
+and the duals to `f M g`. Body must be exactly f or f + a single ¬g
+conjunct/disjunct; any other extra term makes G(body)/F(body) strictly
+stronger/weaker (unsound, guarded + regression-tested). Trades two temporals
+(G,U) for one (W) — an acc-set census win.
+
+Chosen over a standalone pass (discussed): it IS a subcase of W-folding, and
+inlining lets it compose with `_arm_cofactor` in the SAME bottom-up walk
+(the U arm is cofactored before its parent Or is folded). So
+`G(!b & h) | ((!b & h) U b)` → (cofactor) `G(!b & h) | (h U b)` →
+(W-fold) `h W b`, recovering the source — the W/R analogue of the M-case
+the cofactor rule already recovered.
+
+Tests: new `tests/kr/simplify/test_wm_fold.py` (10 cases incl. 2 must-not-fire
+guards, SUCCESS); fold/now/factor/context/arm_cofactor suites CLEAN;
+`test_random_equiv` 500-formula fuzz ALL EQUIVALENT; `test_kr_r4_audit` CLEAN;
+`tests/survey.py` SUCCESS 35/35.
