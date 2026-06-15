@@ -184,6 +184,7 @@ def run_build(formula: str, use: Optional[str] = None,
     # hanging: it SIGKILLs the python child directly, which WOULD orphan GAP, so
     # we give it slack and let the catchable-SIGINT path above do the reaping.
     cmd = ["timeout", "--signal=INT", "--kill-after=1", str(timeout), *tool]
+    t0 = time.monotonic()
     try:
         proc = subprocess.run(
             cmd,
@@ -191,13 +192,18 @@ def run_build(formula: str, use: Optional[str] = None,
         )
     except subprocess.TimeoutExpired:
         return {"status": f"BUILD_TIMEOUT>{timeout}s"}
+    wall_s = time.monotonic() - t0
     # `timeout` reports 124 (SIGINT-killed at the budget) or 137 (SIGKILL after
     # the grace) — a construction overrun, not a tool crash.
     if proc.returncode in (124, 137):
-        return {"status": f"BUILD_TIMEOUT>{timeout}s"}
+        return {"status": f"BUILD_TIMEOUT>{timeout}s", "build_s": f"{wall_s:.3f}"}
     stdout = (proc.stdout or "").strip()
     stderr = proc.stderr or ""
     info = _parse_report(stderr)
+    # External wall time is the fair, uniform measure across ALL outcomes (the
+    # tool's own "build time" line covers only the cascade build, and the NOT_LTL
+    # / decline paths print none). Override the parsed value with what we timed.
+    info["build_s"] = f"{wall_s:.3f}"
     # A clean DECLINE is exit 1 WITH the tool's decline message; any other exit-1
     # (or other nonzero, or empty stdout) is the tool crashing — a real error, not
     # a decline (a DAG was NOT produced).
