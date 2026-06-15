@@ -13,6 +13,8 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
+from ...proc import register_child, unregister_child, kill_child_group
+
 
 def run_gap_script(
     script: str,
@@ -34,26 +36,37 @@ def run_gap_script(
         script_path.write_text(script, encoding="utf-8")
 
         cmd = [gap_cmd, "--no-window", "--bare", str(script_path)]
-        try:
-            with open(out_path, "w", encoding="utf-8") as out_f:
-                proc = subprocess.run(
-                    cmd,
-                    stdout=out_f,
-                    stderr=subprocess.PIPE,
-                    timeout=timeout,
-                    check=False,
-                    text=True,
-                )
-            captured = out_path.read_text(encoding="utf-8")
-            if proc.returncode != 0:
-                raise RuntimeError(
-                    f"GAP exited with code {proc.returncode}.\n"
-                    f"stderr (last 2000 chars):\n{proc.stderr[-2000:]}\n"
-                    f"stdout head:\n{captured[:1500]}"
-                )
-            return captured
-        except subprocess.TimeoutExpired:
-            raise RuntimeError(f"GAP run timed out after {timeout}s") from None
+        # No runaways: GAP is heavy and we never want it living on without us.
+        # start_new_session=True drops it into its own process group (pgid==pid)
+        # and we register that group, so on a timeout or an interrupt we take the
+        # whole family down together rather than orphaning a multi-GB process.
+        # (See aut2ltl/proc.py for the leash.)
+        with open(out_path, "w", encoding="utf-8") as out_f:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=out_f,
+                stderr=subprocess.PIPE,
+                text=True,
+                start_new_session=True,
+            )
+            register_child(proc.pid)
+            try:
+                _, stderr = proc.communicate(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                kill_child_group(proc.pid)
+                proc.communicate()  # reap the killed group
+                raise RuntimeError(f"GAP run timed out after {timeout}s") from None
+            finally:
+                unregister_child(proc.pid)
+
+        captured = out_path.read_text(encoding="utf-8")
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"GAP exited with code {proc.returncode}.\n"
+                f"stderr (last 2000 chars):\n{(stderr or '')[-2000:]}\n"
+                f"stdout head:\n{captured[:1500]}"
+            )
+        return captured
 
 
 def check_gap_available(gap_cmd: str = "gap") -> bool:
