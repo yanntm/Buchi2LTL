@@ -237,13 +237,16 @@ Deferred passes (own iterations, agreed):
      wrappers. Menu: `acc/weak/buchi/cobuchi/bls/sl` (producers) + `sl_driven`/
      `decompose` (wrappers). `--use bls` = pure BLS; `--use buchi` DECLINES off
      the Büchi class. Smoke: `tests/test_build_portfolio.py`.
-  2. ⏳ `portfolio/__init__.py` — `reconstruct_decomposed = build_portfolio(_options)`;
-     export `build_portfolio` (behavior-preserving).
-  3. ⏳ `aut2ltl/__main__.py` — `main(argv)`: HOA/LTL input, `--use` techniques,
-     `-O key=value` + `--list-options`, verbose-by-default report (formula text w/
-     flatten limit, techniques, DAG+tree sizes, build time), `-q`, `-o FILE`.
-  4. ⏳ `pyproject.toml` — `[project.scripts] aut2ltl = "aut2ltl.__main__:main"`.
-  5. ⏳ STATUS/TODO/README.
+  2. ✅ `portfolio/__init__.py` — `reconstruct_decomposed = build_portfolio(_options)`;
+     export `build_portfolio`/`TECHNIQUES` (behavior-preserving; MP survey clean).
+  3. ✅ `aut2ltl/ltl/metrics.py` + `aut2ltl/ltl/printers.py` — DAG/tree node counts
+     (+ sharing) and the gated formula printer the report needs (floor helpers).
+  4. ✅ `aut2ltl/__main__.py` — `main(argv)`: HOA/LTL input (`--ltl`/`--hoa`),
+     `--use` techniques, `-O key=value` + `--list-options`/`--list-techniques`,
+     verbose-by-default report (formula text w/ flatten limit, techniques,
+     DAG+tree sizes, build time) to stderr, `-q`, `-o FILE`. DECLINE ⇒ exit 1.
+  5. ✅ `pyproject.toml` — `[project.scripts] aut2ltl = "aut2ltl.__main__:main"`.
+  6. ✅ STATUS/TODO/README.
 - Engine work items: see `aut2ltl/kr/TODO.md`.
 - The per-file LOC inventory that used to live here is **stale** after this
   session (cascade→package, gap_bridge→gap/, acceptance_dispatch split into
