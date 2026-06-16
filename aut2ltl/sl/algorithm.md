@@ -54,17 +54,68 @@ Split `q`'s out-edges into petals `SL(q)` and stems `EX(q)`, and abbreviate:
 ε    = ⋁ { g ∧ X Λ(dst) : (g,dst,A) ∈ EX(q) }         the stems (targets via Λ)
 ```
 
-### The labeling equation
+### Functional core
 
-A run from `q` either ends up staying in `q` forever, or eventually leaves.
-**Stay or leave** — and the language is the union of the two:
+A label is an LTL formula or a decline; a translator maps a rooted automaton to a
+label:
 
 ```
-Final(q)  =  STAY∞(q)  ∨  LEAVE(q)
-
-STAY∞(q)  =  G(σ)  ∧  ⋀_{i=1..m} GF(σ_i)
-LEAVE(q)  =  σ  U  ε
+Label       =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ = decline
+Translator  =  Aut → Label                   -- Aut rooted & trimmed to reachable
 ```
+
+The assembly's glue is two combinators:
+
+```
+first(s, t)(A)  =  case s(A) of  Some φ → Some φ ;  ⊥ → t(A)
+decline(A)      =  ⊥
+```
+
+The core is one higher-order function `sl`, parameterized by the labeler `Λ` it
+uses for its exit targets, and itself a `Translator`:
+
+```
+sl(Λ) : Translator
+sl(Λ)(A) =
+    let q = init(A) in
+    if hasNonSelfIncoming(q) then ⊥                 -- not a marguerite (local, N&S)
+    else                                            -- q is a marguerite
+      let children = [ Λ(A↓dst) | (q, g, dst, _) ∈ δ, dst ≠ q ]   -- exits, in order
+      in if any child = ⊥ then ⊥                    -- a stem we can't label poisons q
+         else Some( STAY∞(q) ∨ LEAVE(q, children) )
+```
+
+with, over the petals/stems of `q` (using `σ`, `σ_i` from above, and pairing each
+stem guard `g_j` with its child label `Some φ_j`):
+
+```
+STAY∞(q)              =  G(σ) ∧ ⋀_{i=1..m} GF(σ_i)        -- stay forever, accepting
+LEAVE(q, [φ_j])       =  σ U ⋁_j ( g_j ∧ X φ_j )          -- stay finitely, then exit
+```
+
+A run from `q` either stays forever or eventually leaves; the language is the union
+(the `∨`). The core never inspects a child `Λ(A↓dst)` — each exit target is an
+*opaque* sub-label, a nonterminal plugged in. That is what makes the core
+**context-free**: a single local production combining `q`'s own petals with its
+children's labels.
+
+`hasNonSelfIncoming(q)` is the entire accept/decline test — necessary, sufficient,
+and purely local: `q` is a marguerite iff its only incoming edges are self-loops,
+which already guarantees every stem strictly descends (a return path would be a
+non-self incoming edge to `q`).
+
+The engine closes the open recursion with a fixpoint:
+
+```
+Λ*        =  fix (λ Λ. first(sl(Λ), delegate))     -- delegate : Translator, free
+slEngine  =  fix (λ Λ. first(sl(Λ), decline))      -- pure sl (delegate = ⊥)
+```
+
+`sl(Λ*)` is a **decorator** over `Λ*`: it peels each marguerite it roots at and
+defers every exit to `Λ*`, which tries `sl` again (reabsorbing marguerite targets)
+and falls through to `delegate` on multi-state-SCC targets. Passing only `sl`
+(`delegate = decline`) recovers basic sl exactly — same decline verdict
+(re-rooting-invariant), same labels (downward induction), same poisoning.
 
 ### The three moves
 
@@ -92,20 +143,6 @@ this way:
   leave; the strong `U` drops out on its own (no separate "must-leave" rule).
 - **`m = 0`**: empty conjunction is `true` ⇒ `STAY∞ = G(σ)`.
 
-### The exit labeler Λ
-
-The only non-local input is `Λ`: for each stem target `dst`, `ε` uses `Λ(dst)` as
-an **opaque** sub-formula — the language accepted from `dst`. The core never looks
-inside `Λ(dst)` and never expands it; in grammar terms each stem target is a
-nonterminal the core plugs in. That is what makes the core *context-free* — a
-single local production combining `q`'s petals with its children's labels.
-
-How `Λ` is obtained is the assembly's choice, not the core's. The intended wiring
-(see "Out of scope" below) is a first-fit chain `Λ = first_fit([sl, next])`: sl
-declines a non-marguerite root, so a marguerite target is reclaimed by sl and a
-multi-state-SCC target falls through to `next`. The core neither knows nor cares
-which happened — it just receives `Λ(dst)`.
-
 ### Why transition acceptance is essential
 
 A single marguerite expresses `⋀_i GF(σ_i)` with a *different petal set per
@@ -132,10 +169,14 @@ drives the labeling. The core computes one local label and trusts its inputs:
 - **The labeler `Λ` being well-founded.** The core calls `Λ(dst)` and trusts the
   result: that `Λ` itself terminates and returns a correct label is the assembly's
   contract.
-- **Dispatch and root handling.** The first-fit wiring, sl declining a
-  non-marguerite root, and the rule that every handoff to `next` strictly shrinks
-  the automaton — all assembly-level. Stripping these from the core is the point:
-  the core *is* just the marguerite equation.
+- **Dispatch and root handling.** The first-fit wiring, the `fix` that closes
+  `Λ*`, sl declining a non-marguerite root, and the rule that every handoff to
+  `delegate` strictly shrinks the automaton — all assembly-level. Stripping these
+  from the core is the point: the core *is* just the marguerite equation.
+- **Sharing / memoization.** The functional core re-roots at every successor and
+  would recompute a node reached from two marguerites. Memoizing `Λ*` by state (to
+  preserve DAG sharing and avoid recomputation) is an assembly optimization, not a
+  correctness condition.
 
 ### Expressivity (open)
 
