@@ -355,12 +355,12 @@ def accepting_sc_subsets(g, nodes):
     of a state carry the same marks, so the union over induced edges is
     run-independent and `g.acc().accepting(union)` is an exact oracle.
 
-    Enumeration is exponential in the SCC size, gated by
-    KR_MULLER_SCC_LIMIT (default 12); beyond the limit we emit only the
-    whole-SCC set and warn (no silent truncation).
+    Enumeration is exponential in the SCC size and EXACT: every accepting
+    strongly-connected subset is yielded, with NO cap. Soundness requires the
+    full family — emitting a coarser set (e.g. the whole SCC only) would build a
+    non-equivalent formula. If the enumeration explodes the run simply times out;
+    we never approximate.
     """
-    import os
-    import sys
     import itertools
     import spot
 
@@ -373,17 +373,6 @@ def accepting_sc_subsets(g, nodes):
                 succ[k].add(e.dst)
                 key = (k, e.dst)
                 emarks[key] = (emarks[key] | e.acc) if key in emarks else e.acc
-
-    limit = int(os.environ.get("KR_MULLER_SCC_LIMIT", 12))
-    if len(nodes) > limit:
-        print(
-            f"[KR][WARN] Muller subset enumeration truncated: SCC size "
-            f"{len(nodes)} > KR_MULLER_SCC_LIMIT={limit}; emitting the "
-            f"whole-SCC set only (raise the env var for exactness).",
-            file=sys.stderr,
-        )
-        yield tuple(nodes)
-        return
 
     def strongly_connected(cset):
         start = next(iter(cset))
