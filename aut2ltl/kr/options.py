@@ -99,11 +99,6 @@ MAX_LEVELS = OptionSpec(
     "opt-in cascade depth ceiling (0 = no ceiling)",
     env="KR_MAX_LEVELS")
 
-MULLER_SCC_LIMIT = OptionSpec(
-    "kr.muller_scc_limit", 12,
-    "good-Muller-set enumeration SCC size cap (whole-SCC fallback logged above it)",
-    env="KR_MULLER_SCC_LIMIT")
-
 FLATTEN_TREE_LIMIT = OptionSpec(
     "kr.flatten_tree_limit", 250_000,
     "max unfolded-tree size to flatten the DAG to a string (output path only)",
@@ -141,14 +136,14 @@ KR_DISPATCH_OPTIONS = [DISPATCH_ACC, DISPATCH_WEAK, DISPATCH_BUCHI, DISPATCH_COB
 # The full contract (all buckets), for the root builder's env-bridge aggregation.
 KR_OPTIONS = KR_DISPATCH_OPTIONS + [
     FOLD_FIN_REACH, FUSE_LETTERS, SIMP_OWN, SIMP_OWN_FOLD, SIMP_OWN_FACTOR,
-    TRACE, REACH_GUARD, MAX_LEVELS, MULLER_SCC_LIMIT, FLATTEN_TREE_LIMIT,
+    TRACE, REACH_GUARD, MAX_LEVELS, FLATTEN_TREE_LIMIT,
     SIMP_NODE, SIMP_TREE_LIMIT, SIMP_OPTS, SIMP_FULL_LIMIT, SIMP_OWN_LIMIT,
 ]
 
 __all__ = [
     "DISPATCH_ACC", "DISPATCH_WEAK", "DISPATCH_BUCHI", "DISPATCH_COBUCHI",
     "FOLD_FIN_REACH", "FUSE_LETTERS", "SIMP_OWN", "SIMP_OWN_FOLD", "SIMP_OWN_FACTOR",
-    "TRACE", "REACH_GUARD", "MAX_LEVELS", "MULLER_SCC_LIMIT", "FLATTEN_TREE_LIMIT",
+    "TRACE", "REACH_GUARD", "MAX_LEVELS", "FLATTEN_TREE_LIMIT",
     "SIMP_NODE", "SIMP_TREE_LIMIT", "SIMP_OPTS", "SIMP_FULL_LIMIT", "SIMP_OWN_LIMIT",
     "KR_DISPATCH_OPTIONS", "KR_OPTIONS",
 ]
