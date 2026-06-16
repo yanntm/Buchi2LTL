@@ -1,5 +1,5 @@
 survey: 165 formulas  (--use default)
 answers 99/165: validated 88, spot_timeout 0, unverified 11, spot_err 0, false 0
 declined 0, not_ltl 43, build_timeout 23, build_crash 0
-totals over answers: DAG=13724 temporals=2368 build=17.949s
+totals over answers: DAG=13708 temporals=2364 build=17.414s
 SUCCESS

@@ -1,36 +1,36 @@
 formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
 true,B,B,acc,1,0,1,1.0,0.612,True,1
-false,B,B,acc,1,0,1,1.0,0.609,True,0
-a,G,B,acc,1,0,1,1.0,0.619,True,a
-Ga,S,S,-,,,,,0.627,DECLINED,
-G(a | b),S,S,-,,,,,0.617,DECLINED,
+false,B,B,acc,1,0,1,1.0,0.616,True,0
+a,G,B,acc,1,0,1,1.0,0.611,True,a
+Ga,S,S,-,,,,,0.615,DECLINED,
+G(a | b),S,S,-,,,,,0.616,DECLINED,
 G(a -> X b),S,S,-,,,,,0.623,DECLINED,
-a & X a,S,B,acc,3,0,4,1.3,0.618,True,a & Xa
-G(a -> X a),S,S,-,,,,,0.610,DECLINED,
-G(a & X a),S,S,-,,,,,0.617,DECLINED,
-X a,G,B,acc,2,0,2,1.0,0.617,True,Xa
-X X a,G,B,acc,3,0,3,1.0,0.618,True,XXa
-X X X a,G,B,acc,4,0,4,1.0,0.619,True,XXXa
-X(a & X a),G,B,acc,4,0,5,1.2,0.612,True,X(a & Xa)
-Fa,G,G,-,,,,,0.618,DECLINED,
-a U b,G,G,-,,,,,0.609,DECLINED,
-F(a & b),G,G,-,,,,,0.604,DECLINED,
-F(a & X b),G,G,-,,,,,0.621,DECLINED,
-a | X b,G,B,acc,4,0,4,1.0,0.620,True,a | Xb
-Fa | Gb,O,O,-,,,,,1.167,DECLINED,
-Ga | Gb,O,S,-,,,,,0.609,DECLINED,
-Fa & Gb,O,O,-,,,,,0.616,DECLINED,
+a & X a,S,B,acc,3,0,4,1.3,0.614,True,a & Xa
+G(a -> X a),S,S,-,,,,,0.619,DECLINED,
+G(a & X a),S,S,-,,,,,0.618,DECLINED,
+X a,G,B,acc,2,0,2,1.0,0.620,True,Xa
+X X a,G,B,acc,3,0,3,1.0,0.622,True,XXa
+X X X a,G,B,acc,4,0,4,1.0,0.630,True,XXXa
+X(a & X a),G,B,acc,4,0,5,1.2,0.634,True,X(a & Xa)
+Fa,G,G,-,,,,,0.615,DECLINED,
+a U b,G,G,-,,,,,0.611,DECLINED,
+F(a & b),G,G,-,,,,,0.612,DECLINED,
+F(a & X b),G,G,-,,,,,0.613,DECLINED,
+a | X b,G,B,acc,4,0,4,1.0,0.617,True,a | Xb
+Fa | Gb,O,O,-,,,,,1.164,DECLINED,
+Ga | Gb,O,S,-,,,,,0.618,DECLINED,
+Fa & Gb,O,O,-,,,,,0.611,DECLINED,
 (a U b) | Gc,O,O,-,,,,,1.164,DECLINED,
-Ga | Fb,O,O,-,,,,,1.156,DECLINED,
-GFa,R,R,-,,,,,0.615,DECLINED,
-G(a -> F b),R,R,-,,,,,0.610,DECLINED,
-G(a | F b),R,R,-,,,,,0.620,DECLINED,
-GFa & GFb,R,R,-,,,,,1.162,DECLINED,
-GFa & GFb & GFc,R,R,-,,,,,1.723,DECLINED,
-G(a -> F b) & G(c -> F d),R,R,-,,,,,1.303,DECLINED,
-G(p -> (q U r)),R,R,-,,,,,0.616,DECLINED,
-FGa,P,P,-,,,,,0.625,DECLINED,
-F(a & G b),P,P,-,,,,,0.629,DECLINED,
-FGa | FGb,P,P,-,,,,,0.616,DECLINED,
-GFa -> GFb,T,T,-,,,,,0.633,DECLINED,
-GFa & FGb,T,T,-,,,,,1.169,DECLINED,
+Ga | Fb,O,O,-,,,,,1.161,DECLINED,
+GFa,R,R,-,,,,,0.610,DECLINED,
+G(a -> F b),R,R,-,,,,,0.616,DECLINED,
+G(a | F b),R,R,-,,,,,0.614,DECLINED,
+GFa & GFb,R,R,-,,,,,1.164,DECLINED,
+GFa & GFb & GFc,R,R,-,,,,,1.706,DECLINED,
+G(a -> F b) & G(c -> F d),R,R,-,,,,,1.292,DECLINED,
+G(p -> (q U r)),R,R,-,,,,,0.619,DECLINED,
+FGa,P,P,-,,,,,0.611,DECLINED,
+F(a & G b),P,P,-,,,,,0.608,DECLINED,
+FGa | FGb,P,P,-,,,,,0.613,DECLINED,
+GFa -> GFb,T,T,-,,,,,0.617,DECLINED,
+GFa & FGb,T,T,-,,,,,1.155,DECLINED,

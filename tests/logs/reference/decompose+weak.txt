@@ -1,5 +1,5 @@
 survey: 35 formulas  (--use decompose,weak)
 answers 23/35: validated 22, spot_timeout 0, unverified 1, spot_err 0, false 0
 declined 12, not_ltl 0, build_timeout 0, build_crash 0
-totals over answers: DAG=6238 temporals=1083 build=17.118s
+totals over answers: DAG=6238 temporals=1083 build=17.126s
 SUCCESS

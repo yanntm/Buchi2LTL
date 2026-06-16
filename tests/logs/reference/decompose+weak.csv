@@ -1,36 +1,36 @@
 formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
-true,B,B,weak,1,0,1,1.0,0.614,True,1
-false,B,B,weak,1,0,1,1.0,0.606,True,0
-a,G,B,weak,1,0,1,1.0,0.617,True,a
-Ga,S,S,weak,2,1,2,1.0,0.616,True,Ga
-G(a | b),S,S,weak,11,1,21,1.9,0.617,True,(a | b) & ((!a & !b) | G((!a & !b) | X(a | b)))
-G(a -> X b),S,S,weak,144,30,646,4.5,0.643,True,((((a & X((!a | b | XGa) & (Ga | ((X!b & Ga) R (a & X(!a | b | XGa)))))) R (!a |…
+true,B,B,weak,1,0,1,1.0,0.624,True,1
+false,B,B,weak,1,0,1,1.0,0.627,True,0
+a,G,B,weak,1,0,1,1.0,0.618,True,a
+Ga,S,S,weak,2,1,2,1.0,0.615,True,Ga
+G(a | b),S,S,weak,11,1,21,1.9,0.619,True,(a | b) & ((!a & !b) | G((!a & !b) | X(a | b)))
+G(a -> X b),S,S,weak,144,30,646,4.5,0.645,True,((((a & X((!a | b | XGa) & (Ga | ((X!b & Ga) R (a & X(!a | b | XGa)))))) R (!a |…
 a & X a,S,B,weak,3,0,4,1.3,0.623,True,a & Xa
-G(a -> X a),S,S,weak,328,63,12968,39.5,0.678,True,((a R (!a | Xa)) & (a | X(a R (!a | Xa))) & ((a & X(!a | (Xa & (Ga | ((a & X!a) …
-G(a & X a),S,S,weak,2,1,2,1.0,0.614,True,Ga
+G(a -> X a),S,S,weak,328,63,12968,39.5,0.684,True,((a R (!a | Xa)) & (a | X(a R (!a | Xa))) & ((a & X(!a | (Xa & (Ga | ((a & X!a) …
+G(a & X a),S,S,weak,2,1,2,1.0,0.612,True,Ga
 X a,G,B,weak,2,0,2,1.0,0.615,True,Xa
 X X a,G,B,weak,3,0,3,1.0,0.617,True,XXa
-X X X a,G,B,weak,4,0,4,1.0,0.621,True,XXXa
-X(a & X a),G,B,weak,5238,894,30668144,5854.9,1.641,UNVERIFIED_SIZE,<unflattened DAG: 30668144 tree nodes>
-Fa,G,G,weak,2,1,2,1.0,0.658,True,Fa
-a U b,G,G,weak,18,3,45,2.5,0.637,True,(F(!a | b) & (((!a | b) & (a | b)) | ((a & !b) U (a & !b & X((!a | b) & (a | b))…
-F(a & b),G,G,weak,11,1,21,1.9,0.611,True,(a & b) | ((!a | !b) & F((!a | !b) & X(a & b)))
-F(a & X b),G,G,weak,140,30,487,3.5,0.647,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
-a | X b,G,B,weak,28,6,70,2.5,0.624,True,(a | Xb) & (a | (XF!b & (((!a | XF!b) U (!a & XF!b)) | ((a | XF!b) U (a & XF!b))…
-Fa | Gb,O,O,or2+weak,13,3,26,2.0,1.168,True,Fa | (!a & b & ((a | !b) R (a | !b | X(!a & b)))) | G(!a & b)
-Ga | Gb,O,S,weak,137,21,1067,7.8,0.654,True,((!a | b) & ((!a | !b) R (!a | !b | X(!a | b))) & (((a | !b) & ((!a | !b) R (!a …
-Fa & Gb,O,O,weak,54,11,163,3.0,0.626,True,b & (a | ((!a & b) U (!a & b & X(a & b)))) & ((((a | !b) R (a | !b | Xb)) & ((!a…
-(a U b) | Gc,O,O,or2+weak,82,14,408,5.0,1.203,True,(!b & c & (((!a | ((a & !b & c) U (a & !b & c & X(!a & !b & c)))) & ((((!a | b |…
-Ga | Fb,O,O,or2+weak,13,3,26,2.0,1.168,True,Fb | (a & !b & ((!a | b) R (!a | b | X(a & !b)))) | G(a & !b)
-GFa,R,R,-,,,,,0.607,DECLINED,
-G(a -> F b),R,R,-,,,,,0.612,DECLINED,
-G(a | F b),R,R,-,,,,,0.619,DECLINED,
-GFa & GFb,R,R,-,,,,,1.165,DECLINED,
-GFa & GFb & GFc,R,R,-,,,,,1.736,DECLINED,
-G(a -> F b) & G(c -> F d),R,R,-,,,,,1.285,DECLINED,
-G(p -> (q U r)),R,R,-,,,,,0.623,DECLINED,
-FGa,P,P,-,,,,,0.620,DECLINED,
-F(a & G b),P,P,-,,,,,0.616,DECLINED,
-FGa | FGb,P,P,-,,,,,0.619,DECLINED,
-GFa -> GFb,T,T,-,,,,,0.632,DECLINED,
-GFa & FGb,T,T,-,,,,,1.170,DECLINED,
+X X X a,G,B,weak,4,0,4,1.0,0.629,True,XXXa
+X(a & X a),G,B,weak,5238,894,30668144,5854.9,1.657,UNVERIFIED_SIZE,<unflattened DAG: 30668144 tree nodes>
+Fa,G,G,weak,2,1,2,1.0,0.613,True,Fa
+a U b,G,G,weak,18,3,45,2.5,0.624,True,(F(!a | b) & (((!a | b) & (a | b)) | ((a & !b) U (a & !b & X((!a | b) & (a | b))…
+F(a & b),G,G,weak,11,1,21,1.9,0.618,True,(a & b) | ((!a | !b) & F((!a | !b) & X(a & b)))
+F(a & X b),G,G,weak,140,30,487,3.5,0.641,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
+a | X b,G,B,weak,28,6,70,2.5,0.626,True,(a | Xb) & (a | (XF!b & (((!a | XF!b) U (!a & XF!b)) | ((a | XF!b) U (a & XF!b))…
+Fa | Gb,O,O,or2+weak,13,3,26,2.0,1.171,True,Fa | (!a & b & ((a | !b) R (a | !b | X(!a & b)))) | G(!a & b)
+Ga | Gb,O,S,weak,137,21,1067,7.8,0.655,True,((!a | b) & ((!a | !b) R (!a | !b | X(!a | b))) & (((a | !b) & ((!a | !b) R (!a …
+Fa & Gb,O,O,weak,54,11,163,3.0,0.633,True,b & (a | ((!a & b) U (!a & b & X(a & b)))) & ((((a | !b) R (a | !b | Xb)) & ((!a…
+(a U b) | Gc,O,O,or2+weak,82,14,408,5.0,1.200,True,(!b & c & (((!a | ((a & !b & c) U (a & !b & c & X(!a & !b & c)))) & ((((!a | b |…
+Ga | Fb,O,O,or2+weak,13,3,26,2.0,1.160,True,Fb | (a & !b & ((!a | b) R (!a | b | X(a & !b)))) | G(a & !b)
+GFa,R,R,-,,,,,0.617,DECLINED,
+G(a -> F b),R,R,-,,,,,0.608,DECLINED,
+G(a | F b),R,R,-,,,,,0.615,DECLINED,
+GFa & GFb,R,R,-,,,,,1.169,DECLINED,
+GFa & GFb & GFc,R,R,-,,,,,1.733,DECLINED,
+G(a -> F b) & G(c -> F d),R,R,-,,,,,1.312,DECLINED,
+G(p -> (q U r)),R,R,-,,,,,0.606,DECLINED,
+FGa,P,P,-,,,,,0.610,DECLINED,
+F(a & G b),P,P,-,,,,,0.615,DECLINED,
+FGa | FGb,P,P,-,,,,,0.616,DECLINED,
+GFa -> GFb,T,T,-,,,,,0.620,DECLINED,
+GFa & FGb,T,T,-,,,,,1.180,DECLINED,
