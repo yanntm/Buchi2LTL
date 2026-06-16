@@ -557,3 +557,20 @@ contract_combinators/options ALL OK/PASS.
   `BUILD_TIMEOUT` (build-first, then check) now report `NOT_LTL` quickly
   (cheap-check-first), 0 regressions. Reference baselines regenerated
   (`tests/logs/reference/20260616/`, kinská overwritten).
+
+## 2026-06-16 — LTL simplify: completed the binary-modal expansion-fold quartet
+The W/M expansion folds in `aut2ltl/ltl/simplify/fold_pass.py` covered only two
+of the four laws (`f W g ≡ Gf ∨ (fUg)` at Or, `f M g ≡ Ff ∧ (fRg)` at And).
+Added the two missing duals, both observed in real traces:
+  - R-fold (Or):  `G(g ∧ ¬f) ∨ (f M g) → f R g`   (e.g. `G(!d & e) | (d M e) → d R e`)
+  - U-fold (And): `F(g ∨ ¬f) ∧ (f W g) → f U g`
+Both sound via the strengthened-body collapse (`G(g∧¬f)∨(fMg) ≡ Gg∨(fMg)`;
+`F(g∨¬f)∧(fWg) ≡ Fg∧(fWg)`, the Gf branch of fWg killing g∨¬f). Each trades
+two temporals for one (acc-set census win), same shape as the existing pair.
+`tests/kr/simplify/test_wm_fold.py` extended (22 cases incl. must-not-fire for
+the strictly-stronger/weaker extra-term variants); fuzz `test_random_equiv.py`
+ALL EQUIVALENT, r4 audit CLEAN. README fold bullet rewritten to the 4-law quartet.
+Other rules' duals confirmed accounted for (G/F absorption, GF/FG cofactor,
+arm-cofactor U/W/R/M all present); the two deliberately-absent duals are the
+S1/S2 W/M variants (unsound, regression-tested) and arm-padding's M case (sound
+but never observed in outputs — arm-padding is empirically driven).
