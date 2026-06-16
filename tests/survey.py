@@ -38,6 +38,8 @@ Run from the project root:
     python3 tests/survey.py formulas.txt          # one formula per line (# comments)
     python3 tests/survey.py --use bls,sl          # pass --use through to the tool
     KR_SURVEY_TIMEOUT=30 python3 tests/survey.py  # widen the per-phase budget
+    KR_SURVEY_CSV=out.csv python3 tests/survey.py # override the CSV output path
+                                                  # (how survey_sweep.sh names per-config CSVs)
 
 HOA-file inputs are planned (the tool already accepts them); this survey
 currently feeds LTL strings only.
