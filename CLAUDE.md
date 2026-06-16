@@ -31,9 +31,25 @@ simplify). Tests under `tests/` (`survey*`, `tests/kr`, `tests/sl`,
   contract).
 
 ## Discipline (mandatory)
-- One file per commit (logical moves excepted); no commit without explicit user
-  approval. Commit directly to master (the user does not branch when prototyping).
-- Update STATUS/TODO *before* committing a code change.
+- One commit per file (preference). The exception is a mechanical bulk change —
+  code moved/renamed, a regex sweep, a baseline-log regeneration — which commits
+  together. Otherwise commit freely without fretting over intermediate states
+  (we are solo on `master`, so intermediate states are private). The commit
+  message explains *the change*.
+- **Committing** needs the user's go-ahead, then walk the files. **Pushing** is
+  separate and ALWAYS asked for every time (no auto-approve): push only once the
+  work is stable and the gates below have passed.
+- Commit directly to `master` (we do not branch). Never run branch / cross-branch
+  diagnostics.
+- `docs/HISTORY.md` is APPEND-ONLY via shell (`cat >>` / `printf >>`) and is
+  NEVER read (it is large — STATUS.md is the snapshot). Record the *why/when* of a
+  landed change there.
+- NO persistent "memory" files: the user does not use them (not inspectable in the
+  repo, they bloat unseen). Capture anything durable in STATUS / TODO / a README /
+  this file instead — all git-inspectable.
+- Update STATUS/TODO *before* committing a code change *when the change is a
+  STATUS-level state shift or closes a TODO item*; a one-off bug fix that is
+  neither belongs only in `docs/HISTORY.md`.
 - Test BEFORE commit, via placed scripts under `tests/` only (no /tmp, no
   `python -c` one-liners), under timeout:
   - `python3 tests/kr/test_kr_r4_audit.py` → must stay CLEAN
@@ -48,9 +64,11 @@ simplify). Tests under `tests/` (`survey*`, `tests/kr`, `tests/sl`,
   formula cluster or parsers may exceed).
 
 ## Working style (how the user wants me to operate)
-- **Diagnostics self-bound, ≤15s.** Hard cap on any test/diagnostic run; a blown
-  timeout IS a finding, report it. Redirect long output to `tests/**/logs/`
-  (never /tmp), don't pipe long runs to `tail`.
+- **Diagnostics self-bound, ≤15s PER EXAMPLE.** Hard cap on any test/diagnostic
+  run; a blown timeout IS a finding, report it. The cap is per example — do NOT
+  batch many cases into one run to dodge it (give probes a single-input argv and
+  invoke once per case). Redirect long output to `tests/**/logs/` (never /tmp),
+  don't pipe long runs to `tail`.
 - **No manual process management.** Never `kill`/`pkill`, no `&`/`nohup`/`$!`, no
   inspecting pids. For long self-terminating runs use the Monitor tool or Bash
   `run_in_background` (the harness tracks the task and re-invokes on completion);
