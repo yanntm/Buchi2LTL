@@ -110,12 +110,16 @@ class SlCore:
                 stems.append((guard, e.dst))
 
         # Delegate each stem to Λ on the re-rooted Language; one decline poisons q.
+        # Credit the techniques of the children actually used (provenance on the
+        # result envelope — the formula math is untouched).
         children: List["spot.formula"] = []
+        tech = set(_TECH)
         for _, dst in stems:
             res = self._child(Language.of(_reroot(aut, dst)))
             if not res.ok:
                 return LTLFormulaResult.decline(_TECH)
             children.append(res.formula)
+            tech |= res.technique
 
         sigma = _or([g for g, _ in petals])
 
@@ -127,4 +131,4 @@ class SlCore:
         eps = _or([_F.And([g, _F.X(phi)]) for (g, _), phi in zip(stems, children)])
         leave = _F.U(sigma, eps)
 
-        return LTLFormulaResult(_F.Or([stay, leave]), set(_TECH))
+        return LTLFormulaResult(_F.Or([stay, leave]), tech)
