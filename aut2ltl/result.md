@@ -1,10 +1,11 @@
 # Result lifecycle
 
 The contract-floor counterpart to `sl/algorithm.md`. It specifies the result a
-`Translator` returns, its **closed** status set, and the two algebras for
-combining results: **composition** (`credit` / `fuse`) and **choice** (`first`).
-The current type is `LTLFormulaResult` in `contract.py`; this doc is the spec to
-build/clean toward (a better-named home is part of the cleanup — see end).
+`Translator` returns, its **closed** status set, the two algebras for combining
+results (composition `credit` / `fuse` and choice `first`), and the standard
+accumulator idiom for using it. The current type is `LTLFormulaResult` in
+`contract.py`; this is the spec to build/clean toward (a better-named home is part
+of the cleanup — see end).
 
 ## The result
 
@@ -13,132 +14,147 @@ A result carries:
 - `formula` — the reconstructed LTL (a `spot.formula`), present only on success;
 - `technique` — the set of method tags that contributed (open set of strings);
 - `status` — one of the closed values below;
-- `note` — human-facing detail (e.g. the non-aperiodic-monoid reason for a verdict).
+- `diagnosis` — optional human-facing detail explaining a NOK (e.g. "non-aperiodic
+  monoid; D was not state-minimal, so this is a strong hint, not a proof").
 
 ## Status — a closed enum
 
-Four values. They are a closed set → a real `enum`, not loose strings.
+Three values.
 
 | value | meaning | formula? |
 |---|---|---|
 | `OK` | success — a language-faithful formula | yes |
-| `DECLINED` | "not my method" | no |
-| `PROBABLY_NOT_LTL` | impossibility *hint* (D not state-minimal — may be an artifact) | no |
-| `NOT_LTL` | impossibility *proof* (D minimal, non-aperiodic monoid) | no |
+| `DECLINED` | the translator was unable to produce a result (optional diagnosis) | no |
+| `NOT_LTL` | the language is not LTL-definable (optional diagnosis) | no |
 
-**Two-state view (what a consumer acts on).** There is exactly one good state and
-the rest:
+There is no separate "probably not LTL" value. A tentative non-definability (D not
+state-minimal, so possibly an artifact) is the **same status** `NOT_LTL`, with the
+tentativeness stated in the `diagnosis`. Proof vs hint drives no different
+behavior, so it is not a separate value — just text on a single closed enum of
+three.
 
-- **OK** — cool.
-- **NOK** = `{DECLINED, PROBABLY_NOT_LTL, NOT_LTL}` — not cool.
+**Two-state view (what a consumer acts on).** `OK` vs `NOK` = `{DECLINED,
+NOT_LTL}`. A consumer branches on the binary; a NOK carries its **reason** = its
+status value (plus optional diagnosis).
 
-A consumer branches on the binary, but a NOK carries its **reason** = the precise
-NOK value.
-
-**Three categories (what the reason means).**
+**Three categories (what the reason means to `first`).**
 
 - **SUCCESS** = `OK`.
-- **BAIL (recoverable)** = `DECLINED` — "try another method."
-- **VERDICT (absorbing)** = `NOT_LTL`, `PROBABLY_NOT_LTL` — "no formula exists, stop."
+- **BAIL (recoverable)** = `DECLINED`.
+- **VERDICT (absorbing)** = `NOT_LTL`.
 
-The BAIL/VERDICT split is consumed by **exactly one** combinator, `first` (below);
-to everyone else there is only OK vs NOK.
+The BAIL/VERDICT split is consumed by **exactly one** combinator, `first`.
 
-**Dominance order** (used by composition):
-
-```
-NOT_LTL  ≻  PROBABLY_NOT_LTL  ≻  DECLINED  ≻  OK
-```
+**Dominance order** (used by composition): `NOT_LTL ≻ DECLINED ≻ OK`.
 
 ## The universal consumer rule
 
 Every consumer of a child result — `credit`, `fuse`, `sl_core`, any translator
-that uses a sub-label — obeys one rule:
+using a sub-label — obeys one rule:
 
 - child **OK** → credit its techniques, use its formula, keep building.
-- child **NOK** → **retropropagate immediately, bail, and report the reason** (the
-  precise NOK value).
+- child **NOK** → **propagate immediately, bail, report the reason** (status +
+  diagnosis).
 
-You never recover from a NOK yourself. The labeler you were handed already wrapped
-whatever recovery it had (a `first` inside it); once it hands you a NOK, it is
-final to you.
+You never recover from a NOK yourself: the labeler you were handed already wrapped
+whatever recovery it had (a `first` inside it); once it returns a NOK, it is final
+to you.
+
+## Usage — the accumulator idiom
+
+A procedure that produces a result holds **one** current result and threads it:
+
+1. **Start** in `OK`, crediting yourself — seed it with your own technique tag.
+2. **Delegate**: whenever you call a delegate translator / a method that returns a
+   result, **credit it into your instance**. If your instance is now NOK,
+   **bail — return it as is** (it already carries the right status, diagnosis, and
+   accumulated techniques).
+3. **Finish**: if you reach the end still `OK`, fill in the `formula` field and
+   return.
+4. **Error**: at any point you may set your instance to a NOK status (with an
+   optional diagnosis) and return it.
+
+```
+res = Result.ok(MY_TAG)                  # start OK, credit yourself
+for sub in delegates:
+    res.credit(sub(...))                 # fold a child in (mutating accumulator)
+    if res.nok: return res               # bail with the reason
+res.formula = build(...)                 # finish: fill the formula
+return res
+                                         # on error: res.fail(NOT_LTL, diag); return res
+```
+
+The accumulator is a **per-call local**, never shared, so the mutation is safe
+(MT-safe by construction).
 
 ## Composition monoid: `credit` / `fuse`
 
-Combine results you *used together* (e.g. a formula built from child labels).
-Identity is `OK`; the order above is the join.
+`credit` folds a child into the current result. Identity is `OK`; the dominance
+order is the join.
 
 ```
-credit(self, other):                       -- self is building; other is a child it used
-    OK    & OK     → OK, formula = self.formula, technique = self ∪ other
-    otherwise      → max-status wins (the worst child), propagated with its reason/note
-                     (no formula; verdict carries its note)
+res.credit(other):                       -- mutates res, returns res (for chaining)
+    other OK   → technique = res ∪ other          (stay OK, keep res.formula)
+    other NOK  → res takes other's status + diagnosis; formula cleared
 
-fuse(primary, *others) = foldl credit primary others
+fuse(primary, *others) = primary.credit(o1).credit(o2)…
 ```
 
-Properties: associative, `OK` identity, `NOT_LTL` absorbing. This is the
-"⊥-dominates" rule, generalized: the most-absorbing status wins.
-
-Open points (decide at implementation):
-1. **Conclusiveness on credit.** Crediting a *conclusive* `NOT_LTL` child into a
-   larger result: stay `NOT_LTL` (impossibility propagates upward) or downgrade to
-   `PROBABLY_NOT_LTL` (the proof was about the child's minimal D, not the parent's)?
-   Leaning: propagate, but this only affects how loudly we claim a proof.
-2. **Declined provenance.** A bail credits **no** techniques (the universal rule:
-   NOK contributes only its reason, not its tags).
+Properties: associative, `OK` identity, `NOT_LTL` absorbing (max by `NOT_LTL ≻
+DECLINED ≻ OK`). A bail credits **no** techniques — a NOK contributes only its
+reason.
 
 ## Choice monoid: `first`
 
-The chain-of-responsibility. Identity is `decline` (the empty-NOK). It is the
-**single** combinator that "inspects more" than OK/NOK — and it deviates from the
+The chain-of-responsibility. Identity is `decline` (the empty NOK). It is the
+**single** combinator that inspects more than OK/NOK, and it deviates from the
 universal rule in **exactly one** case:
 
 ```
 first(a, b)(x) = let r = a(x) in
                  if r.status == DECLINED then b(x)   -- THE one deviation: recover a decline
-                 else r                               -- OK or VERDICT: return as-is (reason kept)
+                 else r                               -- OK or NOT_LTL: return as-is (reason kept)
 
 first([s₁..sₙ]) = foldr first decline [s₁..sₙ]        -- decline closes the chain
 ```
 
-So `first` is just the universal consumer with one change: **a `DECLINED`
-becomes "try the next member" instead of bailing.** Every other NOK still bails
-with its reason — a `VERDICT` short-circuits the chain (trying the next member is
-wasted, no formula exists, and it would *lose the reason*). `first` does **not**
-credit the techniques of the declined members it skipped; it returns the winning
-`OK` (or the propagated `VERDICT`, or the terminal `decline`) unchanged.
+So `first` is just the universal consumer with one change: a `DECLINED` becomes
+"try the next member" instead of bailing. Every other NOK still bails with its
+reason — a `NOT_LTL` short-circuits the chain (the next member is wasted, no
+formula exists, and trying it would *lose the reason*). `first` does **not** credit
+the techniques of the declined members it skips; it returns the winning `OK` (or a
+propagated `NOT_LTL`, or the terminal `decline`) unchanged.
 
 `decline` as the last element is the identity precisely because it is the NOK that
 says "I have nothing and no opinion": the thing `first` recovers *from*, and the
-honest landing when the list runs out ("none of us could"). A `VERDICT` terminal
-would be wrong — nobody proved impossibility.
+honest landing when the list runs out. A `NOT_LTL` terminal would be wrong — nobody
+proved impossibility.
 
 ## The duality
 
 ```
 combinator   role          continue on    identity      rule
----------    -----------   -----------    ---------     -------------------------------
-first        choice        DECLINED       decline (⊥)   first non-declined wins; verdict short-circuits
+---------    -----------   -----------    ---------     -----------------------------------------
+first        choice        DECLINED       decline (⊥)   first non-declined wins; NOT_LTL short-circuits
 credit/fuse  composition   (folds all)    OK            max-status wins; OK identity; NOT_LTL absorbing
 ```
 
 `first` skips declines until something sticks; `credit` keeps everything OK and
 bails on the worst. Choice has `decline` as unit; composition has `OK` as unit.
-The `DECLINED`-vs-`VERDICT` distinction exists *only* to tell `first` recover-vs-
-propagate.
+The `DECLINED`-vs-`NOT_LTL` distinction exists *only* to tell `first`
+recover-vs-propagate.
 
 ## Consequence for `sl_core`
 
-`sl_core` is a consumer: on a child NOK it must **propagate the exact reason**.
-Today it flattens a child `VERDICT` to `DECLINED` (`if not res.ok: return decline`)
-— wrong by this model, since a `first` above it would then keep trying members that
-cannot succeed. Once `credit`/`fuse` exist, `sl_core`'s tail becomes
-`fuse(success(...), *child_results)` and the verdict propagates correctly.
+`sl_core` is a consumer in the accumulator idiom: start `OK` with `{"sl"}`, credit
+each child, bail on NOK (propagating the exact reason), else fill `Or(stay, leave)`
+and return. Today it flattens a child `NOT_LTL` to `DECLINED` (`if not res.ok:
+return decline`) — wrong by this model, since a `first` above would keep trying
+members that cannot succeed. The accumulator `credit` fixes this for free.
 
 ## Naming / home
 
 `contract.py` mixes the result struct with the `Translator` / `CascadeTranslator`
-protocols, and is hard to find. The result type + `Status` + `credit`/`fuse` want
-a result-named module (e.g. `result.py`); the protocols can stay in the contract
+protocols and is hard to find. The result type + `Status` + `credit`/`fuse` want a
+result-named module (e.g. `result.py`); the protocols can stay in the contract
 floor. To settle at implementation.
