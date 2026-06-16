@@ -137,6 +137,32 @@ def _find_fold_or(kids: List["spot.formula"]) -> Optional[Tuple[int, int, "spot.
                             spot.formula.And([t for t in conj if t != s]) == f:
                         return i, j, spot.formula.W(f, g)
     # ----------------------------------------------------------------------
+    # INDEPENDENT RULE — the M-disjunct sibling of the W-fold above (the same
+    # Or-node "G ∨ modal" shape, M in place of U). The release law
+    #   f R g ≡ G g ∨ (f M g),  with the construction's ¬f-strengthened G body,
+    # sound because  G(g ∧ ¬f) ∨ (f M g) ≡ G g ∨ (f M g):
+    #     G g         ∨ (f M g)   → f R g
+    #     G(g ∧ ¬f)   ∨ (f M g)   → f R g
+    # Trades two temporals (G, M) for one (R). Match on the M disjunct's arms;
+    # the G body must be exactly g, or g with a single ¬f conjunct added (any
+    # other extra conjunct makes G(body) strictly stronger than G g — UNSOUND).
+    for j, m in enumerate(kids):
+        if not m._is(spot.op_M):
+            continue
+        f, g = m[0], m[1]
+        for i, k in enumerate(kids):
+            if i == j or not k._is(spot.op_G):
+                continue
+            body = k[0]
+            if body == g:
+                return i, j, spot.formula.R(f, g)
+            if body._is(spot.op_And):
+                conj = list(body)
+                for s in conj:
+                    if _is_neg(s, f) and \
+                            spot.formula.And([t for t in conj if t != s]) == g:
+                        return i, j, spot.formula.R(f, g)
+    # ----------------------------------------------------------------------
     return None
 
 
@@ -197,6 +223,32 @@ def _find_fold_and(kids: List["spot.formula"]) -> Optional[Tuple[int, int, "spot
                     if _is_neg(s, g) and \
                             spot.formula.Or([t for t in disj if t != s]) == f:
                         return i, j, spot.formula.M(f, g)
+    # ----------------------------------------------------------------------
+    # INDEPENDENT RULE — the W-conjunct sibling of the M-fold above (the dual
+    # of the R-fold in _find_fold_or). The until law
+    #   f U g ≡ F g ∧ (f W g),  with the construction's ¬f-weakened F body,
+    # sound because  F(g ∨ ¬f) ∧ (f W g) ≡ F g ∧ (f W g):
+    #     F g         ∧ (f W g)   → f U g
+    #     F(g ∨ ¬f)   ∧ (f W g)   → f U g
+    # Trades two temporals (F, W) for one (U). Match on the W conjunct's arms;
+    # the F body must be exactly g, or g with a single ¬f disjunct added (any
+    # other extra disjunct makes F(body) strictly weaker than F g — UNSOUND).
+    for j, w in enumerate(kids):
+        if not w._is(spot.op_W):
+            continue
+        f, g = w[0], w[1]
+        for i, k in enumerate(kids):
+            if i == j or not k._is(spot.op_F):
+                continue
+            body = k[0]
+            if body == g:
+                return i, j, spot.formula.U(f, g)
+            if body._is(spot.op_Or):
+                disj = list(body)
+                for s in disj:
+                    if _is_neg(s, f) and \
+                            spot.formula.Or([t for t in disj if t != s]) == g:
+                        return i, j, spot.formula.U(f, g)
     # ----------------------------------------------------------------------
     return None
 
