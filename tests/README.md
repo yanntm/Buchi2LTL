@@ -37,6 +37,35 @@ file is just the index.
   list `survey.py` sweeps when given no inputs).
 - `survey_diff.py` — quantitative diff of two survey CSVs (regression triage).
 
+### Where they build & how to run them
+
+Each sweep takes an OUTPUT DIR as `$1` and writes per-config (or per-input) CSVs
+there plus a `SUMMARY.txt`; pass a throwaway dir under `tests/logs/` (gitignored)
+for day-to-day runs. Both sweeps self-terminate, so launch them in the background
+(parallel is fine — they are CPU-bound and independent) and wait on completion:
+
+    bash tests/survey_sweep.sh tests/logs/scratch_survey   # all --use configs, LTL corpus
+    bash tests/kinska_sweep.sh tests/logs/scratch_kinska    # default portfolio, Kinská corpus
+
+Read `SUMMARY.txt` first; it must print `SUCCESS` (no verified non-equivalence;
+`BUILD_TIMEOUT` / `UNVERIFIED_SIZE` are size explosions, not failures).
+
+### Promoting a sweep to the committed reference baseline
+
+The reference is CSV-only, under dated subfolders. After a run is green, diff it
+against the current reference with `survey_diff.py` per config (look for `0
+regression(s)`), then promote:
+
+- **survey** — copy the new per-config CSVs to a NEW dated folder
+  `tests/logs/reference/<YYYYMMDD>/` (append `_1`, `_2`, … only to DISAMBIGUATE a
+  same-day collision — the clean date is the canonical/newest baseline). The
+  `.gitignore` re-includes `tests/logs/reference/**/*.csv`.
+- **kinská** — overwrite `tests/samples/kinska/logs/reference/kinska.csv` in place
+  (single flat baseline; git history keeps the prior).
+
+Then commit the baseline move as ONE commit (it is a bulk log regeneration, the
+exception to one-commit-per-file). Logs are otherwise never committed.
+
 ## Unit / smoke tests (fast, mostly GAP-free)
 
 - `test_build_portfolio.py` — building a `Translator` triggers NO GAP.
