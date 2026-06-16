@@ -12,9 +12,15 @@ Two parts, read in order:
 
 ## Algorithm presentation
 
-The pure formulation of core **sl** ("self-loop") backward labeling. It is written
-to be read and implemented on its own terms; the synopsis below records how the
-current code realizes a special-cased form of the same thing.
+The pure formulation of core **sl** ("self-loop") backward labeling. The core is a
+**local, context-free combinator**: it defines the LTL language of a *single*
+marguerite state, given a labeler `Λ` that supplies the language-label of each exit
+target. It inspects only that one state's own edges and treats every target's label
+as an opaque sub-term handed to it by `Λ` — it does not itself recurse, and it owns
+no global concern (termination, legal looping, the well-foundedness of `Λ`). Those
+belong to the *assembly* that wires `Λ` and feeds marguerites in (see "Out of
+scope" below). The synopsis records how the current code realizes a special-cased
+form of the same thing.
 
 ### Setting
 
@@ -24,24 +30,28 @@ Input is a **TGBA** `A = (Q, Σ, δ, q0, {F_1,…,F_m})`, `Σ = 2^AP`. An edge i
 **every** set `i` it takes infinitely many `i`-marked edges (transition-based
 generalized Büchi). `m = 0` means every infinite run is accepting.
 
-We compute, per state `q`, an LTL formula `Final(q)` whose models are exactly the
-words `A` accepts from `q`.
+The core takes a single marguerite state `q` (below) plus a labeler `Λ`, and
+returns an LTL formula `Final(q)` whose models are exactly the words accepted from
+`q` — *provided* `Λ(dst)` is the correct label of each exit target `dst`.
 
 ### The marguerite
 
-sl applies to a state that is a **marguerite** (daisy): a singleton SCC — a center
-`q` with **petals** (self-loops `q → q`) and **stems** (exits `q → dst`, `dst ≠ q`)
-whose targets never reach back to `q`. Equivalently, the only cycles through `q`
-are its own self-loops and the exit relation descends strictly. A whole automaton
-is in scope when every state is a marguerite, i.e. it is **very-weak (1-weak)**:
-every SCC is a single, possibly self-looping, state.
+The core's input is a **marguerite** (daisy): one center `q` with **petals**
+(self-loops `q → q`) and **stems** (exits `q → dst`, `dst ≠ q`). It treats the
+petals structurally and each stem target only through `Λ(dst)`.
+
+It *assumes*, as a precondition the assembly guarantees, that the stems leave for
+good — no target reaches back to `q`, so `q` is a singleton SCC. The core neither
+checks this nor relies on it for its own operation (only for the correctness of
+`Λ`'s labels), and this is the natural condition to relax later (e.g. stems that
+loop back — the big-self-loop direction).
 
 Split `q`'s out-edges into petals `SL(q)` and stems `EX(q)`, and abbreviate:
 
 ```
 σ    = ⋁ { g : (g,A) ∈ SL(q) }                       all petal guards
 σ_i  = ⋁ { g : (g,A) ∈ SL(q), i ∈ A }                petals carrying acc set i
-ε    = ⋁ { g ∧ X Final(dst) : (g,dst,A) ∈ EX(q) }     the stems
+ε    = ⋁ { g ∧ X Λ(dst) : (g,dst,A) ∈ EX(q) }         the stems (targets via Λ)
 ```
 
 ### The labeling equation
@@ -82,24 +92,19 @@ this way:
   leave; the strong `U` drops out on its own (no separate "must-leave" rule).
 - **`m = 0`**: empty conjunction is `true` ⇒ `STAY∞ = G(σ)`.
 
-### Open recursion: a fallback labeler
+### The exit labeler Λ
 
-`Final` is defined by recursion through stems — `ε` mentions `Final(dst)`. We
-leave that recursion **open**: sl is parameterized by a *labeler* `Λ`, a Translator
-supplied at construction that maps a sub-automaton to an LTL label for its
-language. At a stem target `dst`:
+The only non-local input is `Λ`: for each stem target `dst`, `ε` uses `Λ(dst)` as
+an **opaque** sub-formula — the language accepted from `dst`. The core never looks
+inside `Λ(dst)` and never expands it; in grammar terms each stem target is a
+nonterminal the core plugs in. That is what makes the core *context-free* — a
+single local production combining `q`'s petals with its children's labels.
 
-- if `dst` is a marguerite, continue with sl's own equation (`Final(dst)`);
-- otherwise `dst` lies in a genuine multi-state SCC — off sl's fragment — and sl
-  **delegates**: it hands the sub-automaton reachable from `dst` (that SCC together
-  with its whole suffix) to `Λ`, and splices the returned formula in as `Final(dst)`.
-
-sl is thus a **decorator** over `Λ`: it peels the very-weak envelope it can label
-exactly and defers each hard core to `Λ`, which then runs on a *smaller* automaton
-than the whole. The construction is sound whenever `Λ` is — a delegated label that
-is exactly the language from `dst` plays the identical role to sl's own
-`Final(dst)`. Taking `Λ` to be sl alone (no other engine) yields the pure
-very-weak engine, which simply declines when it meets a non-marguerite.
+How `Λ` is obtained is the assembly's choice, not the core's. The intended wiring
+(see "Out of scope" below) is a first-fit chain `Λ = first_fit([sl, next])`: sl
+declines a non-marguerite root, so a marguerite target is reclaimed by sl and a
+multi-state-SCC target falls through to `next`. The core neither knows nor cares
+which happened — it just receives `Λ(dst)`.
 
 ### Why transition acceptance is essential
 
@@ -115,14 +120,22 @@ Guards (`σ`, `σ_i`, `ε`) are symbolic formulas/BDDs: **no `2^AP` enumeration*
 **no determinization**. Work and output size scale with the automaton's states and
 edges, not with the alphabet.
 
-### Well-foundedness
+### Out of scope: assembly responsibilities
 
-`Final` recurses only through stems; petals are summarized in place by the
-equation and never recursed. Because stems descend strictly, the exit graph is a
-**DAG** — the recursion has no infinite descent and bottoms out at marguerites
-with no stems (pure `STAY∞`). With memoization each state is labeled once. A stem
-into a non-marguerite is *not* recursed by sl: it is delegated to `Λ` (see above),
-so it is a leaf of sl's own recursion; with no `Λ` to call, sl declines there.
+Deliberately **not** the core function's concern — pushed to the assembly that
+drives the labeling. The core computes one local label and trusts its inputs:
+
+- **Well-foundedness / termination.** That the marguerites form a DAG (stems
+  descend, nothing loops back illegally) so the `Λ`-recursion bottoms out. The core
+  assumes its precondition and returns one label; whether the global walk
+  terminates — and whether that condition is later relaxed — is the assembly's.
+- **The labeler `Λ` being well-founded.** The core calls `Λ(dst)` and trusts the
+  result: that `Λ` itself terminates and returns a correct label is the assembly's
+  contract.
+- **Dispatch and root handling.** The first-fit wiring, sl declining a
+  non-marguerite root, and the rule that every handoff to `next` strictly shrinks
+  the automaton — all assembly-level. Stripping these from the core is the point:
+  the core *is* just the marguerite equation.
 
 ### Expressivity (open)
 
