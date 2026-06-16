@@ -34,14 +34,14 @@ from typing import List, Tuple, TYPE_CHECKING
 
 import spot
 
-from aut2ltl.contract import LTLFormulaResult
 from aut2ltl.language import Language
+from aut2ltl.result import Result, Status
 
 if TYPE_CHECKING:
     from aut2ltl.contract import Translator
 
 _F = spot.formula
-_TECH = {"sl"}
+_NAME = "sl"
 
 
 def _or(fs: List["spot.formula"]) -> "spot.formula":
@@ -88,13 +88,14 @@ class SlCore:
     def __init__(self, child: "Translator") -> None:
         self._child = child
 
-    def __call__(self, lang: "Language") -> "LTLFormulaResult":
+    def __call__(self, lang: "Language") -> "Result":
         aut = lang.tgba()
         q = aut.get_init_state_number()
+        res = Result.start(_NAME)                   # start OK, credit ourselves
 
         # Accept iff q is a marguerite (only self-loops come back to it).
         if _has_non_self_incoming(aut, q):
-            return LTLFormulaResult.decline(_TECH)
+            return res.fail(Status.DECLINED, "initial state is not a marguerite")
 
         bdict = aut.get_dict()
         m = aut.acc().num_sets()
@@ -109,17 +110,14 @@ class SlCore:
             else:
                 stems.append((guard, e.dst))
 
-        # Delegate each stem to Λ on the re-rooted Language; one decline poisons q.
-        # Credit the techniques of the children actually used (provenance on the
-        # result envelope — the formula math is untouched).
+        # Delegate each stem to Λ; credit it in, bail on NOK (propagating reason).
         children: List["spot.formula"] = []
-        tech = set(_TECH)
         for _, dst in stems:
-            res = self._child(Language.of(_reroot(aut, dst)))
-            if not res.ok:
-                return LTLFormulaResult.decline(_TECH)
-            children.append(res.formula)
-            tech |= res.technique
+            child = self._child(Language.of(_reroot(aut, dst)))
+            res.credit(child)
+            if res.nok:
+                return res
+            children.append(child.formula)
 
         sigma = _or([g for g, _ in petals])
 
@@ -131,4 +129,5 @@ class SlCore:
         eps = _or([_F.And([g, _F.X(phi)]) for (g, _), phi in zip(stems, children)])
         leave = _F.U(sigma, eps)
 
-        return LTLFormulaResult(_F.Or([stay, leave]), tech)
+        res.formula = _F.Or([stay, leave])         # finish: fill the formula
+        return res

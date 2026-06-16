@@ -14,13 +14,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
 
-from aut2ltl.contract import LTLFormulaResult  # noqa: E402
 from aut2ltl.language import Language  # noqa: E402
+from aut2ltl.result import Result  # noqa: E402
 from aut2ltl.sl.sl_core import SlCore  # noqa: E402
 
 
-def _decline(_lang: "Language") -> "LTLFormulaResult":
-    return LTLFormulaResult.decline({"delegate"})
+def _decline(_lang: "Language") -> "Result":
+    return Result.decline()
 
 
 def _fix_first(lang: "Language") -> "LTLFormulaResult":
