@@ -1,0 +1,20 @@
+config                     cases  answ valid false  decl    bTO   bCR unver    DAGsum tempsum    build
+default                       35    35    35     0     0      0     0     0       487     119     9.05
+acc                           35     9     9     0    26      0     0     0        23       0    10.78
+decompose+acc                 35     9     9     0    26      0     0     0        23       0    11.11
+weak                          35    23    21     0    12      0     0     2      9602    1710    29.63
+decompose+weak                35    23    22     0    12      0     0     1      6238    1083    32.05
+buchi                         35    27    24     0     6      2     0     2     20342    3552    34.07
+decompose+buchi               35    29    28     0     6      0     0     1     12762    2254    43.00
+cobuchi                       35     3     2     0    32      0     0     1     36992    6838     7.38
+decompose+cobuchi             35     3     2     0    32      0     0     1     36992    6838     7.39
+bls                           35    31    24     0     0      4     0     5    122989   22010    45.62
+decompose+bls                 35    34    28     0     0      1     0     3    104905   18962    56.86
+str                           35    31    28     0     0      4     0     2     45504    8321    40.59
+decompose+str                 35    34    33     0     0      1     0     1     37956    7030    51.68
+sl                            35    30    30     0     5      0     0     0       149      44     1.92
+decompose+sl                  35    30    30     0     5      0     0     0       145      49     1.95
+sl_driven+str                 35    34    34     0     0      1     0     0       454     106     6.62
+decompose+sl_driven+str       35    35    35     0     0      0     0     0       487     119     8.90
+
+SUCCESS
