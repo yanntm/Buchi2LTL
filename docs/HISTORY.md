@@ -512,3 +512,48 @@ both at every nesting level. Exposed a typed public `builders.own_simplify`
 Verified: `h W b`/`c W d` → source, `d R e` → d M e-fold, 8ap HOA → `h W b`.
 survey.py SUCCESS (DAG 488→487); kr_r4_audit CLEAN; build_portfolio/
 contract_combinators/options ALL OK/PASS.
+
+## 2026-06-16 — LTL-definability gate moved off the sbacc form; Muller cap removed
+
+- **Regression**: monolithic (non-`decompose`) cascade paths (`acc`/`weak`/
+  `buchi`/`cobuchi`/`str`/`bls`) reported `NOT_LTL` for `GFa & GFb & GFc` — a
+  formula written *in* LTL, so trivially LTL-definable. A false impossibility.
+- **Root cause**: the gate (commit `fa900a2`) tested `IsAperiodicSemigroup` on
+  the cascade's own `det_parity_sbacc()` automaton. Forcing STATE-BASED
+  acceptance (`sbacc`) degeneralizes generalized-Büchi `Inf(0)&Inf(1)&Inf(2)`
+  into a "which mark am I waiting for" counter — a real cyclic group in THAT
+  automaton's transition monoid (GAP: 5 states, |T|=43, non-aperiodic), even
+  though the language is LTL. Aperiodicity is a property of the SYNTACTIC monoid;
+  the sbacc-inflated form is the wrong object. The same language in generic form
+  is 1 state, |T|=1, aperiodic. The `conclusive = n <= sat_min_threshold` hedge
+  was also unsound (small ≠ minimal, and `det_parity_sbacc` never SAT-minimizes).
+- **Why `decompose` never misfired**: it splits the `&` into `GFa`/`GFb`/`GFc`
+  *before* the gate, so no 3-way conjunct is ever degeneralized.
+- **Fix** (gate on a sbacc-FREE form, before the build):
+  - `language.py` — `Language` now HOLDS an `ltl_definable` `(definable,
+    conclusive)` tag (`set_ltl_definable` / `ltl_definable`); it does not derive
+    it (floor cannot import kr).
+  - `kr/gap/aperiodic.py` (new) — `is_aperiodic_gens`: minimal GAP script
+    (`Semigroup` + `IsAperiodicSemigroup`, NO holonomy), the cheap LTL oracle.
+  - `kr/ltl_tester.py` (new) — `label_ltl_definable(lang)`: runs the oracle on
+    `det_generic_minimal()` (deterministic, generic, SAT-min when small), caches
+    the verdict on the Language. `conclusive` iff the form was state-minimal.
+  - `kr/aut2cas.py` — the gate now runs `label_ltl_definable` BEFORE
+    `decompose_lang` (skips the explosive holonomy build on non-LTL) and on the
+    right form; the old post-build `casc.aperiodic` block + `_sat_min_threshold`
+    are removed. One choke point for all cascade members (top + inner core share
+    the single `as_translator`).
+- **Muller cap removed** (`kr/cascade/config_graph.py`, `kr/options.py`): the
+  good-Muller-set enumeration was capped by `KR_MULLER_SCC_LIMIT` (12), above
+  which it emitted the whole-SCC set only — an APPROXIMATION that can build a
+  non-equivalent formula. Removed entirely: enumeration is now always exact; if
+  it explodes the run times out (honest), never approximates. The dead option is
+  gone too.
+- **Verification**: probes showed `GFa&GFb&GFc` 5-state/|T|=43/non-aperiodic
+  (parity+sbacc) vs 1-state/|T|=1/aperiodic (generic); counting automata stay
+  non-aperiodic on BOTH forms (no false negatives). R4 audit CLEAN. Survey sweep
+  SUCCESS, 17/17 configs, zero `NOT_LTL` on the LTL corpus. Kinská sweep SUCCESS,
+  strict improvement: 20 genuine `counting_buchi_*` cases that previously
+  `BUILD_TIMEOUT` (build-first, then check) now report `NOT_LTL` quickly
+  (cheap-check-first), 0 regressions. Reference baselines regenerated
+  (`tests/logs/reference/20260616/`, kinská overwritten).
