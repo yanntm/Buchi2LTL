@@ -1,12 +1,148 @@
-# The sl algorithm — formalization (core, current version)
+# The sl algorithm
 
-This is a faithful spec of the **core** self-loop backward-labeling engine in
-`reconstruction.py` (`reconstruct_ltl` / its inner `label`). It is meant to match
-the code as fact, so that we can reason about — and, where the formalization comes
-out awkward, clean up — the code against it.
+Two parts, read in order:
 
-**Scope.** This document covers ONLY core sl. It deliberately omits the two
-non-core seams that the code interleaves into `label`:
+- **Algorithm presentation** — the pure, clean formulation we are converging on.
+  This is the spec to implement, in isolation from the current code.
+- **Synopsis of current code** — a code-faithful description of today's
+  `reconstruction.py` engine, kept to compare against (the implementation the pure
+  version will replace).
+
+---
+
+## Algorithm presentation
+
+The pure formulation of core **sl** ("self-loop") backward labeling. It is written
+to be read and implemented on its own terms; the synopsis below records how the
+current code realizes a special-cased form of the same thing.
+
+### Setting
+
+Input is a **TGBA** `A = (Q, Σ, δ, q0, {F_1,…,F_m})`, `Σ = 2^AP`. An edge is
+`(src, g, dst, A)` with a Boolean guard `g` (symbolic — a BDD over `AP`) and a set
+`A ⊆ {1,…,m}` of the acceptance sets it belongs to. A run is accepting iff for
+**every** set `i` it takes infinitely many `i`-marked edges (transition-based
+generalized Büchi). `m = 0` means every infinite run is accepting.
+
+We compute, per state `q`, an LTL formula `Final(q)` whose models are exactly the
+words `A` accepts from `q`.
+
+### The marguerite
+
+sl applies to a state that is a **marguerite** (daisy): a singleton SCC — a center
+`q` with **petals** (self-loops `q → q`) and **stems** (exits `q → dst`, `dst ≠ q`)
+whose targets never reach back to `q`. Equivalently, the only cycles through `q`
+are its own self-loops and the exit relation descends strictly. A whole automaton
+is in scope when every state is a marguerite, i.e. it is **very-weak (1-weak)**:
+every SCC is a single, possibly self-looping, state.
+
+Split `q`'s out-edges into petals `SL(q)` and stems `EX(q)`, and abbreviate:
+
+```
+σ    = ⋁ { g : (g,A) ∈ SL(q) }                       all petal guards
+σ_i  = ⋁ { g : (g,A) ∈ SL(q), i ∈ A }                petals carrying acc set i
+ε    = ⋁ { g ∧ X Final(dst) : (g,dst,A) ∈ EX(q) }     the stems
+```
+
+### The labeling equation
+
+A run from `q` either ends up staying in `q` forever, or eventually leaves.
+**Stay or leave** — and the language is the union of the two:
+
+```
+Final(q)  =  STAY∞(q)  ∨  LEAVE(q)
+
+STAY∞(q)  =  G(σ)  ∧  ⋀_{i=1..m} GF(σ_i)
+LEAVE(q)  =  σ  U  ε
+```
+
+### The three moves
+
+- **Leave** (`ε`). Take a stem: assert its guard now, `X Final(dst)` after.
+  Multiple/overlapping stems are just a disjunction — nondeterminism needs no
+  determinization.
+
+- **Stay, finitely** (the left side of the `U` in `LEAVE`). Hold the boolean `σ`
+  and *forget acceptance*: a finite stay takes only finitely many petals, so their
+  marks cannot help (acceptance needs infinitely many). The **strong** `U` forces
+  an actual exit, after which `Final(dst)` must carry acceptance.
+
+- **Stay, infinitely** (`STAY∞`). Assert the TGBA acceptance *restricted to the
+  petals*: `G(σ)` lets any petal be taken at each step (mix freely); `⋀ GF(σ_i)`
+  forces, for each acc set, one of its petals infinitely often.
+
+### Degenerate cases (no special-casing needed)
+
+The single equation already covers the corners — this is the point of writing it
+this way:
+
+- **no stems**: `ε = false` ⇒ `LEAVE = σ U false = false` ⇒ `Final = STAY∞`.
+- **a petal-unreachable acc set** `i` (`σ_i = false`): `GF(false) = false` ⇒
+  `STAY∞ = false` ⇒ `Final = LEAVE` — staying cannot accept, so the run *must*
+  leave; the strong `U` drops out on its own (no separate "must-leave" rule).
+- **`m = 0`**: empty conjunction is `true` ⇒ `STAY∞ = G(σ)`.
+
+### Open recursion: a fallback labeler
+
+`Final` is defined by recursion through stems — `ε` mentions `Final(dst)`. We
+leave that recursion **open**: sl is parameterized by a *labeler* `Λ`, a Translator
+supplied at construction that maps a sub-automaton to an LTL label for its
+language. At a stem target `dst`:
+
+- if `dst` is a marguerite, continue with sl's own equation (`Final(dst)`);
+- otherwise `dst` lies in a genuine multi-state SCC — off sl's fragment — and sl
+  **delegates**: it hands the sub-automaton reachable from `dst` (that SCC together
+  with its whole suffix) to `Λ`, and splices the returned formula in as `Final(dst)`.
+
+sl is thus a **decorator** over `Λ`: it peels the very-weak envelope it can label
+exactly and defers each hard core to `Λ`, which then runs on a *smaller* automaton
+than the whole. The construction is sound whenever `Λ` is — a delegated label that
+is exactly the language from `dst` plays the identical role to sl's own
+`Final(dst)`. Taking `Λ` to be sl alone (no other engine) yields the pure
+very-weak engine, which simply declines when it meets a non-marguerite.
+
+### Why transition acceptance is essential
+
+A single marguerite expresses `⋀_i GF(σ_i)` with a *different petal set per
+acceptance set*. State-based acceptance can only mark a state as a whole
+(all-or-nothing), so it could not say which petals feed which set without
+splitting the state. Transition-based (TGBA) acceptance is exactly what lets one
+state encode a rich generalized-Büchi condition — "a lot in a single state."
+
+### Cost and representation
+
+Guards (`σ`, `σ_i`, `ε`) are symbolic formulas/BDDs: **no `2^AP` enumeration** and
+**no determinization**. Work and output size scale with the automaton's states and
+edges, not with the alphabet.
+
+### Well-foundedness
+
+`Final` recurses only through stems; petals are summarized in place by the
+equation and never recursed. Because stems descend strictly, the exit graph is a
+**DAG** — the recursion has no infinite descent and bottoms out at marguerites
+with no stems (pure `STAY∞`). With memoization each state is labeled once. A stem
+into a non-marguerite is *not* recursed by sl: it is delegated to `Λ` (see above),
+so it is a leaf of sl's own recursion; with no `Λ` to call, sl declines there.
+
+### Expressivity (open)
+
+The in-scope shape is the **nondeterministic very-weak (1-weak) TGBA**. The exact
+LTL subclass it captures is left open here: the clean anchor is Gastin–Oddoux
+(*very-weak alternating* automata ≡ full LTL), of which the nondeterministic
+very-weak class is a strict subset; whether it coincides with a Manna–Pnueli level
+is not settled in this note.
+
+---
+
+## Synopsis of current code
+
+A faithful description of the **core** self-loop backward-labeling engine in
+`reconstruction.py` (`reconstruct_ltl` / its inner `label`), as it stands. It is
+meant to match the code as fact, so we can compare it against the presentation
+above and clean the code toward it.
+
+**Scope.** This covers ONLY core sl. It deliberately omits the two non-core seams
+that the code interleaves into `label`:
 
 - the **t2 / terminal-SCC fragment** reintegration (`scc_fragments`,
   `scc_entry_I`, `direct_scc_sync_attach`, the t2 short-circuit), and
