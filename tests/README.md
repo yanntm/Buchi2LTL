@@ -30,6 +30,10 @@ file is just the index.
 - `survey_sweep.sh` — sweep `survey.py` across `--use` configurations
   (techniques/flags head-to-head) on the curated corpus; per-config CSV + `.txt`
   and a cross-config `SUMMARY.txt`.
+- `survey_summary.sh <dir>` — (re)build that `SUMMARY.txt` from the per-config
+  CSVs already in a dir, re-running no tool. The sweep calls it for its summary
+  step (single source of truth), and it recovers the summary for an OLD
+  reference folder whose per-config `.txt` was never kept.
 - `kinska_sweep.sh` — `survey.py` over the Kinská sample corpus
   (`samples/kinska/`) with the DEFAULT portfolio only, strict 15s/run, one flat
   log (`kinska.csv`/`.txt` + `SUMMARY.txt`) into `samples/kinska/logs/reference/`.
@@ -58,10 +62,15 @@ regression(s)`), then promote:
 
 - **survey** — copy the new per-config CSVs to a NEW dated folder
   `tests/logs/reference/<YYYYMMDD>/` (append `_1`, `_2`, … only to DISAMBIGUATE a
-  same-day collision — the clean date is the canonical/newest baseline). The
-  `.gitignore` re-includes `tests/logs/reference/**/*.csv`.
-- **kinská** — overwrite `tests/samples/kinska/logs/reference/kinska.csv` in place
-  (single flat baseline; git history keeps the prior).
+  same-day collision — the clean date is the canonical/newest baseline). Or just
+  point the sweep straight at the new folder. The `.gitignore` re-includes
+  `tests/logs/reference/**/*.csv` plus the token-compact `SUMMARY.txt` and the
+  per-config `.txt`, so commit those too (`sweep.log`, the bulky per-formula
+  stderr trace, stays ignored). For older folders that predate keeping the
+  `.txt`, regenerate just the summary with `survey_summary.sh <folder>`.
+- **kinská** — overwrite `tests/samples/kinska/logs/reference/kinska.csv` (and its
+  `.txt` / `SUMMARY.txt`) in place (single flat baseline; git history keeps the
+  prior). Squash in place once green on size/results vs. the current reference.
 
 Then commit the baseline move as ONE commit (it is a bulk log regeneration, the
 exception to one-commit-per-file). Logs are otherwise never committed.
