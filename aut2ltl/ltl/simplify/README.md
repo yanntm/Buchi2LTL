@@ -79,16 +79,25 @@ Later additions (same module):
   `FG α ∨ GF β → FG(α|¬β) ∨ GF β`. Care-set aggregates all sibling invariants
   (`∧ ψ_k` / `¬(∨ β_k)`); φ restricted via `prop_cofactor`, accepted only when
   strictly smaller. No temporal node added/removed.
-- **W/M expansion fold** (in `_find_fold_or` / `_find_fold_and`, flagged
-  there as an independent rule): the weak-until / strong-release laws
-  `f W g ≡ Gf ∨ (f U g)` and `f M g ≡ Ff ∧ (f R g)`, accepting the
-  construction's ¬g-strengthened modal body — `G(f ∧ ¬g) ∨ (f U g) → f W g`
-  (sound since `G(f∧¬g) ∨ (fUg) ≡ Gf ∨ (fUg)`), dual `F(f ∨ ¬g) ∧ (f R g) →
-  f M g`. The body must be exactly `f` or `f` plus a single ¬g conjunct (any
-  other extra conjunct makes `G(body)` strictly stronger — unsound). Trades
-  two temporals (G,U) for one (W), so it composes with the cofactoring rule
-  in the same bottom-up walk: e.g. `G(!b & h) | ((!b & h) U b)` →cofactor→
-  `G(!b & h) | (h U b)` →W-fold→ `h W b` (the source).
+- **W/M/R/U expansion fold** (in `_find_fold_or` / `_find_fold_and`, flagged
+  there as independent rules): the full quartet of binary-modal expansion
+  laws, each with the construction's strengthened modal body, sound because
+  the strengthening collapses back to the plain law:
+  - `f W g ≡ Gf ∨ (f U g)`  — `G(f ∧ ¬g) ∨ (f U g) → f W g`  (Or)
+  - `f M g ≡ Ff ∧ (f R g)`  — `F(f ∨ ¬g) ∧ (f R g) → f M g`  (And, dual)
+  - `f R g ≡ Gg ∨ (f M g)`  — `G(g ∧ ¬f) ∨ (f M g) → f R g`  (Or, M-disjunct
+    sibling of the W-fold; sound since `G(g∧¬f) ∨ (fMg) ≡ Gg ∨ (fMg)`)
+  - `f U g ≡ Fg ∧ (f W g)`  — `F(g ∨ ¬f) ∧ (f W g) → f U g`  (And, dual of
+    the R-fold; sound since `F(g∨¬f) ∧ (fWg) ≡ Fg ∧ (fWg)` — the `Gf` branch
+    of `f W g` makes `g∨¬f` never true, forcing the `f U g` branch)
+
+  In every case the strengthened body must be exactly the bare arm or that arm
+  plus a single negated-other-arm term (any other extra term makes `G(body)` /
+  `F(body)` strictly stronger / weaker — unsound; regression-tested as
+  must-not-fire). Each trades two temporals for one, so it composes with the
+  cofactoring rule in the same bottom-up walk: e.g. `G(!b & h) | ((!b & h) U b)`
+  →cofactor→ `G(!b & h) | (h U b)` →W-fold→ `h W b` (the source); likewise
+  `G(!d & e) | (d M e)` →R-fold→ `d R e`.
 - **Boolean left-arm cofactoring** (`_arm_cofactor`): for a binary
   temporal with BOTH arms purely propositional, the left arm is evaluated
   only on the positions where the right arm has not yet fired, so it can be
