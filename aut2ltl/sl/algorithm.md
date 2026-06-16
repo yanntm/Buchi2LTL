@@ -24,21 +24,24 @@ form of the same thing.
 
 ### Setting
 
-Input is a **TGBA** `A = (Q, Σ, δ, q0, {F_1,…,F_m})`, `Σ = 2^AP`. An edge is
-`(src, g, dst, A)` with a Boolean guard `g` (symbolic — a BDD over `AP`) and a set
-`A ⊆ {1,…,m}` of the acceptance sets it belongs to. A run is accepting iff for
-**every** set `i` it takes infinitely many `i`-marked edges (transition-based
-generalized Büchi). `m = 0` means every infinite run is accepting.
+A Translator receives a **Language** — the floor handle over a
+language-equivalence class — *not* a concrete automaton. It asks the Language for
+the representation it needs; sl asks for the **TGBA** form, the shape in which it
+can (sometimes) peel the initial state. The Language builds and caches that form on
+demand: the TGBA is *offered*, never assumed.
 
-The core takes a single marguerite state `q` (below) plus a labeler `Λ`, and
-returns an LTL formula `Final(q)` whose models are exactly the words accepted from
-`q` — *provided* `Λ(dst)` is the correct label of each exit target `dst`.
+That TGBA form is `A = (Q, Σ, δ, q0, {F_1,…,F_m})`, `Σ = 2^AP`. An edge is
+`(src, g, dst, A)` with a Boolean guard `g` (symbolic — a BDD over `AP`) and the
+set `A ⊆ {1,…,m}` of acceptance sets it belongs to. A run is accepting iff for
+**every** set `i` it takes infinitely many `i`-marked edges (transition-based
+generalized Büchi); `m = 0` means every infinite run is accepting.
 
 ### The marguerite
 
-The core's input is a **marguerite** (daisy): one center `q` with **petals**
-(self-loops `q → q`) and **stems** (exits `q → dst`, `dst ≠ q`). It treats the
-petals structurally and each stem target only through `Λ(dst)`.
+In the TGBA form, the core looks at the **initial state** `q` and treats it as a
+**marguerite** (daisy): a center `q` with **petals** (self-loops `q → q`) and
+**stems** (exits `q → dst`, `dst ≠ q`). It treats the petals structurally and each
+stem target only through `Λ`.
 
 It *assumes*, as a precondition the assembly guarantees, that the stems leave for
 good — no target reaches back to `q`, so `q` is a singleton SCC. The core neither
@@ -61,14 +64,17 @@ label:
 
 ```
 Label       =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ = decline
-Translator  =  Aut → Label                   -- Aut rooted & trimmed to reachable
+Translator  =  Language → Label              -- a Language, not a concrete automaton
 ```
 
-The assembly's glue is two combinators:
+A `Language` offers representations on demand (`tgba`, deterministic parity, …) and
+caches them. sl asks for the **TGBA** form, `A = tgba(L)`; `A↓dst` is the
+sub-automaton rooted at `dst` (reachable-from-`dst`), re-wrapped as a `Language` by
+`of(·)`. The assembly's glue is two combinators:
 
 ```
-first(s, t)(A)  =  case s(A) of  Some φ → Some φ ;  ⊥ → t(A)
-decline(A)      =  ⊥
+first(s, t)(L)  =  case s(L) of  Some φ → Some φ ;  ⊥ → t(L)
+decline(L)      =  ⊥
 ```
 
 The core is one higher-order function `sl`, parameterized by the labeler `Λ` it
@@ -76,11 +82,11 @@ uses for its exit targets, and itself a `Translator`:
 
 ```
 sl(Λ) : Translator
-sl(Λ)(A) =
-    let q = init(A) in
+sl(Λ)(L) =
+    let A = tgba(L); q = init(A) in
     if hasNonSelfIncoming(q) then ⊥                 -- not a marguerite (local, N&S)
     else                                            -- q is a marguerite
-      let children = [ Λ(A↓dst) | (q, g, dst, _) ∈ δ, dst ≠ q ]   -- exits, in order
+      let children = [ Λ(of(A↓dst)) | (q, g, dst, _) ∈ δ, dst ≠ q ]   -- exits, in order
       in if any child = ⊥ then ⊥                    -- a stem we can't label poisons q
          else Some( STAY∞(q) ∨ LEAVE(q, children) )
 ```
@@ -113,9 +119,12 @@ slEngine  =  fix (λ Λ. first(sl(Λ), decline))      -- pure sl (delegate = ⊥
 
 `sl(Λ*)` is a **decorator** over `Λ*`: it peels each marguerite it roots at and
 defers every exit to `Λ*`, which tries `sl` again (reabsorbing marguerite targets)
-and falls through to `delegate` on multi-state-SCC targets. Passing only `sl`
-(`delegate = decline`) recovers basic sl exactly — same decline verdict
-(re-rooting-invariant), same labels (downward induction), same poisoning.
+and falls through to `delegate` on multi-state-SCC targets. Because each exit is
+handed back as a `Language` (`of(A↓dst)`), the delegate is free to ask it for a
+*different* representation — e.g. a deterministic parity form — independently of
+sl's choice of TGBA. Passing only `sl` (`delegate = decline`) recovers basic sl
+exactly — same decline verdict (re-rooting-invariant), same labels (downward
+induction), same poisoning.
 
 ### The three moves
 
