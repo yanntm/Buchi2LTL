@@ -69,45 +69,10 @@ for use in "${USES[@]}"; do
   cat "$rep"
 done
 
-# Dense cross-config summary. equiv is CSV column 9, dag_nodes column 5; neither
-# is preceded by a comma-bearing field, so -F, is safe here.
-summary="$OUTDIR/SUMMARY.txt"
-{
-  # CSV columns: 5 dag_nodes, 6 temporals, 9 build_s, 10 equiv (none preceded by
-  # a comma-bearing field, so -F, is safe). answers = built (not declined / not a
-  # build problem); totals are over answers only.
-  printf "%-26s %5s %5s %5s %5s %5s %6s %5s %5s %9s %7s %8s\n" \
-         config cases answ valid false decl bTO bCR unver DAGsum tempsum build
-  total_false=0
-  for use in "${USES[@]}"; do
-    label="$(name_of "$use")"
-    csv="$OUTDIR/$label.csv"
-    [ -f "$csv" ] || continue
-    line=$(awk -F, 'NR>1 {
-        n++; e=$10;
-        if      (e=="True")            v++;
-        else if (e=="FALSE")           f++;
-        else if (e=="UNVERIFIED_SIZE") uv++;
-        else if (e=="DECLINED")        d++;
-        else if (e ~ /^BUILD_TIMEOUT/) bto++;
-        else if (e ~ /^CRASH/)         bcr++;
-        if (e=="True"||e=="FALSE"||e=="SPOT_TIMEOUT"||e=="UNVERIFIED_SIZE"||e ~ /^SPOT_ERR/) {
-          ans++;
-          if ($5 ~ /^[0-9]+$/)   dag+=$5;
-          if ($6 ~ /^[0-9]+$/)   tmp+=$6;
-          if ($9 ~ /^[0-9.]+$/)  bld+=$9;
-        }
-      } END {
-        printf "%-26s %5d %5d %5d %5d %5d %6d %5d %5d %9d %7d %8.2f %d",
-               L, n, ans, v, f, d, bto, bcr, uv, dag, tmp, bld, f
-      }' L="$label" "$csv")
-    f_count="${line##* }"
-    printf "%s\n" "${line% *}"
-    total_false=$((total_false + f_count))
-  done
-  echo
-  [ "$total_false" -gt 0 ] && echo "FAIL" || echo "SUCCESS"
-} | tee "$summary"
+# Dense cross-config summary, from the per-config CSVs just written. Factored
+# into survey_summary.sh so a fresh sweep and a CSV-only regeneration produce the
+# identical table (single source of truth).
+bash "$(dirname "$0")/survey_summary.sh" "$OUTDIR"
 
 echo
-echo "logs: $OUTDIR   summary: $summary"
+echo "logs: $OUTDIR   summary: $OUTDIR/SUMMARY.txt"
