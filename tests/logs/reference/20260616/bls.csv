@@ -1,0 +1,36 @@
+formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
+true,B,B,bls,1,0,1,1.0,1.144,True,1
+false,B,B,bls,1,0,1,1.0,1.142,True,0
+a,G,B,bls,1,0,1,1.0,1.139,True,a
+Ga,S,S,bls,2,1,2,1.0,1.149,True,Ga
+G(a | b),S,S,bls,11,1,21,1.9,1.158,True,(a | b) & ((!a & !b) | G((!a & !b) | X(a | b)))
+G(a -> X b),S,S,bls,353,79,3100,8.8,1.184,True,((a R (!a | X(b & (!a | (X(a U (!a & b)) & ((!a | Xb) U (a & X(!a & b))))) & ((a…
+a & X a,S,B,bls,3,0,4,1.3,1.139,True,a & Xa
+G(a -> X a),S,S,bls,800,141,1527930,1909.9,1.252,UNVERIFIED_SIZE,<unflattened DAG: 1527930 tree nodes>
+G(a & X a),S,S,bls,2,1,2,1.0,1.139,True,Ga
+X a,G,B,bls,2,0,2,1.0,1.158,True,Xa
+X X a,G,B,bls,3,0,3,1.0,1.133,True,XXa
+X X X a,G,B,bls,4,0,4,1.0,1.148,True,XXXa
+X(a & X a),G,B,bls,23645,4134,1537463151,65022.8,3.031,UNVERIFIED_SIZE,<unflattened DAG: 1537463151 tree nodes>
+Fa,G,G,bls,2,1,2,1.0,1.135,True,Fa
+a U b,G,G,bls,8,1,13,1.6,1.135,True,b | ((a & !b) U (a & !b & Xb))
+F(a & b),G,G,bls,11,1,21,1.9,1.126,True,(a & b) | ((!a | !b) & F((!a | !b) & X(a & b)))
+F(a & X b),G,?,bls,282,64,2739,9.7,1.166,SPOT_TIMEOUT,(((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a &…
+a | X b,G,B,bls,4,0,4,1.0,1.163,True,a | Xb
+Fa | Gb,O,O,bls,89,21,356,4.0,1.163,True,a | ((((!a & b) U (!a & b & Xa)) | ((!b | ((!a & b) U (!a & b & X(a | !b)))) & F…
+Ga | Gb,O,S,bls,257,46,6438,25.1,1.189,True,(((a & !b) | ((a & b) U (a & b & X(a & !b)))) & (!a | b | Xa) & ((!a | !b) R (!a…
+Fa & Gb,O,O,bls,51,11,159,3.1,1.155,True,((a & b) | ((!a & b) U (!a & b & X(a & b)))) & ((a | !b) R (a | !b | X(!a | !b |…
+(a U b) | Gc,O,O,bls,2598,474,2922135,1124.8,1.605,UNVERIFIED_SIZE,<unflattened DAG: 2922135 tree nodes>
+Ga | Fb,O,O,bls,89,21,356,4.0,1.151,True,b | ((((a & !b) U (a & !b & Xb)) | ((!a | ((a & !b) U (a & !b & X(!a | b)))) & F…
+GFa,R,R,bls,23,10,55,2.4,1.131,True,((!a R Fa) & G(!a | X(!a R Fa)) & (Ga | F(!a & X(!a U Ga)))) | ((!a M Fa) & G((!…
+G(a -> F b),R,R,bls,19,4,48,2.5,1.144,True,((a & !b) R (!a | Fb)) & (((!a | b) & ((a & !b) | G((a & !b) | X(!a | b)))) | G(…
+G(a | F b),R,R,bls,19,4,48,2.5,1.137,True,((!a & !b) R (a | Fb)) & (((a | b) & ((!a & !b) | G((!a & !b) | X(a | b)))) | G(…
+GFa & GFb,R,R,bls,15641,2629,90789017745027609,5804553273130.1,2.291,UNVERIFIED_SIZE,<unflattened DAG: 90789017745027609 tree nodes>
+GFa & GFb & GFc,R,R,-,,,,,15.021,BUILD_TIMEOUT>15s,
+G(a -> F b) & G(c -> F d),R,R,-,,,,,15.016,BUILD_TIMEOUT>15s,
+G(p -> (q U r)),R,R,bls,492,84,20291,41.2,1.287,SPOT_ERR:too-many-acceptance-sets,((!p | r | (q & X(r | ((q & !r) U (q & !r & Xr))))) & ((((p & !r) | X(!p | r | (…
+FGa,P,P,bls,14,6,27,1.9,1.147,True,((!a U Ga) | F(!a & X(!a U Ga))) & G(!a | X(!a R Fa))
+F(a & G b),P,P,bls,32,7,126,3.9,1.203,True,((a & b) | ((!a | !b) & F((!a | !b) & X(a & b)))) & (((!a | !b) U (a & Gb)) | (F…
+FGa | FGb,P,P,bls,78530,14269,2666068033502606777,33949675709953.0,7.379,UNVERIFIED_SIZE,<unflattened DAG: 2666068033502606777 tree nodes>
+GFa -> GFb,T,T,-,,,,,15.028,BUILD_TIMEOUT>15s,
+GFa & FGb,T,T,-,,,,,15.030,BUILD_TIMEOUT>15s,

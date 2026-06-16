@@ -1,5 +1,0 @@
-survey: 35 formulas  (--use sl)
-answers 30/35: validated 30, spot_timeout 0, unverified 0, spot_err 0, false 0
-declined 5, not_ltl 0, build_timeout 0, build_crash 0
-totals over answers: DAG=149 temporals=44 build=1.887s
-SUCCESS

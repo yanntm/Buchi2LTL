@@ -21,8 +21,9 @@ tests/**/__pycache__/
 tests/**/*.pyc
 
 # Reference survey sweeps are committed per release (re-include despite *.csv).
+# Dated subfolders (tests/logs/reference/<YYYYMMDD>/) -> recurse with **/*.csv.
 !tests/logs/reference/
-!tests/logs/reference/*.csv
+!tests/logs/reference/**/*.csv
 !tests/samples/kinska/logs/reference/
 !tests/samples/kinska/logs/reference/*.csv
 

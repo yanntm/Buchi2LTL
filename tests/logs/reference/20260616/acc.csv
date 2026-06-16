@@ -1,0 +1,36 @@
+formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
+true,B,B,acc,1,0,1,1.0,1.186,True,1
+false,B,B,acc,1,0,1,1.0,1.187,True,0
+a,G,B,acc,1,0,1,1.0,1.206,True,a
+Ga,S,S,-,,,,,1.191,DECLINED,
+G(a | b),S,S,-,,,,,1.209,DECLINED,
+G(a -> X b),S,S,-,,,,,1.214,DECLINED,
+a & X a,S,B,acc,3,0,4,1.3,1.201,True,a & Xa
+G(a -> X a),S,S,-,,,,,1.181,DECLINED,
+G(a & X a),S,S,-,,,,,1.246,DECLINED,
+X a,G,B,acc,2,0,2,1.0,1.180,True,Xa
+X X a,G,B,acc,3,0,3,1.0,1.198,True,XXa
+X X X a,G,B,acc,4,0,4,1.0,1.206,True,XXXa
+X(a & X a),G,B,acc,4,0,5,1.2,1.224,True,X(a & Xa)
+Fa,G,G,-,,,,,1.182,DECLINED,
+a U b,G,G,-,,,,,1.185,DECLINED,
+F(a & b),G,G,-,,,,,1.173,DECLINED,
+F(a & X b),G,G,-,,,,,1.185,DECLINED,
+a | X b,G,B,acc,4,0,4,1.0,1.193,True,a | Xb
+Fa | Gb,O,O,-,,,,,1.178,DECLINED,
+Ga | Gb,O,S,-,,,,,1.229,DECLINED,
+Fa & Gb,O,O,-,,,,,1.187,DECLINED,
+(a U b) | Gc,O,O,-,,,,,1.182,DECLINED,
+Ga | Fb,O,O,-,,,,,1.192,DECLINED,
+GFa,R,R,-,,,,,1.192,DECLINED,
+G(a -> F b),R,R,-,,,,,1.186,DECLINED,
+G(a | F b),R,R,-,,,,,1.188,DECLINED,
+GFa & GFb,R,R,-,,,,,1.183,DECLINED,
+GFa & GFb & GFc,R,R,-,,,,,1.196,DECLINED,
+G(a -> F b) & G(c -> F d),R,R,-,,,,,1.357,DECLINED,
+G(p -> (q U r)),R,R,-,,,,,1.192,DECLINED,
+FGa,P,P,-,,,,,1.196,DECLINED,
+F(a & G b),P,P,-,,,,,1.193,DECLINED,
+FGa | FGb,P,P,-,,,,,1.195,DECLINED,
+GFa -> GFb,T,T,-,,,,,1.204,DECLINED,
+GFa & FGb,T,T,-,,,,,1.255,DECLINED,

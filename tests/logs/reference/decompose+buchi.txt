@@ -1,5 +1,0 @@
-survey: 35 formulas  (--use decompose,buchi)
-answers 29/35: validated 28, spot_timeout 0, unverified 1, spot_err 0, false 0
-declined 6, not_ltl 0, build_timeout 0, build_crash 0
-totals over answers: DAG=12759 temporals=2254 build=24.392s
-SUCCESS

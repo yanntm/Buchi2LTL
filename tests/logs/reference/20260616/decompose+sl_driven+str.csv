@@ -1,0 +1,36 @@
+formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
+true,B,B,sl+sl_driven,1,0,1,1.0,0.060,True,1
+false,B,B,sl+sl_driven,1,0,1,1.0,0.064,True,0
+a,G,B,sl+sl_driven,1,0,1,1.0,0.063,True,a
+Ga,S,S,sl+sl_driven,2,1,2,1.0,0.064,True,Ga
+G(a | b),S,S,sl+sl_driven,4,1,4,1.0,0.065,True,G(a | b)
+G(a -> X b),S,S,sl+sl_driven+t2,6,1,6,1.0,0.066,True,G(!a | Xb)
+a & X a,S,B,sl+sl_driven,3,0,4,1.3,0.064,True,a & Xa
+G(a -> X a),S,S,sl+sl_driven,4,2,5,1.2,0.065,True,!a W Ga
+G(a & X a),S,S,sl+sl_driven,2,1,2,1.0,0.063,True,Ga
+X a,G,B,sl+sl_driven,2,0,2,1.0,0.063,True,Xa
+X X a,G,B,sl+sl_driven,3,0,3,1.0,0.064,True,XXa
+X X X a,G,B,sl+sl_driven,4,0,4,1.0,0.066,True,XXXa
+X(a & X a),G,B,sl+sl_driven,4,0,5,1.2,0.064,True,X(a & Xa)
+Fa,G,G,sl+sl_driven,2,1,2,1.0,0.062,True,Fa
+a U b,G,G,sl+sl_driven,3,1,3,1.0,0.067,True,a U b
+F(a & b),G,G,sl+sl_driven,4,1,4,1.0,0.065,True,F(a & b)
+F(a & X b),G,G,buchi+f2+sl+sl_driven,181,40,829,4.6,1.169,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
+a | X b,G,B,sl+sl_driven,4,0,4,1.0,0.064,True,a | Xb
+Fa | Gb,O,O,or2+sl+sl_driven,7,2,8,1.1,0.063,True,Fa | G(!a & b)
+Ga | Gb,O,S,sl+sl_driven,11,3,15,1.4,0.062,True,(a & b) W ((!a & Gb) | (!b & Ga))
+Fa & Gb,O,O,sl+sl_driven,7,2,10,1.4,0.064,True,(!a & Gb) U (a & Gb)
+(a U b) | Gc,O,O,or2+sl+sl_driven,13,4,24,1.8,0.066,True,(a U b) | G(a & !b & c) | ((a & !b & Gc) U (!a & !b & Gc))
+Ga | Fb,O,O,or2+sl+sl_driven,7,2,8,1.1,0.065,True,Fb | G(a & !b)
+GFa,R,R,sl+sl_driven,3,2,3,1.0,0.065,True,GFa
+G(a -> F b),R,R,buchi+sl+sl_driven,19,4,48,2.5,1.144,True,((a & !b) R (!a | Fb)) & (((!a | b) & ((a & !b) | G((a & !b) | X(!a | b)))) | G(…
+G(a | F b),R,R,buchi+sl+sl_driven,19,4,48,2.5,1.141,True,((!a & !b) R (a | Fb)) & (((a | b) & ((!a & !b) | G((!a & !b) | X(a | b)))) | G(…
+GFa & GFb,R,R,and2+sl+sl_driven,7,4,7,1.0,0.064,True,GFa & GFb
+GFa & GFb & GFc,R,R,and3+sl+sl_driven,10,6,10,1.0,0.065,True,GFa & GFb & GFc
+G(a -> F b) & G(c -> F d),R,R,and2+buchi+sl+sl_driven,37,8,95,2.6,2.348,True,((a & !b) R (!a | Fb)) & (((!a | b) & ((a & !b) | G((a & !b) | X(!a | b)))) | G(…
+G(p -> (q U r)),R,R,buchi+sl+sl_driven,86,14,751,8.7,1.168,True,(!p | r | (q & X(r | ((q & !r) U (q & !r & Xr))))) & ((((p & q & !r) R ((p & !r)…
+FGa,P,P,sl+sl_driven,3,2,3,1.0,0.065,True,FGa
+F(a & G b),P,P,sl+sl_driven,5,2,5,1.0,0.063,True,F(a & Gb)
+FGa | FGb,P,P,sl+sl_driven,6,3,6,1.0,0.064,True,F(Ga | Gb)
+GFa -> GFb,T,T,sl+sl_driven,9,4,10,1.1,0.066,True,F(G!a | (b & GFb))
+GFa & FGb,T,T,and2+sl+sl_driven,7,4,7,1.0,0.065,True,FGb & GFa
