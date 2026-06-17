@@ -29,7 +29,8 @@ from typing import Optional
 
 import spot
 
-from aut2ltl.contract import LTLFormulaResult, Translator
+from aut2ltl.contract import Translator
+from aut2ltl.result import Result
 from aut2ltl.language import Language
 
 __all__ = ["SlDriven"]
@@ -44,7 +45,7 @@ class SlDriven:
     def __init__(self, delegate: Translator) -> None:
         self._delegate = delegate
 
-    def __call__(self, lang: Language) -> LTLFormulaResult:
+    def __call__(self, lang: Language) -> Result:
         from aut2ltl.sl.reconstruction import reconstruct_ltl
 
         deleg_tech: set = set()
@@ -54,7 +55,7 @@ class SlDriven:
             # directly (no str()): the DAG-native engine attaches it as a child
             # node WITHOUT flattening — a high-sharing core costs only its DAG.
             r = self._delegate(Language.of(sub))
-            if r.declined or r.formula is None:
+            if not r.ok:
                 return None
             deleg_tech.update(r.technique)
             return r.formula
@@ -63,14 +64,14 @@ class SlDriven:
         try:
             out = reconstruct_ltl(tgba, scc_labeler=labeler)
         except Exception:
-            return LTLFormulaResult.decline()
-        if out.declined or out.formula is None:
-            return LTLFormulaResult.decline()
+            return Result.decline()
+        if not out.ok:
+            return Result.decline()
         rec = out.formula
         try:
             cand = rec if isinstance(rec, spot.formula) else spot.formula(str(rec))
         except Exception:
-            return LTLFormulaResult.decline()
+            return Result.decline()
         # Simplify on equal footing with the rest of the pipeline (sl skips Spot's
         # simplifier; the spliced delegate labels are already simplified).
         try:
@@ -78,6 +79,6 @@ class SlDriven:
             cand = _simp_f(cand)
         except Exception:
             pass
-        tech = set(out.technique or set()) | deleg_tech
+        tech = set(out.technique) | deleg_tech
         tech.add(self.name)
-        return LTLFormulaResult(formula=cand, technique=tech)
+        return Result.success(cand, *tech)
