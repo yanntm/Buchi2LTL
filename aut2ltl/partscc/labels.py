@@ -33,6 +33,8 @@ def incoming_or(aut: "spot.twa_graph", state: int, states: List[int]) -> "buddy.
         for e in aut.out(src):
             if e.dst == state:
                 res = res | e.cond
+                if res == buddy.bddtrue:
+                    return res             # O(1): a true label fails tightness anyway
     return res
 
 
@@ -42,6 +44,8 @@ def outgoing_or(aut: "spot.twa_graph", state: int) -> "buddy.bdd":
     res = buddy.bddfalse
     for e in aut.out(state):
         res = res | e.cond
+        if res == buddy.bddtrue:
+            return res
     return res
 
 
