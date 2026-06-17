@@ -24,7 +24,7 @@ from typing import Optional
 
 from aut2ltl.ltl.builders import _And, _Or, _X, _tt, _ff, _simp_f, _letters_to_f
 from aut2ltl.kr.cascade import Cascade, CascadeHolder
-from .cascade_translator import CascadeTranslator
+from aut2ltl.kr.cascade_translator import CascadeTranslator
 from aut2ltl.result import LTLResult
 
 
