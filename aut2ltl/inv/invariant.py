@@ -43,17 +43,22 @@ class Invariant:
         aut = lang.tgba()
         sig = sigma(aut)
 
-        # Vacuous (Σ ≡ true): G(true) carries nothing — pass through, no credit.
+        # Vacuous (Σ ≡ true): G(true) carries nothing — pass the child's result
+        # through unchanged, with no inv credit (inv did not act).
         if sig == buddy.bddtrue:
             return self._child(lang)
 
-        # Strip Σ from the guards and delegate the simplified language.
+        # Build/accumulate idiom (result.md): seed an OK accumulator crediting
+        # ourselves, delegate the stripped language, and credit the child IN — so
+        # all of its fields (technique, diagnosis, and any future step-trace /
+        # profiling info) flow through the contract instead of being hand-copied.
+        res = LTLResult.start(_NAME)
         child = self._child(Language.of(strip(aut, sig)))
-        if child.nok:
-            return child                       # propagate decline/verdict unchanged
+        res.credit(child)
+        if res.nok:
+            return res                         # child declined / verdict: carried out
 
-        # Re-assert the invariant and credit ourselves (inv ∪ child's techniques).
+        # OK: re-assert the invariant on the child's formula (no re-instantiation).
         sig_f = spot.bdd_to_formula(sig, aut.get_dict())
-        return LTLResult.success(
-            _F.And([child.formula, _F.G(sig_f)]), _NAME, *child.technique
-        )
+        res.formula = _F.And([child.formula, _F.G(sig_f)])
+        return res

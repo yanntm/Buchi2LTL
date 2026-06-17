@@ -78,8 +78,13 @@ Three cases:
   nothing, so delegate the *original* `L` to `Λ` and credit nothing. Not a decline:
   a decorator that declined here would discard a perfectly good `Λ` answer.
 - **Non-vacuous, `Λ` succeeds**: return `φ ∧ G(Σ)` and add `inv` to the technique.
-- **Non-vacuous, `Λ` declines** (`⊥`): propagate it unchanged — `inv` only
-  *strengthens* an OK result, never manufactures one.
+- **Non-vacuous, `Λ` declines** (`⊥`): carry the decline (status + diagnosis) out —
+  `inv` only *strengthens* an OK result, never manufactures a formula.
+
+The non-vacuous cases go through the result build/accumulate idiom — seed an
+accumulator crediting `inv`, credit `Λ`'s result in, fill the formula only on OK —
+so every field `Λ` carries (technique, diagnosis, future step-trace) flows through
+the contract rather than being copied by hand.
 
 The strip and the re-assertion of `G(Σ)` sit at the **same `Language` boundary,
 around the same `Λ` call**: whatever is stripped is re-added at the same level, so
