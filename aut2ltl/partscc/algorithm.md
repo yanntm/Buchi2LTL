@@ -134,8 +134,29 @@ created it.
 - the validated `φ` is the whole result, returnable through the normal contract
   (whether to `own_simplify` it before returning is an open choice).
 
+## Status (v1)
+
+Implemented: the steady-state leaf above (`partscc.py` / `labels.py`). It fires on
+the **memoryless** terminal-SCC family — `G(p→Xq)` and its rerooted embeddings
+(`a U G(p→Xq)`, `FG(!p|Xq)`) reconstruct to a tiny `G(…)`, equivalence-checked. It
+**soundly declines the phase-dependent (alternating) family** (`G((!p∧Xp)|(p∧X!p))`,
+`G(a↔Xb)`): the partition is built (labels tight + disjoint) but the equivalence
+gate rejects `φ`, because `G(⋁ L(s)∧X O(s))` does not pin which phase position 0
+starts in and so over-approximates the entry. These are exactly the cases the
+legacy t2 rescued — but via entry-timing surgery pushed into sl.
+
+The fix is **init-anchoring**, and it stays *inside* the leaf: the input Language
+has a definite init state (the entry the labeler rooted at), which is part of the
+leaf's own input — so position 0 can be pinned to the init state's outgoing role
+(`φ = ⟨init disjunct at 0⟩ ∧ G(pattern)`) to recover exactness, with no composer
+cooperation. The legacy only externalized this because it operated in-place on a
+fragment with no well-defined init. Deferred (v2).
+
 ## Open questions (settle by test)
 
+- **Init-anchoring (v2).** Pin position 0 to the init state to recover the
+  phase-dependent family (see Status). Leaf-internal; the open part is the exact
+  anchored shape and that it survives the equivalence gate on the alternating set.
 - **Input reachability.** Whether clean single-terminal-SCC Languages actually
   reach us rides on the `Language.of` smallification plan above. Until it lands,
   an SCC embedded in a larger automaton simply makes the leaf decline — never

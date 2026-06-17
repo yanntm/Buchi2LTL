@@ -1,0 +1,70 @@
+"""The `partscc` leaf Translator (see algorithm.md).
+
+`PartScc` labels a Language whose TGBA is a single terminal (escape-free) SCC by
+partitioning it: each state gets a uniquely-characterizing label `L(s)`, and when
+the labels are tight and pairwise disjoint it emits `φ = G(⋁ L(s) ∧ X O(s))`,
+adopted **only** if it is language-equivalent to the component. Otherwise it
+declines. Self-contained: no child, no composer cooperation, no entry-timing — the
+input *is* the whole "stay forever" language, so the steady-state `φ` is the whole
+answer.
+"""
+
+from typing import TYPE_CHECKING
+
+import spot
+
+from aut2ltl.language import Language
+from aut2ltl.result import LTLResult
+from .labels import scc_states, partition, outgoing_or
+
+if TYPE_CHECKING:  # spot imported above for runtime use
+    pass
+
+_NAME = "partscc"
+_F = spot.formula
+
+
+def _validates(aut: "spot.twa_graph", phi: "spot.formula") -> bool:
+    """Soundness gate: `φ` is adopted only if it is language-equivalent to the
+    component `aut`. A wrong partition guess simply fails here and is declined, so
+    partscc can never answer unsoundly."""
+    try:
+        cand = phi.translate("GeneralizedBuchi", "Small", "High")
+        return spot.are_equivalent(aut, cand)
+    except Exception:
+        return False
+
+
+class PartScc:
+    """The terminal-SCC partition as a leaf `Translator` (`Language → LTLResult`).
+
+    A producer, not a decorator: it takes no child and holds no state."""
+
+    name = _NAME
+
+    def __call__(self, lang: "Language") -> "LTLResult":
+        aut = lang.tgba()
+
+        states = scc_states(aut)
+        if states is None:
+            return LTLResult.decline("not a single SCC of size >= 2")
+
+        labels = partition(aut, states)
+        if labels is None:
+            return LTLResult.decline(
+                "L-labels are not a tight pairwise-disjoint partition")
+
+        # φ = G( ⋁_s L(s) ∧ X O(s) )
+        d = aut.get_dict()
+        terms = [
+            _F.And([spot.bdd_to_formula(labels[s], d),
+                    _F.X(spot.bdd_to_formula(outgoing_or(aut, s), d))])
+            for s in states
+        ]
+        phi = _F.G(_F.Or(terms))
+
+        if not _validates(aut, phi):
+            return LTLResult.decline(
+                "candidate not language-equivalent to the component")
+
+        return LTLResult.success(phi, _NAME)
