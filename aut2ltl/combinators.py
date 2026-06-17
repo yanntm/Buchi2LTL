@@ -2,7 +2,7 @@
 aut2ltl/combinators.py — composite translators built over the contract.
 
 A composite is itself a translator: it delegates to a collection of
-sub-translators and combines their `LTLFormulaResult`s. Because every sub-result obeys
+sub-translators and combines their `Result`s. Because every sub-result obeys
 the contract invariant (language-faithful or DECLINED, never wrong), the
 composite is sound by construction. The combinators here are generic over the
 input type, so they apply to both `Translator` (automaton in) and
@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import Callable, Generic, Sequence, TypeVar
 
-from aut2ltl.contract import LTLFormulaResult
+from aut2ltl.result import Result
 
 _In = TypeVar("_In")
 
@@ -28,35 +28,31 @@ class _FirstSuccess(Generic[_In]):
     `__call__`), so a composite is itself a valid stage of another composite.
 
     Each stage is self-gating: a stage that does not apply to the input returns a
-    DECLINED `LTLFormulaResult`, and the chain moves on. The winning stage's result —
+    DECLINED `Result`, and the chain moves on. The winning stage's result —
     including its `technique` set — is returned unchanged (the composite stamps no
     tag of its own; its `name` is its identity, not a technique).
     """
 
     def __init__(
-        self, name: str, stages: Sequence[Callable[[_In], LTLFormulaResult]]
+        self, name: str, stages: Sequence[Callable[[_In], Result]]
     ) -> None:
         self.name = name
         self._stages = tuple(stages)
 
-    def __call__(self, x: _In) -> LTLFormulaResult:
-        # A NOT_LTL-family verdict from a stage is NOT a decline: the language is
-        # (probably) not LTL-definable, so NO stage can produce a faithful formula.
-        # Both NOT_LTL and PROBABLY_NOT_LTL end the chain at once and propagate up
-        # (a later cascade stage would only re-derive the same verdict from the
-        # CascadeHolder's cached decomposition); `.conclusive` rides along for the
-        # caller. Only a real OK beats it.
+    def __call__(self, x: _In) -> Result:
+        # The single rule (result.md): only DECLINED continues the chain. OK or a
+        # NOT_LTL verdict both stop it — a verdict means no stage can produce a
+        # faithful formula (a later stage would re-derive the same verdict), and
+        # returning it preserves the reason. The terminal is a bare decline.
         for stage in self._stages:
             r = stage(x)
-            if r.ok:
+            if not r.declined:
                 return r
-            if r.not_ltl:
-                return r
-        return LTLFormulaResult.decline()
+        return Result.decline()
 
 
 def first_success(
-    stages: Sequence[Callable[[_In], LTLFormulaResult]],
+    stages: Sequence[Callable[[_In], Result]],
     *,
     name: str,
 ) -> "_FirstSuccess[_In]":
