@@ -128,27 +128,32 @@ class Result:
     def credit(self, other: "Result") -> "Result":
         """Fold a child result in (mutates and returns self). An OK child
         contributes its techniques; a more-dominant NOK child flips this result to
-        that status (taking its diagnosis, clearing the formula). Accepts any
-        result-like object exposing .ok/.declined/.not_ltl/.technique/.diagnosis
-        (interop with the legacy LTLFormulaResult during migration)."""
+        that status (accumulating its diagnosis, clearing the formula)."""
         if other.ok:
             self._technique |= set(other.technique)
-        else:
-            other_status = Status.NOT_LTL if other.not_ltl else Status.DECLINED
-            if _RANK[other_status] > _RANK[self._status]:
-                self._status = other_status
-                self._diagnosis = getattr(other, "diagnosis", None) or getattr(other, "note", None)
-                self._formula = None
+            return self
+        # other is NOK: raise to the worse status (NOT_LTL ≻ DECLINED), clearing
+        # the formula, and ACCUMULATE its diagnosis (a NOK fused with a NOK
+        # inherits both reasons).
+        other_status = Status.NOT_LTL if other.not_ltl else Status.DECLINED
+        if _RANK[other_status] > _RANK[self._status]:
+            self._status = other_status
+            self._formula = None
+        self._add_diagnosis(other.diagnosis)
         return self
 
     def fail(self, status: "Status", diagnosis: Optional[str] = None) -> "Result":
-        """Transition this result to a NOK status with an optional diagnosis
-        (clears the formula). Returns self."""
+        """Transition this result to a NOK status, accumulating an optional
+        diagnosis (clears the formula). Returns self."""
         assert status is not Status.OK, "fail() needs a NOK status"
         self._status = status
-        self._diagnosis = diagnosis
         self._formula = None
+        self._add_diagnosis(diagnosis)
         return self
+
+    def _add_diagnosis(self, diagnosis: Optional[str]) -> None:
+        if diagnosis:
+            self._diagnosis = "; ".join(p for p in (self._diagnosis, diagnosis) if p)
 
     def __repr__(self) -> str:
         return (f"Result({self._status.value}, formula={self._formula}, "
