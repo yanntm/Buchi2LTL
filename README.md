@@ -1,21 +1,15 @@
 # aut2ltl
 
-**Read an ω-automaton, get back an LTL formula.**
-
-`aut2ltl` takes an [ω-automaton](https://en.wikipedia.org/wiki/%CF%89-automaton) in
-the [HOA format](https://adl.github.io/hoaf/) and reconstructs a Linear Temporal
-Logic formula that describes the **same language** — a readable formula for an
-automaton you were handed. You can also pass an LTL/PSL formula directly (it is
-translated to an automaton first, then reconstructed), which is handy for trying the
-tool out.
-
-It is a **best-effort** translator: on the inputs it handles it returns a verified
-equivalent formula, and when it cannot, it tells you so rather than guessing (see
-[Scope & honesty](#scope--honesty)).
+`aut2ltl` reconstructs a Linear Temporal Logic (LTL) formula from an
+[ω-automaton](https://en.wikipedia.org/wiki/%CF%89-automaton). Given an automaton in
+the [HOA format](https://adl.github.io/hoaf/), it produces an LTL formula defining the
+same ω-language, or determines that the language is not LTL-definable. An LTL or PSL
+formula may be supplied in place of an automaton, in which case it is translated to an
+automaton before reconstruction.
 
 ## Quick start
 
-You need three things on your system (they are *not* pip-installable):
+Three dependencies must be installed at system level (they are *not* pip-installable):
 
 - **Python 3**
 - **[Spot](https://spot.lre.epita.fr/)** with its `spot` / `buddy` Python bindings
@@ -36,7 +30,7 @@ the language *"`p` until `q`, and `r` infinitely often"*:
 
 <p align="center"><img src="docs/img/motivating_example.png" alt="the example automaton" width="240"></p>
 
-Hand it to the tool:
+Run `aut2ltl` on it:
 
 ```console
 $ python3 -m aut2ltl tests/fixtures/motivating_example.hoa
@@ -49,9 +43,9 @@ build time: 0.002s
 (p & !q) U (q & GFr)
 ```
 
-The **formula** is printed on stdout; the **report** above it (which methods fired,
-the formula's size, build time) goes to stderr. So in a pipeline you get just the
-formula:
+The **formula** is printed on stdout; the **report** above it (the methods used, the
+formula's size, build time) goes to stderr. In a pipeline you therefore receive only
+the formula:
 
 ```bash
 python3 -m aut2ltl tests/fixtures/motivating_example.hoa -q | ltlfilt --simplify
@@ -85,7 +79,7 @@ Fine-tune any declared option with `-O key=value` (see `--list-options`).
 
 A reference run of the curated corpus is committed under
 [`tests/logs/reference/`](tests/logs/reference/) (per-formula CSVs + a summary) — a
-quick sense of what the tool produces across a range of inputs.
+sample of the tool's output across a range of inputs.
 
 ## Project structure
 
@@ -109,14 +103,16 @@ tests/            survey (the correctness gate), fixtures, per-engine tests
 docs/             algorithm notes, the construction log, figures
 ```
 
-## Scope & honesty
+## Scope
 
-Translating an automaton to LTL is hard: the construction is exponential in several
-directions, and some ω-languages are simply **not LTL-definable** at all (ω-automata
-are strictly more expressive than LTL). `aut2ltl` does not pretend otherwise — every
-translator is *language-faithful or it declines*, so a result you get back is an
-honest one, and an input out of reach is reported as a decline rather than a wrong
-formula.
+Translating an ω-automaton to LTL is expensive — the construction is exponential in
+several directions — and not always possible, since ω-automata are strictly more
+expressive than LTL. `aut2ltl` is **sound** (it never returns a non-equivalent
+formula) and **complete** on the LTL-definable fragment (it reconstructs a defining
+formula whenever one exists), at the cost of a possibly exponential blow-up in formula
+size. When the input language lies outside LTL it **decides** so and reports it — to
+our knowledge, `aut2ltl` is among the first tools to actually decide LTL-definability
+in practice.
 
 ## Algorithms
 
