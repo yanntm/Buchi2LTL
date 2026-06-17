@@ -619,3 +619,23 @@ tag is now `daisy`. Removed `sl/sl_core.py`; repointed the four probes (`probe_s
 `probe_sl_over_str`, `probe_inv`, `probe_sccdecomp`) to `aut2ltl.daisy.Daisy`. Still
 unwired (probe-only, as `sl_core` was) — no STATUS shift. Verified via the probes
 (`a U b`, `inv` over it, `sccdecomp` over it): all equiv=True, tag `daisy`.
+
+## 2026-06-17 — decomp/: regroup the (de)composition approaches, themed by folder
+
+Created aut2ltl/decomp/ as a theme folder, one self-contained subpackage per way of
+breaking a language into easier pieces (each with its own algorithm.md, its own
+inline recombine — nothing shared by force; decomp/__init__ imports none of them, so
+one approach drags in neither its siblings nor their deps):
+
+- decomp/scc/        — moved from aut2ltl/sccdecomp/ (SccDecompose; tag scc<k>).
+- decomp/strength/   — NEW StrengthDecompose: ∨ over weak/terminal/strong (Renault
+                       TACAS'13, exact for any automaton; tag strength<k>).
+- decomp/acceptance/ — NEW AccDecompose: ∧ over acceptance conjuncts, exact on the
+                       deterministic generic-minimal form (tag acc<k>).
+- decomp/inv/        — moved from aut2ltl/inv/ (Invariant decorator); its doc
+                       README.md → algorithm.md for folder parity.
+
+strength + acceptance are the two halves of portfolio/decompose.py's AND/OR split,
+re-cast as separate pure peer Translators (portfolio/decompose.py itself untouched —
+still unwired). Verified via per-approach probes: Ga|Gb (scc3), Fa|Gb (strength2),
+GFa&GFb (acc2), aUb (inv), all equiv=True. CLAUDE.md project-layout line updated.
