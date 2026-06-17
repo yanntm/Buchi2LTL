@@ -1,4 +1,4 @@
-"""Smoke-test SlCore (pure marguerite core, delegate=decline) on ONE formula.
+"""Smoke-test Daisy (pure daisy core, delegate=decline) on ONE formula.
 
 Builds Language.of_ltl(arg), runs sl(Λ) with Λ = first(sl(Λ), decline) (the pure
 very-weak engine — decline is the floor), prints the reconstructed formula and
@@ -16,12 +16,12 @@ import spot  # noqa: E402
 
 from aut2ltl.language import Language  # noqa: E402
 from aut2ltl.result import LTLResult, decline, first  # noqa: E402
-from aut2ltl.sl.sl_core import SlCore  # noqa: E402
+from aut2ltl.daisy import Daisy  # noqa: E402
 
 
 def _lam(lang: "Language") -> "LTLResult":
     """Λ* = fix(λ Λ. first(sl(Λ), decline)) — the pure sl engine, decline floor."""
-    return first(SlCore(_lam), decline)(lang)
+    return first(Daisy(_lam), decline)(lang)
 
 
 def main(argv: List[str]) -> int:

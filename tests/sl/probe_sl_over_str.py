@@ -1,7 +1,7 @@
-"""Probe SlCore with the kr default strength cascade ('str') as second delegate.
+"""Probe Daisy with the kr default strength cascade ('str') as second delegate.
 
 Wires the fixpoint  Λ* = fix(λ Λ. first(sl(Λ), str))  where
-str = as_translator(make_hierarchy_class()) — sl peels marguerite envelopes, the
+str = as_translator(make_hierarchy_class()) — sl peels daisy envelopes, the
 kr cascade handles the multi-state-SCC cores it delegates. Runs ONE formula per
 invocation (≤15s; the cascade calls GAP), prints the result, its technique tags,
 and a spot equivalence check:
@@ -18,7 +18,7 @@ import spot  # noqa: E402
 
 from aut2ltl.language import Language  # noqa: E402
 from aut2ltl.result import LTLResult, first  # noqa: E402
-from aut2ltl.sl.sl_core import SlCore  # noqa: E402
+from aut2ltl.daisy import Daisy  # noqa: E402
 from aut2ltl.kr.aut2cas import as_translator  # noqa: E402
 from aut2ltl.kr.hierarchy_class import make_hierarchy_class  # noqa: E402
 
@@ -26,8 +26,8 @@ _STR = as_translator(make_hierarchy_class())
 
 
 def _lam(lang: "Language") -> "LTLResult":
-    """Λ* = fix(λ Λ. first(sl(Λ), str)): the marguerite peel, else the kr cascade."""
-    return first(SlCore(_lam), _STR)(lang)
+    """Λ* = fix(λ Λ. first(sl(Λ), str)): the daisy peel, else the kr cascade."""
+    return first(Daisy(_lam), _STR)(lang)
 
 
 def main(argv: List[str]) -> int:

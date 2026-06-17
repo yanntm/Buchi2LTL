@@ -1,6 +1,6 @@
 """Smoke-test SccDecompose over an sl-over-kr leaf on ONE formula.
 
-Wires sccdecomp(Λ) with Λ = first(sl, kr-cascade): sl peels marguerites, the kr
+Wires sccdecomp(Λ) with Λ = first(sl, kr-cascade): sl peels daisies, the kr
 cascade handles cores. Prints the number of accepting SCCs of the input automaton
 (so a genuine split needs >= 2), the reconstructed formula + technique tags, and a
 spot equivalence check. Single input, one formula per call (≤15s; kr calls GAP):
@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import spot  # noqa: E402
 
 from aut2ltl.language import Language  # noqa: E402
-from aut2ltl.sl.sl_core import SlCore  # noqa: E402
+from aut2ltl.daisy import Daisy  # noqa: E402
 from aut2ltl.sccdecomp import SccDecompose  # noqa: E402
 from aut2ltl.sccdecomp.restrict import accepting_sccs, ensure_marked  # noqa: E402
 from aut2ltl.kr.aut2cas import as_translator  # noqa: E402
@@ -27,7 +27,7 @@ _STR = as_translator(make_hierarchy_class())
 
 def _leaf(lang: "Language") -> "LTLResult":
     """Λ = first(sl(Λ), kr-cascade)."""
-    r = SlCore(_leaf)(lang)
+    r = Daisy(_leaf)(lang)
     return r if not r.declined else _STR(lang)
 
 

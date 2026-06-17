@@ -18,13 +18,13 @@ import spot  # noqa: E402
 
 from aut2ltl.language import Language  # noqa: E402
 from aut2ltl.result import LTLResult, decline, first  # noqa: E402
-from aut2ltl.sl.sl_core import SlCore  # noqa: E402
+from aut2ltl.daisy import Daisy  # noqa: E402
 from aut2ltl.inv import Invariant  # noqa: E402
 
 
 def _sl(lang: "Language") -> "LTLResult":
     """The pure sl engine: fix(λ Λ. first(sl(Λ), decline))."""
-    return first(SlCore(_sl), decline)(lang)
+    return first(Daisy(_sl), decline)(lang)
 
 
 def _lam(lang: "Language") -> "LTLResult":
