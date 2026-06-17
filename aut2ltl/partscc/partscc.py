@@ -54,14 +54,25 @@ class PartScc:
             return LTLResult.decline(
                 "L-labels are not a tight pairwise-disjoint partition")
 
-        # φ = G( ⋁_s L(s) ∧ X O(s) )
+        # The L-partition makes the SCC deterministic (a letter σ leads to the
+        # unique state with σ ∈ L(s)), so the language from the init state q0 is
+        #     O(q0)  ∧  G( ⋀_s ( L(s) → X O(s) ) )
+        # The G-part is the steady-state transition law (if the last letter put us
+        # in s, the next is a valid move out of s); the O(q0) conjunct anchors
+        # position 0 to the init state's own outgoing availability — there is no
+        # incoming letter there, which is exactly the entry phase a bare steady G
+        # over-approximates.
         d = aut.get_dict()
-        terms = [
-            _F.And([spot.bdd_to_formula(labels[s], d),
-                    _F.X(spot.bdd_to_formula(outgoing_or(aut, s), d))])
+
+        def _f(bdd: "buddy.bdd") -> "spot.formula":
+            return spot.bdd_to_formula(bdd, d)
+
+        steady = _F.G(_F.And([
+            _F.Or([_F.Not(_f(labels[s])), _F.X(_f(outgoing_or(aut, s)))])
             for s in states
-        ]
-        phi = _F.G(_F.Or(terms))
+        ]))
+        anchor = _f(outgoing_or(aut, aut.get_init_state_number()))
+        phi = _F.And([anchor, steady])
 
         if not _validates(aut, phi):
             return LTLResult.decline(

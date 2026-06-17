@@ -86,13 +86,35 @@ pairwise-disjoint; how it is produced is a free parameter (see open questions).
 
 ## The formula
 
+The pairwise-disjoint `L(s)` make the component **deterministic**: a letter `σ`
+leads to the unique state with `σ ∈ L(s)`, written `δ(σ)`. So from the init state
+`q0` a word `w` is accepted iff every step is a legal move:
+
 ```
-φ  =  G( ⋁_s ( L(s) ∧ X O(s) ) )
+w[0] ∈ O(q0)            and            ∀ i.  w[i+1] ∈ O( δ(w[i]) )
 ```
 
-"forever: whichever entry class `L(s)` holds now, the next letter satisfies that
-state's outgoing condition `O(s)`." A safety-shaped description of the steady
-state.
+The right conjunct is the **steady-state transition law** — "if the last letter
+put us in `s`, the next letter is a legal move out of `s`" — which, since `δ(w[i])`
+is the unique `s` with `w[i] ∈ L(s)`, is the implication form:
+
+```
+steady  =  G( ⋀_s ( L(s) → X O(s) ) )
+```
+
+The left conjunct **anchors position 0** to the init state's own outgoing
+availability — there is no incoming letter at the start, so `q0` is fixed by the
+input, not selected by a letter:
+
+```
+φ  =  O(q0)  ∧  steady
+```
+
+The anchor is the whole point of the leaf framing: `q0` is *part of the input
+Language* (the entry the labeler rooted at), so pinning the entry phase needs no
+context and no composer — it is read straight off the automaton. A bare steady
+`G(⋁_s L(s) ∧ X O(s))` drops the `O(q0)` anchor and over-approximates the entry,
+which is why the phase-dependent (alternating) family needs this form.
 
 ## Soundness — verify before use
 
@@ -134,29 +156,25 @@ created it.
 - the validated `φ` is the whole result, returnable through the normal contract
   (whether to `own_simplify` it before returning is an open choice).
 
-## Status (v1)
+## Status
 
-Implemented: the steady-state leaf above (`partscc.py` / `labels.py`). It fires on
-the **memoryless** terminal-SCC family — `G(p→Xq)` and its rerooted embeddings
-(`a U G(p→Xq)`, `FG(!p|Xq)`) reconstruct to a tiny `G(…)`, equivalence-checked. It
-**soundly declines the phase-dependent (alternating) family** (`G((!p∧Xp)|(p∧X!p))`,
-`G(a↔Xb)`): the partition is built (labels tight + disjoint) but the equivalence
-gate rejects `φ`, because `G(⋁ L(s)∧X O(s))` does not pin which phase position 0
-starts in and so over-approximates the entry. These are exactly the cases the
-legacy t2 rescued — but via entry-timing surgery pushed into sl.
+Implemented (`partscc.py` / `labels.py`): the anchored construction above. It fires
+on both terminal-SCC families, each equivalence-checked:
 
-The fix is **init-anchoring**, and it stays *inside* the leaf: the input Language
-has a definite init state (the entry the labeler rooted at), which is part of the
-leaf's own input — so position 0 can be pinned to the init state's outgoing role
-(`φ = ⟨init disjunct at 0⟩ ∧ G(pattern)`) to recover exactness, with no composer
-cooperation. The legacy only externalized this because it operated in-place on a
-fragment with no well-defined init. Deferred (v2).
+- **memoryless** — `G(p→Xq)` → `G(!p|Xq)`, and its rerooted embeddings
+  `a U G(p→Xq)`, `FG(!p|Xq)`;
+- **phase-dependent (alternating)** — `G((!p∧Xp)|(p∧X!p))` →
+  `p ∧ G((p|Xp)∧(!p|X!p))`, and `G(a↔Xb)` → `b ∧ G((!a|Xb)∧(a|X!b))`; the leading
+  conjunct is the `O(q0)` anchor. The legacy t2 rescued these only via entry-timing
+  surgery pushed into sl; here it is read straight off the input's init state.
+
+It **soundly declines** whatever it cannot express, never returning a
+non-equivalent answer: recurrence SCCs whose `L`-labels overlap (`G(a→Fb)`,
+`G(a→XFb)`) are rejected at the partition test; Büchi components a safety `G(…)`
+cannot capture (`GF(a∧Xb)`) are built but rejected at the equivalence gate.
 
 ## Open questions (settle by test)
 
-- **Init-anchoring (v2).** Pin position 0 to the init state to recover the
-  phase-dependent family (see Status). Leaf-internal; the open part is the exact
-  anchored shape and that it survives the equivalence gate on the alternating set.
 - **Input reachability.** Whether clean single-terminal-SCC Languages actually
   reach us rides on the `Language.of` smallification plan above. Until it lands,
   an SCC embedded in a larger automaton simply makes the leaf decline — never
