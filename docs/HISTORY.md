@@ -1021,3 +1021,31 @@ Cleared from TODO.md as DONE:
   kr/ -> bls/ (the BLS construction names the engine); the general member is `muller`,
   bls.py a deprecated shim.
 All verified: CLI + tests/survey SUCCESS + the r4 audit CLEAN throughout.
+
+## 2026-06-18 — heur/fuse2: extracted the size-2 SCC over-approximation (groundwork for retiring sl/)
+
+The f2 size-2 non-accepting-SCC over-approximation heuristic (legacy
+`aut2ltl/sl/heuristics/size2_overapprox.py::try_size2_overapprox`) moved to a new
+theme package `aut2ltl/heur/` (pattern-matching heuristics) as `heur/fuse2`.
+
+WHY: the portfolio rework wants `sl/` and the current `portfolio/` contents to
+disappear entirely (all of sl is covered by `daisy`, a stronger version of the same
+self-loop labeling). f2 was the one piece of sl with no daisy equivalent, so it is
+lifted out first, cleanly, with no dependency on `sl/`.
+
+WHAT: reframed HONESTLY as what it is — a gated TGBA->TGBA rewrite, NOT a Translator
+(produces no LTL). `fuse2(aut) -> twa_graph | None`: find one non-accepting 2-state
+SCC, unfold it once over-approximating the satellite self-loop to true, return the
+result ONLY if `spot.are_equivalent` confirms the language survived. Documented
+WIP/immature: best-effort, fires rarely, only ~30% of accepted rewrites actually
+linearize into daisy reach (the rest stay multi-state, daisy declines harmlessly) —
+the gate guarantees language equality, never the target shape.
+
+CLEANUP vs legacy: `get_true_bdd` formula-translation hack -> `buddy.bddtrue`; one
+200-line function -> four typed helpers + a thin gated entry; all F2_TRACE prints
+dropped. `tests/heur/test_fuse2.py` proves byte-for-byte behavioral PARITY with the
+legacy entry over the 100-formula f2 fixture (0 disagreements, 0 gate failures).
+
+NOT WIRED: nothing imports `heur/` yet; the live pipeline + survey/r4 gates are
+untouched. Decision: leave unwired for now, let fuzzing measure whether its absence
+costs perf vs the current default before deciding to wire it.
