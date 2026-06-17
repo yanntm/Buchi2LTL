@@ -34,7 +34,8 @@ from typing import List, Optional, Tuple
 
 import spot
 
-from aut2ltl.contract import LTLFormulaResult, Translator
+from aut2ltl.contract import Translator
+from aut2ltl.result import Result, fuse
 from aut2ltl.language import Language
 from aut2ltl.ltl.builders import own_simplify
 
@@ -83,31 +84,23 @@ def _split(aut: "spot.twa_graph") -> Tuple[Optional[str], List["spot.twa_graph"]
     return (None, [])
 
 
-def _recombine(op: str, subs: List[LTLFormulaResult]) -> LTLFormulaResult:
-    """Recombine sub-results with the root ⋀/⋁. Propagates a NOT_LTL part upward
-    (a part that is (probably) not LTL-definable cannot be built, and no later
-    recombination recovers it); declines if any part declines; else And/Or of the
-    part formulas, technique = ⋃ parts ∪ {op<n>}."""
-    # Checked before the decline test: a NOT_LTL part also has formula None, and a
-    # non-definable part is a stronger fact than a plain decline. Prefer a
-    # conclusive verdict if several parts report one.
-    not_ltls = [s for s in subs if s.not_ltl]
-    if not_ltls:
-        return next((s for s in not_ltls if s.conclusive), not_ltls[0])
-    if any(s.declined or s.formula is None for s in subs):
-        return LTLFormulaResult.decline()
+def _recombine(op: str, subs: List[Result]) -> Result:
+    """Recombine sub-results with the root ⋀/⋁ via the accumulator idiom: seed an
+    OK result with {op<n>}, `fuse` every part in (worst status wins, all diagnoses
+    accumulated), and bail if the fold is NOK — a NOT_LTL part is propagated as the
+    verdict, a declined part as a decline, each carrying every part's reason. On OK,
+    fill in the And/Or of the part formulas; technique = ⋃ parts ∪ {op<n>}."""
+    res = fuse(Result.start(f"{op}{len(subs)}"), *subs)   # credit each part; accumulate reasons
+    if res.nok:
+        return res
     # Run the own-rules simplifier (NOT Spot's — it is not DAG-size aware)
     # on the parts BEFORE combining and on the combo AFTER: the recombined
     # And/Or is a node no per-node pass ever saw whole, so cross-part folds
     # (e.g. `G(!b&h) | (h U b)` → `h W b`) only fire here.
     forms = [own_simplify(s.formula) for s in subs]
-    tech = set()
-    for s in subs:
-        tech |= s.technique
-    tech.add(f"{op}{len(subs)}")
     f = spot.formula.And(forms) if op == "and" else spot.formula.Or(forms)
-    f = own_simplify(f)
-    return LTLFormulaResult(formula=f, technique=tech)
+    res.formula = own_simplify(f)
+    return res
 
 
 class Decompose:
@@ -121,7 +114,7 @@ class Decompose:
     def __init__(self, leaf: Translator) -> None:
         self._leaf = leaf
 
-    def __call__(self, lang: Language) -> LTLFormulaResult:
+    def __call__(self, lang: Language) -> Result:
         op, pieces = _split(lang.det_generic_minimal())
         if pieces:
             return _recombine(op, [self(Language.of(p)) for p in pieces])
