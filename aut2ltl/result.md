@@ -49,7 +49,7 @@ The BAIL/VERDICT split is consumed by **exactly one** combinator, `first`.
 
 ## The universal consumer rule
 
-Every consumer of a child result — `credit`, `fuse`, `sl_core`, any translator
+Every consumer of a child result — `credit`, `fuse`, `daisy`, any translator
 using a sub-label — obeys one rule:
 
 - child **OK** → credit its techniques, use its formula, keep building.
@@ -144,13 +144,16 @@ bails on the worst. Choice has `decline` as unit; composition has `OK` as unit.
 The `DECLINED`-vs-`NOT_LTL` distinction exists *only* to tell `first`
 recover-vs-propagate.
 
-## Consequence for `sl_core`
+## Consequence for `daisy`
 
-`sl_core` is a consumer in the accumulator idiom: start `OK` with `{"sl"}`, credit
-each child, bail on NOK (propagating the exact reason), else fill `Or(stay, leave)`
-and return. Today it flattens a child `NOT_LTL` to `DECLINED` (`if not res.ok:
-return decline`) — wrong by this model, since a `first` above would keep trying
-members that cannot succeed. The accumulator `credit` fixes this for free.
+`daisy` is a textbook consumer in the accumulator idiom: start `OK` with
+`{"daisy"}`, credit each child, bail on NOK (propagating the exact reason), else
+fill `Or(stay, leave)` and return. Hold to the pattern even where a shortcut would
+yield the same formula today: routing every child through `credit` — rather than
+lifting out its formula alone — is what keeps the result's accumulated metadata
+(techniques, status, diagnosis, and any field added later) intact and traceable
+through composition. The idiom is the extension point; straying from it quietly
+drops provenance that a consumer above may come to rely on.
 
 ## Naming / home
 
