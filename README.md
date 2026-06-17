@@ -1,143 +1,138 @@
 # aut2ltl
 
-Translation of ω-automata to Linear Temporal Logic. The project pairs two
-engines, composed by a portfolio that picks the winning method at each node:
+**Read an ω-automaton, get back an LTL formula.**
 
-* **`aut2ltl.kr`** — the *systematic* algebraic construction: Krohn-Rhodes
-  holonomy cascade decomposition (SgpDec + GAP) following Boker, Lehtinen &
-  Sickert, *"On the Translation of Automata to Linear Temporal Logic"*
-  (FoSSaCS 2022) — no pattern matching on automaton shape. To our knowledge the
-  first practical implementation of that construction.
-* **`aut2ltl.sl`** — the *heuristic* engine: self-loop backward labeling, exact
-  on the very-weak fragment and declining elsewhere, plus the f2 / tN SCC
-  rescue heuristics (verify-before-use).
+`aut2ltl` takes an [ω-automaton](https://en.wikipedia.org/wiki/%CF%89-automaton) in
+the [HOA format](https://adl.github.io/hoaf/) and reconstructs a Linear Temporal
+Logic formula that describes the **same language** — a readable formula for an
+automaton you were handed. You can also pass an LTL/PSL formula directly (it is
+translated to an automaton first, then reconstructed), which is handy for trying the
+tool out.
 
-Both are language-faithful-or-decline, so the portfolio can compose them
-soundly. On the Manna-Pnueli class ladder the combined path is a clean sweep
-(every case verified equivalent).
+It is a **best-effort** translator: on the inputs it handles it returns a verified
+equivalent formula, and when it cannot, it tells you so rather than guessing (see
+[Scope & honesty](#scope--honesty)).
 
-## Command-line tool
+## Quick start
 
-`python3 -m aut2ltl` (console script `aut2ltl`) is the front end: an LTL formula
-or a HOA automaton file in, an equivalent LTL formula out.
+You need three things on your system (they are *not* pip-installable):
+
+- **Python 3**
+- **[Spot](https://spot.lre.epita.fr/)** with its `spot` / `buddy` Python bindings
+- **[GAP](https://www.gap-system.org/) 4.12+** with the **SgpDec** package — run
+  `aut2ltl/kr/install.sh` once to set it up user-locally (`~/.gap/pkg`)
+
+Then install the package itself:
 
 ```bash
-python3 -m aut2ltl 'GFa & GFb'          # an LTL formula in
-python3 -m aut2ltl model.hoa            # a HOA file (auto-detected; --ltl/--hoa force)
-python3 -m aut2ltl 'F(a & X b)' -q | ltlfilt --simplify   # quiet: formula only on stdout
+pip install -e .          # provides `python3 -m aut2ltl` and the `aut2ltl` console script
+```
 
-# Cite the techniques that may participate (cited order = priority, NO fallback):
-python3 -m aut2ltl 'FG a' --use bls          # pure BLS-from-Muller
-python3 -m aut2ltl 'FG a' --use str          # the integrated kr cascade
-python3 -m aut2ltl 'GFa & GFb' --use decompose,str   # cascade under strength decomposition
-python3 -m aut2ltl 'FG a' --use buchi        # Buchi leaf only -> DECLINES (exit 1)
+### Example
 
-# The verbose report (technique, DAG/temporals/tree sizes, build time) goes to
-# stderr by default; -q silences it. The formula is a hash-consed DAG — the flat
-# string can explode, so it is size-gated (--flatten-limit), or dump the DAG:
-python3 -m aut2ltl 'GFa & GFb' --dag | dot -Tpng -o dag.png
+Here is a small automaton from the test fixtures
+([`tests/fixtures/motivating_example.hoa`](tests/fixtures/motivating_example.hoa)) —
+the language *"`p` until `q`, and `r` infinitely often"*:
 
-python3 -m aut2ltl --list-techniques     # the --use vocabulary
-python3 -m aut2ltl --list-options        # every -O key, its default and doc
+<p align="center"><img src="docs/img/motivating_example.png" alt="the example automaton" width="240"></p>
+
+Hand it to the tool:
+
+```console
+$ python3 -m aut2ltl tests/fixtures/motivating_example.hoa
+technique : sl+sl_driven
+DAG nodes : 9
+temporals : 3
+tree nodes: 10
+sharing   : 1.1x
+build time: 0.002s
+(p & !q) U (q & GFr)
+```
+
+The **formula** is printed on stdout; the **report** above it (which methods fired,
+the formula's size, build time) goes to stderr. So in a pipeline you get just the
+formula:
+
+```bash
+python3 -m aut2ltl tests/fixtures/motivating_example.hoa -q | ltlfilt --simplify
+```
+
+## Using it
+
+The input is auto-detected as a HOA file or an LTL/PSL formula; force it with
+`--ltl` / `--hoa`.
+
+```bash
+python3 -m aut2ltl 'G(p -> (q U r))'           # an LTL/PSL formula in
+python3 -m aut2ltl model.hoa                    # a HOA automaton file in
+python3 -m aut2ltl model.hoa -q -o out.ltl      # -q: formula only; -o: to a file
+python3 -m aut2ltl model.hoa --list-options     # every -O knob, its default and doc
 python3 -m aut2ltl --help
 ```
 
-Menu for `--use`: producers `acc weak buchi cobuchi bls str sl` (ladder rungs,
-tried in cited order; `str` is the integrated default cascade) and wrappers
-`sl_driven decompose` (wrap the ladder). Omit `--use` for the best default
-portfolio. Any declared option is overridable with `-O key=value` (e.g.
-`-O kr.fuse_letters=0`).
-
-```python
-# Programmatic entry: a Language in, an LTLResult out.
-import spot
-from aut2ltl.language import Language
-from aut2ltl.portfolio import reconstruct_decomposed
-
-aut = spot.formula("GFa & GFb").translate()
-res = reconstruct_decomposed(Language.of(aut))   # LTLResult
-print(res.formula, res.technique_str())          # formula DAG, e.g. "and2+sl"
-```
-
-The result is an `LTLResult` (`aut2ltl.contract`): `.formula` (a
-hash-consed `spot.formula` DAG) or `.declined`, plus `.technique` (the methods
-that contributed). A `Language` (`aut2ltl.language`) wraps any input
-(`Language.of(aut)` / `Language.of_ltl(formula)`) as lazily-cached,
-language-equivalent automaton views. As a factory it does two more jobs: it
-**interns** on the literal input (a bounded LRU, so repeated calls share one
-`Language` and its cached views — caching the heavy, erratic spot calls), and it
-**cleans** the source once — `postprocess(generic, medium, any)` + `remove_unused_ap`
-(purge dead/unreachable states, merge redundant acceptance sets, drop orphan APs)
-— language- and acceptance-family-preserving. Level/size are `OptionSpec` knobs.
-
-## Layout
-
-```
-aut2ltl/                  the root package (layering: floor -> engines -> portfolio -> cli)
-  contract.py            LTLResult + Translator (the contract floor)
-  language.py            Language factory: interned, cleaned, lazy
-                         language-equivalent automaton views
-  __main__.py            the portfolio front end:  python3 -m aut2ltl  (console: aut2ltl)
-  kr/                    pure cascade FoSSaCS engine (cascade/, reachability,
-                         fin, acceptance_dispatch, gap/, simplify/, ...)
-  sl/                    heuristic engine (backward labeling + f2/tN heuristics)
-  portfolio/             combinators: build, decompose, heuristic_gate, sl_driven
-  ltl/                   engine-agnostic helpers: metrics, printers, simplify/
-tests/
-  survey.py              front-end survey over a corpus (the correctness gate)
-  survey_formulas.py     the curated, annotated corpus
-  survey_sweep.sh        sweep the front end across --use configurations
-  survey_diff.py         quantitative diff of two survey CSVs
-  kr/                    cascade-engine unit tests + debug tools (test_kr_r4_audit, ...)
-  sl/                    heuristic-engine fixture generators (find_*)
-  fixtures/              curated formula + HOA fixtures
-docs/                     algorithm.md, dag_folding.md (research notes), HISTORY.md
-paper/                    construction reference + ground-truth paper text
-```
-
-## Dependencies
-
-Runtime deps are NOT pip-installable; install them at system level:
-
-* **Spot** (the `spot` and `buddy` Python bindings) — both engines.
-* **GAP 4.12+** with the **SgpDec** package — the `kr` cascade engine only.
-  Run `aut2ltl/kr/install.sh` once (user-local under `~/.gap/pkg`).
-
-`pyproject.toml` carries the package metadata (`pip install -e .` installs the
-`aut2ltl` package itself, not the external tools above).
-
-## Testing
-
-The front-end survey is the correctness gate — it reconstructs a corpus through
-the actual CLI and verifies each result with Spot:
+The reconstructed formula is a **hash-consed DAG**: it shares repeated sub-formulas,
+and successful outputs are often highly tail-redundant, so the DAG stays compact even
+when the flat string is large. By default a large formula is printed only up to a
+size gate (raise it with `--flatten-limit N`), or export the DAG itself:
 
 ```bash
-python3 tests/survey.py                    # the curated corpus; ends SUCCESS / FAIL
-python3 tests/survey.py "G(p -> (q U r))"   # a single formula
-python3 tests/survey_sweep.sh tests/logs/reference   # sweep all --use configs
-python3 tests/survey_diff.py OLD.csv NEW.csv          # before/after a change
-python3 tests/kr/test_kr_r4_audit.py        # structural audit gate (must stay CLEAN)
+python3 -m aut2ltl model.hoa --dag | dot -Tpng -o dag.png
 ```
 
-`SUCCESS`/`FAIL` is definite: `FAIL` means a *verified non-equivalent* formula
-was produced. Spot timeouts / size explosions / >32-acceptance-set walls are
-reported as their own categories, never as failures — a DAG we built that Spot
-cannot verify is not our fault. The committed release baseline lives in
-`tests/logs/reference/`.
+Fine-tune any declared option with `-O key=value` (see `--list-options`).
 
-## More
+## Samples
 
-* `aut2ltl/kr/README.md` — kr engine doc map, pipeline, module map, testing tools.
-* `aut2ltl/kr/STATUS.md` / `aut2ltl/kr/TODO.md` — engine state / work items.
-* `STATUS.md` / `TODO.md` — project-level snapshot / open items.
-* `docs/algorithm.md` — the construction's scope and module mapping.
-* `docs/dag_folding.md` — the size-explosion analysis (open research direction).
-* `docs/HISTORY.md` — the dated construction log.
-* `paper/automata-to-ltl-construction.md` — the construction reference;
-  `paper/Automata2LTL.txt` — ground-truth paper text.
+A reference run of the curated corpus is committed under
+[`tests/logs/reference/`](tests/logs/reference/) (per-formula CSVs + a summary) — a
+quick sense of what the tool produces across a range of inputs.
+
+## Project structure
+
+`aut2ltl` is a **portfolio**: most modules are *translators* (a `Language` in, an
+LTL result out) and the portfolio composes them, taking the best answer at each step.
+
+```
+aut2ltl/
+  language.py     the input wrapper: cached, cleaned, language-equivalent automaton views
+  result.py       LTLResult — a formula (DAG) or a decline, plus which methods contributed
+  __main__.py     the command-line front end  (python3 -m aut2ltl)
+  kr/             the systematic construction (Krohn-Rhodes cascade; see kr/README.md)
+  daisy/          the self-loop "daisy" peel — a pure local translator
+  decomp/         (de)composition approaches, one isolated subpackage each:
+                  scc / strength / acceptance / inv
+  partscc/        the single-terminal-SCC leaf translator
+  sl/             the heuristic self-loop engine
+  ltl/            LTL primitives, metrics, printers, simplifiers
+  portfolio/      the combinators that assemble the translators
+tests/            survey (the correctness gate), fixtures, per-engine tests
+docs/             algorithm notes, the construction log, figures
+```
+
+## Scope & honesty
+
+Translating an automaton to LTL is hard: the construction is exponential in several
+directions, and some ω-languages are simply **not LTL-definable** at all (ω-automata
+are strictly more expressive than LTL). `aut2ltl` does not pretend otherwise — every
+translator is *language-faithful or it declines*, so a result you get back is an
+honest one, and an input out of reach is reported as a decline rather than a wrong
+formula.
+
+## Algorithms
+
+The systematic core follows Boker, Lehtinen & Sickert, *"On the Translation of
+Automata to Linear Temporal Logic"* (FoSSaCS 2022), via a Krohn-Rhodes holonomy
+cascade decomposition (SgpDec + GAP) — to our knowledge the first practical
+implementation of that construction. It is complemented by a portfolio of additional,
+mostly original methods that handle structured fragments directly.
+
+> This material is **unpublished**. Please give us time to write the paper before
+> building on this prototype. Feedback and collaboration are very welcome —
+> contact **Yann.Thierry-Mieg@lip6.fr** or open a GitHub issue. As a last resort,
+> cite this repository.
 
 ## License
 
-Distributed under the **GNU General Public License v3.0** (see `LICENSE`).
+Distributed under the **GNU General Public License v3.0** (see [`LICENSE`](LICENSE)).
 
 © 2026 Yann Thierry-Mieg, LIP6, Sorbonne Université, CNRS.
