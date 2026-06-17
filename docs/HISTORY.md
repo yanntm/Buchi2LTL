@@ -604,3 +604,18 @@ and `.conclusive`/`.note`/`not_ltl_definable` are all GONE.
 
 Gates: `tests/kr/test_kr_r4_audit.py` CLEAN; `tests/survey.py` SUCCESS (35/35
 validated, 0 false, 0 declined, DAG=487 temporals=119 build=8.8s).
+
+## 2026-06-17 — daisy: pure self-loop core extracted as a peer translator
+
+Lifted the pure marguerite/daisy core out of `aut2ltl/sl/sl_core.py` (`SlCore`) into
+a new sibling package `aut2ltl/daisy/`, peer to `partscc`/`sccdecomp`: `daisy.py`
+(the `Daisy(child)` combinator — peel one daisy = STAY∞ ∨ LEAVE, delegate stems to
+the child), `shape.py` (the structure helpers `is_daisy`/`split`/`reroot`),
+`algorithm.md` (clean spec, lifted from the "Algorithm presentation" half of
+`sl/algorithm.md`), `__init__.py` (context-free, contract-only — names no siblings).
+Naming converged through `slpeel` → **daisy** (memorable structural metaphor over a
+descriptive compound; sets up the "daisy chains" big-self-loop extension); technique
+tag is now `daisy`. Removed `sl/sl_core.py`; repointed the four probes (`probe_sl_core`,
+`probe_sl_over_str`, `probe_inv`, `probe_sccdecomp`) to `aut2ltl.daisy.Daisy`. Still
+unwired (probe-only, as `sl_core` was) — no STATUS shift. Verified via the probes
+(`a U b`, `inv` over it, `sccdecomp` over it): all equiv=True, tag `daisy`.
