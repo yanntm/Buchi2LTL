@@ -1,25 +1,27 @@
 """
-kr/muller.py — the general Muller-DNF assembly (BLS core support).
+kr/muller/muller.py — the general Muller-DNF member (the BLS general case).
 
-This is the explosive but fully general Δ₂ form: for the lifted Müller condition
+The explosive but fully general Δ₂ form: for the lifted Müller condition
 α' = good config-sets M (the recurrent sets the normalized D actually exhibits),
 
     φ = ⋁_M ( ⋀_{C∈M} ¬Fin(C)  ∧  ⋀_{C∉M} Fin(C) )
 
 asserting the set of configs visited infinitely often is exactly some good M.
-`assemble_muller_dnf` is **support** (casc → formula), not a CascadeTranslator:
-the `Bls` member (kr/bls.py) wraps it into the general-case leaf. It always
-produces a formula. The five inductive reachability formulas it relies on (via
-fin_c / Fin(C)) live in reachability_operators.py + fin.py.
+`assemble_muller_dnf` is the assembly (casc → formula); the `Muller`
+CascadeTranslator member wraps it into the general-case leaf, which always produces a
+formula. The five inductive reachability formulas it relies on (via fin_c / Fin(C))
+live in reachability_operators.py + fin.py. See algorithm.md.
 """
 
 from __future__ import annotations
 import os
 
 import aut2ltl.kr.reachability_operators as _ops
-from .fin import fin_c
+from aut2ltl.kr.fin import fin_c
 from aut2ltl.ltl.builders import _And, _Or, _Not, _tt, _ff, _simp_f, _short_f
-from .cascade import CascadeHolder, good_muller_sets
+from aut2ltl.kr.cascade import CascadeHolder, good_muller_sets
+from aut2ltl.kr.cascade_translator import CascadeTranslator
+from aut2ltl.result import LTLResult
 
 
 def assemble_muller_dnf(casc: CascadeHolder) -> "spot.formula":
@@ -98,4 +100,18 @@ def assemble_muller_dnf(casc: CascadeHolder) -> "spot.formula":
     return res_f
 
 
-__all__ = ["assemble_muller_dnf"]
+class Muller:
+    """General-case CascadeTranslator: the full Muller-DNF construction (the BLS
+    fallback). Reached only when no simpler acceptance class applies; never declines
+    in practice (LTL input is counter-free)."""
+
+    name = "muller"
+
+    def __call__(self, casc: CascadeHolder) -> LTLResult:
+        return LTLResult.success(assemble_muller_dnf(casc), self.name)
+
+
+muller: CascadeTranslator = Muller()
+
+
+__all__ = ["assemble_muller_dnf", "Muller", "muller"]
