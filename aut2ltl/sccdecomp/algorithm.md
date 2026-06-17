@@ -21,6 +21,15 @@ sccdecomp asks the Language for a generalized-Büchi automaton `A = tgba(L)`,
 it meets every color `F_i` infinitely often). It manipulates only acceptance marks,
 never the transition structure, so no determinism is assumed or required.
 
+## Mark-based form
+
+The decomposition reads "accepting" off acceptance *marks*, so it first puts `A`
+in mark-based form: if `A` is all-accepting (`m = 0`, the `t` condition, no marks),
+add one Büchi set and mark every edge with it (acceptance `Inf(0)`) — language-
+preserving, since every infinite run already accepts. Write `marked(A)` for this
+(the identity when `A` already carries marks). After it, an SCC reads as accepting
+iff it carries a marked cycle, and clearing marks outside an SCC has meaning.
+
 ## The per-SCC restriction
 
 For an SCC `C ⊆ Q`, let `A↾C` be `A` with acceptance marks kept **only inside `C`**
@@ -57,7 +66,7 @@ nondeterministic automaton (`L(⋃) = ⋃ L`), needing no determinization.
 ```
 sccdecomp(Λ) : Translator
 sccdecomp(Λ)(L) =
-    let A = tgba(L); {C_1,…,C_k} = acceptingSCCs(A) in
+    let A = marked(tgba(L)); {C_1,…,C_k} = acceptingSCCs(A) in
     if k < 2 then Λ(L)                                  -- atomic: nothing to split
     else let φ_j = sccdecomp(Λ)( of(A↾C_j) )  for each j
          in if any φ_j = ⊥ then ⊥                       -- a part we cannot label poisons it
