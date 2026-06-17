@@ -45,7 +45,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(r"{PROJECT_ROOT}").resolve()))
 import spot
-from aut2ltl.kr import decompose_aut, reconstruct_bls as rec_clean
+from aut2ltl.bls import decompose_aut, reconstruct_bls as rec_clean
 
 fs = {formula!r}
 import sys
@@ -62,7 +62,7 @@ try:
     print("LEVELS:", casc.num_levels)
     print("ACC_CFGS:", len(casc.accepting_configs()))
     try:
-        import aut2ltl.kr.operators.reachability_operators as _ops
+        import aut2ltl.bls.operators.reachability_operators as _ops
         print("REACH_CALLS:", getattr(_ops, 'PAPER_REACH_CALLS', -1))
         print("FIN_CALLS:", getattr(_ops, 'PAPER_FIN_CALLS', -1))
         print("MAXSZ:", getattr(_ops, 'PAPER_MAX_LTL_SIZE', -1))

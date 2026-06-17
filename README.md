@@ -14,7 +14,7 @@ Three dependencies must be installed at system level (they are *not* pip-install
 - **Python 3**
 - **[Spot](https://spot.lre.epita.fr/)** with its `spot` / `buddy` Python bindings
 - **[GAP](https://www.gap-system.org/) 4.12+** with the **SgpDec** package — run
-  `aut2ltl/kr/install.sh` once to set it up user-locally (`~/.gap/pkg`)
+  `aut2ltl/bls/install.sh` once to set it up user-locally (`~/.gap/pkg`)
 
 Then install the package itself:
 

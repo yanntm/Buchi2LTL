@@ -38,13 +38,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import spot
 
-from aut2ltl.kr import decompose_aut
-import aut2ltl.kr.operators.reachability_operators as _ops
-from aut2ltl.kr.operators.reachability_operators import (
+from aut2ltl.bls import decompose_aut
+import aut2ltl.bls.operators.reachability_operators as _ops
+from aut2ltl.bls.operators.reachability_operators import (
     reach_strong,
     simplify_ltl,
 )
-from aut2ltl.kr.operators.fin import fin_c, _uncond_reach_strict
+from aut2ltl.bls.operators.fin import fin_c, _uncond_reach_strict
 from aut2ltl.ltl.builders import _Not, _to_f, _tree_size_f
 from ltl_diff import diff_report, to_aut
 

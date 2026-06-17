@@ -18,7 +18,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 from aut2ltl.language import Language
-from aut2ltl.kr.aut2cas import reconstruct
+from aut2ltl.bls.aut2cas import reconstruct
 
 CASES = ["GFa", "FGa"]
 

@@ -30,7 +30,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from aut2ltl.kr import (
+from aut2ltl.bls import (
     decompose_aut,
     reconstruct_bls,
 )
@@ -81,7 +81,7 @@ proj = Path(r"{PROJECT_ROOT}").resolve()
 sys.path.insert(0, str(proj))
 
 import spot
-from aut2ltl.kr import decompose_aut, reconstruct_bls
+from aut2ltl.bls import decompose_aut, reconstruct_bls
 
 fs = {formula_str!r}
 try:

@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from aut2ltl.options import Options
 from aut2ltl.portfolio import PORTFOLIO_OPTIONS
-from aut2ltl.kr.options import KR_OPTIONS
+from aut2ltl.bls.options import KR_OPTIONS
 from aut2ltl.portfolio.build import build_portfolio, TECHNIQUES
 from aut2ltl.language import Language
 

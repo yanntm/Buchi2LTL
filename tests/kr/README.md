@@ -1,7 +1,7 @@
 # tests/kr/
 
 Development and verification scripts for the kr/ algebraic path.
-The script-by-script overview lives in `aut2ltl/kr/STATUS.md` ("Tooling for
+The script-by-script overview lives in `aut2ltl/bls/STATUS.md` ("Tooling for
 targeted work"); this file only records the ground rules.
 
 ## Rules

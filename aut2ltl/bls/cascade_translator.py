@@ -1,5 +1,5 @@
 """
-aut2ltl/kr/cascade_translator.py — the kr-internal cascade contract.
+aut2ltl/bls/cascade_translator.py — the kr-internal cascade contract.
 
 `CascadeTranslator` is the cascade-level peer of `Translator`, **private to the kr
 engine**: it translates an already-decomposed Krohn-Rhodes cascade to LTL. It lives
@@ -11,7 +11,7 @@ from typing import Protocol, TYPE_CHECKING, runtime_checkable
 
 if TYPE_CHECKING:
     from aut2ltl.result import LTLResult
-    from aut2ltl.kr.cascade import CascadeHolder
+    from aut2ltl.bls.cascade import CascadeHolder
 
 
 @runtime_checkable

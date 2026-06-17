@@ -1,4 +1,4 @@
-# aut2ltl.kr — cascade engine (automaton → LTL)
+# aut2ltl.bls — cascade engine (automaton → LTL)
 
 `kr` translates a deterministic ω-automaton into an equivalent LTL formula via
 the Krohn–Rhodes / holonomy reset cascade, following the construction of Boker,
@@ -69,7 +69,7 @@ config-automaton analysis (reachable/accepting configs, good Muller sets).
 
 ```python
 import spot
-from aut2ltl.kr import decompose_aut, reconstruct_bls
+from aut2ltl.bls import decompose_aut, reconstruct_bls
 
 casc = decompose_aut(spot.formula("G(p -> (q U r))").translate())
 phi = reconstruct_bls(casc)            # the dispatch chain, formula DAG out
@@ -83,7 +83,7 @@ The recommended top-level entry is the portfolio front end
 ## Dependencies
 
 GAP (≥ 4.12) with the SgpDec package on `PATH`. Install once:
-`./aut2ltl/kr/gap/install.sh` (user-local under `~/.gap/pkg`).
+`./aut2ltl/bls/gap/install.sh` (user-local under `~/.gap/pkg`).
 
 ## Docs & tests
 

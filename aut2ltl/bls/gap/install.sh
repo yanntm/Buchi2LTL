@@ -6,8 +6,8 @@
 # After success, `gap --no-window -c 'LoadPackage("SgpDec"); Print("SgpDec OK\n");'` should work.
 #
 # Usage:
-#   ./aut2ltl/kr/gap/install.sh
-#   ./aut2ltl/kr/gap/install.sh --check-only
+#   ./aut2ltl/bls/gap/install.sh
+#   ./aut2ltl/bls/gap/install.sh --check-only
 #
 set -euo pipefail
 

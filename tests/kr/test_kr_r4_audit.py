@@ -28,14 +28,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
-from aut2ltl.kr import decompose_aut, CascadeHolder
-from aut2ltl.kr.operators.reachability_operators import (
+from aut2ltl.bls import decompose_aut, CascadeHolder
+from aut2ltl.bls.operators.reachability_operators import (
     reach_strong, reach_weak, simplify_ltl,
     _solid_stay_weak, _stay_gt0_weak,
     _dashed_change_strong,
 )
-from aut2ltl.kr.operators.fin import fin_c
-from aut2ltl.kr.hierarchy_class import hierarchy_class
+from aut2ltl.bls.operators.fin import fin_c
+from aut2ltl.bls.hierarchy_class import hierarchy_class
 
 def _reset_counters():
     # No-op: build state (memos + counters) now lives on a per-build CascadeHolder,
@@ -186,7 +186,7 @@ def check_5point_checklist():
     Precise source inspection of the *bodies* of Rws0 / R4 + behavioral.
     """
     print("\n=== Path C: 5-point Rws0 / R4 checklist (source + behavioral) ===")
-    src_path = PROJECT_ROOT / "aut2ltl" / "kr" / "operators" / "reachability_operators.py"
+    src_path = PROJECT_ROOT / "aut2ltl" / "bls" / "operators" / "reachability_operators.py"
     src = src_path.read_text()
     rws0_body = _get_func_body(src, "_stay_gt0_weak")
     rs_body = _get_func_body(src, "_solid_stay_weak")

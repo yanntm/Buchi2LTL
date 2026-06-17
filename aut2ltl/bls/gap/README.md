@@ -10,7 +10,7 @@ decomposition.
 The package exposes one job — decompose an automaton into a holonomy cascade:
 
 ```python
-from aut2ltl.kr.gap import decompose_aut
+from aut2ltl.bls.gap import decompose_aut
 
 casc = decompose_aut(aut, *, gap_cmd="gap", timeout=180, max_aps=5)  # -> Cascade
 ```
@@ -28,7 +28,7 @@ Lower-level entry, skipping the Spot normalization to decompose an explicit list
 of transformation images:
 
 ```python
-from aut2ltl.kr.gap import decompose_gens
+from aut2ltl.bls.gap import decompose_gens
 casc = decompose_gens(generators, *, gap_cmd="gap", timeout=180)  # -> Cascade
 ```
 
@@ -38,8 +38,8 @@ Needs GAP (≥ 4.12) with the SgpDec package on `PATH`. Install once with the
 script in this folder (user-local under `~/.gap/pkg`, no root needed):
 
 ```sh
-./aut2ltl/kr/gap/install.sh            # install
-./aut2ltl/kr/gap/install.sh --check-only
+./aut2ltl/bls/gap/install.sh            # install
+./aut2ltl/bls/gap/install.sh --check-only
 ```
 
 Probe availability from Python with `check_gap_available()`.

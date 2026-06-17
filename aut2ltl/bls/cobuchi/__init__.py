@@ -1,5 +1,5 @@
 """
-aut2ltl.kr.cobuchi — the coBüchi (persistence, Σ₂) cascade-translator member.
+aut2ltl.bls.cobuchi — the coBüchi (persistence, Σ₂) cascade-translator member.
 
 `cobuchi` labels a coBüchi cascade as φ = ⋀_{marked configs C} Fin(C), the dual of
 `buchi`, and declines otherwise. Membership is tested on the natural acceptance

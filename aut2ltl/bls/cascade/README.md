@@ -1,4 +1,4 @@
-# aut2ltl.kr.cascade — the cascade data model + analysis
+# aut2ltl.bls.cascade — the cascade data model + analysis
 
 This package holds the Krohn–Rhodes **cascade** that the decomposition produces
 and everything that reads its structure. It is the data layer the translator
@@ -24,5 +24,5 @@ members consume; it builds no LTL itself.
 `config_graph` depends only on a `Cascade` (+ Spot); `model` delegates its
 analysis to `config_graph`. Nothing here imports the formula-construction core
 (`reachability_operators`, `fin`, `ltl_builders`, `muller`) — construction sits
-*above* this package. `from aut2ltl.kr.cascade import Cascade, good_muller_sets,
+*above* this package. `from aut2ltl.bls.cascade import Cascade, good_muller_sets,
 …` is the public surface (re-exported in `__init__.py`).

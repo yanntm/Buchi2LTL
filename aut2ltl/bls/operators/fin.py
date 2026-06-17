@@ -16,8 +16,8 @@ from __future__ import annotations
 from typing import Optional, Tuple
 
 from aut2ltl.ltl.builders import _And, _Or, _Not, _X, _ff, _tt, _letters_to_f, _simp_f, _short_f, _fuse_or
-import aut2ltl.kr.operators.reachability_operators as _ops
-from aut2ltl.kr.operators.reachability_operators import reach_strong, _trace, TRACE_ON
+import aut2ltl.bls.operators.reachability_operators as _ops
+from aut2ltl.bls.operators.reachability_operators import reach_strong, _trace, TRACE_ON
 
 
 def _uncond_reach_strict(S: Tuple[int, ...], T: Tuple[int, ...], casc: "Cascade") -> "spot.formula":

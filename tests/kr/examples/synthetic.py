@@ -17,8 +17,8 @@ from pathlib import Path
 # Make sure we can import the kr package when run directly
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from aut2ltl.kr.gap import generate_gap_script, check_gap_available, decompose_gens
-from aut2ltl.kr.cascade import Cascade, LevelInfo
+from aut2ltl.bls.gap import generate_gap_script, check_gap_available, decompose_gens
+from aut2ltl.bls.cascade import Cascade, LevelInfo
 
 
 def main():
@@ -51,7 +51,7 @@ def main():
             print("Run failed (this is expected if SgpDec is not fully set up):", e)
     else:
         print("No usable GAP + SgpDec in PATH.")
-        print("Run ./aut2ltl/kr/gap/install.sh (or install manually) and try again.")
+        print("Run ./aut2ltl/bls/gap/install.sh (or install manually) and try again.")
         # Still return a dummy Cascade so the example is always runnable.
         dummy = Cascade(
             num_levels=2,

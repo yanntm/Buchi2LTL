@@ -19,7 +19,7 @@ Each entry is a `SurveyCase(formula, klass, note)`:
 
 The corpus spans the MP hierarchy weakest-first and folds in the cases that were
 hard during construction (the former equiv residuals recorded in
-aut2ltl/kr/STATUS.md), so a regression on any of them shows up immediately.
+aut2ltl/bls/STATUS.md), so a regression on any of them shows up immediately.
 """
 from __future__ import annotations
 

@@ -30,7 +30,7 @@ from aut2ltl.proc import setup_signals
 from aut2ltl.options import Options, OptionSpec
 from aut2ltl.language import Language, LANGUAGE_OPTIONS
 from aut2ltl.portfolio import PORTFOLIO_OPTIONS, build_portfolio, TECHNIQUES
-from aut2ltl.kr.options import KR_OPTIONS, FLATTEN_TREE_LIMIT
+from aut2ltl.bls.options import KR_OPTIONS, FLATTEN_TREE_LIMIT
 from aut2ltl.ltl.metrics import dag_metrics
 from aut2ltl.ltl.printers import format_gated, to_dot
 

@@ -9,10 +9,10 @@ config only adds a ¬Fin≡false disjunct, so the looser cover set stays sound.
 
 from __future__ import annotations
 
-from aut2ltl.kr.operators.fin import fin_c
+from aut2ltl.bls.operators.fin import fin_c
 from aut2ltl.ltl.builders import _Or, _Not, _ff, _simp_f
-from aut2ltl.kr.cascade import Cascade, CascadeHolder
-from aut2ltl.kr.cascade_translator import CascadeTranslator
+from aut2ltl.bls.cascade import Cascade, CascadeHolder
+from aut2ltl.bls.cascade_translator import CascadeTranslator
 from aut2ltl.result import LTLResult
 
 

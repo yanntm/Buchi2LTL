@@ -1,5 +1,5 @@
 """
-aut2ltl.kr.acc — the bounded / transient (X-ladder) cascade-translator member.
+aut2ltl.bls.acc — the bounded / transient (X-ladder) cascade-translator member.
 
 `acc` reconstructs cascades whose runs reach a ⊤/⊥ sink within a bounded horizon by
 emitting the finite unrolling `Acc(ι)` directly, and declines when a reachable

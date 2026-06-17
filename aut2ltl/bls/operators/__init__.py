@@ -1,5 +1,5 @@
 """
-aut2ltl.kr.operators — the paper's inductive reachability operators.
+aut2ltl.bls.operators — the paper's inductive reachability operators.
 
 The five inductive reachability formulas (`reachability_operators.py`) and `Fin(C)`
 (`fin.py`, Lemma 7) that the cascade-translator members are built on. This package

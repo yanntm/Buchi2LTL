@@ -89,7 +89,7 @@ def test_package_contracts_wellformed() -> None:
     package-owned keys, unique across packages, every spec carries an env bridge,
     and the Bucket-1 dispatch sub-list is a subset of the full kr contract with
     the in-code defaults."""
-    from aut2ltl.kr.options import (
+    from aut2ltl.bls.options import (
         KR_OPTIONS, KR_DISPATCH_OPTIONS,
         DISPATCH_ACC, DISPATCH_WEAK, DISPATCH_BUCHI, DISPATCH_COBUCHI,
     )

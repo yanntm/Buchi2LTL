@@ -37,8 +37,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
-from aut2ltl.kr import decompose_aut, reconstruct_bls
-from aut2ltl.kr.reachability import _compute_good_muller_sets
+from aut2ltl.bls import decompose_aut, reconstruct_bls
+from aut2ltl.bls.reachability import _compute_good_muller_sets
 
 def describe_aut(aut, label):
     print(f"\n=== {label} ===")

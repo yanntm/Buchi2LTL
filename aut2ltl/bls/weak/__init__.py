@@ -1,5 +1,5 @@
 """
-aut2ltl.kr.weak — the weak (Δ₁) cascade-translator member.
+aut2ltl.bls.weak — the weak (Δ₁) cascade-translator member.
 
 `weak` reconstructs weak-recognizable languages (safety / guarantee / obligation) by
 pure reachability over the configuration automaton: φ = ⋁ over accepting SCC G of

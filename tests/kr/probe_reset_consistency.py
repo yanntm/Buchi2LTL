@@ -31,7 +31,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
-from aut2ltl.kr import decompose_aut
+from aut2ltl.bls import decompose_aut
 
 
 def letter_str(casc, li):

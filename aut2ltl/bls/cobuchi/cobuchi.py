@@ -12,10 +12,10 @@ accepts -> true.
 
 from __future__ import annotations
 
-from aut2ltl.kr.operators.fin import fin_c
+from aut2ltl.bls.operators.fin import fin_c
 from aut2ltl.ltl.builders import _And, _tt, _simp_f
-from aut2ltl.kr.cascade import Cascade, CascadeHolder
-from aut2ltl.kr.cascade_translator import CascadeTranslator
+from aut2ltl.bls.cascade import Cascade, CascadeHolder
+from aut2ltl.bls.cascade_translator import CascadeTranslator
 from aut2ltl.result import LTLResult
 
 

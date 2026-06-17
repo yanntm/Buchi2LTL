@@ -25,9 +25,9 @@ from __future__ import annotations
 
 from aut2ltl.first_success import first_success
 from aut2ltl.options import Options
-from aut2ltl.kr.options import KR_OPTIONS
-from aut2ltl.kr.aut2cas import as_translator
-from aut2ltl.kr.hierarchy_class import make_hierarchy_class
+from aut2ltl.bls.options import KR_OPTIONS
+from aut2ltl.bls.aut2cas import as_translator
+from aut2ltl.bls.hierarchy_class import make_hierarchy_class
 from .options import PORTFOLIO_OPTIONS
 from .sl import Sl
 from .sl_driven import SlDriven

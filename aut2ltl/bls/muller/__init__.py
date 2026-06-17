@@ -1,5 +1,5 @@
 """
-aut2ltl.kr.muller — the general Muller-DNF cascade-translator member (the BLS fallback).
+aut2ltl.bls.muller — the general Muller-DNF cascade-translator member (the BLS fallback).
 
 `muller` is the general-case leaf: φ = ⋁_M (⋀_{C∈M} ¬Fin(C) ∧ ⋀_{C∉M} Fin(C)) over the
 good config-sets M (the recurrent sets the normalized D exhibits). It is reached only

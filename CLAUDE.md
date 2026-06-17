@@ -2,7 +2,7 @@
 
 ## Project layout (nested root package `aut2ltl/`)
 Layering, acyclic: `aut2ltl/contract.py` (LTLResult/Translator floor) +
-`aut2ltl/language.py` ← `aut2ltl/kr` (pure cascade FoSSaCS engine) +
+`aut2ltl/language.py` ← `aut2ltl/bls` (pure cascade FoSSaCS engine) +
 `aut2ltl/sl` (heuristic engine, ex-`buchi2ltl/`) + `aut2ltl/daisy` (pure
 self-loop peel) + `aut2ltl/decomp` ((de)composition approaches, one isolated
 subpackage each: `scc` / `strength` / `acceptance` / `inv`) ← `aut2ltl/portfolio`
@@ -14,9 +14,9 @@ simplify). Tests under `tests/` (`survey*`, `tests/kr`, `tests/sl`,
 ## Orientation (don't duplicate here — follow the pointers)
 - `README.md` — repo guide / quick start. `STATUS.md` / `TODO.md` — project
   snapshot / open items.
-- `aut2ltl/kr/README.md` — kr engine entry point: doc map, pipeline, module map,
-  testing tools. `aut2ltl/kr/STATUS.md` — **current** engine state (read to start).
-  `aut2ltl/kr/TODO.md` — engine work items.
+- `aut2ltl/bls/README.md` — kr engine entry point: doc map, pipeline, module map,
+  testing tools. `aut2ltl/bls/STATUS.md` — **current** engine state (read to start).
+  `aut2ltl/bls/TODO.md` — engine work items.
 - `docs/HISTORY.md` — construction log (the dated DONE/WIRED/LANDED/reverted
   record). Reference for the *why/when*; **do NOT read it to start a session** —
   STATUS.md is the current snapshot.

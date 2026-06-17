@@ -20,8 +20,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import spot
 
 from aut2ltl.language import Language
-from aut2ltl.kr.aut2cas import as_translator
-from aut2ltl.kr.hierarchy_class import make_hierarchy_class
+from aut2ltl.bls.aut2cas import as_translator
+from aut2ltl.bls.hierarchy_class import make_hierarchy_class
 from aut2ltl.sl.reconstruction import reconstruct_ltl
 from aut2ltl.sl.reconstruction_helpers import _sub_automaton_from
 

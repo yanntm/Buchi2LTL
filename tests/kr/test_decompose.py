@@ -22,7 +22,7 @@ from aut2ltl.language import Language
 from aut2ltl.first_success import first_success
 from aut2ltl.portfolio.sl import sl
 from aut2ltl.portfolio.decompose import Decompose
-from aut2ltl.kr.aut2cas import reconstruct as cascade
+from aut2ltl.bls.aut2cas import reconstruct as cascade
 
 CASES = ["GFa & FGb", "Ga | Fb", "FGa | FGb", "GFa", "a U b"]
 

@@ -16,11 +16,11 @@ live in reachability_operators.py + fin.py. See algorithm.md.
 from __future__ import annotations
 import os
 
-import aut2ltl.kr.operators.reachability_operators as _ops
-from aut2ltl.kr.operators.fin import fin_c
+import aut2ltl.bls.operators.reachability_operators as _ops
+from aut2ltl.bls.operators.fin import fin_c
 from aut2ltl.ltl.builders import _And, _Or, _Not, _tt, _ff, _simp_f, _short_f
-from aut2ltl.kr.cascade import CascadeHolder, good_muller_sets
-from aut2ltl.kr.cascade_translator import CascadeTranslator
+from aut2ltl.bls.cascade import CascadeHolder, good_muller_sets
+from aut2ltl.bls.cascade_translator import CascadeTranslator
 from aut2ltl.result import LTLResult
 
 

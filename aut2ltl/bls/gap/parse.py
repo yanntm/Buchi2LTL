@@ -4,7 +4,7 @@ kr/gap/parse.py
 Focused service: parsing the structured textual output emitted by the
 self-contained GAP scripts generated for SgpDec holonomy decomposition.
 
-This was extracted from aut2ltl.kr.gap.bridge so that the bridge module
+This was extracted from aut2ltl.bls.gap.bridge so that the bridge module
 can stay small and focused on "orchestration + script generation + execution",
 while parsing (a distinct, testable concern that produces Cascade objects)
 lives in its own small file.

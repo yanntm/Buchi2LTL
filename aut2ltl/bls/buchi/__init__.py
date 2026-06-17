@@ -1,5 +1,5 @@
 """
-aut2ltl.kr.buchi — the Büchi (recurrence, Π₂) cascade-translator member.
+aut2ltl.bls.buchi — the Büchi (recurrence, Π₂) cascade-translator member.
 
 `buchi` labels a Krohn-Rhodes cascade whose normalized automaton carries a plain
 Büchi condition as φ = ⋁_{accepting configs C} ¬Fin(C), and declines otherwise. It

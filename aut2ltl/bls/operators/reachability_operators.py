@@ -82,7 +82,7 @@ from aut2ltl.ltl.builders import (
 )
 
 # Fin(C) (Lemma 7) lives in kr/fin.py (one-way dependency: fin imports this
-# module, never the reverse). Import fin_c from aut2ltl.kr.operators.fin directly.
+# module, never the reverse). Import fin_c from aut2ltl.bls.operators.fin directly.
 
 
 

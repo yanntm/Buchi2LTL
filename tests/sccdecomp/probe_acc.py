@@ -20,8 +20,8 @@ from aut2ltl.language import Language  # noqa: E402
 from aut2ltl.daisy import Daisy  # noqa: E402
 from aut2ltl.decomp.acceptance import AccDecompose  # noqa: E402
 from aut2ltl.decomp.acceptance.acceptance import conjunct_pieces  # noqa: E402
-from aut2ltl.kr.aut2cas import as_translator  # noqa: E402
-from aut2ltl.kr.hierarchy_class import make_hierarchy_class  # noqa: E402
+from aut2ltl.bls.aut2cas import as_translator  # noqa: E402
+from aut2ltl.bls.hierarchy_class import make_hierarchy_class  # noqa: E402
 
 _STR = as_translator(make_hierarchy_class())
 

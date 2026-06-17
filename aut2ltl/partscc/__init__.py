@@ -1,7 +1,7 @@
 """
 aut2ltl.partscc — the terminal-SCC partition leaf Translator.
 
-A sibling of the translator engines (`aut2ltl.kr`, `aut2ltl.sl`) and the `inv`
+A sibling of the translator engines (`aut2ltl.bls`, `aut2ltl.sl`) and the `inv`
 decorator: `PartScc` labels a Language whose TGBA is a single terminal SCC by
 partitioning its states into uniquely-characterizing entry classes and emitting one
 validated `G(…)` formula — or declining. Defined entirely against the Translator

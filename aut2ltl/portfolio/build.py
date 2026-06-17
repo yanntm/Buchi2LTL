@@ -52,13 +52,13 @@ from typing import Dict, Iterable, List, Optional, Tuple
 from aut2ltl.first_success import first_success
 from aut2ltl.contract import CascadeTranslator, Translator
 from aut2ltl.options import Options
-from aut2ltl.kr.aut2cas import as_translator
-from aut2ltl.kr.hierarchy_class import make_hierarchy_class
-from aut2ltl.kr.acc import acc as _acc
-from aut2ltl.kr.buchi import buchi as _buchi
-from aut2ltl.kr.cobuchi import cobuchi as _cobuchi
-from aut2ltl.kr.weak import weak as _weak
-from aut2ltl.kr.bls import bls as _bls
+from aut2ltl.bls.aut2cas import as_translator
+from aut2ltl.bls.hierarchy_class import make_hierarchy_class
+from aut2ltl.bls.acc import acc as _acc
+from aut2ltl.bls.buchi import buchi as _buchi
+from aut2ltl.bls.cobuchi import cobuchi as _cobuchi
+from aut2ltl.bls.weak import weak as _weak
+from aut2ltl.bls.bls import bls as _bls
 from .sl import Sl
 from .sl_driven import SlDriven
 from .decompose import Decompose

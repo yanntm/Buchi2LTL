@@ -14,10 +14,10 @@ reach-driven A/B alternative rather than the default.
 
 from __future__ import annotations
 
-import aut2ltl.kr.operators.reachability_operators as _ops
+import aut2ltl.bls.operators.reachability_operators as _ops
 from aut2ltl.ltl.builders import _And, _Or, _Not, _tt, _ff, _simp_f
-from aut2ltl.kr.cascade import Cascade, CascadeHolder
-from aut2ltl.kr.cascade_translator import CascadeTranslator
+from aut2ltl.bls.cascade import Cascade, CascadeHolder
+from aut2ltl.bls.cascade_translator import CascadeTranslator
 from aut2ltl.result import LTLResult
 
 
@@ -63,7 +63,7 @@ class Weak:
     def __call__(self, casc: CascadeHolder) -> LTLResult:
         if not is_weak_cascade(casc):
             return LTLResult.decline()
-        from aut2ltl.kr.cascade import build_pruned_config_aut, reachable_configs
+        from aut2ltl.bls.cascade import build_pruned_config_aut, reachable_configs
         import spot
         g = build_pruned_config_aut(casc)
         if g is None:

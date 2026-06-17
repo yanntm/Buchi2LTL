@@ -1,4 +1,4 @@
-# aut2ltl/kr — Current Status
+# aut2ltl/bls — Current Status
 
 Factual snapshot of the **current** state — read this to start a session.
 Construction history (the dated "DONE / WIRED / LANDED / reverted" log) lives in
@@ -72,14 +72,14 @@ landed, the soundness arguments, and the measurements):
 
 - **Letter fusion** (`KR_FUSE_LETTERS`) — one summand per outcome class instead
   of per letter (Minato-minimized guard OR).
-- **Own simplify + fold passes** (`aut2ltl/kr/simplify/`, `KR_SIMP_OWN`,
+- **Own simplify + fold passes** (`aut2ltl/bls/simplify/`, `KR_SIMP_OWN`,
   `KR_SIMP_OWN_FOLD`, cap `KR_SIMP_OWN_LIMIT=2000`) — context pass, now-evaluation,
   partial factoring, unroll-inverse folds, initial-state opening, context-aware
   S1/S2 subsumption, arm-padding removal. Rules Spot lacks; per-node, amortized.
 - **Per-conjunct Fin-reachability fold** (`KR_FOLD_FIN_REACH`) — keep `Fin(C∉M)`
   only for C reachable from the good set M in the config graph; decided before
   building the explosive `fin_c`.
-- **Acceptance dispatch** (`aut2ltl/kr/acceptance_dispatch.py`), pre-checks at the
+- **Acceptance dispatch** (`aut2ltl/bls/acceptance_dispatch.py`), pre-checks at the
   head of `reconstruct_ltl_paper_style`, in chain order: `Acc(c)` bounded-fragment
   unroll (`KR_DISPATCH_ACC`, self-declining) → Büchi `⋁¬Fin` (`KR_DISPATCH_BUCHI`)
   → coBüchi `⋀Fin` (`KR_DISPATCH_COBUCHI`). Weak/looping `reconstruct_weak`

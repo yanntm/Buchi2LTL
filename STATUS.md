@@ -1,6 +1,6 @@
 # aut2ltl — Project Status
 
-Project-level snapshot. For the **engine** state read `aut2ltl/kr/STATUS.md`
+Project-level snapshot. For the **engine** state read `aut2ltl/bls/STATUS.md`
 (the FoSSaCS'22 cascade core); for construction history read `docs/HISTORY.md`.
 
 ## What works
@@ -9,7 +9,7 @@ The FoSSaCS'22 automaton→LTL construction is implemented end-to-end and
 semantically validated. The portfolio front end (`reconstruct_decomposed`:
 decompose/recombine + the sl heuristic gate over the integrated kr cascade)
 sweeps the Manna–Pnueli class ladder — every probed case verifies equiv=True.
-Engine internals and the current size profile live in `aut2ltl/kr/STATUS.md`.
+Engine internals and the current size profile live in `aut2ltl/bls/STATUS.md`.
 
 ## Front end (CLI)
 
@@ -40,7 +40,7 @@ client cost):
 
 ## Layout
 
-`aut2ltl/contract.py` (floor) + `aut2ltl/language.py` ← `aut2ltl/kr` (pure
+`aut2ltl/contract.py` (floor) + `aut2ltl/language.py` ← `aut2ltl/bls` (pure
 cascade engine) + `aut2ltl/sl` (heuristic engine) ← `aut2ltl/portfolio`
 (combinators) ← `aut2ltl/__main__`. Engine-agnostic helpers in `aut2ltl/ltl`.
 Tests under `tests/` (`survey*`, `tests/kr`, `tests/sl`, `tests/fixtures`).
