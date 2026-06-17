@@ -78,7 +78,7 @@ def _reroot(aut: "spot.twa_graph", state: int) -> "spot.twa_graph":
 
 
 class SlCore:
-    """The pure sl combinator `sl(Λ)` as a `Translator` (`Language → LTLFormulaResult`).
+    """The pure sl combinator `sl(Λ)` as a `Translator` (`Language → Result`).
 
     Constructed with the child labeler `Λ` it uses for exit targets (the decorator
     seam). It peels the initial state of the input Language's TGBA form when that

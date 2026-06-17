@@ -16,7 +16,7 @@ output formula; the build is O(|reachable configs| × |Σ|) memoized.
 
 `Acc` is a self-contained CascadeTranslator member: it decides on its own whether
 the input is in the bounded fragment (no external predicate) and returns a
-language-faithful LTLFormulaResult or a DECLINE.
+language-faithful Result or a DECLINE.
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ class _Recurrent(Exception):
 def _unroll(casc: Cascade) -> Optional["spot.formula"]:
     """The bounded Acc(ι) unroll: the formula for L(D) from the initial config,
     or None if any reachable config is recurrent (input outside the bounded
-    fragment). `Acc` wraps this into a LTLFormulaResult.
+    fragment). `Acc` wraps this into a Result.
 
       Acc(c) = ⊤  if L(D from state_of(c)) is universal,           (R1 base)
              = ⊥  if it is empty,

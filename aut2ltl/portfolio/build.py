@@ -50,7 +50,7 @@ from __future__ import annotations
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from aut2ltl.combinators import first_success
-from aut2ltl.contract import CascadeTranslator, LTLFormulaResult, Translator
+from aut2ltl.contract import CascadeTranslator, Translator
 from aut2ltl.options import Options
 from aut2ltl.kr.aut2cas import as_translator
 from aut2ltl.kr.hierarchy_class import make_hierarchy_class

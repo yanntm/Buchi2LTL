@@ -3,7 +3,7 @@ aut2ltl.portfolio — the composition layer (combinators) over the engines.
 
 A `Language` is translated by whichever Translator wins at each node: the sl gate,
 an AND/OR strength/acceptance split (`Decompose`), the sl-driven blaster, or the
-kr cascade. Every piece is a Translator (`Language -> LTLFormulaResult`); the
+kr cascade. Every piece is a Translator (`Language -> Result`); the
 engines stay PEERS importing only the contract floor (`aut2ltl.contract` /
 `aut2ltl.language`).
 

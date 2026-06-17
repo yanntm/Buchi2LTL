@@ -10,7 +10,7 @@ Translator (`aut2ltl.portfolio.sl`) can adopt its output without re-checking.
 
 Imports only the contract floor (`aut2ltl.contract`); a peer of `aut2ltl.kr`,
 importing neither it nor the portfolio. Public entry: `reconstruct_ltl(twa) ->
-LTLFormulaResult`.
+Result`.
 """
 
 from .reconstruction import reconstruct_ltl

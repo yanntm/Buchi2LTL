@@ -7,7 +7,7 @@ hierarchy-class leaves in order — acc → weak → buchi → cobuchi — each 
 (it returns a faithful form or declines), and falls back to the general-case
 `bls` member (the full Muller-DNF construction) when none applies. Each leaf
 drops the explosive Fin web that the Muller form pays. The chain forwards the
-winning leaf's `LTLFormulaResult` unchanged, so `.technique` reports the winning
+winning leaf's `Result` unchanged, so `.technique` reports the winning
 leaf's method tag (`acc`/`weak`/`buchi`/`cobuchi`/`bls`); the formula it carries
 is the hash-consed `spot.formula` DAG (serialization to text is a separate
 concern — `ltl_builders._str_f` — never done here).
