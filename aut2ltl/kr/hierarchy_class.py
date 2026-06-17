@@ -25,7 +25,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from aut2ltl.contract import CascadeTranslator
-from aut2ltl.combinators import first_success
+from aut2ltl.first_success import first_success
 from aut2ltl.options import Options
 from .options import (
     KR_DISPATCH_OPTIONS, DISPATCH_ACC, DISPATCH_WEAK, DISPATCH_BUCHI, DISPATCH_COBUCHI,

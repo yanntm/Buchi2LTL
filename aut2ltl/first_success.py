@@ -1,5 +1,5 @@
 """
-aut2ltl/combinators.py — composite translators built over the contract.
+aut2ltl/first_success.py — composite translators built over the contract.
 
 A composite is itself a translator: it delegates to a collection of
 sub-translators and combines their `LTLResult`s. Because every sub-result obeys

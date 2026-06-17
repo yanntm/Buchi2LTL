@@ -19,7 +19,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 from aut2ltl.language import Language
-from aut2ltl.combinators import first_success
+from aut2ltl.first_success import first_success
 from aut2ltl.portfolio.sl import sl
 from aut2ltl.portfolio.decompose import Decompose
 from aut2ltl.kr.aut2cas import reconstruct as cascade

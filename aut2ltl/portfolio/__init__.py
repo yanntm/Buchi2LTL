@@ -23,7 +23,7 @@ cited-technique ladder (the research/CLI path) — see `build.py`.
 """
 from __future__ import annotations
 
-from aut2ltl.combinators import first_success
+from aut2ltl.first_success import first_success
 from aut2ltl.options import Options
 from aut2ltl.kr.options import KR_OPTIONS
 from aut2ltl.kr.aut2cas import as_translator
