@@ -2,7 +2,7 @@
 Core backward LTL reconstruction logic (DAG-native).
 
 `reconstruct_ltl` runs self-loop backward labeling over a TGBA and returns a
-`LTLFormulaResult` (`aut2ltl.contract`): a hash-consed `spot.formula` DAG on success,
+`Result` (`aut2ltl.result`): a hash-consed `spot.formula` DAG on success,
 or `status=DECLINED` (`.formula` None) when no exact label exists. Every formula
 is built as a `spot.formula` — an adopted `scc_labeler` formula
 is spliced as a child node WITHOUT flattening (the kr-under-sl payoff: a
@@ -18,7 +18,7 @@ import spot
 import buddy
 
 if TYPE_CHECKING:
-    from aut2ltl.contract import LTLFormulaResult
+    from aut2ltl.result import Result
 
 # The two heuristics that can "rescue" certain multi-state SCCs before we
 # give up and emit UNSUPPORTED.  Both are tried (and validated) early.
@@ -45,9 +45,9 @@ def _is_unsupported(val):
 def reconstruct_ltl(
     aut: "spot.twa_graph",
     scc_labeler: Optional[Callable[["spot.twa_graph"], Optional["spot.formula"]]] = None,
-) -> "LTLFormulaResult":
-    """Backward LTL reconstruction from a TGBA. Returns a `LTLFormulaResult`
-    (`aut2ltl.contract`): on success `.formula` is a spot.formula and `.status`
+) -> "Result":
+    """Backward LTL reconstruction from a TGBA. Returns a `Result`
+    (`aut2ltl.result`): on success `.formula` is a spot.formula and `.status`
     is OK; on decline `.status` is DECLINED and `.formula` is None. `.technique`
     is the method-token set (e.g. {"sl","t2"}). Uniform with the kr portfolio
     result.
@@ -328,10 +328,10 @@ def reconstruct_ltl(
     # lives in kr/ for now (the resulting import cycle is deferred to a later
     # `util` extraction — agreed 2026-06-14). No load-time cycle: `import kr`
     # does not import buchi2ltl (the gate's buchi2ltl import is lazy).
-    from aut2ltl.contract import LTLFormulaResult
+    from aut2ltl.result import Result
     techset = set(technique.split("+")) if technique else set()
     if _is_unsupported(final):
         # Contract boundary: the internal UNSUPPORTED sentinel becomes an
         # explicit DECLINED status (no sentinel string in `.formula`).
-        return LTLFormulaResult.decline(techset)
-    return LTLFormulaResult(final, techset)
+        return Result.decline(None, *techset)
+    return Result.success(final, *techset)
