@@ -1001,3 +1001,23 @@ out of the input aut, run the chain, recombine `& G(inv)`; `Fa & Gb` 12→2
 census, equiv=True) was DROPPED on purpose — it is the "poor man's" degenerate
 case (init-config invariant only) and not the direction we want; per-config
 injection above subsumes it when/if pursued.
+
+## 2026-06-17 — session: tool-first docs, contract/combinator refactors, decomp/ + kr→bls reorg
+
+Cleared from TODO.md as DONE:
+- Root README rewritten tool-first (+ rendered example image docs/img/); aut2ltl/README.md
+  source map added; bls/README rewritten as a current source map.
+- contract.py split: Translator -> aut2ltl/translator.py (the floor, no implementor
+  refs); CascadeTranslator -> aut2ltl/bls/cascade_translator.py; contract.py kept as a
+  deprecated shim.
+- combinators.py -> first_success.py. result.md folded into the result.py module
+  docstring (the .md removed).
+- decomp/ regroup: one isolated subpackage per (de)composition approach — scc
+  (ex-sccdecomp), strength, acceptance (extracted from portfolio/decompose), inv
+  (moved in). daisy/ extracted from the old sl_core (slpeel -> daisy).
+- kr engine reorg + rename: members foldered (acc/weak/buchi/cobuchi/muller); operators/
+  gathers the reachability operators + Fin(C); the reachability.py shell + README.old
+  removed; kr/STATUS -> docs/kr_STATUS.md, the kr TODO folded into this file. Then
+  kr/ -> bls/ (the BLS construction names the engine); the general member is `muller`,
+  bls.py a deprecated shim.
+All verified: CLI + tests/survey SUCCESS + the r4 audit CLEAN throughout.
