@@ -12,6 +12,24 @@ formula enters — it is translated to an automaton lazily, after which everythi
 is automaton-backed). This is the kr rule "an automaton, never a formula" made a
 property of the constructor rather than of the Translator signature.
 
+As a FACTORY the constructors do two more things, transparent to the client:
+
+  * INTERN on the literal input — a bounded LRU keyed by the canonical formula
+    string / the automaton's HOA serialization — so separate calls with the same
+    input return one shared `Language`, reusing its lazily-built representations
+    and its definability verdict. The aim is to cache the heavy, sometimes-erratic
+    spot calls (translate / postprocess), not to trust them to be cheap or to run
+    twice the same. Bounded so it never hogs memory (`CACHE_SIZE`).
+  * CLEAN the source once, lazily, language-preserving (`_clean` / `_base`):
+    `postprocess(generic, <CLEAN_LEVEL>, any)` — Generic keeps the acceptance
+    FAMILY (no degeneralization / parity), the level (default Medium) purges
+    dead/unreachable states and merges redundant acceptance sets — then
+    `remove_unused_ap` drops atomic propositions no edge uses (no postprocess level
+    reindexes the alphabet, so we do it ourselves). A rerooted sub-language thus
+    arrives smallified, which the heuristic leaves (e.g. partscc) rely on.
+
+Both behaviours are knobs declared as `OptionSpec`s (`CLEAN_LEVEL`, `CACHE_SIZE`).
+
 LAYERING: this is a contract-floor module. It knows spot automata and formulas
 (shared dependencies, below every engine) but NOT any engine type — in particular
 NOT `Cascade` (kr-specific). The cascade is built on the kr side from

@@ -63,14 +63,20 @@ The result is an `LTLResult` (`aut2ltl.contract`): `.formula` (a
 hash-consed `spot.formula` DAG) or `.declined`, plus `.technique` (the methods
 that contributed). A `Language` (`aut2ltl.language`) wraps any input
 (`Language.of(aut)` / `Language.of_ltl(formula)`) as lazily-cached,
-language-equivalent automaton views.
+language-equivalent automaton views. As a factory it does two more jobs: it
+**interns** on the literal input (a bounded LRU, so repeated calls share one
+`Language` and its cached views — caching the heavy, erratic spot calls), and it
+**cleans** the source once — `postprocess(generic, medium, any)` + `remove_unused_ap`
+(purge dead/unreachable states, merge redundant acceptance sets, drop orphan APs)
+— language- and acceptance-family-preserving. Level/size are `OptionSpec` knobs.
 
 ## Layout
 
 ```
 aut2ltl/                  the root package (layering: floor -> engines -> portfolio -> cli)
   contract.py            LTLResult + Translator (the contract floor)
-  language.py            Language: lazy language-equivalent automaton views
+  language.py            Language factory: interned, cleaned, lazy
+                         language-equivalent automaton views
   __main__.py            the portfolio front end:  python3 -m aut2ltl  (console: aut2ltl)
   kr/                    pure cascade FoSSaCS engine (cascade/, reachability,
                          fin, acceptance_dispatch, gap/, simplify/, ...)
