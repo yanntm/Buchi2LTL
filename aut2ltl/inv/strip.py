@@ -26,6 +26,8 @@ def sigma(aut: "spot.twa_graph") -> "buddy.bdd":
     for s in range(aut.num_states()):
         for e in aut.out(s):
             acc = acc | e.cond
+            if acc == buddy.bddtrue:
+                return acc                 # O(1): Σ can only stay true (vacuous case)
     return acc
 
 
