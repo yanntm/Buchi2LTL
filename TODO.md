@@ -5,6 +5,22 @@ the record of completed campaigns is in git history and `docs/HISTORY.md`.
 
 ## Open
 
+- **Wire `PartScc` into the portfolio / CLI.** The `aut2ltl.partscc` leaf
+  (`PartScc()`, a `Translator`) is built, tested, and gate-clean but not reachable
+  from `-m aut2ltl`. It reconstructs a `Language` whose state-based automaton is a
+  single terminal SCC (the "stay in this SCC forever" sub-language) — exactly what
+  the sl engine hands an exit target via `of(A↓dst)`. Wire it as a leaf in the
+  sl-driven delegate chain in `aut2ltl/portfolio/` (sl peels marguerites and
+  delegates the rerooted suffix; partscc labels it; the crossing `X` is sl's
+  ordinary exit rule — no entry-timing cooperation needed). `Language.of` now
+  cleans rerooted sub-languages (purged states, dropped orphan APs), so clean
+  single-SCC inputs materialize. Then validate against the t2 fixtures
+  (`tests/fixtures/t2_successes.py`, `terminal_2scc_labeled.py`) and the survey's
+  partscc stress block to measure coverage vs the legacy t2. End goal: retire
+  `aut2ltl/sl/heuristics/terminal_2scc.py` and its sl entry-timing surgery
+  (`scc_entry_I` / `direct_scc_sync_attach` in `sl/reconstruction.py`), which the
+  pure-leaf framing makes unnecessary.
+
 - **Output size at scale (the live research front).** The construction is cheap;
   the cost is the flat form — Spot hits its 32-acceptance-set tableau limit and
   the largest flat strings explode. This is representation/verification, not
