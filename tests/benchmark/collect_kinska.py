@@ -4,13 +4,14 @@ the normalised key (tests/benchmark/normalize.normalize_hoa) — one representat
 per key. Her LTL formula files (`*-formulae/`) are skipped: they are the randltl
 SOURCES of the `-ba` automata, redundant with the HOA we keep.
 
-Stores the representative file VERBATIM (only the extension changes) — provenance
-preserved; normalisation is only the dedup key, not applied to stored content.
-Run: `python3 tests/benchmark/collect_kinska.py`.
+Stores the representative with the basic AP renaming APPLIED (normalize_hoa: the
+`AP:` line's quoted names become a, b, c… in index order) — a plain, healthy
+rename, nothing more. The `name:` comment, state numbering and transition order
+are left as-is, so two HOA syntaxes of the same automaton may both survive; that
+residual dup is accepted. Run: `python3 tests/benchmark/collect_kinska.py`.
 """
 from __future__ import annotations
 
-import shutil
 import sys
 from pathlib import Path
 from typing import Dict
@@ -43,7 +44,7 @@ def collect() -> None:
         # Flat name encodes her path (her leaf names repeat across ap-folders).
         name = str(p.relative_to(SRC).with_suffix("")).replace("/", "-") + ".hoa"
         seen[key] = name
-        shutil.copyfile(p, DST / name)              # flatten + .txt -> .hoa, verbatim
+        (DST / name).write_text(key, encoding="utf-8")   # flatten + .txt -> .hoa, AP-renamed
         kept += 1
     print(f"{len(files)} .txt files: {kept} kept (unique HOA), "
           f"{dups} dropped as dups, {skipped} non-HOA skipped")
