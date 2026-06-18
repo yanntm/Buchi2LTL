@@ -30,13 +30,27 @@ and the retired `sl` heuristic engine, which `daisy` (self-loop peel) and `parts
   lifted over the GAP holonomy decomposition), `daisy` (recursive self-loop peel),
   `core` (`first(partscc, bls)`), `daisy_pair` (the daisy/daisy2 peel pair), and the
   recipes `best`, `best_daisy2` (the shipped default), `best_inv`. `--use <name>`
-  resolves here.
+  resolves here. The recursive peels are built from the two primitive **bricks**:
+  `daisy(child) = recurse(λ leaf: first_success([Daisy(leaf), child]))` — i.e.
+  `recurse` (self-reference, `aut2ltl.recurse`) over `first_success` (choice,
+  `aut2ltl.first_success`).
 - **`__init__.py`** — builds the env-seeded default `Options` (from `KR_OPTIONS`) and
   exposes `build_portfolio` / `TECHNIQUES` / `RECIPES` for callers wanting a variant.
+
+## Combinator bricks
+
+Two primitives, both sibling modules of this package, compose the translators:
+
+- **`aut2ltl.first_success`** — *choice*: a flat chain, take the first non-declined.
+- **`aut2ltl.recurse`** — *self-reference*: `recurse(step) = leaf` with
+  `leaf = step(leaf)`, the recursive-descent shape `daisy` / `daisy_pair` / the
+  `decomp` composites share. The single seam where `best_of` (size), memoization,
+  or a per-descent layer would later land.
 
 ## Layering
 
 Above the engine and the (de)composition approaches; imports them (`bls`, `daisy`,
-`partscc`, `decomp`) and the `aut2ltl.contract` floor, never the reverse. A caller
+`partscc`, `decomp`), the combinator bricks (`first_success`, `recurse`) and the
+`aut2ltl.contract` floor, never the reverse. A caller
 builds a variant by rebuilding with `build_portfolio` + a cited technique set, a
 recipe name, or a cloned `Options` (the A/B move).
