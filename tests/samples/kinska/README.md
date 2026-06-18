@@ -9,7 +9,8 @@ test inputs for our automata→LTL construction.
   (commit `1a1b45d`, 2025-05-20)
 - **Author:** Tereza Kinská
 - **Thesis:** *Detection of LTL-Definability in Büchi Automata*, Master's thesis,
-  Faculty of Informatics, Masaryk University (FI MUNI), Brno, Spring 2025.
+  Faculty of Informatics, Masaryk University (FI MUNI), Brno, Spring 2025 —
+  [report (PDF)](https://is.muni.cz/th/svrfk/master_thesis_TK_Archive.pdf).
 - **Tool:** `ba2ltlDecider`
 
 Quoted from the source repository's README:
@@ -35,7 +36,8 @@ Mirrors the upstream `experiments_data/` directory:
 ## Our results on this corpus (2026-06-15, preliminary)
 
 Full detail (per-input formula, sizes, verdict) is in
-**`logs/reference/kinska.csv`** + `SUMMARY.txt`.
+[`logs/reference/kinska.csv`](logs/reference/kinska.csv) +
+[`SUMMARY.txt`](logs/reference/SUMMARY.txt).
 
 
 A like-for-like comparison (our aperiodicity gate vs their decider, per instance,
