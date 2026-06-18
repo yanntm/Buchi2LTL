@@ -1,0 +1,17 @@
+HOA: v1
+name: "counting !a.(bat)^w 4 ACC"
+States: 4
+Start: 3
+AP: 2 "a" "b"
+acc-name: Buchi
+Acceptance: 1 Inf(0)
+--BODY--
+State: 0 {0}
+[1] 1
+State: 1 {0}
+[0] 2
+State: 2 {0}
+[t] 0
+State: 3 {0}
+[!0] 0
+--END--

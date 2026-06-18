@@ -1,0 +1,15 @@
+HOA: v1
+name: "counting b.(ta)^w 1 ACC"
+States: 3
+Start: 0
+AP: 2 "a" "b"
+acc-name: Buchi
+Acceptance: 1 Inf(0)
+--BODY--
+State: 0
+[1] 1
+State: 1
+[t] 2
+State: 2 {0}
+[0] 1
+--END--
