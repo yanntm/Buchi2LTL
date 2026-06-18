@@ -277,6 +277,118 @@ the flat form; it is a witness for this one language, not the construction.
   spoke of this construction — its accepting divergence is `decomp/scc`'s, and
   the strong `U` in `move_s` correctly refuses to claim it.
 
+## Experimental findings — `best_daisy2` over the 40-formula survey
+
+`daisy2` was slipped into the shipped `best` peel (`portfolio/builder.py`'s
+`best_daisy2`) and run over the curated 40-formula survey with the Spot gate
+traced (`DAISY2_TRACE`; driver `tests/daisy2/scan_corpus.py`). Two conclusions.
+
+**When it validates, daisy2 is a large size win.** It peels 4 star SCCs the rest
+of the portfolio reached only through the Büchi leaf or `partscc` — the motivating
+example `G(p → (q U r))` collapses **86 → 7** DAG nodes — and over the corpus
+`best_daisy2` matches `best` (40/40, all Spot-equivalent) at **−24 % DAG / −44 %
+tree**. That payoff is the reason to finish the construction.
+
+**But the closed form as emitted is currently UNSOUND — the Spot gate is
+load-bearing, not a safety net.** 5/40 formulas hit a gate REJECT; without the
+oracle the *too-loose* ones would be wrong answers. The cause is concrete: the
+prototype emits the **flat-`G` `StaySafe`**
+(`G(σ ∨ ⋁ E_s∧X(G_s U R_s) ∨ ⋁ G_s U R_s)`) — *exactly the form §`STAY∞` already
+proved unsound ("No flat-`G` shortcut")*, never yet replaced by the phase-tracked
+`(Stay_h, Stay_s)` recursion. The bench shows it failing on **natural** formulas
+(not just the contrived `probe_flatG_side_condition` star), in two unsound ways
+plus one incompleteness:
+
+| formula | witness | direction | root cause |
+|---|---|---|---|
+| `G((!a&Xa)\|(a&X!a))` | `cycle{!a}` | too loose ⇒ **unsound** | flat-`G` hub-looseness: an in-body residual `G_s U R_s` validates a hub position with no entry |
+| `G(a ↔ Xb)` | `cycle{a&!b}` | too loose **and** too tight | flat-`G` looseness + coupling |
+| `GFa & GFb & G(a→X!a)` | `cycle{a&!b;!a&!b}` | too loose ⇒ **unsound** | acceptance over-credit (parallel edges, non-uniform marks) |
+| `GF(a & Xb)` (probe) | `cycle{!a&!b;a}` | too loose ⇒ **unsound** | acceptance over-credit (marked vs unmarked parallel entry) |
+| `G(a → Xb)` | `cycle{a&b}` | too tight ⇒ incomplete | body-divergence: a run loops in the spoke forever (accepting, since safety); strong-`U` excludes it |
+| `G(a → Xb) & GFa` | `cycle{a&b}` | too tight ⇒ incomplete | body-divergence |
+
+Reading it off:
+
+- **Unsound (too loose)** has two sources, both already flagged as open caveats
+  and now confirmed to bite on natural input: (i) the **flat-`G` `StaySafe`** the
+  prototype emits in place of the `(Stay_h, Stay_s)` recursion; (ii) **acceptance
+  over-credit** from collapsing parallel edges of a role into one guard with a
+  union mark. These are the two real construction errors — the priority fixes.
+- **Incomplete (too tight)** is the **body-divergence** boundary (§3): a run that
+  stays in a spoke forever. This is by design, *not* a closed-form bug — but the
+  implemented `decomp/scc` does **not** recover it either: `SccDecompose` splits
+  *across* accepting SCCs and cannot crack a single SCC that diverges internally
+  (confirmed — wrapping the peel pair in `SccDecompose` converted zero declines).
+  Recovering it needs a dedicated handler (treat the diverging spoke as its own
+  accepting component), so §3's "that's `decomp/scc`'s job" must be read with that
+  caveat.
+
+**The 40-formula set is a sufficient driver.** It already exercises every known
+failure mode with a small witness, so the next iteration — replace the flat-`G`
+`StaySafe` with the `(Stay_h, Stay_s)` recursion, and make acceptance per-edge —
+can be built and checked against it before any larger benchmark.
+
+## Next iteration: concrete code + test targets
+
+Three targets, each naming the file/function to change and the witness that must
+flip. Regression loop: `tests/daisy2/scan_corpus.py` (runs the corpus under
+`DAISY2_TRACE`, reports per-formula `rej/err`); the unsound part is fixed when the
+four *too-loose* witnesses report `rej=0`. The Spot gate stays throughout — the
+goal is to make it a true safety net (never load-bearing).
+
+### Target A — acceptance per *edge*, not per *role*  (fixes the over-credit unsoundness)
+
+*Why:* `comp_i` credits a whole role (`E_s`/`G_s`/`R_s` taken as one disjunction
+with a union mark), so a traversal taking an *unmarked* parallel edge still
+satisfies `GF(comp_i)`. Witnesses: `GF(a&Xb)` (`cycle{!a&!b;a}`),
+`GFa&GFb&G(a→X!a)` (`cycle{a&!b;!a&!b}`).
+
+*Code:*
+- `shape.py` `Spoke`: replace the aggregate `entry/body/ret` guards + the three
+  `*_acc` sets with **per-edge lists** `entries/bodies/rets : List[(guard, marks)]`
+  (keep the aggregate guards as derived helpers for the moves).
+- `daisy2.py` `build_candidate`, `comp_i`: for set `i` use only the *marked* edges
+  of each role — `E_s^i = ⋁{g : (g,M)∈entries, i∈M}`, likewise `R_s^i`, `G_s^i` —
+  - entry / return mark: `E_s^i ∧ X(G_s U R_s)`  /  `E_s ∧ X(G_s U R_s^i)`;
+  - body mark: `E_s ∧ X( G_s U ( G_s^i ∧ X(G_s U R_s) ) )`  (≥ 1 step of the
+    *marked* body edge, then carry on to the return).
+
+*Test:* `GF(a&Xb)` and `GFa&GFb&G(a→X!a)` go `rej → 0` and validate.
+
+### Target B — StaySafe: the anchored fixpoint, not the flat `G`  (fixes the hub-looseness unsoundness)
+
+*Why:* `build_candidate` emits `G(σ ∨ ⋁ E_s∧X(G_s U R_s) ∨ ⋁ G_s U R_s)`. The bare
+`G_s U R_s` disjunct validates a **hub** position with no preceding entry — the
+flat-`G` defect §`STAY∞` already proved. Witnesses: `G((!a&Xa)|(a&X!a))`
+(`cycle{!a}`), `G(a↔Xb)` (`cycle{a&!b}`).
+
+*Code:* `STAY∞`'s safety part is not a `G` over a position predicate; it is the
+**position-0-anchored fixpoint** `Φ` of §The label,
+`Φ_stay = νZ. ⋁_petals(σ∧XZ) ∨ ⋁_spokes(E_s ∧ X(G_s U (R_s ∧ XZ)))`, which
+threads phase through the `X`s from `q0 = h`. Built that way a body residual is
+reachable **only after its entry** `E_s` — there is *no* standalone-body disjunct,
+so the hub-looseness is gone by construction. Sub-steps:
+- stop wrapping a flat disjunction in `G`; build `Φ_stay` by the
+  `(Stay_h, Stay_s)` recursion (hub obligation a greatest fixpoint, each spoke
+  body a strong-`U` least fixpoint);
+- the finite-LTL realization of that `ν`-fixpoint for a *multi-move* star is the
+  open math (the macro `(Stay_h, Stay_s)` automaton is itself a length-1 star —
+  self-similar); single-move stars already collapse to daisy's `G(σ)`;
+- until the finite form lands, emit nothing rather than the unsound flat-`G` — the
+  gate then declines (sound), instead of relying on the oracle to catch a wrong
+  candidate.
+
+*Test:* `G((!a&Xa)|(a&X!a))` and `G(a↔Xb)` lose their too-loose witness — they may
+still decline (closed form pending) but must never gate-REJECT for being *loose*.
+
+### Target C — body-divergence stays out of scope (no daisy2 code)
+
+`G(a→Xb)`, `G(a→Xb)&GFa` decline by design (a run loops in a spoke forever);
+daisy2's strong-`U` is correct, do not patch it. It is also *not* fixed by the
+current `SccDecompose` (splits across SCCs, not within one). A dedicated in-SCC
+divergence handler is separate, later work.
+
 ## Open points (small, by design)
 
 - **The exact closed `StaySafe`.** The phase recursion `(Stay_h, Stay_s)` above is
