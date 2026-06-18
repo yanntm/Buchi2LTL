@@ -80,19 +80,21 @@ def build_candidate(
     excursions = [_excursion(sp) for sp in spokes]
     stay = _or([sigma] + excursions + bodies)
 
-    # STAY∞ = G(stay) ∧ ⋀_i GF(comp_i). A mark is collected per edge ROLE, not
-    # per spoke (algorithm.md §Acceptance): entry/return edges fire on every
-    # traversal (the bare excursion witnesses them), but a body self-loop mark
-    # needs ≥ 1 real loop step — E_s ∧ X(G_s ∧ (G_s U R_s)).
+    # STAY∞ = G(stay) ∧ ⋀_i GF(comp_i): the per-edge GF anchor at the move boundary
+    # (algorithm.md §Acceptance). Under S3 marks sit only on petals and the
+    # entry/return links, each taken once per move, so comp_i credits only the
+    # i-MARKED sibling of a role (E_s^i / R_s^i) — never the unmarked parallel
+    # edges, and there is no body case.
     gfs: List["spot.formula"] = []
     for i in range(m):
-        disj: List["spot.formula"] = [g for g, acc in petals if i in acc]
+        disj: List["spot.formula"] = [g for g, marks in petals if i in marks]
         for sp in spokes:
-            if i in sp.entry_acc or i in sp.ret_acc:
-                disj.append(_excursion(sp))
-            if i in sp.body_acc:
-                disj.append(_F.And([sp.entry,
-                                    _F.X(_F.And([sp.body, _F.U(sp.body, sp.ret)]))]))
+            ent_i = [g for g, marks in sp.entries if i in marks]   # E_s^i
+            ret_i = [g for g, marks in sp.rets if i in marks]      # R_s^i
+            if ent_i:
+                disj.append(_F.And([_or(ent_i), _F.X(_F.U(sp.body, sp.ret))]))
+            if ret_i:
+                disj.append(_F.And([sp.entry, _F.X(_F.U(sp.body, _or(ret_i)))]))
         gfs.append(_F.G(_F.F(_or(disj))))
     stay_inf = _and([_F.G(stay)] + gfs)
 
