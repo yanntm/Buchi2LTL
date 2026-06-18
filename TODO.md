@@ -4,34 +4,8 @@ Open project-level items only. Completed campaigns are recorded in `docs/HISTORY
 and git history. (The big docs + contract/combinator refactors + the `decomp/` regroup
 and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
 
-## Portfolio rework (NEXT PRIORITY)
+## Portfolio / combinators
 
-`aut2ltl/portfolio/builder.py` now holds named assembly **recipes** over the
-translators. `best` = `Simplify(strength(acceptance(daisy(core))), "hi")` with
-`core = first(partscc, bls)` — the modern re-expression of the historical
-`Decompose / SlDriven / Decompose` default, `daisy` in place of the sl envelope and
-`partscc` in place of `t2`. It **reproduces and slightly beats** that default and is
-reachable via `--use best` (see HISTORY 2026-06-18; survey log pointer below). The
-new framing (from this session): **`sl/` and the current `portfolio/` contents should
-disappear** — all of sl is covered by `daisy` (a stronger self-loop labeler), and the
-one piece with no daisy equivalent (`fuse2`) is already extracted to `heur/`.
-
-Remaining, roughly in order:
-
-- **DONE (2026-06-18) — `best` is the actual default.** `build_portfolio(None)` now
-  returns `RECIPES["best"]`; the no-`--use` path IS the recipe. Gated (survey 40/40,
-  kr audit CLEAN) and the benchmark's legacy-default `FALSE` is now sound under default
-  (`daisy+strength2`, DAG 19). `_default_portfolio` is dead pending the next item.
-- **IN PROGRESS — retire the old architecture** (nothing in the default path imports it
-  now): `portfolio/decompose.py` (`Decompose`), `portfolio/sl.py` (`Sl`),
-  `portfolio/sl_driven.py` (`SlDriven`), `portfolio/options.py` (`SL_*`), the
-  `_default_portfolio` + the `sl`/`sl_driven`/`decompose` cited rungs in `build.py`, and
-  then **`aut2ltl/sl/` entirely.** Update/remove the tests that pin the old arch
-  (`test_sl_member`, `kr/test_decompose`, `kr/fuzz_gate_decompose`, the `sl/` probes,
-  `test_build_portfolio` vocabulary) — a one-time test refresh, then full modern.
-- **Settle the `--use` vocabulary**: recipes (`best`, …) + the leaf names; `str`/`bls`
-  → `bls`/`muller`. Drop the inline `_simp_f` boundary calls `portfolio/sl*.py` carry
-  (the `Simplify` decorator subsumes them).
 - **`best_of` combinator + a `cost`/size field on `LTLResult`.** Recipes pick the
   FIRST success; size is the research objective, so add `best_of([...], key=cost)`
   beside `first_success` (`LTLResult` is pre-shaped for a cost field).
@@ -44,15 +18,9 @@ Remaining, roughly in order:
   to swap `first`→`best_of`, memoize subproblems on the `Language`, and tag uniformly.
   Today each combinator owns its own recursion (honest, explicit) — extract only when
   the `best_of` + memo payoff is real.
-- **Retire the transitional shims** once importers repoint: `aut2ltl/contract.py` and
-  `aut2ltl/bls/bls.py`.
+- **Retire the transitional shim** `aut2ltl/contract.py` once importers repoint.
 - **`fuse2` is unwired** (`heur/fuse2`). Decision: leave it out; let fuzzing measure
-  whether its absence costs `best` vs the default before deciding to wire it.
-
-Latest `--use best` survey vs the default reference: **`tests/logs/best.csv`**
-(+10.7% DAG, 40/40 sound, several cases smaller than default). **NOT committed** —
-throwaway scratch, still WIP; promote to `tests/logs/reference/<date>/` only once
-`best` becomes the default.
+  whether its absence costs `best` before deciding to wire it.
 
 ## Open
 
