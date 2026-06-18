@@ -39,12 +39,9 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
 - **Committing** needs the user's go-ahead, then walk the files. **Pushing** is
   separate and ALWAYS asked for every time (no auto-approve): push only once the
   work is stable and the gates below have passed.
-- **`git rm` stages the deletion immediately — commit it RIGHT AWAY** (recurring
-  mistake). A later `git add <other> && git commit` with NO pathspec sweeps the
-  pending deletion into the wrong commit. So: either commit the `git rm` before
-  touching anything else, or ALWAYS pass an explicit pathspec to `git commit`
-  (`git commit -m "msg" -- <paths>`, options before `--`). Never leave a staged
-  deletion sitting while you stage unrelated files.
+- Remember that git operations like `git mv` or `git rm` already populate the
+  index. So always follow them with a commit *before* attempting to add any
+  modified file to index.
 - Commit directly to `master` (we do not branch). Never run branch / cross-branch
   diagnostics.
 - `docs/HISTORY.md` is APPEND-ONLY via shell (`cat >>` / `printf >>`) and is
