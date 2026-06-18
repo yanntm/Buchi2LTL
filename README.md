@@ -104,7 +104,7 @@ aut2ltl/
   language.py     the input wrapper: cached, cleaned, language-equivalent automaton views
   result.py       LTLResult — a formula (DAG) or a decline, plus which methods contributed
   __main__.py     the command-line front end  (python3 -m aut2ltl)
-  kr/             the systematic construction (Krohn-Rhodes cascade; see kr/README.md)
+  bls/            the systematic construction (Krohn-Rhodes cascade; see bls/README.md)
   daisy/          the self-loop "daisy" peel — a pure local translator
   decomp/         (de)composition approaches, one isolated subpackage each:
                   scc / strength / acceptance / inv
