@@ -1,26 +1,27 @@
 # The daisychain algorithm  (DRAFT — formalization in progress)
 
-> First draft, kept git-inspectable so we can iterate on the formalization
-> *before* writing any code. The single-state engine it generalizes is
-> `aut2ltl/daisy` (read `daisy/algorithm.md` first — this note reuses its
-> notation: petals, stems, `σ`, `σ_i`, `STAY∞`, `LEAVE`). Worked validation of
-> the central example lives in `tests/daisychain/probe_bigloop_Gafb.py`.
+> First draft, kept git-inspectable so the formalization can be reviewed *before*
+> any code. It generalizes the single-state engine in `aut2ltl/daisy` — read
+> `daisy/algorithm.md` first; this note reuses its vocabulary (petals, stems,
+> guard `σ`, the `STAY∞ ∨ LEAVE` production). The central example is checked in
+> `tests/daisychain/probe_bigloop_Gafb.py`.
 
 daisy peels a **single** state whose only cycle is its own self-loop. daisychain
-peels a whole **terminal-or-internal SCC** by reducing it to *one* daisy: it picks
-a **hub** state `h`, folds every other path that returns to `h` into a **big
-self-loop** — a finite, guaranteed-to-return *detour* labelled by recursively
-running daisy on the detour itself — and then applies the ordinary
-`STAY∞ ∨ LEAVE` production at `h`, treating each big self-loop as a (multi-step)
-petal. The name is literal: the hub is a daisy whose petals are themselves
-daisies (each detour is very-weak, so daisy labels it), a *chain* of daisies.
+peels a whole **SCC** by reducing it to *one* daisy: choose a **hub** state `h`,
+fold every path that leaves `h` and returns into a **big self-loop** — a finite,
+guaranteed-to-return *detour* whose label is obtained by running daisy on the
+detour itself — and then apply the ordinary daisy production at `h`, with each big
+self-loop treated as a multi-step petal. The name is literal: the hub is a daisy
+whose petals are themselves daisies. The one idea that makes this work cleanly is
+to read the stay condition as **"always inside a stay-move"**, not "a stay-move
+starts at every step" (see *Stay-moves: start vs. in-progress*).
 
 ## Setting
 
-The Translator/Label contract is unchanged (see `daisy/algorithm.md` §Setting):
+The Translator/Label contract is unchanged:
 
 ```
-Label       =  Some φ  |  ⊥
+Label       =  Some φ  |  ⊥                       -- φ an LTL formula; ⊥ = decline
 Translator  =  Language → Label
 ```
 
@@ -29,150 +30,177 @@ daisychain asks the Language for its **TGBA** `A = (Q, Σ, δ, q0, {F_1,…,F_m}
 a Boolean guard `g` (a BDD over `AP`) and the marks `B ⊆ {1,…,m}`; a run accepts
 iff for every set `i` it takes infinitely many `i`-marked edges (`m = 0` ⇒ every
 infinite run accepts). It applies at the **initial SCC** `C` (the SCC of `q0`),
-which it requires to have no non-self incoming edge from outside `C` — the same
-"nothing flows back in" boundary as daisy, lifted from a state to an SCC.
+required to have no incoming edge from outside `C` — the same "nothing flows back
+in" boundary as daisy, lifted from one state to one SCC.
 
-## From SCC to hub: the reduction
+## Reducing an SCC to its hub
 
 ### The hub
 
-Pick a **hub** `h ∈ C` that is a **feedback vertex set** of `C`: every cycle of
-`C` passes through `h`. (First draft: a *single* hub state; the general FVS is a
-set `H`, an open generalization below.) Deleting `h` leaves `C ∖ {h}` **acyclic
-up to self-loops** — a DAG of self-loops, i.e. a **very-weak** sub-automaton.
-That is exactly daisy's home fragment, which is what lets the recursion close.
+Choose a **hub** `h ∈ C` that is a **feedback vertex set** of `C`: every cycle of
+`C` passes through `h`. (This first draft fixes a *single* hub state; a true FVS
+may need a set `H` — see Open points.) Deleting `h` leaves `C ∖ {h}` **acyclic up
+to self-loops** — a DAG of self-loops, i.e. a **very-weak** graph. That is daisy's
+exact fragment, which is what lets the recursion close.
 
-### Detours and the big self-loop
+### Petals, stems, detours
 
-Split `h`'s out-edges into three kinds (petals/stems as in daisy, plus detours):
-
-```
-petals   SL(h)  =  self-loops   h →[g] h                          -- one-letter, as in daisy
-detours  D(h)   =  entries      h →[γ_d] s_d   with s_d ∈ C∖{h}   -- back into the SCC
-stems    EX(h)  =  exits        h →[g_j] dst_j with dst_j ∉ C     -- leave the SCC, descend
-```
-
-A **detour** `d` is the whole family of finite paths that start with an entry edge
-`h →[γ_d] s_d`, wander through `C ∖ {h}` (a DAG of self-loops), and come back to
-`h`. Because `h` is an FVS, such a path **cannot revisit `h`** in the middle and
-**must** eventually return (it cannot stay forever — see soundness). It is a *big
-self-loop*: a self-loop on `h` whose "letter" is a finite word language, not a
-single symbol.
-
-### Folding a detour (recursive daisy)
-
-The detour sub-automaton `A↓s_d` — rooted at the entry target `s_d`, restricted to
-`C ∖ {h}`, with the return edges `· →[r] h` redirected to a fresh placeholder
-"back-at-the-hub" exit `•` — is very-weak. Run daisy on it:
+Partition `h`'s out-edges three ways:
 
 ```
-β_d  =  daisy( of(A↓s_d  with  ·→h  rerouted to •) )
-M_d  =  ⋃ { B : B marks any edge of detour d }        -- entry ∪ internal ∪ return marks
+petals   SL(h)  =  self-loops  h →[g] h                           -- one letter, as in daisy
+detours  D(h)   =  entries     h →[γ_d] s_d   (s_d ∈ C ∖ {h})     -- back into the SCC
+stems    EX(h)  =  exits        h →[g_j] dst_j (dst_j ∉ C)        -- leave the SCC, descend
 ```
 
-`β_d` is a `U`-fragment formula (a finite obligation with the continuation `•`
-standing for "control is back at `h`"). `M_d` is the **union of all marks seen
-along the detour**, collected onto the folded pseudo-edge — sound because, by the
-condition below, no acc set is *trapped* inside the detour. Define the **big-self-
-loop move**
+A **detour** `d` is the family of finite paths that begin with an entry edge
+`h →[γ_d] s_d`, run through `C ∖ {h}`, and come back to `h`. Since `h` is an FVS,
+such a path cannot revisit `h` in the middle, and — by the must-return property
+below — must eventually return. It is a *big self-loop*: a self-loop on `h` whose
+"letter" is a finite-word language rather than a single symbol.
+
+### Folding a detour: recursive daisy
+
+The detour sub-automaton `A↓s_d` — rooted at `s_d`, kept inside `C ∖ {h}`, with
+every return edge `· →[r] h` redirected to a fresh placeholder exit `•` ("control
+is back at the hub") — is very-weak, so daisy labels it **exactly**. Running daisy
+gives, for each detour state `s`, a residual formula `ψ_s` (a `U`-fragment
+obligation reaching `•`), and in particular the body `β_d = ψ_{s_d}`. Collect
 
 ```
-τ_d  =  γ_d ∧ β_d            -- take entry guard now, discharge the body, return to h
+M_d  =  ⋃ { B : B marks some edge of detour d }     -- entry ∪ internal ∪ return marks
 ```
 
-so that returning to `h` re-enters the hub's own formula (the fixpoint, closed by
-`β_d`'s finiteness).
+the **union of marks seen along the detour**, routed onto the folded pseudo-edge —
+sound because, by the must-return condition, no acc set is trapped inside the
+detour.
 
 ## The label
 
-Generalize daisy's petal aggregates to include the big self-loops:
+### Stay-moves: start vs. in-progress
+
+This is the crux, and where a naive lift of daisy goes wrong. daisy's stay
+condition is `G(σ)` with `σ` a **Boolean over `AP`**: every position *is* a
+one-letter petal, so "stay" and "a petal at this step" coincide. A big self-loop
+spans several positions, so `σ` becomes **temporal** and the two notions split:
+
+- a *move-start* predicate is true only where a move *begins* (a hub-visit);
+- an *in-move* predicate is true at *every* position the run occupies while making
+  a valid move — at the petal letter, and at each corridor position of a detour.
+
+The fix is to make `G` iterate the **in-move** predicate. For a detour `d`, the
+in-move obligation at a corridor position where control sits at state `s` is
+exactly daisy's residual `ψ_s`: it asserts the remaining detour will complete and
+return. Define
 
 ```
-σ̃    =  σ  ∨  ⋁_{d ∈ D(h)} τ_d                       -- "make some stay-move at h"
-σ̃_i  =  σ_i ∨ ⋁_{d : i ∈ M_d} τ_d                    -- stay-moves that carry acc set i
+ρ_d  =  ⋁_{s ∈ detour d} ψ_s            -- "currently somewhere inside detour d"
+σ̃    =  σ  ∨  ⋁_{d ∈ D(h)} ρ_d           -- "currently inside some stay-move"
 ```
 
-and reuse the daisy production at `h`:
+The entry position (at `h`, reading `γ_d`) is the first position of `ρ_d`; when
+`γ_d` overlaps the detour's first residual it is subsumed by `ρ_d` (as it is in the
+worked example, so the entry guard drops out), otherwise it is carried as that
+residual's leading conjunct. `σ̃` is the in-move predicate; `G(σ̃)` reads "the run
+never steps outside a valid stay-move", i.e. it stays in `C` forever.
+
+### STAY∞ and LEAVE
 
 ```
 Final(h)  =  STAY∞(h)  ∨  LEAVE(h)
-STAY∞(h)  =  G(σ̃)  ∧  ⋀_{i=1..m} GF(σ̃_i)            -- stay in C forever, accepting
-LEAVE(h)  =  σ̃  U  ⋁_{j} ( g_j ∧ X φ_j )             -- stay finitely, then exit C via a stem
+STAY∞(h)  =  G(σ̃)  ∧  ⋀_{i=1..m} GF(μ_i)            -- stay in C forever, accepting
+LEAVE(h)  =  σ̃  U  ⋁_{j} ( g_j ∧ X φ_j )            -- stay finitely, then exit C via a stem
 ```
 
-with `φ_j = Λ(of(A↓dst_j))` the child label of SCC-exit stem `j` (`dst_j` strictly
-descends, so `Λ` is well-founded there, exactly as in daisy).
+`φ_j = Λ(of(A↓dst_j))` is the child label of SCC-exit stem `j`; `dst_j` strictly
+descends, so `Λ` is well-founded there, exactly as in daisy. `LEAVE` reuses the
+same `σ̃`: holding inside the SCC until a genuine exit.
+
+### Acceptance
+
+`μ_i` is the position-predicate "an `i`-marked edge of `C` fires here":
+
+```
+μ_i  =  σ_i  ∨  ⋁_{d : i ∈ M_d} ( the i-marked edge of detour d fires )
+```
+
+with `σ_i` the petals carrying set `i` (as in daisy). Because the detour is
+must-return, set `i` is collected once per traversal at a fixed marked edge, so
+`GF(μ_i)` ⟺ "set `i` infinitely often". The precise position-predicate for the
+detour-internal marked edge — derived from daisy's labeling of the detour — is the
+one piece still to be pinned (Open points). When `m = 1` and a petal already
+carries the set (the worked example), `GF(μ_1)` is implied by `G(σ̃)` and vanishes.
 
 ### Worked check (`probe_bigloop_Gafb.py`)
 
 `G(a → Xb)` / `G(a ∨ Fb)` has a 2-state initial SCC `0 ⇄ 1`. Hub `h = 0`; one
-petal `σ = a∨b {0}`; one detour `0 →[¬a∧¬b] 1, (¬b)*, 1 →[b] 0` with `β_d = ¬b U
-b` and `M_d = {0}`. No SCC-exit (`LEAVE = false`). Then
+petal `σ = a∨b {0}`; one detour `0 →[¬a∧¬b] 1, (¬b)*, 1 →[b] 0` with body
+`β_d = ¬b U b`, residual `ρ_d = ¬b U b`, and `M_d = {0}`. No SCC-exit, so
+`LEAVE = false`. Then
 
 ```
-STAY∞(0) = G( (a∨b) ∨ (¬a∧¬b ∧ (¬b U b)) ) ∧ GF(…)   ≡   G(a ∨ Fb)
+σ̃ = (a∨b) ∨ (¬b U b)          STAY∞(0) = G(σ̃) ∧ GF(…)  ≡  G(a ∨ Fb)
 ```
 
-verified equivalent to the input — a clean closed form where the `buchi`
-technique emits a 48-node blob.
+verified equivalent to the input (the entry guard `¬a∧¬b` drops out — `σ̃` is the
+in-move predicate, confirmed against the move-start variant in the probe), and the
+`GF` conjunct is implied. The `buchi` technique emits a 48-node blob for the same
+language.
 
-## Why it is sound (sketch)
+## Soundness (sketch)
 
 1. **The hub is a genuine daisy in the quotient.** `h` is an FVS, so in the
-   quotient that collapses each detour to a single big-self-loop edge `h→h`, the
-   only edges returning to `h` are self-loops (petals and big self-loops). The
-   SCC-boundary condition forbids edges into `C` from outside, and `h` being an
-   FVS forbids any other cycle. So `h` satisfies the daisy precondition and
-   `STAY∞ ∨ LEAVE` is the daisy equation, verbatim, one level up.
+   quotient that collapses each detour to one big-self-loop edge `h→h`, the only
+   edges returning to `h` are self-loops (petals and big self-loops); the SCC
+   boundary forbids entry from outside, and the FVS property forbids any other
+   cycle. So `h` meets the daisy precondition and `STAY∞ ∨ LEAVE` is daisy's
+   equation, one level up.
 
-2. **Detours are must-return (`*`, not `ω`).** This is the §2.3 lever read one
-   level up. A detour stays inside `C ∖ {h}`, whose only cycles are self-loops.
-   **Soundness condition (syntactic):** every such internal self-loop must
-   **miss at least one acc set** — a clean sufficient form is *no marks on
-   detour-internal self-loops* (marks on the chain's successor edges are fine,
-   they fold into `M_d`). Then an infinite stay inside a detour is non-accepting,
-   so in any accepting run every detour entry is followed by a return to `h`.
-   Hence an accepting run that never exits `C` visits `h` **infinitely often** —
-   which is what `STAY∞`'s `G/GF` over `σ̃` asserts.
+2. **Detours must return (`*`, not `ω`).** A detour stays in `C ∖ {h}`, whose only
+   cycles are self-loops. **Soundness condition (syntactic on the TGBA):** every
+   such internal self-loop must miss at least one acc set — a clean sufficient form
+   is *no marks on detour-internal self-loops* (marks on the chain's successor
+   edges are fine; they fold into `M_d`). Then an infinite stay inside a detour is
+   non-accepting, so in any accepting run every detour entry is followed by a
+   return to `h`; a run that never exits `C` therefore visits `h` infinitely often.
+   This is the lever: the *accepting bit chooses the operator* — a non-accepting
+   internal cycle is a finite `*` (a `U`), an accepting recurrence at the hub is an
+   `ω` (a `G`/`GF`). daisychain reads that dichotomy one level above daisy.
 
 3. **The fold is well-founded.** "Must return" is precisely the `U`
-   well-foundedness that breaks the back-edge: `β_d` is a finite `U`-obligation,
-   so the hub→detour→hub recursion unfolds to a DAG, never an unbounded fixpoint.
-   daisy is *exact on very-weak*, so `β_d` labels the detour exactly.
+   well-foundedness that breaks the back-edge: each `ψ_s` is a finite `U`
+   obligation, so the hub→detour→hub recursion unfolds to a DAG, never an unbounded
+   fixpoint. daisy is exact on very-weak, so the `ψ_s` label the detour exactly.
 
-4. **Mark bookkeeping is faithful.** Because no acc set is trapped inside a
-   detour (2), routing the **union** `M_d` onto the pseudo-edge is sound:
-   `GF(σ̃_i)` ⟺ "set `i` is seen infinitely often", since each traversal collects
-   `i` exactly when the real detour does.
+4. **Marks are faithful.** No acc set is trapped inside a detour (2), so routing
+   the union `M_d` onto the pseudo-edge and testing `GF(μ_i)` is sound: each
+   traversal collects `i` exactly when the real detour does.
 
-## Degenerate cases (should fall out, like daisy)
+## Degenerate cases (should fall out, as in daisy)
 
-- **No detours** ⇒ `D(h)=∅` ⇒ `σ̃ = σ`, `τ_d` absent ⇒ daisychain *is* daisy.
+- **No detours** ⇒ `σ̃ = σ` and `μ_i = σ_i` ⇒ daisychain *is* daisy.
 - **No petals, no exits** ⇒ pure recurrence through detours (`G(a∨Fb)` is this).
-- **A detour that can never return** would violate the soundness condition and is
-  rejected up front (declined), not mis-folded.
+- **A detour that cannot return** violates the soundness condition and is declined
+  up front, never mis-folded.
 
-## Open points (the formalization to settle before code)
+## Open points (to settle before code)
 
-- **`STAY∞` over multi-step moves.** `G(σ̃) ∧ GF(σ̃_i)` re-asserts the detour body
-  `β_d` at *every* position, not only at hub-visits. It is exact on the worked
-  example (deterministic, single mark), but the general soundness of `G(σ̃)` for
-  variable-length moves is the crux. Options to pin down: (a) prove `G(σ̃)` sound
-  unconditionally; (b) restrict it to hub-visit positions via a marker; (c)
-  reformulate `STAY∞` as an explicit `(σ̃)^ω` ω-regular fixpoint. **This is the
-  open question that decides the design.**
-- **Multi-state hub `H` (true FVS).** Single-state `h` may not be an FVS of a
-  fat SCC; the general construction eliminates a non-singleton `H` topologically.
-  Bookkeeping for marks and detours across `|H|>1` is unspecified here.
-- **Hub choice.** Minimum FVS vs. "the accepting states" — affects detour count
-  and formula size, not soundness (any FVS is sound).
-- **`visiting` / well-foundedness guard.** The fold must break the back-edge so
-  the recursion the assembly drives stays a DAG; interaction with the existing
-  daisy-assembly memoization is unspecified.
+- **The acceptance predicate `μ_i`.** STAY∞'s `GF(μ_i)` needs the exact
+  position-predicate for "the `i`-marked edge of detour `d` fires", read off daisy's
+  labeling of the detour. Tractable, not yet written.
+- **Entry/corridor coverage.** `σ̃` drops the entry guard when `γ_d` overlaps the
+  first residual (the worked case). When they are disjoint the entry must be kept
+  as the residual's leading conjunct; the general `σ̃` must state this precisely so
+  `G(σ̃)` is neither too strong nor too weak.
+- **Multi-state hub (true FVS).** A single hub state may not be an FVS of a fat
+  SCC; the general construction eliminates a non-singleton `H` topologically. Mark
+  and detour bookkeeping across `|H| > 1` is unspecified here.
+- **Hub choice.** Minimum FVS vs. "the accepting states" — affects detour count and
+  formula size, not soundness (any FVS is sound).
 
 ## Out of scope (the assembly's concern)
 
 As with daisy: closing the open recursion with a fixpoint `Λ*` and first-fit
-dispatch, memoization by state for DAG sharing, and the SCC-iteration order belong
-to the assembly that wires the child, not to this local production. daisychain
+dispatch, memoization by state for DAG sharing, and SCC-iteration order belong to
+the assembly that wires the child, not to this local production. daisychain
 computes one SCC's label from its hub, its petals, its detours, and its children.
