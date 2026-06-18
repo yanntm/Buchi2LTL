@@ -4,7 +4,7 @@ Smoke test for aut2ltl.portfolio.build.build_portfolio.
 
 Covers the assembly logic only (cheap — building a Translator triggers NO GAP
 decomposition; that happens when it is CALLED). One GAP-free functional check
-runs the `sl`-only ladder on a very-weak formula. Self-bound, no Spot/GAP waits.
+runs the `muller` leaf on a very-weak formula. Self-bound, no Spot/GAP waits.
 
     python3 tests/test_build_portfolio.py
 """
@@ -14,12 +14,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from aut2ltl.options import Options
-from aut2ltl.portfolio import PORTFOLIO_OPTIONS
 from aut2ltl.bls.options import KR_OPTIONS
 from aut2ltl.portfolio.build import build_portfolio, TECHNIQUES
 from aut2ltl.language import Language
 
-_opts = Options.from_specs(PORTFOLIO_OPTIONS + KR_OPTIONS)
+_opts = Options.from_specs(KR_OPTIONS)
 _fail = []
 
 
@@ -29,50 +28,47 @@ def check(cond: bool, msg: str) -> None:
         _fail.append(msg)
 
 
-# --- default assembly (techniques=None) ---
+# --- default assembly (techniques=None) is the `best` recipe ---
 top = build_portfolio(_opts)
-check(getattr(top, "name", None) == "decompose", "default top is a Decompose")
+check(getattr(top, "name", None) == "simplify", "default top is best's Simplify")
 check(callable(top), "default is callable")
+# --- the recipe cited by name resolves to the same shape ---
+best = build_portfolio(_opts, {"best"})
+check(getattr(best, "name", None) == "simplify", "--use best top is a Simplify")
 
-# --- cited single producer (pure BLS) ---
-bls = build_portfolio(_opts, {"bls"})
-check(callable(bls), "build {'bls'} is callable")
-check(getattr(bls, "name", None) != "decompose", "pure bls is not wrapped")
+# --- cited single producer (the general muller leaf) ---
+muller = build_portfolio(_opts, {"muller"})
+check(callable(muller), "build {'muller'} is callable")
 
-# --- cited ladder, order + kr-grouping ---
-ladder = build_portfolio(_opts, ["sl", "buchi", "bls"])
-# sl rung + one grouped kr rung (buchi,bls collapse) => 2 rungs, name 'cited'
-check(getattr(ladder, "name", None) == "cited", "sl,buchi,bls is a 'cited' ladder")
-check(len(ladder._stages) == 2, "buchi+bls collapse to one kr rung (2 rungs total)")
+# --- cited ladder: one grouped kr rung (buchi) + the bls cascade rung ---
+ladder = build_portfolio(_opts, ["buchi", "bls"])
+check(getattr(ladder, "name", None) == "cited", "buchi,bls is a 'cited' ladder")
+check(len(ladder._stages) == 2, "buchi rung + bls cascade rung => 2 rungs total")
 
-# --- wrappers ---
-wrapped = build_portfolio(_opts, ["decompose", "acc", "bls"])
-check(getattr(wrapped, "name", None) == "decompose", "decompose,acc,bls -> Decompose outer")
-driven = build_portfolio(_opts, ["sl_driven", "buchi"])
-check(getattr(driven, "name", None) == "sl_driven", "sl_driven,buchi -> SlDriven outer")
+# --- kr leaves collapse into a single grouped rung ---
+collapsed = build_portfolio(_opts, ["acc", "buchi", "muller"])
+check(getattr(collapsed, "name", None) != "cited",
+      "three kr leaves collapse to one rung (returned directly, not a 'cited' ladder)")
 
-# --- str: the integrated cascade as a producer ---
-bare_str = build_portfolio(_opts, ["str"])
-check(callable(bare_str), "build {'str'} is callable")
-check(getattr(bare_str, "name", None) != "decompose", "bare str is not wrapped")
-str_decomp = build_portfolio(_opts, ["decompose", "str"])
-check(getattr(str_decomp, "name", None) == "decompose", "decompose,str -> Decompose outer")
+# --- bls is the integrated cascade as a producer ---
+bare_bls = build_portfolio(_opts, ["bls"])
+check(callable(bare_bls), "build {'bls'} is callable")
 
 # --- validation ---
-for bad, why in [({"nope"}, "unknown technique"), ({"decompose"}, "producer-free citation")]:
+for bad, why in [({"nope"}, "unknown technique"), ([], "producer-free citation")]:
     try:
         build_portfolio(_opts, bad)
         check(False, f"{why} raises ValueError")
     except ValueError:
         check(True, f"{why} raises ValueError")
 
-check(set(TECHNIQUES) == {"acc", "weak", "buchi", "cobuchi", "bls", "str", "sl",
-                          "sl_driven", "decompose"}, "TECHNIQUES vocabulary is the 9 names")
+check(set(TECHNIQUES) == {"acc", "weak", "buchi", "cobuchi", "muller", "bls"},
+      "TECHNIQUES vocabulary is the 6 producer names")
 
-# --- one GAP-free functional run: sl gate on a very-weak formula ---
-sl_only = build_portfolio(_opts, ["sl"])
-res = sl_only(Language.of_ltl("F a"))
-check(res.ok and res.formula is not None, "sl-only translates 'F a' (no GAP)")
+# --- one GAP-free functional run: the muller leaf on a very-weak formula ---
+muller_only = build_portfolio(_opts, ["muller"])
+res = muller_only(Language.of_ltl("F a"))
+check(res.ok and res.formula is not None, "muller translates 'F a' (no GAP)")
 
 print()
 if _fail:
