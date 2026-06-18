@@ -30,12 +30,12 @@ Usage — the accumulator idiom. A translator threads ONE result:
 
 The accumulator is per-call (never shared), so the mutation is safe.
 
-Size cost: `.cost` is the result's DAG-node count (lazy, derived from the formula),
-the portfolio's minimization objective — `best_of` selects on it. `LTLResult` is
-expected to trace/accumulate yet more over time (finer provenance, a step trace).
-Route every child through `credit`/`fuse` rather than lifting out its `.formula`
-alone — bypassing the idiom silently drops accumulated metadata that a consumer
-above, or a field added later, will rely on.
+NOT FINAL: `LTLResult` is expected to trace/accumulate more over time (finer
+provenance, a step trace). Route every child through `credit`/`fuse` rather than
+lifting out its `.formula` alone — bypassing the idiom silently drops accumulated
+metadata that a consumer above, or a field added later, will rely on. (Output SIZE is
+deliberately NOT a field here: it is derived from `.formula` by whoever needs it —
+the `best_of` comparators — keeping the contract floor free of the metric layer.)
 """
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ class LTLResult:
     fill the `formula` and return. The accumulator is never shared, so mutation is safe.
     """
 
-    __slots__ = ("_status", "_formula", "_technique", "_diagnosis", "_cost")
+    __slots__ = ("_status", "_formula", "_technique", "_diagnosis")
 
     def __init__(
         self,
@@ -88,7 +88,6 @@ class LTLResult:
         self._formula = formula
         self._technique: Set[str] = set(technique) if technique else set()
         self._diagnosis = diagnosis
-        self._cost: Optional[int] = None      # lazy DAG-size cache (see `cost`)
 
     # --- factories -------------------------------------------------------------
     @classmethod
@@ -148,26 +147,6 @@ class LTLResult:
     @formula.setter
     def formula(self, f: "spot.formula") -> None:
         self._formula = f
-        self._cost = None                     # invalidate the size cache
-
-    @property
-    def cost(self) -> Optional[int]:
-        """The result's size cost — the DAG-node count of its formula (the
-        portfolio's minimization objective; what the survey/benchmark report as
-        "DAG nodes"). `None` when there is no formula (a NOK result, or an
-        accumulator not yet filled), so it is never a comparable size.
-
-        Derived lazily from the formula and cached (the cache is cleared when the
-        formula is reset). The metric import is local to keep the contract floor
-        decoupled from `ltl.metrics` at import time. This realizes the module
-        docstring's provisioned "output size / cost" field; `best_of` selects on it.
-        """
-        if self._formula is None:
-            return None
-        if self._cost is None:
-            from aut2ltl.ltl.metrics import dag_node_count
-            self._cost = dag_node_count(self._formula)
-        return self._cost
 
     def technique_str(self) -> str:
         return "+".join(sorted(self._technique)) if self._technique else "-"

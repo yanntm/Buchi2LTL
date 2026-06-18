@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Smoke test for aut2ltl.best_of + LTLResult.cost (GAP-free; bare spot.formula
-DAGs in, no engine, stages are plain lambdas ignoring their input).
+Smoke test for aut2ltl.best_of (GAP-free; bare spot.formula DAGs in, no engine,
+stages are plain lambdas ignoring their input). Size is derived by the comparators
+from the result formula — there is no score field on LTLResult.
 
     python3 tests/test_best_of.py
 """
@@ -13,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import spot
 
 from aut2ltl.result import LTLResult
-from aut2ltl.best_of import best_of
+from aut2ltl.best_of import best_of, significantly_smaller
 from aut2ltl.ltl.metrics import dag_node_count
 
 _fail = []
@@ -34,24 +35,14 @@ SMALL = spot.formula("a")            # dag 1
 BIG = spot.formula("a & b")          # dag 3 (And, a, b)
 MID = spot.formula("G a")            # dag 2 (G, a)
 
-# --- LTLResult.cost -----------------------------------------------------------
-check(LTLResult.success(SMALL, "x").cost == dag_node_count(SMALL) == 1,
-      "cost of an OK result = dag_node_count of its formula")
-check(LTLResult.decline().cost is None, "a DECLINED result has no cost (None)")
-check(LTLResult.not_definable().cost is None, "a NOT_LTL result has no cost (None)")
+check(dag_node_count(SMALL) == 1 and dag_node_count(BIG) == 3 and dag_node_count(MID) == 2,
+      "fixture sizes are 1 / 3 / 2 DAG nodes")
 
-acc = LTLResult.start("seed")
-check(acc.cost is None, "an accumulator with no formula yet has no cost")
-acc.formula = BIG
-check(acc.cost == 3, "cost computes once the formula is filled")
-acc.formula = SMALL
-check(acc.cost == 1, "cost cache invalidates when the formula is reset")
-
-# --- best_of: minimal-cost selection -----------------------------------------
+# --- best_of: minimal-size selection (default `smaller`) ----------------------
 r = best_of([const(LTLResult.success(BIG, "big")),
              const(LTLResult.success(SMALL, "small")),
              const(LTLResult.success(MID, "mid"))], name="t")(None)
-check(r.ok and r.formula == SMALL, "best_of returns the least-cost OK stage")
+check(r.ok and r.formula == SMALL, "best_of returns the least-size OK stage")
 check(r.technique == frozenset({"small"}),
       "the winner is returned UNCHANGED (its technique, no tag of best_of's own)")
 
@@ -78,12 +69,30 @@ r = best_of([const(LTLResult.success(BIG, "big")),
              boom], name="t")(None)
 check(r.not_ltl, "a NOT_LTL verdict short-circuits best_of")
 
-# --- custom key ---------------------------------------------------------------
-# Pick the LARGEST instead, by negating the cost.
+# --- custom comparator (the pluggable seam) ----------------------------------
+# Prefer the LARGEST: challenger beats incumbent iff its formula has more nodes.
 r = best_of([const(LTLResult.success(SMALL, "small")),
              const(LTLResult.success(BIG, "big"))],
-            name="t", key=lambda res: -(res.cost or 0))(None)
-check(r.formula == BIG, "a custom key selects on its own measure (here: largest)")
+            name="t",
+            beats=lambda inc, ch: dag_node_count(ch.formula) > dag_node_count(inc.formula))(None)
+check(r.formula == BIG, "a custom `beats` selects on its own policy (here: largest)")
+
+# --- significance margin: a tiny win does NOT unseat the trusted incumbent ----
+small_win = spot.formula("a & b & c")    # dag 4, one less than...
+incumb = spot.formula("a & b & c & d")   # dag 5
+r = best_of([const(LTLResult.success(incumb, "first")),
+             const(LTLResult.success(small_win, "challenger"))],
+            name="t", beats=significantly_smaller(rel=0.5, floor=3))(None)
+check(r.technique == frozenset({"first"}),
+      "a 1-node win below the margin keeps the trusted first answer")
+
+# --- significance margin: a big win DOES unseat it ---------------------------
+big_win = spot.formula("a")              # dag 1, four less than incumb (>= floor 3)
+r = best_of([const(LTLResult.success(incumb, "first")),
+             const(LTLResult.success(big_win, "challenger"))],
+            name="t", beats=significantly_smaller(rel=0.5, floor=3))(None)
+check(r.technique == frozenset({"challenger"}),
+      "a win past the margin (4 >= max(3, ceil(.5*5))) takes over")
 
 print()
 if _fail:

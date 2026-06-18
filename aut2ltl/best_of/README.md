@@ -6,11 +6,15 @@ a README — a primitive brick beside `first_success` and `recurse`, not a helpe
 ## What it is
 
 ```
-best_of([a, b, c], key=cost) = the OK result among a, b, c with the least cost
+best_of([a, b, c]) = walk a, b, c in order; keep the first OK as the trusted
+                     incumbent; let a later OK take over only when `beats(...)` says so
 ```
 
-A composite translator: run every stage, keep the smallest language-faithful result.
-It is the **size-objective** sibling of `first_success`.
+A composite translator: the **size-objective** sibling of `first_success`. The whole
+selection policy is one pluggable comparator, `beats(incumbent, challenger) -> bool`.
+
+Package layout: `best_of.py` is the combinator (the walk); `comparators.py` is the
+catalog of `Comparator` policies it can be configured with.
 
 ## Why a brick (and why beside `first_success`)
 
@@ -20,33 +24,70 @@ Two *choice* shapes recur — the difference is the selection rule:
 - **choice by order** — `first_success([a, b, c])`: take the FIRST stage that
   succeeds. Cheap (stops at the first OK), but order-biased: the answer depends on
   who was cited first, not on which answer is best.
-- **choice by size** — `best_of([a, b, c])`: run ALL the stages and take the
-  SMALLEST. Pays for every branch, but selects on the objective we actually care
-  about — output size — per input.
+- **choice by size** — `best_of([a, b, c])`: run ALL the stages, hold the first OK as
+  the trusted incumbent, and let a later one take over only when `beats(...)` says it
+  wins. Pays for every branch, but selects on the objective we care about — output
+  size — per input, *as guidance*: the first answer is trusted unless clearly beaten.
 
 They are complementary, share one signature shape, and slot into the same seams.
 `best_of` is what converts a recipe that wins on some inputs and loses on others
-(e.g. an `inv`-woven variant) into **pure upside**: keep the cheaper of the two,
-input by input, instead of committing to one globally.
+(e.g. an `inv`-woven variant) into **pure upside**: keep the trusted answer, and take
+the alternative only on a real win — input by input, instead of committing globally.
 
-## The cost
+## The comparator (the single pluggable seam)
 
-The default `key` is `LTLResult.cost` — the **DAG-node count** of the result formula
-(what the survey and benchmark report as "DAG nodes"), which is the portfolio's
-minimization objective. `cost` is a derived, lazily-computed field on `LTLResult`
-(`result.py`); a `None` cost (no formula) sorts as +∞ and never wins. Pass a custom
-`key` to select on a different measure.
+A `Comparator` — `beats(incumbent, challenger) -> bool` — is the *one* place the policy
+lives. **Intent:** every result `best_of` weighs denotes the SAME language (each is
+faithful), so a comparator never changes *what* is expressed — it only picks a **better
+FORM** of that language (smaller, better-factored, more readable). It compares two whole
+`LTLResult`s, so a policy can weigh anything (size, a margin, temporals, technique), not
+one scalar. The `Comparator` Protocol (`comparators.py`) pins the contract: total
+(defined on formula-less results too), pure, tie-keeping (False ⇒ keep the incumbent),
+and *sound by delegation* (it ranks already-faithful results, so it is a preference,
+never a gate).
+
+### The catalog (`comparators.py`)
+
+| comparator | one-liner |
+|---|---|
+| `smaller` *(default)* | strict-min on DAG-node size; ties keep the incumbent |
+| `significantly_smaller(rel, floor)` | switch only on a win ≥ `max(floor, ⌈rel·size⌉)` — strict on small instances, proportional on large |
+
+`smaller` reads `dag_node_count(result.formula)`; the size is *derived in the
+comparator*, not stored on `LTLResult`, so the contract floor stays free of the metric
+layer. `significantly_smaller` is the *guidance* policy: DAG-node size is noisy at the
+margin (a better-factored form can carry *more* nodes), so the trusted incumbent is
+overridden only on a win large enough to trust the metric — tune `rel`/`floor` as it is
+refined.
+
+### Configuring / writing another comparator
+
+Pass any `Comparator` as `beats`:
+
+```python
+from aut2ltl.best_of import best_of, significantly_smaller
+
+best_of([trusted, challenger], name="guarded",
+        beats=significantly_smaller(rel=0.2, floor=6))   # a tuned built-in
+best_of([a, b], name="fewest_temporals",
+        beats=lambda inc, ch: temporals(ch) < temporals(inc))   # an inline policy
+```
+
+To add a reusable one: write a function (or a factory returning one) in
+`comparators.py` honouring the `Comparator` contract above, add it to that module's
+`__all__`, and give it a row in the catalog table. Because it only chooses a form, no
+soundness review is needed — `best_of` has already filtered to faithful results.
 
 ## Contract (the caller's obligation, and what is free)
 
 - **Soundness is inherited.** Every stage is language-faithful or DECLINED (the
-  Translator contract), so the least-cost OK result is still faithful — `best_of`
-  cannot turn a sound portfolio unsound, whatever the `key`.
+  Translator contract), so whichever OK result wins is still faithful — `best_of`
+  cannot turn a sound portfolio unsound, whatever the `beats` comparator decides.
 - **NOT_LTL short-circuits.** A NOT_LTL verdict from any stage is absorbing: the
   language is not LTL-definable, so no stage can produce a faithful formula and the
   verdict is returned at once (as in `first_success`).
 - **Ties keep the earlier stage** — cited order is the tiebreak, so `best_of`
-  degrades to `first_success` when all costs are equal.
+  degrades to `first_success` when all sizes are equal.
 - **Cost, not free.** `best_of` runs *every* applicable stage (no short-circuit on
   the first OK). Use it where the size win justifies the extra runs; keep
   `first_success` where order already encodes priority and the first answer is fine.

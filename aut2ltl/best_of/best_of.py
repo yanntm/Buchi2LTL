@@ -2,26 +2,29 @@
 aut2ltl/best_of/best_of.py — the choice-by-size combinator.
 
 `best_of` is the size-objective sibling of `first_success`: where `first_success`
-takes the FIRST language-faithful stage (choice by cited order), `best_of` runs ALL
-the stages and keeps the SMALLEST faithful result (choice by `cost`). Both obey the
-same contract — every stage is language-faithful or DECLINED — so the winner is
-sound by construction whichever one is chosen.
+takes the FIRST language-faithful stage (choice by cited order), `best_of` walks the
+stages IN ORDER keeping the first as the trusted incumbent and lets a later stage
+take over only when a pluggable `beats` comparator says it wins. Both obey the same
+contract — every stage is language-faithful or DECLINED — so the winner is sound by
+construction whichever one is chosen.
+
+The whole policy lives in ONE place: a `Comparator` (`beats(incumbent, challenger) ->
+bool`, see `comparators.py`), a comparison of two full `LTLResult`s. That is the
+single pluggable seam — swap it to change what "better form" means (size, a
+significance margin, temporals-first, technique preference, …) without touching the
+walk. The default `smaller` is strict-min on DAG-node size; `significantly_smaller`
+is the *guidance* policy: the first-cited answer is trusted (expected at least as good
+on grounds the metric cannot see — factoring, readability) and is overridden only on
+a win large enough to trust it.
 """
 from __future__ import annotations
 
 from typing import Callable, Generic, Optional, Sequence, TypeVar
 
 from aut2ltl.result import LTLResult
+from .comparators import Comparator, smaller
 
 _In = TypeVar("_In")
-
-# Comparable size key; `None` (no formula) sorts as +infinity so it never wins.
-Key = Callable[[LTLResult], Optional[int]]
-
-
-def _by_cost(r: LTLResult) -> Optional[int]:
-    """Default key: the result's DAG-node count (`LTLResult.cost`)."""
-    return r.cost
 
 
 class _BestOf(Generic[_In]):
@@ -29,44 +32,48 @@ class _BestOf(Generic[_In]):
     Translator / CascadeTranslator interface (a fixed `name` plus a `__call__`), so
     a composite is itself a valid stage of another composite.
 
-    Each stage is self-gating (a stage that does not apply returns DECLINED). Unlike
-    `first_success`, every applicable stage is run, and the OK result with the least
-    `key` is returned UNCHANGED (the composite stamps no tag of its own; its `name`
-    is its identity, not a technique). Ties keep the earlier stage (cited order is
-    the tiebreak). A NOT_LTL from any stage short-circuits: the language is not
-    LTL-definable, so no stage can produce a faithful formula and the verdict stands.
+    Each stage is self-gating (a stage that does not apply returns DECLINED). The
+    stages are walked IN ORDER: the first OK is the incumbent, and a later OK replaces
+    it only when `beats(incumbent, challenger)`. The winner is returned UNCHANGED (the
+    composite stamps no tag of its own; its `name` is its identity, not a technique).
+    A NOT_LTL from any stage short-circuits: the language is not LTL-definable, so no
+    stage can produce a faithful formula and the verdict stands.
     """
 
     def __init__(
-        self, name: str, stages: Sequence[Callable[[_In], LTLResult]], key: Key
+        self,
+        name: str,
+        stages: Sequence[Callable[[_In], LTLResult]],
+        beats: Comparator,
     ) -> None:
         self.name = name
         self._stages = tuple(stages)
-        self._key = key
+        self._beats = beats
 
     def __call__(self, x: _In) -> LTLResult:
-        best: Optional[LTLResult] = None
-        best_k: Optional[int] = None
+        incumbent: Optional[LTLResult] = None
         for stage in self._stages:
             r = stage(x)
             if r.not_ltl:
-                return r                      # absorbing verdict: stop, keep reason
+                return r                          # absorbing verdict: keep reason
             if r.declined:
-                continue                      # not this stage's case: move on
-            k = self._key(r)                  # OK: a real candidate
-            if best is None or (k is not None and (best_k is None or k < best_k)):
-                best, best_k = r, k
-        return best if best is not None else LTLResult.decline()
+                continue                          # not this stage's case: move on
+            if incumbent is None:
+                incumbent = r                     # the trusted first answer
+            elif self._beats(incumbent, r):
+                incumbent = r                     # a winning challenger takes over
+        return incumbent if incumbent is not None else LTLResult.decline()
 
 
 def best_of(
     stages: Sequence[Callable[[_In], LTLResult]],
     *,
     name: str,
-    key: Key = _by_cost,
+    beats: Comparator = smaller,
 ) -> "_BestOf[_In]":
-    """Compose `stages` into a single named translator that runs every stage and
-    returns the OK result minimizing `key` (default: DAG-node `cost`), a NOT_LTL
-    verdict if any stage proves one, or a DECLINE if every stage declines. `name`
-    is the composite's identity (passed at construction)."""
-    return _BestOf(name, stages, key)
+    """Compose `stages` into a single named translator that walks them in order and
+    returns the trusted-incumbent winner: the first OK stage, overridden by a later
+    OK only when `beats(incumbent, challenger)` (default `smaller`: strict-min size).
+    A NOT_LTL verdict from any stage is returned at once; a DECLINE if every stage
+    declines. `name` is the composite's identity (passed at construction)."""
+    return _BestOf(name, stages, beats)

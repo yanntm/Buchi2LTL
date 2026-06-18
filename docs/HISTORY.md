@@ -1291,3 +1291,20 @@ and per peel descent via `daisy_pair_inv`). Survey: sound (40/40 equiv, 0 regres
 inv fires on 16/40, DAG +0.7% (flat at survey scale; the pre-determinization strip
 is a benchmark-scale lever). Default recipe pointer made a single re-pointable alias
 `RECIPES["default"]`; recipes split one-module-per-file under `portfolio/recipes/`.
+
+## 2026-06-19 (same day, follow-up) — best_of: pluggable Comparator, drop cost field
+
+Reshaped best_of after the design firmed: the selection policy is now a single
+pluggable `Comparator` (a `Protocol`, not a Callable alias) — `beats(incumbent,
+challenger) -> bool` over two whole LTLResults. INTENT framed in its pydoc: all
+weighed results denote the SAME language, so a comparator only ever picks a better
+FORM, never changes what is expressed (sound by delegation — a preference, not a
+gate). Walk is incumbent-in-order: first OK trusted, a later OK takes over only when
+beats() says so. Comparators moved to best_of/comparators.py (the catalog): `smaller`
+(strict-min DAG size) + `significantly_smaller(rel, floor)` (guidance margin:
+inc-ch >= max(floor, ceil(rel*inc)) — strict on small, proportional on large).
+DROPPED the LTLResult.cost field added earlier the same day: the two-result
+comparator makes an embedded score redundant, and deriving size in the comparator
+(dag_node_count(.formula)) keeps the contract floor free of the metric layer. README
+extended: intent, a comparator catalog table, and how to configure/write another.
+Still unwired. tests/test_best_of.py green.
