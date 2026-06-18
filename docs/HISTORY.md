@@ -1199,3 +1199,23 @@ reconstructs it soundly (`daisy+strength2`, DAG 19, Spot True). Gated: kr r4 aud
 CLEAN, survey SUCCESS 40/40 equivalent (all modern techniques), and the formerly-FALSE
 formula now sound under the default CLI path. `_default_portfolio` and the legacy
 `sl`/`sl_driven`/`decompose` rungs are now dead pending the architecture retirement.
+
+## 2026-06-18 — retire the sl engine + legacy portfolio; settle the --use vocabulary
+
+Full-modern cleanup on top of the promote-best pivot. DELETED: aut2ltl/sl/ entirely
+(the heuristic backward-labeling engine — daisy subsumes its self-loop labeling,
+partscc its t2 SCC heuristic, fuse2 was already extracted to aut2ltl/heur);
+portfolio/{decompose,sl,sl_driven,options}.py (Decompose / Sl / SlDriven / the
+portfolio.sl.* OptionSpecs); the aut2ltl/bls/bls.py compatibility shim (hierarchy_class
+now imports muller directly). build.py dropped _default_portfolio and the
+sl/sl_driven/decompose vocabulary; portfolio/__init__ is a modern surface
+(build_portfolio/TECHNIQUES/RECIPES, _options seeded from KR_OPTIONS); __main__ dropped
+PORTFOLIO_OPTIONS. VOCABULARY settled: the six producers acc/weak/buchi/cobuchi/muller/bls
++ recipe best — `str` became `bls` (the integrated cascade) and the old `bls` general
+leaf became `muller` (its acceptance class). TESTS refreshed (one-time, per user):
+deleted the tests/sl/ probes + test_sl_member + kr/test_decompose + kr/fuzz_gate_decompose;
+rewrote test_build_portfolio + test_options; repointed test_fuse2 to drop the retired-
+legacy parity (keeps the soundness gate). The curated example corpora already lived in
+tests/fixtures (f2_successes still used by test_fuse2; t2_successes + terminal_2scc_labeled
+kept though now orphaned). survey_sweep.sh + READMEs/STATUS/TODO/CLAUDE updated. Gates
+green throughout (survey SUCCESS 40/40, kr audit CLEAN).
