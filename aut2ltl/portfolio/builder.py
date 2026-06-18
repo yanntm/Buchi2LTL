@@ -23,10 +23,9 @@ from __future__ import annotations
 from typing import Callable, Dict, Optional
 
 from aut2ltl.translator import Translator
-from aut2ltl.language import Language
-from aut2ltl.result import LTLResult
 from aut2ltl.options import Options
 from aut2ltl.first_success import first_success
+from aut2ltl.recurse import recurse
 from aut2ltl.bls.aut2cas import as_translator
 from aut2ltl.bls.hierarchy_class import make_hierarchy_class
 from aut2ltl.daisy import Daisy
@@ -50,34 +49,25 @@ def bls(options: Optional[Options] = None) -> Translator:
 def daisy(child: Translator) -> Translator:
     """Recursively peel self-loop daisies, delegating residual cores to `child`.
 
-    A fixpoint: the `daisy` combinator hands each exit target back to THIS assembly,
-    so a chain of nested daisies peels away one center at a time; when the head is
-    not a daisy the peel declines and `child` (e.g. `bls`) takes the whole. Every
-    stem strictly descends, so the recursion is well-founded; `child` must not
-    re-enter `daisy` on a single multi-state SCC (the bls cascade is a flat floor)."""
-
-    def leaf(lang: Language) -> LTLResult:
-        r = Daisy(leaf)(lang)
-        return r if not r.declined else child(lang)
-
-    return leaf
+    `recurse` ties the knot, `first_success` is the per-level choice: try `Daisy`,
+    else fall to `child`. The `Daisy` peel hands each exit target back to `leaf`
+    (THIS assembly), so a chain of nested daisies peels one center at a time; when
+    the head is not a daisy the peel declines and `child` (e.g. `bls`) takes the
+    whole. Every stem strictly descends, so the recursion is well-founded; `child`
+    must not re-enter `daisy` on a single multi-state SCC (bls is a flat floor)."""
+    return recurse(lambda leaf: first_success([Daisy(leaf), child], name="daisy"))
 
 
 def daisy_pair(child: Translator) -> Translator:
     """Like `daisy(child)` but with the length-1 star `daisy2` slipped in between
-    the self-loop `daisy` and the floor: try `Daisy`, then `Daisy2` (gated by a
-    Spot oracle), each handing its stem exits back to THIS pair; fall to `child`
-    only when neither peels. Same well-founded recursion as `daisy` — every stem
-    strictly descends, and `daisy2` resolves a whole star SCC without recursing
-    into it, so `child` is still a flat floor (`core`, or a declining unit)."""
-
-    def leaf(lang: Language) -> LTLResult:
-        r = Daisy(leaf)(lang)
-        if r.declined:
-            r = Daisy2(leaf)(lang)
-        return r if not r.declined else child(lang)
-
-    return leaf
+    the self-loop `daisy` and the floor: per level try `Daisy`, then `Daisy2`
+    (gated by a Spot oracle), then `child`; each peel hands its stem exits back to
+    `leaf`. Same well-founded recursion as `daisy` — every stem strictly descends,
+    and `daisy2` resolves a whole star SCC without recursing into it, so `child`
+    is still a flat floor (`core`, or a declining unit)."""
+    return recurse(
+        lambda leaf: first_success([Daisy(leaf), Daisy2(leaf), child],
+                                   name="daisy_pair"))
 
 
 def core(options: Optional[Options] = None) -> Translator:
