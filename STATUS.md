@@ -6,10 +6,13 @@ Project-level snapshot. For the **engine** state read `aut2ltl/bls/STATUS.md`
 ## What works
 
 The FoSSaCS'22 automaton→LTL construction is implemented end-to-end and
-semantically validated. The portfolio front end (`reconstruct_decomposed`:
-decompose/recombine + the sl heuristic gate over the integrated kr cascade)
-sweeps the Manna–Pnueli class ladder — every probed case verifies equiv=True.
-Engine internals and the current size profile live in `aut2ltl/bls/STATUS.md`.
+semantically validated. The portfolio front end is the **`best` recipe** (the
+no-`--use` default since 2026-06-18): `Simplify(strength(acceptance(daisy(core))),
+"hi")` with `core = first(partscc, bls)` — strength/acceptance decomposition over a
+self-loop daisy peel flooring on the kr cascade. It sweeps the Manna–Pnueli class
+ladder — every probed case verifies equiv=True — and replaces the legacy
+`Decompose / SlDriven / Decompose` graph that the benchmark caught producing a
+verified FALSE. Engine internals and the size profile live in `aut2ltl/bls/STATUS.md`.
 
 ## Front end (CLI)
 
