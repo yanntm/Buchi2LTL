@@ -11,7 +11,7 @@
 # (.ltl / .hoa); content routing is survey.py's job.
 #
 # Usage:
-#   tests/benchmark/bench_sweep.sh                      # whole corpus -> tests/logs/benchmark
+#   tests/benchmark/bench_sweep.sh                      # whole corpus -> tests/benchmark/logs
 #   tests/benchmark/bench_sweep.sh OUTDIR PATHS...      # subset (dirs/files) for dev
 #   KR_SURVEY_TIMEOUT=8 tests/benchmark/bench_sweep.sh  # tighter per-input budget
 #
@@ -21,7 +21,7 @@ set -u
 cd "$(dirname "$0")/../.."   # project root
 
 INPUTS="tests/benchmark/inputs"
-OUTDIR="${1:-tests/logs/benchmark}"
+OUTDIR="${1:-tests/benchmark/logs}"
 [ "$#" -gt 0 ] && shift
 ROOTS=("$@"); [ "${#ROOTS[@]}" -eq 0 ] && ROOTS=("$INPUTS")
 

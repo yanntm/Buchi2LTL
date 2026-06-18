@@ -14,6 +14,7 @@ __pycache__/
 
 # generated outputs and caches
 tests/smoke/
+tests/benchmark/logs/
 tests/kr/examples/generated/
 aut2ltl/**/__pycache__/
 aut2ltl/**/*.pyc
