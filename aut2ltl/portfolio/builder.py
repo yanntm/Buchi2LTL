@@ -70,6 +70,19 @@ def daisy_pair(child: Translator) -> Translator:
                                    name="daisy_pair"))
 
 
+def daisy_pair_inv(child: Translator) -> Translator:
+    """`daisy_pair` with the invariant strip woven into EVERY descent level: each
+    recursion first factors its sub-automaton's *local* `G(Σ)` (`Invariant`), peels
+    the stripped residual, and re-asserts `G(Σ)`. The `recurse` step wraps the
+    per-level peel in `Invariant`, so as the peel descends each stem target is
+    inv-stripped on the way in — unlike top-only `best_inv`, where the *global*
+    `Σ = ⋁(all guards)` is usually vacuous. Sound per level (each `Invariant` is one
+    self-contained strip + re-assert around one peel call)."""
+    return recurse(
+        lambda leaf: Invariant(
+            first_success([Daisy(leaf), Daisy2(leaf), child], name="daisy_pair")))
+
+
 def core(options: Optional[Options] = None) -> Translator:
     """The non-decomposed core floor: try `partscc` (label a single terminal SCC —
     exactly what a daisy peel hands an exit target), else fall to the `bls` cascade.
@@ -106,14 +119,25 @@ def best_daisy2(options: Optional[Options] = None) -> Translator:
 
 
 def best_inv(options: Optional[Options] = None) -> Translator:
-    """`best_daisy2` with the invariant layer in the loop: factor the global safety
-    invariant `G(Σ)` out front (`Invariant`), then strength ∘ acceptance
-    decomposition over the daisy/daisy2 peel pair flooring on `core`. The strip
-    hands a simpler residual language to the rest of the assembly; sound for the one
-    application (`L(A) = L(strip(A,Σ)) ∩ L(GΣ)`). A/B variant to see what the
-    invariant layer buys on top of daisy2."""
+    """`best_daisy2` with the invariant layer applied ONCE at the top: factor the
+    global safety invariant `G(Σ)` out front (`Invariant`), then strength ∘
+    acceptance decomposition over the daisy/daisy2 peel pair flooring on `core`.
+    Sound for the one application (`L(A) = L(strip(A,Σ)) ∩ L(GΣ)`). The global `Σ`
+    is usually vacuous, so this is benchmark-neutral — see `best_inv_loop` for the
+    per-descent placement where the invariant actually fires."""
     return Simplify(
         Invariant(StrengthDecompose(AccDecompose(daisy_pair(core(options))))), "hi")
+
+
+def best_inv_loop(options: Optional[Options] = None) -> Translator:
+    """`best_daisy2` with the invariant strip woven into the peel loop
+    (`daisy_pair_inv`): `G(Σ)` factored at EVERY descent level, not once at the top.
+    Deep sub-automata have tighter local invariants the global `Σ` washes out, so
+    inv fires as the peel descends. A/B against `best_daisy2` to measure the
+    per-descent invariant's effect (incl. faster NOT_LTL verdicts on counting-style
+    automata, by shrinking the monoid the LTL-definability gate tests)."""
+    return Simplify(
+        StrengthDecompose(AccDecompose(daisy_pair_inv(core(options)))), "hi")
 
 
 # Public recipe names → builders. `build_portfolio` resolves `--use <name>` here.
@@ -121,8 +145,9 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
     "best": best,
     "best_daisy2": best_daisy2,
     "best_inv": best_inv,
+    "best_inv_loop": best_inv_loop,
 }
 
 
-__all__ = ["bls", "daisy", "daisy_pair", "core", "best", "best_daisy2",
-           "best_inv", "RECIPES"]
+__all__ = ["bls", "daisy", "daisy_pair", "daisy_pair_inv", "core", "best",
+           "best_daisy2", "best_inv", "best_inv_loop", "RECIPES"]
