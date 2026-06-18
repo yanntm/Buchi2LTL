@@ -173,22 +173,72 @@ daisychain only claims LTL-definable (star-free) languages, where
 is the move-level lift of daisy's `G(σ)` (Open points). Why the worked example
 *looked* flat: a double coincidence, explained below.
 
-**Acceptance `comp_i`** — counts marks at *move completions* (a petal taken, or a
-spoke traversed back to `h`). For set `i`:
+**Acceptance `comp_i`.** A TGBA run accepts iff, for **every** acceptance set
+`i`, it traverses **infinitely many `i`-marked edges**. We re-express each "set
+`i` infinitely often" as an LTL `GF(comp_i)`, with `comp_i` marking the positions
+at which an `i`-marked edge of the star is taken. The reduction is legitimate
+**because the staying run revisits `h` infinitely** (the daisy2 / `decomp/scc`
+split, §3): every edge that can matter lies on a *finite* move — a petal, or one
+full spoke excursion — so "an `i`-marked edge is taken infinitely often" is the
+same as "infinitely many *moves that carry `i`* complete". A mark inside a body
+that the run never leaves does not arise here; that is `decomp/scc`'s case.
+
+The marks sit on the **individual edges** of a move, so `comp_i` must be keyed to
+the edge that actually carries `i` — *not* to the spoke as a whole. The three
+edge roles give three cases (`move_s(⊤) = E_s ∧ X(G_s U R_s)`, the bare
+excursion):
 
 ```
-comp_i  =  ( ⋁_{petal σ : i ∈ B_σ} σ )                         -- mark on a petal
-        ∨  ⋁_{s : i ∈ B_s^E ∪ B_s^R} move_s(⊤)                 -- mark on entry/return
-        ∨  ⋁_{s : i ∈ B_s^G} ( E_s ∧ X( G_s ∧ (G_s U (R_s ∧ ⊤)) ) )  -- mark on the loop body
+comp_i  =  ⋁_{petal σ : i ∈ B_σ}  σ                          -- (P)  a petal edge
+        ∨  ⋁_{s : i ∈ B_s^E ∪ B_s^R}  move_s(⊤)              -- (ER) entry / return edge
+        ∨  ⋁_{s : i ∈ B_s^G}  E_s ∧ X( G_s ∧ (G_s U R_s) )   -- (G)  a body self-loop edge
 ```
 
-Entry/return marks are collected on **every** traversal of the spoke, so the
-detour move itself witnesses them. A **self-loop** mark `i ∈ B_s^G` is collected
-only when the body actually loops (≥ 1 `G_s` step); the last disjunct demands one
-real `G_s` step before returning. `GF(comp_i)` then asserts that completion
-recurs. (Sound because accepting runs revisit `h`: every relevant mark is seen on
-a finite traversal — no need to track marks inside a never-returning body, which
-is `decomp/scc`'s case.)
+- **(P)** A petal carrying `i` is one hub self-loop, taken exactly when the letter
+  satisfies `σ` at a hub position; `σ` is its own witness, as in daisy.
+- **(ER)** The entry edge `h→s` and the return edge `s→h` are taken on **every**
+  traversal of `s` — one each, no choice — so the bare excursion `move_s(⊤)`
+  already witnesses them: traverse `s`, and the `i`-marked entry/return edge is
+  taken.
+- **(G)** A body self-loop edge `s→s` carrying `i` is taken **only if the body
+  loops at least once**. A traversal that enters and returns with *zero* body
+  steps (`E_s` then immediately `R_s`) never touches the self-loop, so it must
+  **not** be credited. The witness therefore demands one real body step before
+  the return: `E_s ∧ X(G_s ∧ (G_s U R_s))` — at the first post-entry position
+  `G_s` holds (the loop is taken once) and `G_s U R_s` carries the excursion on to
+  its return.
+
+`GF(comp_i)` then asserts that an `i`-collecting move recurs forever, which —
+under the revisits-`h` assumption — is exactly "set `i` infinitely often". With
+`m = 0` (no sets) the conjunction is empty and `STAY∞ = StaySafe`.
+
+**Why per-edge, not per-spoke (a real failure to check).** The prototype first
+collapsed a spoke's marks to one set `B_s = B_s^E ∪ B_s^G ∪ B_s^R` and used the
+bare `move_s(⊤)` for all of them. That is unsound when the mark is on the body.
+`GF(a ∧ Xb)` is a one-spoke star whose self-loop carries the only mark; the run
+that **enters and returns with no loop** — word `(¬a∧¬b · a)^ω` — completes a
+spoke excursion every two steps yet never takes the marked self-loop, so the
+language rejects it. The union form wrongly accepted it (probe
+`tests/daisy2/probe_daisy2.py 'GF(a & X b)'`, witness `cycle{!a&!b ; a}`). Case
+**(G)**'s "≥ 1 body step" guard is exactly the fix; this is the soundness point
+to scrutinize.
+
+**Two caveats this draft leaves open** (the acceptance face of the "parallel
+edges on a role" Open point):
+
+- *Parallel edges with non-uniform marks.* `E_s`, `G_s`, `R_s` above are the
+  *disjunction* of all edges in that role. If only **some** of several parallel
+  entry (resp. body, return) edges carry `i`, the role disjunction is too coarse —
+  it also fires for the unmarked siblings. Exactness needs per-edge guards, not
+  the role disjunction. (Single-edge roles, the common case, are exact.)
+- *Existential runs.* `comp_i` is a property of the **word**, while acceptance is
+  existential over runs of a possibly nondeterministic automaton; "`comp_i` holds
+  here" must coincide with "*some* accepting run takes an `i`-edge here". For the
+  star this is benign — a move is a local hub choice and the spoke path is forced
+  once entered — but the exactness of the whole `StaySafe ∧ ⋀_i GF(comp_i)`
+  conjunction *is* the unsolved closed form, which is why daisy2 keeps the Spot
+  validity gate (`partscc` pattern) and only adopts a candidate it confirms
+  equivalent.
 
 ## Worked check (`tests/daisychain/probe_bigloop_Gafb.py`)
 
