@@ -13,7 +13,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tests.survey_formulas import SURVEY_CASES  # noqa: E402
+from normalize import normalize_ltl  # noqa: E402
 
 # MP-class code -> (filename stem, human title), weakest-first.
 _CLASS = {
@@ -40,10 +42,11 @@ def emit(root: str = "tests/benchmark/inputs/core") -> list[str]:
         path = os.path.join(root, f"{stem}.ltl")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write(f"# {title}\n"
-                     f"# from tests/survey_formulas.py (the curated survey corpus) -- "
-                     f"resync via tests/benchmark/from_survey.py\n\n")
+                     f"# from tests/survey_formulas.py (the curated survey corpus), "
+                     f"AP-renamed to canonical a,b,c… -- resync via "
+                     f"tests/benchmark/from_survey.py\n\n")
             for c in cases:
-                fh.write(f"{c.formula}  # {c.note}\n")
+                fh.write(f"{normalize_ltl(c.formula)}  # {c.note}\n")
         written.append(path)
     return written
 
