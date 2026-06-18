@@ -14,13 +14,6 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   the LTL-definability gate tests). Top-only `best_inv` is benchmark-neutral (the
   global `Σ = ⋁(all guards)` is usually vacuous); the per-descent local `Σ` is the
   one that should fire.
-- **Split `portfolio/builder.py` — recipes to their own files.** builder is getting
-  large; keep the *blocks* (`bls`, `core`, `daisy`, `daisy_pair`, `daisy_pair_inv`)
-  in `builder.py` and move the *recipes* (`best`, `best_daisy2`, `best_inv`,
-  `best_inv_loop`) into a `portfolio/recipes/` subpackage (one file per recipe, an
-  `__init__` aggregating `RECIPES`). Repoint `build.py` + `portfolio/__init__.py`
-  `from .builder import RECIPES` → `from .recipes import RECIPES`. Gate: default +
-  `--use` surveys SUCCESS (pure move).
 - **`best_of` combinator + a `cost`/size field on `LTLResult`.** Recipes pick the
   FIRST success; size is the research objective, so add `best_of([...], key=cost)`
   beside `first_success` (`LTLResult` is pre-shaped for a cost field).

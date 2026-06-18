@@ -5,7 +5,7 @@ technique set.
 Two modes, one entry point (`build_portfolio`):
 
 * `techniques is None` — the shipped default: the `best_daisy2` recipe
-  (`builder.RECIPES["best_daisy2"]`), `Simplify(strength(acceptance(daisy_pair(core))), "hi")`
+  (`recipes.RECIPES["best_daisy2"]`), `Simplify(strength(acceptance(daisy_pair(core))), "hi")`
   with `core = first(partscc, bls)`. The strength/acceptance decomposition over a
   daisy/daisy2 peel pair (self-loop daisy, then the length-1 star daisy2) flooring
   on the bls cascade. (`--use best` is the prior daisy-only assembly.)
@@ -47,7 +47,7 @@ from aut2ltl.bls.buchi import buchi as _buchi
 from aut2ltl.bls.cobuchi import cobuchi as _cobuchi
 from aut2ltl.bls.weak import weak as _weak
 from aut2ltl.bls.muller import muller as _muller
-from .builder import RECIPES
+from .recipes import RECIPES
 
 # The cited-technique vocabulary. KR leaves map to their CascadeTranslator member
 # (lifted to a Translator via as_translator). `muller` is the general-case leaf
@@ -110,15 +110,15 @@ def build_portfolio(
     options: Options, techniques: Optional[Iterable[str]] = None
 ) -> Translator:
     """Assemble a portfolio Translator. `techniques=None` ⇒ the shipped default,
-    the `best_daisy2` recipe (`builder.RECIPES["best_daisy2"]`); a single recipe
-    name from `builder.RECIPES` (e.g. `best`, `best_inv`) ⇒ that named assembly;
+    the `best_daisy2` recipe (`recipes.RECIPES["best_daisy2"]`); a single recipe
+    name from `recipes.RECIPES` (e.g. `best`, `best_inv`) ⇒ that named assembly;
     otherwise a set/sequence of technique names ⇒ the cited ladder (cited order =
     priority, no implicit floor). Raises `ValueError` on an unknown name or a
     producer-free citation."""
     if techniques is None:
         return RECIPES["best_daisy2"](options)
     techs = list(techniques)
-    # A recipe name (e.g. `--use best`) resolves to a named assembly from builder.py.
+    # A recipe name (e.g. `--use best`) resolves to a named assembly from recipes/.
     # Recipes are whole assemblies, not ladder rungs, so they are cited alone.
     if len(techs) == 1 and techs[0] in RECIPES:
         return RECIPES[techs[0]](options)

@@ -26,16 +26,35 @@ and the retired `sl` heuristic engine, which `daisy` (self-loop peel) and `parts
   (`acc / weak / buchi / cobuchi / muller`) and the integrated cascade `bls`
   (the whole engine). Groups the cited kr leaves into ONE cascade-level
   `first_success` (one GAP decomposition).
-- **`builder.py`** — the named assemblies (`RECIPES`): `bls` (the cascade engine,
-  lifted over the GAP holonomy decomposition), `daisy` (recursive self-loop peel),
-  `core` (`first(partscc, bls)`), `daisy_pair` (the daisy/daisy2 peel pair), and the
-  recipes `best`, `best_daisy2` (the shipped default), `best_inv`. `--use <name>`
-  resolves here. The recursive peels are built from the two primitive **bricks**:
+- **`builder.py`** — the reusable building **blocks** the recipes assemble: `bls`
+  (the cascade engine, lifted over the GAP holonomy decomposition), `core`
+  (`first(partscc, bls)`), `daisy` (recursive self-loop peel), `daisy_pair` (the
+  daisy/daisy2 peel pair), and `daisy_pair_inv` (the peel with the invariant strip
+  woven per descent). The recursive peels are built from the two primitive **bricks**:
   `daisy(child) = recurse(λ leaf: first_success([Daisy(leaf), child]))` — i.e.
   `recurse` (self-reference, `aut2ltl.recurse`) over `first_success` (choice,
   `aut2ltl.first_success`).
+- **`recipes/`** — the named assemblies, **one module per recipe** (`best`,
+  `best_daisy2` the shipped default, `best_inv`, `best_inv_loop`), each composing the
+  `builder.py` blocks into a whole. Its `__init__` aggregates them into the `RECIPES`
+  registry that `build_portfolio` resolves for `--use <name>`.
 - **`__init__.py`** — builds the env-seeded default `Options` (from `KR_OPTIONS`) and
   exposes `build_portfolio` / `TECHNIQUES` / `RECIPES` for callers wanting a variant.
+
+### Adding a recipe (the whole wiring)
+
+Wiring a new assembly in is **declare it and name it** — nothing else:
+
+1. **Declare** it as a builder `Options -> Translator` in a new `recipes/<name>.py`
+   (compose `builder.py` blocks; reuse an existing recipe's module as the template).
+2. **Name** it: add `"<name>": <name>` to the `RECIPES` dict in `recipes/__init__.py`.
+
+That is the complete wiring. `build_portfolio` resolves `--use <name>` straight from
+`RECIPES`, so the CLI (`python3 -m aut2ltl --use <name>`), the survey, the benchmark,
+and the `--use`-sweep scripts all honor the new recipe automatically — they read the
+registry, there is no separate list to update. (Cited *techniques* — the producer
+leaves `acc / weak / buchi / cobuchi / muller / bls` for the research ladder — are the
+`TECHNIQUES` vocabulary in `build.py`; a *recipe* is a whole assembly cited alone.)
 
 ## Combinator bricks
 
