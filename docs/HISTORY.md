@@ -1269,3 +1269,25 @@ recipes are sound (0 non-equivalent); best_daisy2 is −3.6% DAG vs best and tur
 formula. best_inv is benchmark-neutral on this corpus (~0.03%) but kept as an A/B.
 **best_daisy2 is now the no-`--use` default** (`build_portfolio`); reference
 baseline regenerated (DAG 538 → 414 on the 40-survey).
+
+## 2026-06-19 — best_of brick + LTLResult.cost; best_inv_all experiment
+
+WHY/WHAT. Landed `best_of` (`aut2ltl/best_of/`), the choice-by-size sibling of
+`first_success`: runs every stage, returns the least-`cost` OK result (NOT_LTL
+short-circuits as an absorbing verdict; DECLINED falls through; ties keep cited
+order; winner returned unchanged, name is identity). A dedicated brick package with
+its own README, mirroring `recurse/`. Added `LTLResult.cost` — the DAG-node count of
+the result formula (lazy, cached, invalidated by the formula setter), the
+provisioned "output size" field the result-contract NOT-FINAL note anticipated; the
+metric import is local to keep the contract floor decoupled. `best_of`'s default
+`key` is `cost` but is swappable. Unwired so far. KNOWN: `dag_node_count` is noisy at
+the margin (the `(a U b) | Gc` inv case is 11→12 yet better-factored) — a switch
+margin + a refined scalar are deferred (TODO) before wiring it into a recipe.
+Test: `tests/test_best_of.py` (GAP-free) green.
+
+Also added `best_inv_all` (`portfolio/recipes/best_inv_all.py`), an experimental
+recipe weaving `Invariant` at every boundary (top, around `Acc` pre-determinization,
+and per peel descent via `daisy_pair_inv`). Survey: sound (40/40 equiv, 0 regress),
+inv fires on 16/40, DAG +0.7% (flat at survey scale; the pre-determinization strip
+is a benchmark-scale lever). Default recipe pointer made a single re-pointable alias
+`RECIPES["default"]`; recipes split one-module-per-file under `portfolio/recipes/`.

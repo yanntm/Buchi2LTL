@@ -14,9 +14,14 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   the LTL-definability gate tests). Top-only `best_inv` is benchmark-neutral (the
   global `Σ = ⋁(all guards)` is usually vacuous); the per-descent local `Σ` is the
   one that should fire.
-- **`best_of` combinator + a `cost`/size field on `LTLResult`.** Recipes pick the
-  FIRST success; size is the research objective, so add `best_of([...], key=cost)`
-  beside `first_success` (`LTLResult` is pre-shaped for a cost field).
+- **Refine `best_of`'s cost policy, then wire it in.** The brick landed
+  (`aut2ltl/best_of/` + `LTLResult.cost`), still unwired. Open: (a) a **switch
+  margin** so it keeps the first-cited form unless a challenger is smaller by a real
+  margin — `dag_node_count` is noisy at the margin (a better-factored form can carry
+  more nodes), so harvest the big collapses and ignore churn; the scalar stays
+  swappable (e.g. temporals-first). (b) Swap a `first_success` for `best_of` where
+  running every branch pays (the `recurse` seam; pairing an inv-variant with its
+  non-inv form to keep only per-input wins).
 - **A `recurse`/`fix` combinator (idea — revisit with `best_of`).** `daisy`, the
   `strength`/`acceptance` decomposers all share ONE shape: structural recursion over a
   well-founded decomposition — `leaf = combine([leaf(sub) for sub in decompose(lang)])`
