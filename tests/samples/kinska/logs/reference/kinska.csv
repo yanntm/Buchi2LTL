@@ -1,166 +1,166 @@
 formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
-counting_buchi_1ap_01.txt,?,?,-,,,,,0.617,NOT_LTL,
-counting_buchi_1ap_02.txt,?,?,-,,,,,0.616,NOT_LTL,
+counting_buchi_1ap_01.txt,?,?,-,,,,,0.582,NOT_LTL,
+counting_buchi_1ap_02.txt,?,?,-,,,,,0.584,NOT_LTL,
 counting_buchi_1ap_03.txt,?,?,partscc,9,1,15,1.7,0.062,True,!a & G((!a | X!a) & (a | Xa))
-counting_buchi_1ap_04.txt,?,?,partscc,9,1,15,1.7,0.061,True,!a & G((!a | X!a) & (a | Xa))
-counting_buchi_1ap_05.txt,?,?,-,,,,,0.617,NOT_LTL,
-counting_buchi_1ap_06.txt,?,?,buchi,2150,347,3244605,1509.1,1.538,UNVERIFIED_SIZE,<unflattened DAG: 3244605 tree nodes>
-counting_buchi_1ap_07.txt,?,?,buchi,2175,343,2063370,948.7,1.524,UNVERIFIED_SIZE,<unflattened DAG: 2063370 tree nodes>
-counting_buchi_1ap_08.txt,?,?,-,,,,,0.607,NOT_LTL,
-counting_buchi_1ap_09.txt,?,?,-,,,,,0.609,NOT_LTL,
-counting_buchi_1ap_10.txt,?,?,-,,,,,0.606,NOT_LTL,
-counting_buchi_1ap_11.txt,?,?,-,,,,,0.609,NOT_LTL,
-counting_buchi_1ap_12.txt,?,?,buchi,709,128,9874589,13927.5,1.300,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
-counting_buchi_1ap_13.txt,?,?,buchi,709,128,9874589,13927.5,1.290,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
-counting_buchi_1ap_14.txt,?,?,buchi,709,128,9874589,13927.5,1.292,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
-counting_buchi_1ap_15.txt,?,?,buchi,1128,202,41719086,36985.0,1.260,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
-counting_buchi_1ap_16.txt,?,?,buchi,1128,202,41719086,36985.0,1.256,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
-counting_buchi_1ap_17.txt,?,?,buchi,1128,202,41719086,36985.0,1.262,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
-counting_buchi_1ap_18.txt,?,?,buchi,1152,200,43867210,38079.2,1.248,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
-counting_buchi_1ap_19.txt,?,?,buchi,1152,200,43867210,38079.2,1.245,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
-counting_buchi_1ap_20.txt,?,?,buchi,1152,200,43867210,38079.2,1.255,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
-counting_buchi_1ap_21.txt,?,?,-,,,,,0.611,NOT_LTL,
-counting_buchi_1ap_22.txt,?,?,-,,,,,0.593,NOT_LTL,
-counting_buchi_1ap_23.txt,?,?,-,,,,,0.600,NOT_LTL,
-counting_buchi_1ap_24.txt,?,?,-,,,,,0.602,NOT_LTL,
-counting_buchi_1ap_25.txt,?,?,-,,,,,0.606,NOT_LTL,
-counting_buchi_1ap_26.txt,?,?,-,,,,,0.603,NOT_LTL,
-counting_buchi_1ap_27.txt,?,?,daisy+partscc,11,1,17,1.5,0.064,True,a & X(a & G((a | Xa) & (!a | X!a)))
-counting_buchi_1ap_28.txt,?,?,daisy+partscc,11,1,17,1.5,0.063,True,a & X(a & G((a | Xa) & (!a | X!a)))
-counting_buchi_1ap_29.txt,?,?,-,,,,,0.614,NOT_LTL,
-counting_buchi_1ap_30.txt,?,?,-,,,,,0.640,NOT_LTL,
-counting_buchi_1ap_31.txt,?,?,-,,,,,0.612,NOT_LTL,
-counting_buchi_1ap_32.txt,?,?,-,,,,,0.617,NOT_LTL,
-counting_buchi_1ap_33.txt,?,?,-,,,,,0.617,NOT_LTL,
-counting_buchi_1ap_34.txt,?,?,-,,,,,0.625,NOT_LTL,
-counting_buchi_1ap_35.txt,?,?,-,,,,,0.671,NOT_LTL,
-counting_buchi_1ap_36.txt,?,?,-,,,,,0.955,NOT_LTL,
-counting_buchi_1ap_37.txt,?,?,-,,,,,1.841,NOT_LTL,
-counting_buchi_1ap_38.txt,?,?,-,,,,,15.005,BUILD_TIMEOUT>15s,
-counting_buchi_1ap_39.txt,?,?,-,,,,,15.004,BUILD_TIMEOUT>15s,
+counting_buchi_1ap_04.txt,?,?,partscc,9,1,15,1.7,0.063,True,!a & G((!a | X!a) & (a | Xa))
+counting_buchi_1ap_05.txt,?,?,-,,,,,0.578,NOT_LTL,
+counting_buchi_1ap_06.txt,?,?,buchi,2150,347,3244605,1509.1,1.434,UNVERIFIED_SIZE,<unflattened DAG: 3244605 tree nodes>
+counting_buchi_1ap_07.txt,?,?,buchi,2175,343,2063370,948.7,1.437,UNVERIFIED_SIZE,<unflattened DAG: 2063370 tree nodes>
+counting_buchi_1ap_08.txt,?,?,-,,,,,0.580,NOT_LTL,
+counting_buchi_1ap_09.txt,?,?,-,,,,,0.578,NOT_LTL,
+counting_buchi_1ap_10.txt,?,?,-,,,,,0.598,NOT_LTL,
+counting_buchi_1ap_11.txt,?,?,-,,,,,0.627,NOT_LTL,
+counting_buchi_1ap_12.txt,?,?,buchi,709,128,9874589,13927.5,1.259,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
+counting_buchi_1ap_13.txt,?,?,buchi,709,128,9874589,13927.5,1.249,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
+counting_buchi_1ap_14.txt,?,?,buchi,709,128,9874589,13927.5,1.230,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
+counting_buchi_1ap_15.txt,?,?,buchi,1128,202,41719086,36985.0,1.209,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
+counting_buchi_1ap_16.txt,?,?,buchi,1128,202,41719086,36985.0,1.213,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
+counting_buchi_1ap_17.txt,?,?,buchi,1128,202,41719086,36985.0,1.215,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
+counting_buchi_1ap_18.txt,?,?,buchi,1152,200,43867210,38079.2,1.220,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
+counting_buchi_1ap_19.txt,?,?,buchi,1152,200,43867210,38079.2,1.274,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
+counting_buchi_1ap_20.txt,?,?,buchi,1152,200,43867210,38079.2,1.232,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
+counting_buchi_1ap_21.txt,?,?,-,,,,,0.591,NOT_LTL,
+counting_buchi_1ap_22.txt,?,?,-,,,,,0.579,NOT_LTL,
+counting_buchi_1ap_23.txt,?,?,-,,,,,0.580,NOT_LTL,
+counting_buchi_1ap_24.txt,?,?,-,,,,,0.576,NOT_LTL,
+counting_buchi_1ap_25.txt,?,?,-,,,,,0.581,NOT_LTL,
+counting_buchi_1ap_26.txt,?,?,-,,,,,0.583,NOT_LTL,
+counting_buchi_1ap_27.txt,?,?,daisy+partscc,11,1,17,1.5,0.063,True,a & X(a & G((a | Xa) & (!a | X!a)))
+counting_buchi_1ap_28.txt,?,?,daisy+partscc,11,1,17,1.5,0.062,True,a & X(a & G((a | Xa) & (!a | X!a)))
+counting_buchi_1ap_29.txt,?,?,-,,,,,0.580,NOT_LTL,
+counting_buchi_1ap_30.txt,?,?,-,,,,,0.583,NOT_LTL,
+counting_buchi_1ap_31.txt,?,?,-,,,,,0.581,NOT_LTL,
+counting_buchi_1ap_32.txt,?,?,-,,,,,0.581,NOT_LTL,
+counting_buchi_1ap_33.txt,?,?,-,,,,,0.585,NOT_LTL,
+counting_buchi_1ap_34.txt,?,?,-,,,,,0.600,NOT_LTL,
+counting_buchi_1ap_35.txt,?,?,-,,,,,0.639,NOT_LTL,
+counting_buchi_1ap_36.txt,?,?,-,,,,,0.874,NOT_LTL,
+counting_buchi_1ap_37.txt,?,?,-,,,,,1.626,NOT_LTL,
+counting_buchi_1ap_38.txt,?,?,-,,,,,14.003,NOT_LTL,
+counting_buchi_1ap_39.txt,?,?,-,,,,,15.005,BUILD_TIMEOUT>15s,
 counting_buchi_1ap_40.txt,?,?,-,,,,,15.004,BUILD_TIMEOUT>15s,
-counting_buchi_2ap_01.txt,?,?,-,,,,,0.626,NOT_LTL,
-counting_buchi_2ap_02.txt,?,?,-,,,,,0.621,NOT_LTL,
-counting_buchi_2ap_03.txt,?,?,-,,,,,0.624,NOT_LTL,
-counting_buchi_2ap_04.txt,?,?,-,,,,,0.619,NOT_LTL,
-counting_buchi_2ap_05.txt,?,?,-,,,,,0.622,NOT_LTL,
+counting_buchi_2ap_01.txt,?,?,-,,,,,0.583,NOT_LTL,
+counting_buchi_2ap_02.txt,?,?,-,,,,,0.581,NOT_LTL,
+counting_buchi_2ap_03.txt,?,?,-,,,,,0.578,NOT_LTL,
+counting_buchi_2ap_04.txt,?,?,-,,,,,0.582,NOT_LTL,
+counting_buchi_2ap_05.txt,?,?,-,,,,,0.600,NOT_LTL,
 counting_buchi_2ap_06.txt,?,?,-,,,,,0.626,NOT_LTL,
-counting_buchi_2ap_07.txt,?,?,-,,,,,0.631,NOT_LTL,
-counting_buchi_2ap_08.txt,?,?,-,,,,,0.618,NOT_LTL,
-counting_buchi_2ap_09.txt,?,?,-,,,,,0.616,NOT_LTL,
-counting_buchi_2ap_10.txt,?,?,-,,,,,0.613,NOT_LTL,
+counting_buchi_2ap_07.txt,?,?,-,,,,,0.608,NOT_LTL,
+counting_buchi_2ap_08.txt,?,?,-,,,,,0.595,NOT_LTL,
+counting_buchi_2ap_09.txt,?,?,-,,,,,0.586,NOT_LTL,
+counting_buchi_2ap_10.txt,?,?,-,,,,,0.577,NOT_LTL,
 counting_buchi_2ap_11.txt,?,?,daisy+partscc,12,1,18,1.5,0.063,True,b & X(!a & G((!a | X!a) & (a | Xa)))
-counting_buchi_2ap_12.txt,?,?,daisy+partscc,12,1,18,1.5,0.067,True,b & X(!a & G((!a | X!a) & (a | Xa)))
-counting_buchi_2ap_13.txt,?,?,daisy+partscc,12,1,18,1.5,0.067,True,b & X(!a & G((!a | X!a) & (a | Xa)))
-counting_buchi_2ap_14.txt,?,?,-,,,,,0.618,NOT_LTL,
-counting_buchi_2ap_15.txt,?,?,-,,,,,0.611,NOT_LTL,
-counting_buchi_2ap_16.txt,?,?,-,,,,,0.611,NOT_LTL,
-counting_buchi_2ap_17.txt,?,?,-,,,,,0.615,NOT_LTL,
-counting_buchi_2ap_18.txt,?,?,-,,,,,0.611,NOT_LTL,
-counting_buchi_2ap_19.txt,?,?,-,,,,,0.609,NOT_LTL,
-counting_buchi_2ap_20.txt,?,?,-,,,,,0.624,NOT_LTL,
-counting_buchi_2ap_21.txt,?,?,-,,,,,0.610,NOT_LTL,
-counting_buchi_2ap_22.txt,?,?,-,,,,,0.592,NOT_LTL,
-counting_buchi_2ap_23.txt,?,?,-,,,,,0.601,NOT_LTL,
-counting_buchi_2ap_24.txt,?,?,-,,,,,0.610,NOT_LTL,
-counting_buchi_2ap_25.txt,?,?,-,,,,,0.605,NOT_LTL,
-counting_buchi_2ap_26.txt,?,?,-,,,,,0.605,NOT_LTL,
-counting_buchi_2ap_27.txt,?,?,-,,,,,0.592,NOT_LTL,
-counting_buchi_2ap_28.txt,?,?,daisy,1,0,1,1.0,0.062,True,0
-counting_buchi_2ap_29.txt,?,?,-,,,,,0.596,NOT_LTL,
-counting_buchi_2ap_30.txt,?,?,-,,,,,0.606,NOT_LTL,
-counting_buchi_2ap_31.txt,?,?,-,,,,,0.599,NOT_LTL,
-counting_buchi_2ap_32.txt,?,?,-,,,,,0.607,NOT_LTL,
-counting_buchi_2ap_33.txt,?,?,-,,,,,0.604,NOT_LTL,
-counting_buchi_2ap_34.txt,?,?,-,,,,,0.604,NOT_LTL,
-counting_buchi_2ap_35.txt,?,?,-,,,,,0.607,NOT_LTL,
-counting_buchi_2ap_36.txt,?,?,-,,,,,0.607,NOT_LTL,
-counting_buchi_2ap_37.txt,?,?,-,,,,,0.611,NOT_LTL,
-counting_buchi_2ap_38.txt,?,?,-,,,,,0.636,NOT_LTL,
-counting_buchi_2ap_39.txt,?,?,-,,,,,0.948,NOT_LTL,
-counting_buchi_2ap_40.txt,?,?,-,,,,,1.823,NOT_LTL,
-counting_buchi_2ap_41.txt,?,?,-,,,,,0.612,NOT_LTL,
-counting_buchi_2ap_42.txt,?,?,-,,,,,0.610,NOT_LTL,
-counting_buchi_2ap_43.txt,?,?,-,,,,,0.609,NOT_LTL,
-counting_buchi_2ap_44.txt,?,?,-,,,,,0.612,NOT_LTL,
-counting_buchi_2ap_45.txt,?,?,-,,,,,0.613,NOT_LTL,
-randltl-10-a-hoa-10.txt,?,?,daisy,3,1,3,1.0,0.066,True,XFa
+counting_buchi_2ap_12.txt,?,?,daisy+partscc,12,1,18,1.5,0.066,True,b & X(!a & G((!a | X!a) & (a | Xa)))
+counting_buchi_2ap_13.txt,?,?,daisy+partscc,12,1,18,1.5,0.064,True,b & X(!a & G((!a | X!a) & (a | Xa)))
+counting_buchi_2ap_14.txt,?,?,-,,,,,0.583,NOT_LTL,
+counting_buchi_2ap_15.txt,?,?,-,,,,,0.575,NOT_LTL,
+counting_buchi_2ap_16.txt,?,?,-,,,,,0.579,NOT_LTL,
+counting_buchi_2ap_17.txt,?,?,-,,,,,0.580,NOT_LTL,
+counting_buchi_2ap_18.txt,?,?,-,,,,,0.574,NOT_LTL,
+counting_buchi_2ap_19.txt,?,?,-,,,,,0.583,NOT_LTL,
+counting_buchi_2ap_20.txt,?,?,-,,,,,0.576,NOT_LTL,
+counting_buchi_2ap_21.txt,?,?,-,,,,,0.577,NOT_LTL,
+counting_buchi_2ap_22.txt,?,?,-,,,,,0.581,NOT_LTL,
+counting_buchi_2ap_23.txt,?,?,-,,,,,0.593,NOT_LTL,
+counting_buchi_2ap_24.txt,?,?,-,,,,,0.611,NOT_LTL,
+counting_buchi_2ap_25.txt,?,?,-,,,,,0.598,NOT_LTL,
+counting_buchi_2ap_26.txt,?,?,-,,,,,0.589,NOT_LTL,
+counting_buchi_2ap_27.txt,?,?,-,,,,,0.587,NOT_LTL,
+counting_buchi_2ap_28.txt,?,?,daisy,1,0,1,1.0,0.063,True,0
+counting_buchi_2ap_29.txt,?,?,-,,,,,0.581,NOT_LTL,
+counting_buchi_2ap_30.txt,?,?,-,,,,,0.585,NOT_LTL,
+counting_buchi_2ap_31.txt,?,?,-,,,,,0.582,NOT_LTL,
+counting_buchi_2ap_32.txt,?,?,-,,,,,0.588,NOT_LTL,
+counting_buchi_2ap_33.txt,?,?,-,,,,,0.581,NOT_LTL,
+counting_buchi_2ap_34.txt,?,?,-,,,,,0.586,NOT_LTL,
+counting_buchi_2ap_35.txt,?,?,-,,,,,0.585,NOT_LTL,
+counting_buchi_2ap_36.txt,?,?,-,,,,,0.591,NOT_LTL,
+counting_buchi_2ap_37.txt,?,?,-,,,,,0.590,NOT_LTL,
+counting_buchi_2ap_38.txt,?,?,-,,,,,0.611,NOT_LTL,
+counting_buchi_2ap_39.txt,?,?,-,,,,,0.883,NOT_LTL,
+counting_buchi_2ap_40.txt,?,?,-,,,,,1.750,NOT_LTL,
+counting_buchi_2ap_41.txt,?,?,-,,,,,0.598,NOT_LTL,
+counting_buchi_2ap_42.txt,?,?,-,,,,,0.604,NOT_LTL,
+counting_buchi_2ap_43.txt,?,?,-,,,,,0.589,NOT_LTL,
+counting_buchi_2ap_44.txt,?,?,-,,,,,0.582,NOT_LTL,
+counting_buchi_2ap_45.txt,?,?,-,,,,,0.581,NOT_LTL,
+randltl-10-a-hoa-10.txt,?,?,daisy,3,1,3,1.0,0.063,True,XFa
 randltl-10-a-hoa-1.txt,?,?,daisy,1,0,1,1.0,0.063,True,1
-randltl-10-a-hoa-2.txt,?,?,daisy,1,0,1,1.0,0.062,True,0
+randltl-10-a-hoa-2.txt,?,?,daisy,1,0,1,1.0,0.059,True,0
 randltl-10-a-hoa-3.txt,?,?,daisy,1,0,1,1.0,0.062,True,0
 randltl-10-a-hoa-4.txt,?,?,daisy,3,1,3,1.0,0.062,True,G!a
-randltl-10-a-hoa-5.txt,?,?,daisy,1,0,1,1.0,0.062,True,a
+randltl-10-a-hoa-5.txt,?,?,daisy,1,0,1,1.0,0.061,True,a
 randltl-10-a-hoa-6.txt,?,?,daisy,2,0,2,1.0,0.062,True,!a
 randltl-10-a-hoa-7.txt,?,?,daisy,2,1,2,1.0,0.061,True,Ga
 randltl-10-a-hoa-8.txt,?,?,daisy,2,1,2,1.0,0.062,True,Fa
-randltl-10-a-hoa-9.txt,?,?,daisy,3,2,3,1.0,0.060,True,FGa
-1,?,B,daisy,1,0,1,1.0,0.062,True,1
-0,?,B,daisy,1,0,1,1.0,0.062,True,0
+randltl-10-a-hoa-9.txt,?,?,daisy,3,2,3,1.0,0.059,True,FGa
+1,?,B,daisy,1,0,1,1.0,0.059,True,1
+0,?,B,daisy,1,0,1,1.0,0.060,True,0
 X(0),?,B,daisy,1,0,1,1.0,0.062,True,0
-!Fa,?,S,daisy,3,1,3,1.0,0.061,True,G!a
-a,G,B,daisy,1,0,1,1.0,0.060,True,a
-!a,?,B,daisy,2,0,2,1.0,0.062,True,!a
-Ga,S,S,daisy,2,1,2,1.0,0.062,True,Ga
+!Fa,?,S,daisy,3,1,3,1.0,0.060,True,G!a
+a,G,B,daisy,1,0,1,1.0,0.063,True,a
+!a,?,B,daisy,2,0,2,1.0,0.061,True,!a
+Ga,S,S,daisy,2,1,2,1.0,0.064,True,Ga
 Fa,G,G,daisy,2,1,2,1.0,0.062,True,Fa
-FGa,P,P,daisy,3,2,3,1.0,0.063,True,FGa
-FXa,?,G,daisy,3,1,3,1.0,0.063,True,XFa
+FGa,P,P,daisy,3,2,3,1.0,0.060,True,FGa
+FXa,?,G,daisy,3,1,3,1.0,0.065,True,XFa
 randltl-10-a-hoa-10.txt,?,?,daisy,2,1,2,1.0,0.062,True,Ga
-randltl-10-a-hoa-1.txt,?,?,daisy,1,0,1,1.0,0.062,True,0
-randltl-10-a-hoa-2.txt,?,?,daisy,2,0,2,1.0,0.061,True,!a
-randltl-10-a-hoa-3.txt,?,?,daisy,3,0,3,1.0,0.061,True,XXb
-randltl-10-a-hoa-4.txt,?,?,daisy,3,1,3,1.0,0.062,True,XFb
-randltl-10-a-hoa-5.txt,?,?,daisy,1,0,1,1.0,0.061,True,b
+randltl-10-a-hoa-1.txt,?,?,daisy,1,0,1,1.0,0.065,True,0
+randltl-10-a-hoa-2.txt,?,?,daisy,2,0,2,1.0,0.062,True,!a
+randltl-10-a-hoa-3.txt,?,?,daisy,3,0,3,1.0,0.064,True,XXb
+randltl-10-a-hoa-4.txt,?,?,daisy,3,1,3,1.0,0.063,True,XFb
+randltl-10-a-hoa-5.txt,?,?,daisy,1,0,1,1.0,0.064,True,b
 randltl-10-a-hoa-6.txt,?,?,daisy,1,0,1,1.0,0.059,True,1
 randltl-10-a-hoa-7.txt,?,?,daisy,1,0,1,1.0,0.062,True,a
-randltl-10-a-hoa-8.txt,?,?,daisy,1,0,1,1.0,0.062,True,0
-randltl-10-a-hoa-9.txt,?,?,daisy,2,0,2,1.0,0.059,True,!b
-0,?,B,daisy,1,0,1,1.0,0.059,True,0
-!a,?,B,daisy,2,0,2,1.0,0.063,True,!a
+randltl-10-a-hoa-8.txt,?,?,daisy,1,0,1,1.0,0.061,True,0
+randltl-10-a-hoa-9.txt,?,?,daisy,2,0,2,1.0,0.063,True,!b
+0,?,B,daisy,1,0,1,1.0,0.064,True,0
+!a,?,B,daisy,2,0,2,1.0,0.062,True,!a
 XXb,?,B,daisy,3,0,3,1.0,0.063,True,XXb
-XFb,?,G,daisy,3,1,3,1.0,0.063,True,XFb
+XFb,?,G,daisy,3,1,3,1.0,0.062,True,XFb
 b,?,B,daisy,1,0,1,1.0,0.062,True,b
-1,?,B,daisy,1,0,1,1.0,0.059,True,1
-a,G,B,daisy,1,0,1,1.0,0.061,True,a
-GX(0),?,B,daisy,1,0,1,1.0,0.059,True,0
-!b,?,B,daisy,2,0,2,1.0,0.059,True,!b
-a W 0,?,S,daisy,2,1,2,1.0,0.065,True,Ga
-randltl-10-a-hoa-10.txt,?,?,daisy,4,0,4,1.0,0.063,True,a | !b
+1,?,B,daisy,1,0,1,1.0,0.063,True,1
+a,G,B,daisy,1,0,1,1.0,0.063,True,a
+GX(0),?,B,daisy,1,0,1,1.0,0.062,True,0
+!b,?,B,daisy,2,0,2,1.0,0.064,True,!b
+a W 0,?,S,daisy,2,1,2,1.0,0.060,True,Ga
+randltl-10-a-hoa-10.txt,?,?,daisy,4,0,4,1.0,0.065,True,a | !b
 randltl-10-a-hoa-1.txt,?,?,daisy,1,0,1,1.0,0.062,True,0
 randltl-10-a-hoa-2.txt,?,?,daisy+strength2,3,1,3,1.0,0.062,True,c R d
 randltl-10-a-hoa-3.txt,?,?,daisy,2,1,2,1.0,0.062,True,Fb
-randltl-10-a-hoa-4.txt,?,?,daisy,3,0,3,1.0,0.062,True,X!b
-randltl-10-a-hoa-5.txt,?,?,daisy,1,0,1,1.0,0.062,True,b
-randltl-10-a-hoa-6.txt,?,?,daisy,1,0,1,1.0,0.063,True,1
-randltl-10-a-hoa-7.txt,?,?,daisy,3,1,3,1.0,0.065,True,G!c
-randltl-10-a-hoa-8.txt,?,?,daisy,3,2,3,1.0,0.062,True,FGc
+randltl-10-a-hoa-4.txt,?,?,daisy,3,0,3,1.0,0.065,True,X!b
+randltl-10-a-hoa-5.txt,?,?,daisy,1,0,1,1.0,0.065,True,b
+randltl-10-a-hoa-6.txt,?,?,daisy,1,0,1,1.0,0.059,True,1
+randltl-10-a-hoa-7.txt,?,?,daisy,3,1,3,1.0,0.064,True,G!c
+randltl-10-a-hoa-8.txt,?,?,daisy,3,2,3,1.0,0.063,True,FGc
 randltl-10-a-hoa-9.txt,?,?,daisy,1,0,1,1.0,0.062,True,0
-0,?,B,daisy,1,0,1,1.0,0.061,True,0
-c R d,?,S,daisy+strength2,3,1,3,1.0,0.062,True,c R d
+0,?,B,daisy,1,0,1,1.0,0.062,True,0
+c R d,?,S,daisy+strength2,3,1,3,1.0,0.064,True,c R d
 1 U b,?,G,daisy,2,1,2,1.0,0.062,True,Fb
-!Xb,?,B,daisy,3,0,3,1.0,0.061,True,X!b
-b,?,B,daisy,1,0,1,1.0,0.061,True,b
-1,?,B,daisy,1,0,1,1.0,0.062,True,1
-!Fc,?,S,daisy,3,1,3,1.0,0.064,True,G!c
-FGc,?,P,daisy,3,2,3,1.0,0.064,True,FGc
-GX(0),?,B,daisy,1,0,1,1.0,0.062,True,0
-b -> a,?,B,daisy,4,0,4,1.0,0.062,True,a | !b
-randltl-10-a-hoa-10.txt,?,?,daisy+strength2,3,1,3,1.0,0.063,True,c W d
+!Xb,?,B,daisy,3,0,3,1.0,0.060,True,X!b
+b,?,B,daisy,1,0,1,1.0,0.060,True,b
+1,?,B,daisy,1,0,1,1.0,0.060,True,1
+!Fc,?,S,daisy,3,1,3,1.0,0.066,True,G!c
+FGc,?,P,daisy,3,2,3,1.0,0.070,True,FGc
+GX(0),?,B,daisy,1,0,1,1.0,0.060,True,0
+b -> a,?,B,daisy,4,0,4,1.0,0.063,True,a | !b
+randltl-10-a-hoa-10.txt,?,?,daisy+strength2,3,1,3,1.0,0.066,True,c W d
 randltl-10-a-hoa-1.txt,?,?,daisy,1,0,1,1.0,0.062,True,g
-randltl-10-a-hoa-2.txt,?,?,daisy+strength2,3,1,3,1.0,0.063,True,d R e
-randltl-10-a-hoa-3.txt,?,?,daisy,2,0,2,1.0,0.062,True,!h
-randltl-10-a-hoa-4.txt,?,?,daisy,3,1,3,1.0,0.063,True,XFg
-randltl-10-a-hoa-5.txt,?,?,daisy,3,1,3,1.0,0.062,True,h M e
+randltl-10-a-hoa-2.txt,?,?,daisy+strength2,3,1,3,1.0,0.062,True,d R e
+randltl-10-a-hoa-3.txt,?,?,daisy,2,0,2,1.0,0.061,True,!h
+randltl-10-a-hoa-4.txt,?,?,daisy,3,1,3,1.0,0.064,True,XFg
+randltl-10-a-hoa-5.txt,?,?,daisy,3,1,3,1.0,0.060,True,h M e
 randltl-10-a-hoa-6.txt,?,?,daisy,1,0,1,1.0,0.062,True,a
-randltl-10-a-hoa-7.txt,?,?,daisy,1,0,1,1.0,0.064,True,b
-randltl-10-a-hoa-8.txt,?,?,daisy,3,1,3,1.0,0.062,True,a M g
-randltl-10-a-hoa-9.txt,?,?,daisy+strength2,3,1,3,1.0,0.059,True,h W b
-g,?,B,daisy,1,0,1,1.0,0.061,True,g
-d R e,?,S,daisy+strength2,3,1,3,1.0,0.065,True,d R e
-!h,?,B,daisy,2,0,2,1.0,0.063,True,!h
-XFg,?,G,daisy,3,1,3,1.0,0.062,True,XFg
-h M e,?,G,daisy,3,1,3,1.0,0.061,True,h M e
-a,G,B,daisy,1,0,1,1.0,0.061,True,a
-b,?,B,daisy,1,0,1,1.0,0.061,True,b
-a M g,?,G,daisy,3,1,3,1.0,0.063,True,a M g
-h W b,?,S,daisy+strength2,3,1,3,1.0,0.061,True,h W b
-c W d,?,S,daisy+strength2,3,1,3,1.0,0.062,True,c W d
+randltl-10-a-hoa-7.txt,?,?,daisy,1,0,1,1.0,0.062,True,b
+randltl-10-a-hoa-8.txt,?,?,daisy,3,1,3,1.0,0.065,True,a M g
+randltl-10-a-hoa-9.txt,?,?,daisy+strength2,3,1,3,1.0,0.063,True,h W b
+g,?,B,daisy,1,0,1,1.0,0.062,True,g
+d R e,?,S,daisy+strength2,3,1,3,1.0,0.062,True,d R e
+!h,?,B,daisy,2,0,2,1.0,0.061,True,!h
+XFg,?,G,daisy,3,1,3,1.0,0.064,True,XFg
+h M e,?,G,daisy,3,1,3,1.0,0.064,True,h M e
+a,G,B,daisy,1,0,1,1.0,0.062,True,a
+b,?,B,daisy,1,0,1,1.0,0.060,True,b
+a M g,?,G,daisy,3,1,3,1.0,0.061,True,a M g
+h W b,?,S,daisy+strength2,3,1,3,1.0,0.062,True,h W b
+c W d,?,S,daisy+strength2,3,1,3,1.0,0.061,True,c W d
