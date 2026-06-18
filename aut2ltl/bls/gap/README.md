@@ -35,11 +35,12 @@ casc = decompose_gens(generators, *, gap_cmd="gap", timeout=180)  # -> Cascade
 ## Requirements & install
 
 Needs GAP (≥ 4.12) with the SgpDec package on `PATH`. Install once with the
-script in this folder (user-local under `~/.gap/pkg`, no root needed):
+[`install_gap.sh`](../../../install_gap.sh) script at the project root (user-local
+under `~/.gap/pkg`, no root needed):
 
 ```sh
-./aut2ltl/bls/gap/install.sh            # install
-./aut2ltl/bls/gap/install.sh --check-only
+./install_gap.sh            # install
+./install_gap.sh --check-only
 ```
 
 Probe availability from Python with `check_gap_available()`.
@@ -52,7 +53,9 @@ Probe availability from Python with `check_gap_available()`.
 | `export.py` | GAP-source generation — `generate_gap_script` |
 | `runner.py` | process spawn — `run_gap_script`, `check_gap_available` |
 | `parse.py` | structured-output parser → `Cascade` — `parse_cascade_output` |
-| `install.sh` | GAP + SgpDec installer |
+
+The GAP + SgpDec installer ([`install_gap.sh`](../../../install_gap.sh)) lives at the
+project root.
 
 The generated GAP script prints an easy-to-parse structured block
 (`CASCADE_START` / `KEY: value` / `STATE … CONFIG` / `TRANS` / `PI` lines), so

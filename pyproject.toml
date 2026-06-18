@@ -17,8 +17,8 @@ keywords = ["LTL", "omega-automata", "Buchi", "Krohn-Rhodes", "holonomy", "tempo
 
 # Runtime requirements are NOT pip-installable and are intentionally omitted:
 #   * Spot (the `spot` and `buddy` Python bindings) — install at system level.
-#   * GAP 4.12+ with the SgpDec package — needed only by the kr cascade engine;
-#     see README.md and aut2ltl/kr/install.sh.
+#   * GAP 4.12+ with the SgpDec package — needed only by the bls cascade engine;
+#     see README.md and install_gap.sh.
 dependencies = []
 
 [project.scripts]

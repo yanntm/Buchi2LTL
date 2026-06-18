@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# kr/gap/install.sh — Install GAP + SgpDec for the Krohn-Rhodes experimental path.
+# install_gap.sh — Install GAP + SgpDec for the Krohn-Rhodes construction path.
 #
 # Supports: Fedora (dnf), Debian/Ubuntu (apt), and generic "build from source" fallback.
 # Prefers a user-local installation under ~/.gap (no root required for the SgpDec part).
 # After success, `gap --no-window -c 'LoadPackage("SgpDec"); Print("SgpDec OK\n");'` should work.
 #
 # Usage:
-#   ./aut2ltl/bls/gap/install.sh
-#   ./aut2ltl/bls/gap/install.sh --check-only
+#   ./install_gap.sh
+#   ./install_gap.sh --check-only
 #
 set -euo pipefail
 

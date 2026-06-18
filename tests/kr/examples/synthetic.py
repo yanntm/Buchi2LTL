@@ -51,7 +51,7 @@ def main():
             print("Run failed (this is expected if SgpDec is not fully set up):", e)
     else:
         print("No usable GAP + SgpDec in PATH.")
-        print("Run ./aut2ltl/bls/gap/install.sh (or install manually) and try again.")
+        print("Run ./install_gap.sh (or install manually) and try again.")
         # Still return a dummy Cascade so the example is always runnable.
         dummy = Cascade(
             num_levels=2,
