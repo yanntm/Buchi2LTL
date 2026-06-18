@@ -5,10 +5,10 @@ Acceptance-dispatch ladder over a cascade (§9.3 / Theorem 2), as a configured
 `first_success` chain over the acceptance-class members. Tries the direct
 hierarchy-class leaves in order — acc → weak → buchi → cobuchi — each self-gating
 (it returns a faithful form or declines), and falls back to the general-case
-`bls` member (the full Muller-DNF construction) when none applies. Each leaf
+`muller` member (the full Muller-DNF construction) when none applies. Each leaf
 drops the explosive Fin web that the Muller form pays. The chain forwards the
 winning leaf's `LTLResult` unchanged, so `.technique` reports the winning
-leaf's method tag (`acc`/`weak`/`buchi`/`cobuchi`/`bls`); the formula it carries
+leaf's method tag (`acc`/`weak`/`buchi`/`cobuchi`/`muller`); the formula it carries
 is the hash-consed `spot.formula` DAG (serialization to text is a separate
 concern — `ltl_builders._str_f` — never done here).
 
@@ -34,13 +34,13 @@ from .acc import acc as _acc
 from .buchi import buchi as _buchi
 from .cobuchi import cobuchi as _cobuchi
 from .weak import weak as _weak
-from .bls import bls as _bls
+from .muller import muller as _muller
 
 
 def make_hierarchy_class(options: Optional[Options] = None) -> CascadeTranslator:
     """Build the hierarchy-class chain: a named `first_success` over the
-    acceptance-class leaves in order acc → weak → buchi → cobuchi → bls, honoring
-    the per-leaf `kr.dispatch.*` Options. `bls` is always last and never declines.
+    acceptance-class leaves in order acc → weak → buchi → cobuchi → muller, honoring
+    the per-leaf `kr.dispatch.*` Options. `muller` is always last and never declines.
     `options=None` ⇒ the env-seeded default (legacy KR_DISPATCH_* behaviour)."""
     if options is None:
         options = Options.from_specs(KR_DISPATCH_OPTIONS)
@@ -60,9 +60,9 @@ def make_hierarchy_class(options: Optional[Options] = None) -> CascadeTranslator
     # genuinely-not-Büchi cascades. Gate kr.dispatch.cobuchi, default ON.
     if options.get(DISPATCH_COBUCHI):
         members.append(_cobuchi)
-    # No simpler acceptance class applied: fall back to the general-case `bls`
+    # No simpler acceptance class applied: fall back to the general-case `muller`
     # member (the full Muller-DNF construction), which always produces a formula.
-    members.append(_bls)
+    members.append(_muller)
     return first_success(members, name="hierarchy_class")
 
 
