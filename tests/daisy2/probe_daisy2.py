@@ -41,8 +41,9 @@ def main(arg: str) -> None:
     print(f"shape      : {len(petals)} petals, {len(spokes)} spokes, "
           f"{len(stems)} stems")
     for sp in spokes:
-        print(f"  spoke s={sp.state}: E={sp.entry}  G={sp.body}  R={sp.ret}  "
-              f"acc E/G/R={set(sp.entry_acc)}/{set(sp.body_acc)}/{set(sp.ret_acc)}")
+        print(f"  spoke s={sp.state}: E={sp.entry}  G={sp.body}  R={sp.ret}")
+        print(f"    entries={[(str(g), set(M)) for g, M in sp.entries]}  "
+              f"rets={[(str(g), set(M)) for g, M in sp.rets]}")
 
     # Chain a low LTL simplifier onto the result for readability; transparent on
     # declines, and it runs after daisy2's validity gate so it only prettifies an
