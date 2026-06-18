@@ -1152,3 +1152,37 @@ of the one-way now-fact opening — sound but order-dependent in completeness. T
 producer-first sort is the cheap, principled answer (strong facts reach the weak
 siblings that consume them); no soundness change, the fixed-order invariant holds for
 any order.
+
+## 2026-06-18 — tests/benchmark: the portfolio evaluation bench (collection phase)
+
+A new sub-project to strengthen evaluation beyond the 40-formula survey gate: a SIZE
+bench comparing portfolios (`default` vs `best`) at scale, reusing the survey engine.
+
+- **`inputs/`** — raw file corpus, category subfolders, `.ltl` (one formula/line, `#`
+  comments) / `.hoa` / `.md`-ignored: `core/` (the survey corpus by MP class,
+  `from_survey.py`), `chains/` (W/U/R chains ± X-lacing, `patterns.py`), `kinska/` (105
+  Büchi HOA, flattened + deduped from 125, `collect_kinska.py`).
+- **`normalize.py`** — AP-canonical NAME form (rename APs to a,b,c… by first
+  occurrence, NOTHING else — no simplification/reorder/minimisation), the dedup key for
+  LTL and HOA. Deduped Kinská 125→105 (cosmetic key); whole corpus 164 items / 164
+  unique.
+- **`bench_sweep.sh`** — `default` vs `best` over `inputs/`, then `survey_diff.py`.
+  Logs default to the gitignored `tests/benchmark/logs/`; reference runs committed
+  under `tests/benchmark/logs/reference/`.
+
+Engine/test changes this session, all landed:
+- **survey summary reworked** for honesty: "aut2ltl answered X/Y (LTL built + not-LTL)"
+  vs "Failures (timeout/crash/declined)", then a separate Spot-validation line
+  (EQUIVALENT / not-checked grouped as "formula too large") with **NOT EQUIVALENT** on
+  its own prominent line. not-LTL now counts as us answering; Spot's size wall no longer
+  reads as self-doubt. Uniform across all sweeps.
+- **`survey.run_build`**: a run that REACHES the budget is `BUILD_TIMEOUT`, not `CRASH`,
+  whatever the exit code — the tool's SIGINT handler (proc.py reaps GAP, re-raises) can
+  exit outside timeout's 124/137. A genuine crash exits fast and is still `CRASH`.
+- **simplify**: `_gffg_cofactor` accepts strong `U(_,G x)` / `R(_,F x)` as FG/GF
+  invariant sources; `context_pass` visits now-fact producers first; `ltl/simplify`
+  gained `algorithm.md`; README slimmed. (Earlier entries this date.)
+
+FINDING: the first full bench run flagged a legacy-`default` **FALSE** (verified
+non-equivalent) on the strong-until chain `(a U ((a & b) R (b | c)))`, which `best`
+reconstructs correctly — concrete evidence to promote `best` and retire the legacy path.
