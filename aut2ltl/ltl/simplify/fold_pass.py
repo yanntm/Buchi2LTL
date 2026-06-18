@@ -501,8 +501,22 @@ def _gffg_cofactor(node: "spot.formula") -> "spot.formula":
             return k[0][0]
         return None
 
+    # Invariant SOURCE: the literal FG(x)/GF(x), OR a strong until/release that
+    # ENTAILS it. `φ U G(x) ⟹ FG x` for any φ (And side); dually the Or disjunct
+    # `φ R F(x)`, false only when `¬φ U G(¬x) ⟹ FG ¬x`, supplies the same ¬x
+    # co-invariant `GF x` does. W/M give NO invariant — their Gφ/G¬φ branch breaks
+    # the entailment (the strong-until dual of why W is excluded on the And side).
+    bin_inv = spot.op_U if is_and else spot.op_R
+    def _inv_body(k: "spot.formula") -> "Optional[spot.formula]":
+        b = _nest_body(k, inv_o, inv_i)
+        if b is not None:
+            return b
+        if k._is(bin_inv) and k[1]._is(inv_i) and k[1][0].is_boolean():
+            return k[1][0]                          # U(_, G x) / R(_, F x) → x
+        return None
+
     kids = list(node)
-    invs = [b for b in (_nest_body(k, inv_o, inv_i) for k in kids) if b is not None]
+    invs = [b for b in (_inv_body(k) for k in kids) if b is not None]
     if not invs:
         return node
     # And -> care-set ∧ψ_k (care_true); Or -> care-set ¬(∨β_k) (¬care_true).
