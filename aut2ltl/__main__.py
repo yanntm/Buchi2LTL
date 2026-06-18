@@ -6,8 +6,9 @@ aut2ltl — the command-line front end over the portfolio.
 
 INPUT is an LTL formula string or a path to a HOA automaton file (auto-detected;
 force with --ltl / --hoa). The automaton is reconstructed to an equivalent LTL
-formula by the portfolio — by default the best path (sl over kr with
-decompositions); with --use you cite exactly which techniques may participate.
+formula by the portfolio — by default the `best` recipe (strength/acceptance
+decomposition over a daisy peel flooring on the kr cascade); with --use you cite
+exactly which techniques may participate, or name a recipe (e.g. `--use best`).
 
 stdout carries ONLY the formula (pipe-friendly); the verbose report (technique,
 DAG/tree sizes, build time) goes to stderr and is silenced by -q. See --help.
@@ -29,13 +30,13 @@ import spot
 from aut2ltl.proc import setup_signals
 from aut2ltl.options import Options, OptionSpec
 from aut2ltl.language import Language, LANGUAGE_OPTIONS
-from aut2ltl.portfolio import PORTFOLIO_OPTIONS, build_portfolio, TECHNIQUES
+from aut2ltl.portfolio import build_portfolio, TECHNIQUES
 from aut2ltl.bls.options import KR_OPTIONS, FLATTEN_TREE_LIMIT
 from aut2ltl.ltl.metrics import dag_metrics
 from aut2ltl.ltl.printers import format_gated, to_dot
 
 # The full declared option contract (every -O key, every --list-options row).
-ALL_SPECS: List[OptionSpec] = list(PORTFOLIO_OPTIONS) + list(KR_OPTIONS) + list(LANGUAGE_OPTIONS)
+ALL_SPECS: List[OptionSpec] = list(KR_OPTIONS) + list(LANGUAGE_OPTIONS)
 _SPEC_BY_KEY = {s.key: s for s in ALL_SPECS}
 
 _FILE_EXTS = (".hoa", ".aut", ".hoaf")
@@ -51,17 +52,16 @@ def _coerce(value: str, like: object) -> object:
 
 
 def _epilog() -> str:
-    prod = "acc, weak, buchi, cobuchi, bls, str, sl"
-    wrap = "sl_driven, decompose"
+    prod = "acc, weak, buchi, cobuchi, muller, bls"
     return (
         "techniques (--use), cited order = priority, no implicit fallback:\n"
         f"  producers (ladder rungs): {prod}\n"
-        f"  wrappers  (wrap the ladder): {wrap}\n"
-        "  --use bls            pure BLS-from-Muller\n"
-        "  --use str            the integrated kr cascade (full Theorem-2 dispatch, incl. acc)\n"
-        "  --use decompose,str  the kr core under AND/OR strength decomposition\n"
+        "  recipes (whole assemblies, cited alone): best\n"
+        "  --use best           the shipped default assembly (also the omit---use path)\n"
+        "  --use bls            the full kr cascade (the whole bls engine)\n"
+        "  --use muller         the general Muller-DNF leaf only\n"
         "  --use buchi          Buchi leaf only; DECLINES off the Buchi class\n"
-        "  --use sl,buchi,bls   first_success ladder, tried in that order\n"
+        "  --use buchi,muller   first_success ladder, tried in that order\n"
         "  (omit --use)         the best default portfolio\n\n"
         "examples:\n"
         "  python3 -m aut2ltl 'GFa & GFb'\n"
@@ -121,10 +121,10 @@ def build_parser() -> argparse.ArgumentParser:
 def _list_techniques() -> int:
     print("Techniques for --use (cited order = priority; no implicit fallback):")
     print("  producers (ladder rungs):")
-    for t in ("acc", "weak", "buchi", "cobuchi", "bls", "str", "sl"):
+    for t in ("acc", "weak", "buchi", "cobuchi", "muller", "bls"):
         print(f"    {t}")
-    print("  wrappers (wrap the ladder when cited):")
-    for t in ("sl_driven", "decompose"):
+    print("  recipes (whole assemblies, cited alone):")
+    for t in ("best",):
         print(f"    {t}")
     return 0
 
