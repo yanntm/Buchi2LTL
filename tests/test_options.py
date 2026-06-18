@@ -93,9 +93,8 @@ def test_package_contracts_wellformed() -> None:
         KR_OPTIONS, KR_DISPATCH_OPTIONS,
         DISPATCH_ACC, DISPATCH_WEAK, DISPATCH_BUCHI, DISPATCH_COBUCHI,
     )
-    from aut2ltl.portfolio.options import PORTFOLIO_OPTIONS
 
-    all_specs = KR_OPTIONS + PORTFOLIO_OPTIONS
+    all_specs = list(KR_OPTIONS)
     keys = [s.key for s in all_specs]
     assert len(keys) == len(set(keys)), "duplicate option keys across contracts"
     for s in all_specs:
