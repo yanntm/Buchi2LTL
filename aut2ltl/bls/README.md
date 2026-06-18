@@ -42,8 +42,6 @@ spot automaton ──decompose (gap/)──▶ Cascade ──dispatch chain─�
 - **`gap/`** — the GAP / SgpDec holonomy bridge (`decompose_aut`); see `gap/README.md`.
 - **`extract.py`** — transformation-generator extraction for SgpDec.
 - **`ltl_tester.py`** — the LTL-definability labeler. **`options.py`** — engine options.
-- **`bls.py`** — DEPRECATED shim (the general member is now `muller/`); to be retired
-  with the portfolio rework.
 
 Engine-agnostic LTL machinery (builders, simplify, BDD utils, metrics, printers)
 lives in `aut2ltl/ltl/`, shared across engines.
