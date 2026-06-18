@@ -1,7 +1,7 @@
 HOA: v1
 States: 4
 Start: 0
-AP: 1 "b"
+AP: 1 "a"
 acc-name: Buchi
 Acceptance: 1 Inf(0)
 properties: trans-labels explicit-labels state-acc colored

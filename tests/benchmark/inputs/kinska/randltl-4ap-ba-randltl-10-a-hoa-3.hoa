@@ -2,7 +2,7 @@ HOA: v1
 name: "Fb"
 States: 2
 Start: 1
-AP: 1 "b"
+AP: 1 "a"
 acc-name: Buchi
 Acceptance: 1 Inf(0)
 properties: trans-labels explicit-labels state-acc complete

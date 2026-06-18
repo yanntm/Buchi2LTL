@@ -2,7 +2,7 @@ HOA: v1
 name: "XFg"
 States: 3
 Start: 1
-AP: 1 "g"
+AP: 1 "a"
 acc-name: Buchi
 Acceptance: 1 Inf(0)
 properties: trans-labels explicit-labels state-acc complete

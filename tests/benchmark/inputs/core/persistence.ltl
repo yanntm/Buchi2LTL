@@ -1,5 +1,5 @@
 # Persistence (coBuchi / Sigma_2, eventually-always)
-# from tests/survey_formulas.py (the curated survey corpus) -- resync via tests/benchmark/from_survey.py
+# from tests/survey_formulas.py (the curated survey corpus), AP-renamed to canonical a,b,c… -- resync via tests/benchmark/from_survey.py
 
 FGa  # smallest persistence; the coBuchi core
 F(a & G b)  # reach then hold forever
