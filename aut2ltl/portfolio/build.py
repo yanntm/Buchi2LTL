@@ -4,10 +4,11 @@ technique set.
 
 Two modes, one entry point (`build_portfolio`):
 
-* `techniques is None` — the shipped default: the `best` recipe
-  (`builder.RECIPES["best"]`), `Simplify(strength(acceptance(daisy(core))), "hi")`
+* `techniques is None` — the shipped default: the `best_daisy2` recipe
+  (`builder.RECIPES["best_daisy2"]`), `Simplify(strength(acceptance(daisy_pair(core))), "hi")`
   with `core = first(partscc, bls)`. The strength/acceptance decomposition over a
-  self-loop daisy peel flooring on the kr cascade.
+  daisy/daisy2 peel pair (self-loop daisy, then the length-1 star daisy2) flooring
+  on the bls cascade. (`--use best` is the prior daisy-only assembly.)
 
 * `techniques` is a set/sequence of NAMES — the research path: cite the methods
   that may participate, everything else is knocked out, NO implicit floor. The
@@ -109,12 +110,13 @@ def build_portfolio(
     options: Options, techniques: Optional[Iterable[str]] = None
 ) -> Translator:
     """Assemble a portfolio Translator. `techniques=None` ⇒ the shipped default,
-    the `best` recipe (`builder.RECIPES["best"]`); a single recipe name from
-    `builder.RECIPES` (e.g. `best`) ⇒ that named assembly; otherwise a set/sequence
-    of technique names ⇒ the cited ladder (cited order = priority, no implicit
-    floor). Raises `ValueError` on an unknown name or a producer-free citation."""
+    the `best_daisy2` recipe (`builder.RECIPES["best_daisy2"]`); a single recipe
+    name from `builder.RECIPES` (e.g. `best`, `best_inv`) ⇒ that named assembly;
+    otherwise a set/sequence of technique names ⇒ the cited ladder (cited order =
+    priority, no implicit floor). Raises `ValueError` on an unknown name or a
+    producer-free citation."""
     if techniques is None:
-        return RECIPES["best"](options)
+        return RECIPES["best_daisy2"](options)
     techs = list(techniques)
     # A recipe name (e.g. `--use best`) resolves to a named assembly from builder.py.
     # Recipes are whole assemblies, not ladder rungs, so they are cited alone.
