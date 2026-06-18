@@ -14,7 +14,12 @@ __pycache__/
 
 # generated outputs and caches
 tests/smoke/
-tests/benchmark/logs/
+# Bench logs are throwaway EXCEPT the committed reference runs. Ignore the
+# contents of logs/ but keep logs/reference/ (can't re-include inside a fully
+# excluded dir, so exclude the contents, not the dir).
+tests/benchmark/logs/*
+!tests/benchmark/logs/reference/
+!tests/benchmark/logs/reference/**
 tests/kr/examples/generated/
 aut2ltl/**/__pycache__/
 aut2ltl/**/*.pyc
