@@ -37,10 +37,18 @@ client cost):
   one log each + a cross-config SUMMARY. `tests/survey_diff.py` diffs two CSVs.
   The committed release baseline is `tests/logs/reference/`.
 - `tests/kr/test_kr_r4_audit.py` — structural audit gate (must stay CLEAN).
+- `tests/benchmark/` — the portfolio evaluation **bench** (size, not a gate):
+  `default` vs `best` over `inputs/` (the survey corpus + W/U/R chains + 105
+  Kinská HOA), reusing the survey engine; `bench_sweep.sh` + `survey_diff.py`.
+  Reference runs committed under `tests/benchmark/logs/reference/`. The first
+  full run flagged a legacy-`default` **FALSE** (non-equivalent answer) on a
+  strong-until chain that `best` reconstructs correctly — concrete evidence for
+  promoting `best` to the default and retiring the legacy path.
 
 ## Layout
 
 `aut2ltl/contract.py` (floor) + `aut2ltl/language.py` ← `aut2ltl/bls` (pure
 cascade engine) + `aut2ltl/sl` (heuristic engine) ← `aut2ltl/portfolio`
 (combinators) ← `aut2ltl/__main__`. Engine-agnostic helpers in `aut2ltl/ltl`.
-Tests under `tests/` (`survey*`, `tests/kr`, `tests/sl`, `tests/fixtures`).
+Tests under `tests/` (`survey*`, `tests/kr`, `tests/sl`, `tests/fixtures`,
+`tests/benchmark`). `aut2ltl/ltl/simplify` carries its own `algorithm.md` spec.
