@@ -14,7 +14,7 @@ Three dependencies must be installed at system level (they are *not* pip-install
 - **Python 3**
 - **[Spot](https://spot.lre.epita.fr/)** with its `spot` / `buddy` Python bindings
 - **[GAP](https://www.gap-system.org/) 4.12+** with the **SgpDec** package — run
-  `aut2ltl/bls/install.sh` once to set it up user-locally (`~/.gap/pkg`)
+  [`install_gap.sh`](install_gap.sh) once to set it up user-locally (`~/.gap/pkg`)
 
 Then install the package itself:
 
@@ -75,11 +75,24 @@ python3 -m aut2ltl model.hoa --dag | dot -Tpng -o dag.png
 
 Fine-tune any declared option with `-O key=value` (see `--list-options`).
 
-## Samples
+## Evaluation
 
-A reference run of the curated corpus is committed under
-[`tests/logs/reference/`](tests/logs/reference/) (per-formula CSVs + a summary) — a
-sample of the tool's output across a range of inputs.
+Reference runs of the **default** portfolio are committed as per-formula CSVs — which
+GitHub renders as readable tables — one per corpus:
+
+- [`tests/logs/reference/default.csv`](tests/logs/reference/default.csv) — the curated
+  40-formula survey (the correctness gate's corpus).
+- [`tests/benchmark/logs/reference/default.csv`](tests/benchmark/logs/reference/default.csv)
+  — the larger benchmark corpus (the survey set + scalable W/U/R chains + the Kinská
+  automata, 164 formulas).
+- [`tests/samples/kinska/logs/reference/kinska.csv`](tests/samples/kinska/logs/reference/kinska.csv)
+  — the 165 Kinská Büchi automata on their own (many are not LTL-definable); see
+  [`tests/samples/kinska/README.md`](tests/samples/kinska/README.md) for provenance.
+
+Each folder also holds a one-glance **summary** of its CSV — e.g.
+[`tests/benchmark/logs/reference/default.txt`](tests/benchmark/logs/reference/default.txt):
+how many answers were verified equivalent / not-LTL / timed out, and the total
+reconstructed formula size.
 
 ## Project structure
 
