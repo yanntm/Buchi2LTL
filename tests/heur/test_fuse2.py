@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""Parity + soundness check for the extracted `heur.fuse2` rewrite.
+"""Soundness check for the `heur.fuse2` size-2 over-approximation rewrite.
 
-The size-2 over-approximation rewrite moved from `aut2ltl.sl.heuristics.size2_overapprox`
-(`try_size2_overapprox`) to `aut2ltl.heur.fuse2` (`fuse2`), with the `get_true_bdd`
-hack replaced by `buddy.bddtrue` and the surgery factored into helpers. This test
-runs BOTH on the same automaton over the f2 success fixture and asserts:
+`fuse2` (in `aut2ltl.heur.fuse2`) is the extracted, self-contained rewrite (the legacy
+`aut2ltl.sl.heuristics.size2_overapprox` it was lifted from is retired with the sl
+engine). This test runs it over the f2 success fixture and asserts:
 
-  * parity   — new and legacy agree (both None, or both produce an equivalent rewrite);
   * the gate — whenever `fuse2` returns an automaton, it is language-equivalent to the
     input (the soundness guarantee).
 
@@ -25,7 +23,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import spot
 
 from aut2ltl.heur.fuse2 import fuse2
-from aut2ltl.sl.heuristics.size2_overapprox import try_size2_overapprox
 from tests.fixtures.f2_successes import F2_SUCCESS
 
 
@@ -36,26 +33,16 @@ def _self_loop_only(aut: "spot.twa_graph") -> bool:
 
 
 def main() -> int:
-    disagree = []
     gate_violation = []
     self_loop_hits = 0
-    new_hits = legacy_hits = 0
+    new_hits = 0
 
     for f in F2_SUCCESS:
-        aut = spot.formula(f).translate()           # the same input for both
+        aut = spot.formula(f).translate()
         new = fuse2(aut)
-        legacy = try_size2_overapprox(aut)
 
         new_ok = new is not None
-        legacy_ok = legacy is not None
         new_hits += new_ok
-        legacy_hits += legacy_ok
-
-        # Parity: both decline, or both produce an equivalent rewrite.
-        if new_ok != legacy_ok:
-            disagree.append((f, new_ok, legacy_ok))
-        elif new_ok and not spot.are_equivalent(new, legacy):
-            disagree.append((f, "new!=legacy lang", ""))
 
         # The gate's promise: a returned automaton defines the input language.
         if new_ok and not spot.are_equivalent(aut, new):
@@ -67,16 +54,12 @@ def main() -> int:
     n = len(F2_SUCCESS)
     print(f"formulas      : {n}")
     print(f"fuse2 hits    : {new_hits}")
-    print(f"legacy hits   : {legacy_hits}")
-    print(f"disagreements : {len(disagree)}")
     print(f"gate failures : {len(gate_violation)}")
     print(f"self-loop-only: {self_loop_hits}/{new_hits} (reported; daisy's reach)")
-    for f, a, b in disagree[:10]:
-        print(f"  DISAGREE {f!r}: new={a} legacy={b}")
     for f in gate_violation[:10]:
         print(f"  GATE-VIOLATION {f!r}")
 
-    ok = not disagree and not gate_violation
+    ok = not gate_violation
     print("SUCCESS" if ok else "FAILURE")
     return 0 if ok else 1
 
