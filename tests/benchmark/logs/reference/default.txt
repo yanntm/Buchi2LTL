@@ -1,0 +1,6 @@
+survey: 164 formulas  (--use default)
+aut2ltl answered: 160/164  (97 LTL built + 63 not-LTL)   |   Failures: 4  (timeout 4, crash 0, declined 0)
+Spot check of the 97 LTL built: 86 EQUIVALENT, 11 not checked (formula too large)
+NOT EQUIVALENT: 0   (clean)
+totals over LTL built: DAG=14164 temporals=2454 build=26.836s
+SUCCESS
