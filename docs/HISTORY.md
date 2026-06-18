@@ -1106,3 +1106,25 @@ sl/ + the old portfolio contents is the remaining work (see TODO).
 
 LOG NOT COMMITTED: tests/logs/best.csv is throwaway scratch (WIP), not promoted to
 the reference baseline — promote only when best becomes the default.
+
+## 2026-06-18 — simplify: strong-until/release as FG/GF invariant source
+
+`_gffg_cofactor` (ltl/simplify/fold_pass.py) generalized: the FG/GF cofactoring
+invariant source now also recognizes a strong `U(_, G(x))` on the And side and its
+dual `R(_, F(x))` on the Or side, not just the literal `FG x` / `GF x`. Sound because
+`φ U G(x) ⟹ FG x` for any φ (the strong until forces the eventuality); dually a false
+`φ R F(x)` gives `¬φ U G(¬x) ⟹ FG ¬x`, the same `¬x` co-invariant `GF x` supplies.
+Weak `W`/`M` are excluded — their `Gφ`/`G¬φ` branch breaks the entailment (regression-
+tested as must-not-fire).
+
+WHY: tracing the lone `GFa & FGb` mover where `--use best` was +1 over the historical
+default (8 vs 7 DAG). NOT a decomposition difference — `and2` (legacy) and `acc2` (new)
+run byte-identical splits and meet identical automata; the daisy leaf emits FGb as the
+U-form `1 U Gb`, which the cofactoring rule did not see as an `FG` invariant, so the
+cross-part collapse `GF(a&b) ∧ FGb → GFa ∧ FGb` never fired and the outer Spot pass
+factored to `G(FGb & F(a&b))` (8). With the rule extended, `GFa & FGb → G(Fa & FGb)`
+(7) through the simplifier alone — no per-leaf simplify crutch in `builder.best` (an
+inner-`hi` experiment that reached the same 7 was backed out; the fix belongs in the
+rule). best now ties-or-beats the default on every corpus formula: −49.6% DAG, 40/40
+sound, 0 regressions, 0 size-losses (survey scratch tests/logs/best_rulefix.csv, WIP).
+Gates: gffg 12/12, fold CLEAN(42), random-equiv fuzz 500/500 equivalent, R4 CLEAN.
