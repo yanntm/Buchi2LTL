@@ -1,0 +1,11 @@
+# Safety (G-rooted invariants)
+# from tests/survey_formulas.py (the curated survey corpus) -- resync via tests/benchmark/from_survey.py
+
+Ga  # pure invariant; smallest safety
+G(a | b)  # invariant over a boolean guard
+G(a -> X b)  # invariant with a next-step obligation (2-step safety)
+a & X a  # bounded safety; no fixpoint, finite horizon
+G(a -> X a)  # stutter/latch invariant; a former equiv residual
+G(a & X a)  # invariant whose body already spans two steps
+G((!a & X a) | (a & X !a))  # partscc: alternating terminal SCC; phase-dependent entry (anchor)
+G(a <-> X b)  # partscc: 2-step coupled invariant; phase-dependent terminal SCC

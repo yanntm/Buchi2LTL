@@ -1,0 +1,5 @@
+# Bottom / trivial
+# from tests/survey_formulas.py (the curated survey corpus) -- resync via tests/benchmark/from_survey.py
+
+true  # degenerate: empty cascade, must round-trip to true
+false  # degenerate: empty language, must round-trip to false

@@ -1,0 +1,8 @@
+# Obligation (boolean safety + guarantee)
+# from tests/survey_formulas.py (the curated survey corpus) -- resync via tests/benchmark/from_survey.py
+
+Fa | Gb  # obligation: reachability OR invariant
+Ga | Gb  # disjunction of invariants
+Fa & Gb  # reach while maintaining an invariant
+(a U b) | Gc  # until OR invariant
+Ga | Fb  # the mixed safety/guarantee obligation

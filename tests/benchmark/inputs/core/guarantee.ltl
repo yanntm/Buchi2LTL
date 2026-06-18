@@ -1,0 +1,13 @@
+# Guarantee (co-safety, F-reachable)
+# from tests/survey_formulas.py (the curated survey corpus) -- resync via tests/benchmark/from_survey.py
+
+a  # single-letter guarantee; smallest non-trivial case
+X a  # depth ladder: 3-level cascade
+X X a  # depth ladder: 4-level cascade
+X X X a  # depth ladder: 5-level cascade
+X(a & X a)  # depth ladder: branching next, 5-level
+Fa  # pure reachability; smallest liveness
+a U b  # until: the canonical guarantee with a hold condition
+F(a & b)  # reach a boolean state
+F(a & X b)  # reach-then-next; a former equiv residual (reach-driven)
+a | X b  # boolean over a next; shallow co-safety

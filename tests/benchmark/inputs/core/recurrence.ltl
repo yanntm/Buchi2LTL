@@ -1,0 +1,13 @@
+# Recurrence (Buchi / Pi_2, infinitely-often)
+# from tests/survey_formulas.py (the curated survey corpus) -- resync via tests/benchmark/from_survey.py
+
+GFa  # smallest recurrence; the Buchi acceptance core
+G(a -> F b)  # request/response; a former equiv residual
+G(a | F b)  # response variant; a former equiv residual
+GFa & GFb  # conjunctive recurrence; AND-splits per acceptance set
+GFa & GFb & GFc  # three-way conjunctive recurrence; a former wall
+G(a -> F b) & G(c -> F d)  # two independent response conjuncts
+G(p -> (q U r))  # the challenge case: reach-driven, none(1); track every run
+GFa & G(a -> X !a)  # partscc: deterministic Buchi SCC (a i.o., no two a's running)
+G(a -> X b) & GFa  # partscc: deterministic SCC carrying one fairness color
+GFa & GFb & G(a -> X !a)  # partscc: deterministic generalized-Buchi SCC, two colors

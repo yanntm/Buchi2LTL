@@ -1,0 +1,5 @@
+# Reactivity (full Rabin/Streett)
+# from tests/survey_formulas.py (the curated survey corpus) -- resync via tests/benchmark/from_survey.py
+
+GFa -> GFb  # the canonical reactivity (one Rabin pair)
+GFa & FGb  # Inf & Fin Rabin-pair conjunct; AND-splits
