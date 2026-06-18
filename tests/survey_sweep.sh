@@ -5,18 +5,16 @@
 #
 # Each configuration is a distinct --use citation passed straight through to the
 # tool (tests/survey.py -> python3 -m aut2ltl --use ...), so the sweep compares
-# techniques/flags head-to-head on the same corpus. The log NAME is the citation
-# itself: the comma-separated flags joined with '+' in CITED ORDER (so
-# 'decompose,str' -> decompose+str), or 'default' for the no-citation portfolio.
-# Per config we keep:
+# techniques head-to-head on the same corpus. The log NAME is the citation
+# itself: the comma-separated leaves joined with '+' in CITED ORDER, or 'default'
+# for the no-citation portfolio (= the `best` recipe). Per config we keep:
 #   $OUTDIR/<name>.csv   the dense per-formula CSV (DAG/tree/equiv/...)
 #   $OUTDIR/<name>.txt   the survey's own stdout report
 # and finally a cross-config SUMMARY.txt (printed too) — read THAT at a glance.
 #
-# We test every main producer method (acc/weak/buchi/cobuchi/bls/str/sl) both
-# bare AND under the decompose (strength) wrapper; sl_driven is its own method
-# (the sl-driven core over the integrated cascade str), likewise with/without
-# decompose. 'str' is the integrated default cascade (make_hierarchy_class).
+# We test the `best` recipe (= the default), each bare kr leaf
+# (acc/weak/buchi/cobuchi/muller — `muller` is the general Muller-DNF fallback),
+# and the integrated cascade `bls` (the whole engine, = make_hierarchy_class).
 #
 # Day-to-day this writes a throwaway dir under tests/logs/ (gitignored). For a
 # RELEASE reference, point it at the tracked reference dir so the CSVs are
@@ -36,19 +34,17 @@ OUTDIR="${1:-tests/logs/sweep_$(date -u +%Y%m%d)}"
 FORMULAS=("$@")           # empty => the curated corpus
 mkdir -p "$OUTDIR"
 
-# The --use citations to sweep, in run order. Empty = the hand-tuned default.
-# decompose is cited LEFT of the method (wraps it); cited order is preserved in
-# both behaviour and the derived log name.
+# The --use citations to sweep, in run order. Empty = the shipped default (the
+# `best` recipe); `best` cited explicitly should match it.
 USES=(
-  ""                              # default portfolio (no --use)
-  "acc"             "decompose,acc"
-  "weak"            "decompose,weak"
-  "buchi"           "decompose,buchi"
-  "cobuchi"         "decompose,cobuchi"
-  "bls"             "decompose,bls"
-  "str"             "decompose,str"
-  "sl"              "decompose,sl"
-  "sl_driven,str"   "decompose,sl_driven,str"
+  ""          # default portfolio (no --use) = the best recipe
+  "best"      # the best recipe cited by name (sanity: == default)
+  "acc"
+  "weak"
+  "buchi"
+  "cobuchi"
+  "muller"    # the general Muller-DNF leaf
+  "bls"       # the integrated cascade (the whole engine)
 )
 
 name_of() { [ -z "$1" ] && echo "default" || echo "${1//,/+}"; }
