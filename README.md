@@ -34,7 +34,7 @@ Run `aut2ltl` on it:
 
 ```console
 $ python3 -m aut2ltl tests/fixtures/motivating_example.hoa
-technique : sl+sl_driven
+technique : daisy
 DAG nodes : 9
 temporals : 3
 tree nodes: 10
@@ -96,7 +96,6 @@ aut2ltl/
   decomp/         (de)composition approaches, one isolated subpackage each:
                   scc / strength / acceptance / inv
   partscc/        the single-terminal-SCC leaf translator
-  sl/             the heuristic self-loop engine
   ltl/            LTL primitives, metrics, printers, simplifiers
   portfolio/      the combinators that assemble the translators
 tests/            survey (the correctness gate), fixtures, per-engine tests
