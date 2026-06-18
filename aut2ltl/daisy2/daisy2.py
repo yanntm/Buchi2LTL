@@ -19,6 +19,8 @@ candidate is complete. It is looser than `daisy` (a whole star SCC, not one
 self-loop state) and declines when the SCC is not a length-1 star.
 """
 
+import os
+import sys
 from typing import List, TYPE_CHECKING
 
 import spot
@@ -32,6 +34,18 @@ if TYPE_CHECKING:
 
 _NAME = "daisy2"
 _F = spot.formula
+
+# Dev trace of the Spot equivalence gate, mirroring the bls KR_TRACE convention
+# (an env-scoped module flag, not an Options knob — tracing is process-scoped, see
+# TODO.md "Deferred"). When DAISY2_TRACE is on, every gate REJECT prints the
+# rejected candidate and a containment witness in each direction, so the closed
+# form's incompleteness is visible in a run. To stderr: the formula is on stdout.
+_TRACE = os.getenv("DAISY2_TRACE", "0").lower() in ("1", "true", "yes", "on")
+
+
+def _trace(msg: str) -> None:
+    if _TRACE:
+        print("[daisy2] " + msg, file=sys.stderr)
 
 
 def _or(fs: List["spot.formula"]) -> "spot.formula":
@@ -89,14 +103,35 @@ def build_candidate(
     return _F.Or([stay_inf, leave])
 
 
+def _trace_reject(aut: "spot.twa_graph", phi: "spot.formula",
+                  cand: "spot.twa_graph") -> None:
+    """Trace one gate REJECT with a containment witness in each direction (the
+    closed form too loose / too tight). Witnesses are bounded — the star automata
+    are tiny — and computed only under the trace flag."""
+    try:
+        loose = cand.intersecting_word(spot.complement(aut))   # cand \ input
+        tight = aut.intersecting_word(spot.complement(cand))   # input \ cand
+    except Exception as e:
+        loose = tight = f"<witness error: {e}>"
+    _trace(f"gate REJECT: cand={phi}")
+    _trace(f"    too loose (cand\\input): {loose}")
+    _trace(f"    too tight (input\\cand): {tight}")
+
+
 def _validates(aut: "spot.twa_graph", phi: "spot.formula") -> bool:
     """Soundness gate (the `partscc` pattern): adopt `φ` only if it is
     language-equivalent to the input `aut`. The unsolved closed form simply fails
-    here when it is wrong, so daisy2 can never answer unsoundly."""
+    here when it is wrong, so daisy2 can never answer unsoundly. A REJECT (or a
+    Spot error) is traced under DAISY2_TRACE so gate failures are visible."""
     try:
         cand = phi.translate("GeneralizedBuchi", "Small", "High")
-        return spot.are_equivalent(aut, cand)
-    except Exception:
+        if spot.are_equivalent(aut, cand):
+            return True
+        if _TRACE:
+            _trace_reject(aut, phi, cand)
+        return False
+    except Exception as e:
+        _trace(f"gate ERROR on cand={phi}: {e}")
         return False
 
 
