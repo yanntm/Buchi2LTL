@@ -1219,3 +1219,22 @@ legacy parity (keeps the soundness gate). The curated example corpora already li
 tests/fixtures (f2_successes still used by test_fuse2; t2_successes + terminal_2scc_labeled
 kept though now orphaned). survey_sweep.sh + READMEs/STATUS/TODO/CLAUDE updated. Gates
 green throughout (survey SUCCESS 40/40, kr audit CLEAN).
+
+## 2026-06-18 — benchmark: fixtures import + AP-canonical corpus + keyed diff (LANDED)
+
+Grew tests/benchmark from 164 -> 373 inputs and made the stored corpus uniform.
+- WHY: the bench set was thin and inconsistently named (kinska HOA carried randltl
+  alphabet letters like "g"; survey core used p,q,r), which muddied basic dedup.
+- WHAT: new collect_fixtures.py ports tests/fixtures/*.py (formulas / f2_successes /
+  t2_successes / terminal_2scc, 206 formulas after cumulative AP-normalized dedup vs
+  the rest of inputs/ excl. kinska) + the 3 fixture HOA. The basic AP rename
+  (normalize.py) is now APPLIED on store by every generator: collect_kinska (was
+  verbatim), from_survey, patterns. No simplification/reordering — pure rename.
+- Investigated the kinska "8ap" redundancy: it was a filename misread (randltl's
+  candidate alphabet, not declared APs); the automata declare <=2 APs and use them,
+  so remove_unused_ap was a near no-op (verified structurally inert) — dropped that
+  idea, kept only the basic rename.
+- survey_diff.py rewritten (pandas): keys on the input column, reports key-set
+  overlap (absent-left/right, common, answered counts), diffs the common fragment.
+- Sweep at 15s clean: 366/373 answered, 0 not-equivalent, 0 regressions vs the prior
+  reference on the common fragment; reference baseline refreshed.
