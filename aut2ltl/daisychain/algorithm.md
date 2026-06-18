@@ -40,11 +40,13 @@ in" boundary as daisy, lifted from one state to one SCC.
 
 ### The hub
 
-Choose a **hub** `h ∈ C` that is a **feedback vertex set** of `C`: every cycle of
-`C` passes through `h`. (This draft fixes a *single* hub state; a true FVS may need
-a set `H` — see Open points.) Deleting `h` leaves `C ∖ {h}` **acyclic up to
-self-loops** — a DAG of self-loops, i.e. a **very-weak** graph. That is daisy's
-exact fragment, which is what lets the recursion close.
+The SCC is **presented in hub form**: a single hub state `h ∈ C` is given such
+that deleting it leaves `C ∖ {h}` **acyclic up to self-loops** — a DAG of
+self-loops, i.e. a **very-weak** graph. That is daisy's exact fragment, which is
+what lets the recursion close. (Computing such an `h` — a feedback vertex set of
+`C`, possibly a *set* of states for a fat SCC — is a separate generalization the
+assembly owns; this note takes the hub as a precondition and says no more about
+choosing it.)
 
 ### Petals, stems, detours
 
@@ -57,10 +59,10 @@ stems    EX(h)  =  exits        h →[g_j] dst_j (dst_j ∉ C)        -- leave t
 ```
 
 A **detour** `d` is the family of finite paths that begin with an entry edge
-`h →[γ_d] s_d`, run through `C ∖ {h}`, and come back to `h`. Since `h` is an FVS it
-cannot revisit `h` in the middle; since the detour is finite it *must* return (next
-section). It is a *big self-loop*: a self-loop on `h` whose "letter" is a
-finite-word language, not a single symbol.
+`h →[γ_d] s_d`, run through `C ∖ {h}`, and come back to `h`. Since `C ∖ {h}` is
+acyclic up to self-loops the path cannot revisit `h` in the middle; since the
+detour is finite it *must* return (next section). It is a *big self-loop*: a
+self-loop on `h` whose "letter" is a finite-word language, not a single symbol.
 
 ### Folding a detour: delegate to a finite-word labeler
 
@@ -191,11 +193,11 @@ blob. (The `GF` conjunct is implied here and vanishes.)
 
 ## Soundness (sketch)
 
-1. **The hub is a daisy in the quotient.** `h` is an FVS, so collapsing each detour
-   to one big-self-loop edge `h→h` leaves only self-loops returning to `h`; the SCC
-   boundary forbids entry from outside and the FVS property forbids any other cycle.
-   So `h` meets the daisy precondition and `STAY∞ ∨ LEAVE` is daisy's equation, one
-   level up.
+1. **The hub is a daisy in the quotient.** Collapsing each detour to one
+   big-self-loop edge `h→h` leaves only self-loops returning to `h`; the SCC
+   boundary forbids entry from outside and the hub-form precondition forbids any
+   other cycle. So `h` meets the daisy precondition and `STAY∞ ∨ LEAVE` is daisy's
+   equation, one level up.
 
 2. **Detours are finite (must return).** This is the structural core: a detour is a
    finite path from `h` back to `h`, so its label `R_d` is a finite-word language
@@ -235,11 +237,6 @@ blob. (The `GF` conjunct is implied here and vanishes.)
 - **The functional hub anchor.** With no `atQ0` proposition, is "a stay-move
   starts/continues here" (`σ ∨ ⋁_d γ_d` and the detour residuals) a sufficient proxy
   to pin the closed form, or does the fixpoint need more? To validate.
-- **Multi-state hub (true FVS).** A single hub state may not be an FVS of a fat SCC;
-  the general construction eliminates a non-singleton `H` topologically. Mark and
-  detour bookkeeping across `|H| > 1` is unspecified here.
-- **Hub choice.** Minimum FVS vs. "the accepting states" — affects detour count and
-  formula size, not soundness (any FVS is sound).
 
 ## Out of scope (the assembly's concern)
 
