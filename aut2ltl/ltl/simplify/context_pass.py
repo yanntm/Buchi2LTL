@@ -50,6 +50,28 @@ def _is_bool_node(f: "spot.formula") -> bool:
     return f._is(spot.op_And) or f._is(spot.op_Or)
 
 
+def _open_rank(o: "spot.formula", is_and: bool) -> int:
+    """Traversal rank for the ONE-WAY now-fact opening: a smaller rank is
+    visited earlier, so its opened body reaches more (later) siblings. We put
+    the now-fact PRODUCERS first, strongest first, and the pure consumers last.
+    Polarity-dependent — `_now_facts` opens G/R/M at And, F/U/W at Or:
+
+      0  the side's strong producer  (And: G safety / Or: F guarantee)
+      1  the weaker producer         (And: f R/M g / Or: f U/W g — assert g)
+      2  everyone else (consumers + opaque X; booleans flow bidirectionally,
+         so their rank is a no-op — parked here)
+
+    Sorting is free: the operand list is tiny and Spot re-canonicalises the
+    rebuilt And/Or, so this governs only propagation order, never the form."""
+    strong, weak = (spot.op_G, (spot.op_R, spot.op_M)) if is_and \
+        else (spot.op_F, (spot.op_U, spot.op_W))
+    if o._is(strong):
+        return 0
+    if o._is(weak[0]) or o._is(weak[1]):
+        return 1
+    return 2
+
+
 def _now_facts(o: "spot.formula", is_and: bool):
     """Now-knowledge contributed by a temporal sibling, beyond the sibling
     itself: facts TRUE at this instant when the sibling holds (And side),
@@ -124,7 +146,10 @@ def context_simplify(f: "spot.formula", now_hook=None, bool_hook=None) -> "spot.
 
         if _is_bool_node(node):
             is_and = node._is(spot.op_And)
-            kids = list(node)
+            # Visit now-fact producers before consumers (stable within rank),
+            # so the one-way opening below reaches the most siblings. Sound for
+            # any fixed order; this just picks a more complete one.
+            kids = sorted(node, key=lambda o: _open_rank(o, is_and))
             # Sibling atoms: anything that is not And/Or is opaque ("now"
             # assertion at And / refutation at Or). Not(x) contributes x to
             # the dual set.
