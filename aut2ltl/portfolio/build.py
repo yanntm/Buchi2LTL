@@ -4,14 +4,12 @@ technique set.
 
 Two modes, one entry point (`build_portfolio`):
 
-* `techniques is None` — the hand-tuned BEST default, identical to what the
-  module singletons in `portfolio/__init__.py` have always assembled:
-
-      sl        = Sl(options)
-      cascade   = as_translator(make_hierarchy_class(options))
-      core      = Decompose(first_success([sl, cascade]))
-      sl_driven = SlDriven(delegate=core)
-      top       = Decompose(first_success([sl_driven, cascade]))
+* `techniques is None` — the shipped default: the `best` recipe
+  (`builder.RECIPES["best"]`), `Simplify(strength(acceptance(daisy(core))), "hi")`
+  with `core = first(partscc, bls)`. The modern, sl-free re-expression of the
+  historical `Decompose / SlDriven / Decompose` graph (`daisy` in place of the sl
+  envelope, `partscc` in place of `t2`) — smaller and sounder (see HISTORY
+  2026-06-18).
 
 * `techniques` is a set/sequence of NAMES — the research path: cite the methods
   that may participate, everything else is knocked out, NO implicit floor. The
@@ -144,13 +142,13 @@ def _from_techniques(options: Options, techniques: Iterable[str]) -> Translator:
 def build_portfolio(
     options: Options, techniques: Optional[Iterable[str]] = None
 ) -> Translator:
-    """Assemble a portfolio Translator. `techniques=None` ⇒ the best default;
-    a single recipe name from `builder.RECIPES` (e.g. `best`) ⇒ that named assembly;
-    otherwise a set/sequence of technique names ⇒ the cited ladder (cited order =
-    priority, no implicit floor). Raises `ValueError` on an unknown name or a
-    producer-free citation."""
+    """Assemble a portfolio Translator. `techniques=None` ⇒ the shipped default,
+    the `best` recipe (`builder.RECIPES["best"]`); a single recipe name from
+    `builder.RECIPES` (e.g. `best`) ⇒ that named assembly; otherwise a set/sequence
+    of technique names ⇒ the cited ladder (cited order = priority, no implicit
+    floor). Raises `ValueError` on an unknown name or a producer-free citation."""
     if techniques is None:
-        return _default_portfolio(options)
+        return RECIPES["best"](options)
     techs = list(techniques)
     # A recipe name (e.g. `--use best`) resolves to a named assembly from builder.py.
     # Recipes are whole assemblies, not ladder rungs, so they are cited alone.
