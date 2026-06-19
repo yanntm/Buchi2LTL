@@ -149,3 +149,53 @@ the construction's semantic work, not a spot canonicalization we rode on.
   no longer match `raw/`; the probe scripts still reference the original
   generator-ids. The structure stands; re-run the probes over 929 to refresh the
   numbers if needed.
+
+---
+
+## 2026-06-19 — the polarity-class partition of the dedup
+
+- **idea**: reason out exactly what the AP-canonical dedup removed, purely from
+  the before/after counts — no file inspection.
+- **validation**: polarity normalisation is an involution, so it partitions the
+  1845 byte-distinct automata into classes of size <= 2. Arithmetic only
+  (removed = 1845 - 929; singletons = 929 - removed).
+- **results**: **916 pairs** (size-2 classes: one kept, one removed — the 916 we
+  dropped each have their twin still in the corpus) + **13 singletons** (size-1:
+  self-image under polarity norm, no distinct twin, so never removed). Check:
+  2*916 + 13 = 1845; 916 + 13 = 929. So exactly **13** corpus automata are
+  polarity fixed points (use no literal guard, or are a<->!a symmetric); the other
+  916 survivors are each the kept half of a folded pair.
+- **conclusions**: the dedup is overwhelmingly pair-folding (916 pairs vs 13 fixed
+  points) — the 2-state/1-AP space is almost entirely polarity-symmetric, which is
+  why the pre-dedup histogram looked like a mirror. Only 13 of 1845 sit on the
+  symmetry axis.
+
+---
+
+## 2026-06-19 — refreshed entry 1/2/4 measurements over the 929 corpus
+
+- **idea**: re-run the earlier census measurements on the AP-canonical corpus
+  (the thought above explains why the absolute counts should ~halve).
+- **validation**: re-aggregate the committed CSV (`genaut/analyze_census.py`,
+  pure CSV — the `reconstructed` column is the truncated formula) and re-tally the
+  stored true automata (`genaut/probe_true_states.py`, spot over
+  `corpus/2state1ap1acc/`, universality via `complement(a).is_empty()`). Entry 3
+  deliberately NOT re-run (the determinization diagnosis stands; the lever makes
+  sense — left alone).
+- **results (entry 1 — census/idioms)**: 799 LTL built; distinct truncated
+  formulas **121** (was ~221). Top idioms: `1` x331, `GFa` x65 / `GF!a` x39,
+  `Fa` x38 / `F!a` x6, `a` x35, `G(a | Xa)` x15. The histogram is **no longer
+  polarity-symmetric**: dedup keeps one automaton per a<->!a pair, so each idiom
+  roughly halves but UNEVENLY (normalising the automaton's first literal to
+  positive does not fix the produced formula's polarity).
+- **results (entry 2 — Small & universality)**: **331** reconstruct to `1`; as
+  stored under one Small pass, state histogram `{1: 3, 2: 328}`, determinism
+  `{det: 17, nondet: 314}`; all **331** universal (complement empty). Still
+  **exactly 3** reach 1-state canonical (those 3 survived dedup intact); the rest
+  stay 2-state — finding unchanged from the 1845 run.
+- **results (entry 4 — routes to true)**: `acc` 163, `daisy2` 122, `daisy` 45,
+  `daisy+strength2` 1; build total 191.3s (mean 0.578s, max 1.146s). The ~50/50
+  two-route split holds: `acc` 163 vs `daisy*` 168.
+- **conclusions**: every measured structure (idiom concentration, the 3 canonical
+  trues, the two-route split, zero wrong answers) survives the dedup; only the
+  absolute counts halve — exactly as the polarity-class partition predicts.
