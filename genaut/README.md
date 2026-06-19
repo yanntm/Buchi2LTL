@@ -124,9 +124,11 @@ canonicalization we never asked for.
                      diagnostic: over all 654 universal survivors, does the strong
                      determinizing setting reach the canonical 1-state true? (yes,
                      654/654).  `python3 genaut/probe_true_collapse.py`
-    raw/             generated automata, one HOA per survivor (committed: the 929
-                     AP-canonical survivors, alongside their census in logs/; also
-                     regenerable in ~1.7s, with stable index naming).
+    raw/             enumerate.py's scratch output dir (gitignored, regenerable in
+                     ~1.7s). The validated, git-tracked snapshot lives in corpus/.
+    corpus/          the canonical automata, one subfolder per shape (git-tracked):
+                     corpus/2state1ap1acc/ = the 929 AP-canonical survivors. The
+                     specimens exist independently of aut2ltl; index naming stable.
     logs/            the committed survey results for the census above:
                      genaut.csv (per-automaton), genaut.summary.txt (the SUCCESS
                      report), genaut.run.log (per-case stderr trace).
