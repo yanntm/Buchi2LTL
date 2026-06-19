@@ -1381,3 +1381,15 @@ regressions; one win: Fa & Gb 7->5 via the inv variant clearing the margin). The
 below-daisy decomp did not fire on the 40-formula survey (too small) — it is a
 benchmark-scale lever; here it is confirmed sound and wired. Diffed with
 tests/survey_diff.py vs tests/logs/reference/default.csv.
+
+## 2026-06-19 — cake slimmed: shy best_of, one cascade (partscc-floored rich variant)
+
+Benchmark verdict on the 3-assembly cake: every win was inv (daisy+inv / inv+partscc,
+none needed bls); the deep below-daisy decomp + standalone scc won nothing; ~1.8x cost
++ a kinska counting NOT_LTL->TIMEOUT from running bls TWICE per case. Reshaped to two
+stages where best_of hides only ONE cascade: best_daisy2 (full core, run first so its
+NOT_LTL short-circuits) + a RICH cheap variant weaving every technique
+(compose(Invariant, Strength, Scc, Invariant, Acc, daisy_pair_inv)) that floors on
+PartScc ONLY (no bls) — declines to the incumbent where partscc cannot label, so no
+second cascade. Curated-40 survey --use cake: SUCCESS, DAG=412 (keeps the Fa&Gb inv
+win), build 3.75s ~= default 3.7s (was 1.8x). Re-sweeping bench+kinska to confirm.
