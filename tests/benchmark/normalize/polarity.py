@@ -1,9 +1,13 @@
-"""polarity.py — canonicalise per-AP polarity (a benchmark dedup key; does ONLY
-polarity, nothing else: no renaming, no simplification, no reordering).
+"""Normalise the polarity of the atomic propositions of an LTL formula or of a HOA
+automaton.
+
+This homogenises both without loss of input shape except at the boolean-syntactic
+level of how each AP carries its sign — irrelevant downstream, where every AP is
+manipulated as a BDD anyway: the result is isomorphic to the input up to the
+syntactic shape of atomic-proposition polarity.
 
 Each AP is complemented wherever its FIRST literal occurrence, in left-to-right
-reading order, is negative — so the first occurrence comes out positive. Nothing
-else changes (no renaming, no simplification, no reordering). Thus
+reading order, is negative — so the first occurrence comes out positive. Thus
 
     !a X F a   and   a X F !a    both -> a X F !a
 
@@ -20,8 +24,8 @@ no aliases). A negated literal is a `!` directly abutting the atom (`!a`, not
 order, so polarity is canonicalised relative to the presented form.
 
 CLI:
-    python3 tests/benchmark/polarity.py '<formula>'        # print polarity-canon LTL
-    python3 tests/benchmark/polarity.py file.hoa|file.ltl  # whole HOA / per-line LTL
+    python3 .../polarity.py '<formula>'        # print polarity-canon LTL
+    python3 .../polarity.py file.hoa|file.ltl  # whole HOA / per-line LTL
 """
 from __future__ import annotations
 
