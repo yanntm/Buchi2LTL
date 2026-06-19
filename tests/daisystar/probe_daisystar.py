@@ -25,7 +25,10 @@ from aut2ltl.simplify_ltl import Simplify                          # noqa: E402
 
 
 def main(arg: str) -> None:
-    lang = Language.of_ltl(arg)
+    # An existing path is loaded as a HOA automaton; otherwise arg is an LTL
+    # formula. The HOA route lets us probe hand-built adversarial stars (e.g.
+    # tests/fixtures/daisystar_loose.hoa) the LTL front end would not produce.
+    lang = Language.of(spot.automaton(arg)) if os.path.exists(arg) else Language.of_ltl(arg)
     aut = lang.tgba()
     h = aut.get_init_state_number()
     si = spot.scc_info(aut)
