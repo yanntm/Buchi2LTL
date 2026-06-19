@@ -1404,3 +1404,35 @@ and the default itself times out under load) — repointed RECIPES["default"] = 
 single-line alias). Gate after: default resolves, r4 audit CLEAN, curated-40 survey
 SUCCESS DAG=412 (was 414). STATUS updated. Reference logs regenerated under the new
 default next.
+
+## 2026-06-19 — daisystar (rejecting-star reachability peel); cakeds is the new default
+
+LANDED `aut2ltl/daisystar/` — a peer combinator translator for the **reachability**
+regime daisy2 deliberately declines. Motivating gap: `F(a & X b)` fell through every
+structural peel to the bls/buchi leaf, a 181-node blob, versus a handful of nodes.
+Its automaton is a non-accepting star {0,1} above a trivial accepting sink, exiting
+the star from a SPOKE on the trigger b — i.e. the language is pure reachability.
+
+The construction is the *easy half* of daisy2: when the initial SCC is **rejecting**
+(Spot's `is_rejecting_scc`), no run staying in it forever accepts, so `STAY∞ = false`
+**by construction** — daisy2's open `Φ_stay` safety closed form never arises. Only the
+`LEAVE` least-fixpoint remains: `stay U ⋁(exit moves)`, with the exit allowed to fire
+from inside a spoke (`E_s ∧ X(G_s U (h_k ∧ X φ_k))`), the return-excursion shape with
+the return replaced by a spoke-stem. The flat `stay` region reuses daisy2's
+move-level form, so `LEAVE` is still gate-rescued (Spot equivalence, the partscc
+pattern); always sound. shape.py allows spoke-exits and ignores marks (the two
+differences from daisy2's star_partition). algorithm.md is written in the complete
+daisy-style (not the daisy2/daisychain draft style).
+
+WIRED via `daisy_trio`/`daisy_trio_inv` (daisy → daisy2 → daisystar) in
+portfolio/builder.py and a new `cakeds` recipe (= cake with the trio peels).
+Benchmark A/B (default=cake vs cakeds, 373 inputs, survey_diff): **0 regressions,
+10 equivalence fixes** (BUILD_TIMEOUT / UNVERIFIED_SIZE cases now Spot-verified),
+**DAG −78.5%** (e.g. `(a U b) M XF!a` 23123→18, `F(Fa & (!a M (a U b)))` 18721→15,
+`F(a & Xb)` 181→13); curated 40-survey SUCCESS, r4 audit CLEAN. Promoted cakeds to
+`RECIPES["default"]`.
+
+Also de-referenced the current-default recipe NAME from README / portfolio/README /
+CLAUDE.md / STATUS CLI section — the single source of truth is the
+`RECIPES["default"]` pointer; docs that named the winner went stale (best_daisy2 →
+cake → cakeds).
