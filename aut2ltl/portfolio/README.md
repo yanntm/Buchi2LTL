@@ -7,14 +7,17 @@ see `aut2ltl.contract`) or a builder of one; the engines stay pure and are compo
 not modified. The object graph IS the config graph — one shared `Options` is
 threaded through the whole assembly.
 
-The default path is the **`best_daisy2` recipe**:
-`Simplify(strength(acceptance(daisy_pair(core))), "hi")` with
+Which recipe ships as the **default** is decided in one place — the
+`RECIPES["default"]` pointer in `recipes/__init__.py` — and nowhere else; re-point
+it to change the default, and the CLI, survey and benchmark all follow. The recipes
+themselves are the `--use <name>` vocabulary, built from a common kit of blocks: a
+typical assembly is `Simplify(strength(acceptance(peel(core))), "hi")` with
 `core = first(partscc, bls)` — split the language by strength (∨ of
 weak/terminal/strong), then each part by acceptance conjunct (∧, deterministic form),
-peel each atom with the **daisy/daisy2 pair** (self-loop daisy, then the length-1
-star `daisy2`), and floor on the bls cascade (via `partscc` where a single terminal
-SCC labels cleanly). It replaced the legacy `Decompose / SlDriven / Decompose` graph
-and the retired `sl` heuristic engine, which `daisy` (self-loop peel) and `partscc`
+peel each atom (self-loop `daisy`, the length-1 stars `daisy2`/`daisystar`), and
+floor on the bls cascade (via `partscc` where a single terminal SCC labels cleanly).
+This family replaced the legacy `Decompose / SlDriven / Decompose` graph and the
+retired `sl` heuristic engine, which `daisy` (self-loop peel) and `partscc`
 (terminal-SCC labeling) subsume. `--use best` is the prior daisy-only assembly;
 `--use best_inv` adds the global-invariant layer.
 
