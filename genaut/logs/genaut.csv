@@ -1,0 +1,1846 @@
+formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
+aut_00000.hoa,?,?,daisy,1,0,1,1.0,0.066,True,0
+aut_00257.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_00258.hoa,?,?,daisy,3,1,3,1.0,0.069,True,XGa
+aut_00259.hoa,?,?,daisy,4,1,4,1.0,0.067,True,XG!a
+aut_00261.hoa,?,?,daisy,1,0,1,1.0,0.068,True,1
+aut_00262.hoa,?,?,daisy,3,2,3,1.0,0.067,True,GFa
+aut_00263.hoa,?,?,daisy,4,2,4,1.0,0.067,True,GF!a
+aut_00265.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_00288.hoa,?,?,-,,,,,0.594,NOT_LTL,
+aut_00290.hoa,?,?,buchi,31,5,72,2.3,1.149,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_00292.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_00294.hoa,?,?,buchi,9,3,14,1.6,1.144,True,X(Fa & G(!a | X(!a R Fa)))
+aut_00296.hoa,?,?,buchi,31,5,72,2.3,1.160,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_00298.hoa,?,?,buchi,31,5,72,2.3,1.138,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_00300.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_00304.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_00307.hoa,?,?,buchi,31,5,70,2.3,1.140,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_00308.hoa,?,?,daisy2,4,2,4,1.0,0.067,True,GF!a
+aut_00311.hoa,?,?,buchi,9,3,14,1.6,1.119,True,X(F!a & G(a | X(a R F!a)))
+aut_00312.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_00316.hoa,?,?,buchi,31,5,70,2.3,1.152,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_00319.hoa,?,?,buchi,31,5,70,2.3,1.142,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_00324.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_00326.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_00327.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_00328.hoa,?,?,daisy2,1,0,1,1.0,0.067,True,1
+aut_00330.hoa,?,?,daisy,1,0,1,1.0,0.068,True,1
+aut_00332.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_00335.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_00356.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_00358.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_00360.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_00364.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_00372.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_00375.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_00376.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_00380.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_00388.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_00390.hoa,?,?,buchi,9,3,14,1.6,1.133,True,X(Fa & G(!a | X(!a R Fa)))
+aut_00391.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_00392.hoa,?,?,buchi,31,5,72,2.3,1.138,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_00396.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_00452.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_00454.hoa,?,?,acc,1,0,1,1.0,1.100,True,1
+aut_00455.hoa,?,?,buchi,9,3,14,1.6,1.121,True,X(F!a & G(a | X(a R F!a)))
+aut_00456.hoa,?,?,daisy2,4,2,4,1.0,0.068,True,GF!a
+aut_00460.hoa,?,?,buchi,31,5,70,2.3,1.141,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_00513.hoa,?,?,daisy,1,0,1,1.0,0.064,True,a
+aut_00514.hoa,?,?,daisy,2,1,2,1.0,0.064,True,Ga
+aut_00515.hoa,?,?,daisy,5,1,6,1.2,0.065,True,a & XG!a
+aut_00517.hoa,?,?,daisy,1,0,1,1.0,0.062,True,a
+aut_00518.hoa,?,?,daisy,4,2,5,1.2,0.065,True,a & GFa
+aut_00519.hoa,?,?,daisy,5,2,6,1.2,0.064,True,a & GF!a
+aut_00521.hoa,?,?,daisy,1,0,1,1.0,0.064,True,a
+aut_00528.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_00530.hoa,?,?,partscc,5,1,7,1.4,0.065,True,a & G(a | Xa)
+aut_00531.hoa,?,?,-,,,,,0.594,NOT_LTL,
+aut_00532.hoa,?,?,buchi,13,3,23,1.8,1.142,True,a & XX(XG(!a | XXFa) & (a M (!a | XXFa)))
+aut_00533.hoa,?,?,daisy,1,0,1,1.0,0.064,True,a
+aut_00534.hoa,?,?,buchi,24,5,50,2.1,1.127,True,a & X(Fa & (!a | XFa) & ((!a & (a | G(a | X!a))) | G((a | X(a R (!a | XFa))) & (…
+aut_00535.hoa,?,?,acc,1,0,1,1.0,1.112,True,a
+aut_00536.hoa,?,?,buchi,30,5,71,2.4,1.117,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_00540.hoa,?,?,-,,,,,0.590,NOT_LTL,
+aut_00543.hoa,?,?,-,,,,,0.589,NOT_LTL,
+aut_00547.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_00548.hoa,?,?,buchi,335,65,21341,63.7,1.186,True,(X(a & Xa) | (XF(!a & X(!a U (a & Xa))) & (Xa | (XF(!a & Xa) & (((a | X(!a & XFa…
+aut_00551.hoa,?,?,acc,1,0,1,1.0,1.109,True,a
+aut_00552.hoa,?,?,daisy,2,1,2,1.0,0.064,True,Ga
+aut_00556.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_00560.hoa,?,?,partscc,9,1,14,1.6,0.066,True,a & G((a | Xa) & (!a | X!a))
+aut_00562.hoa,?,?,partscc,5,1,7,1.4,0.065,True,a & G(a | Xa)
+aut_00563.hoa,?,?,buchi,31,6,71,2.3,1.125,True,a & ((X(!a & XFa) & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (((a & Xa) R…
+aut_00564.hoa,?,?,buchi,185,37,564705,3052.5,1.140,UNVERIFIED_SIZE,<unflattened DAG: 564705 tree nodes>
+aut_00567.hoa,?,?,buchi,18,5,35,1.9,1.116,True,a & F(a & XF!a) & G((!a | X(!a R (a | XF!a))) & (a | X(a | X(a R F!a))))
+aut_00568.hoa,?,?,partscc,8,2,11,1.4,0.066,True,a & G((a | Xa) & F!a)
+aut_00572.hoa,?,?,buchi,14,3,29,2.1,1.112,True,a & X(!a & XFa) & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))
+aut_00575.hoa,?,?,buchi,31,6,71,2.3,1.122,True,a & ((X(!a & XFa) & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (((a & Xa) R…
+aut_00580.hoa,?,?,buchi,13,3,23,1.8,1.121,True,a & XX(XG(!a | XXFa) & (a M (!a | XXFa)))
+aut_00583.hoa,?,?,acc,1,0,1,1.0,1.108,True,a
+aut_00584.hoa,?,?,buchi,30,5,71,2.4,1.118,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_00588.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_00612.hoa,?,?,buchi,13,3,23,1.8,1.138,True,a & XX(XG(!a | XXFa) & (a M (!a | XXFa)))
+aut_00615.hoa,?,?,acc,1,0,1,1.0,1.118,True,a
+aut_00616.hoa,?,?,buchi,30,5,71,2.4,1.116,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_00620.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_00628.hoa,?,?,buchi,13,3,23,1.8,1.114,True,a & XX(XG(!a | XXFa) & (a M (!a | XXFa)))
+aut_00631.hoa,?,?,acc,1,0,1,1.0,1.111,True,a
+aut_00632.hoa,?,?,buchi,30,5,71,2.4,1.119,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_00636.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_00644.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_00647.hoa,?,?,acc,1,0,1,1.0,1.109,True,a
+aut_00648.hoa,?,?,daisy2,2,1,2,1.0,0.067,True,Ga
+aut_00652.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_00708.hoa,?,?,buchi,185,37,564705,3052.5,1.146,UNVERIFIED_SIZE,<unflattened DAG: 564705 tree nodes>
+aut_00711.hoa,?,?,buchi,18,5,35,1.9,1.105,True,a & F(a & XF!a) & G((!a | X(!a R (a | XF!a))) & (a | X(a | X(a R F!a))))
+aut_00712.hoa,?,?,partscc,8,2,11,1.4,0.067,True,a & G((a | Xa) & F!a)
+aut_00716.hoa,?,?,buchi,14,3,29,2.1,1.121,True,a & X(!a & XFa) & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))
+aut_00769.hoa,?,?,daisy,2,0,2,1.0,0.066,True,!a
+aut_00770.hoa,?,?,daisy,5,1,6,1.2,0.064,True,!a & XGa
+aut_00771.hoa,?,?,daisy,3,1,3,1.0,0.065,True,G!a
+aut_00773.hoa,?,?,daisy,2,0,2,1.0,0.063,True,!a
+aut_00774.hoa,?,?,daisy,5,2,6,1.2,0.069,True,!a & GFa
+aut_00775.hoa,?,?,daisy,5,2,7,1.4,0.066,True,!a & GF!a
+aut_00777.hoa,?,?,daisy,2,0,2,1.0,0.068,True,!a
+aut_00784.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_00786.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_00787.hoa,?,?,partscc,6,1,10,1.7,0.065,True,!a & G(!a | X!a)
+aut_00788.hoa,?,?,buchi,13,3,25,1.9,1.123,True,!a & XX(XG(a | XXF!a) & (!a M (a | XXF!a)))
+aut_00789.hoa,?,?,daisy,2,0,2,1.0,0.064,True,!a
+aut_00790.hoa,?,?,acc,2,0,2,1.0,1.112,True,!a
+aut_00791.hoa,?,?,buchi,24,5,52,2.2,1.131,True,!a & X(F!a & (a | XF!a) & ((a & (!a | G(!a | Xa))) | G((!a | X(!a R (a | XF!a)))…
+aut_00792.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_00794.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_00796.hoa,?,?,buchi,30,5,69,2.3,1.119,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_00800.hoa,?,?,partscc,9,1,15,1.7,0.064,True,!a & G((!a | X!a) & (a | Xa))
+aut_00802.hoa,?,?,buchi,31,6,74,2.4,1.113,True,!a & ((X(a & XF!a) & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (((!a & …
+aut_00803.hoa,?,?,partscc,6,1,10,1.7,0.063,True,!a & G(!a | X!a)
+aut_00804.hoa,?,?,buchi,185,37,567302,3066.5,1.147,UNVERIFIED_SIZE,<unflattened DAG: 567302 tree nodes>
+aut_00806.hoa,?,?,buchi,18,5,36,2.0,1.119,True,!a & F(!a & XFa) & G((a | X(a R (!a | XFa))) & (!a | X(!a | X(!a R Fa))))
+aut_00808.hoa,?,?,buchi,14,3,33,2.4,1.111,True,!a & X(a & XF!a) & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))
+aut_00810.hoa,?,?,buchi,31,6,74,2.4,1.113,True,!a & ((X(a & XF!a) & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (((!a & …
+aut_00812.hoa,?,?,partscc,8,2,13,1.6,0.065,True,!a & G((!a | X!a) & Fa)
+aut_00818.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_00820.hoa,?,?,buchi,335,65,21176,63.2,1.176,True,(X(!a & X!a) | (XF(a & X(a U (!a & X!a))) & (X!a | (XF(a & X!a) & (((a | X(a & X…
+aut_00822.hoa,?,?,acc,2,0,2,1.0,1.114,True,!a
+aut_00824.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_00828.hoa,?,?,daisy,3,1,3,1.0,0.064,True,G!a
+aut_00836.hoa,?,?,buchi,13,3,25,1.9,1.116,True,!a & XX(XG(a | XXF!a) & (!a M (a | XXF!a)))
+aut_00838.hoa,?,?,acc,2,0,2,1.0,1.110,True,!a
+aut_00840.hoa,?,?,-,,,,,0.595,NOT_LTL,
+aut_00844.hoa,?,?,buchi,30,5,69,2.3,1.118,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_00868.hoa,?,?,buchi,13,3,25,1.9,1.109,True,!a & XX(XG(a | XXF!a) & (!a M (a | XXF!a)))
+aut_00870.hoa,?,?,acc,2,0,2,1.0,1.108,True,!a
+aut_00872.hoa,?,?,-,,,,,0.573,NOT_LTL,
+aut_00876.hoa,?,?,buchi,30,5,69,2.3,1.115,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_00884.hoa,?,?,buchi,13,3,25,1.9,1.117,True,!a & XX(XG(a | XXF!a) & (!a M (a | XXF!a)))
+aut_00886.hoa,?,?,acc,2,0,2,1.0,1.110,True,!a
+aut_00888.hoa,?,?,-,,,,,0.594,NOT_LTL,
+aut_00892.hoa,?,?,buchi,30,5,69,2.3,1.120,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_00900.hoa,?,?,buchi,185,37,567302,3066.5,1.152,UNVERIFIED_SIZE,<unflattened DAG: 567302 tree nodes>
+aut_00902.hoa,?,?,buchi,18,5,36,2.0,1.110,True,!a & F(!a & XFa) & G((a | X(a R (!a | XFa))) & (!a | X(!a | X(!a R Fa))))
+aut_00904.hoa,?,?,buchi,14,3,33,2.4,1.118,True,!a & X(a & XF!a) & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))
+aut_00908.hoa,?,?,partscc,8,2,13,1.6,0.067,True,!a & G((!a | X!a) & Fa)
+aut_00964.hoa,?,?,-,,,,,0.592,NOT_LTL,
+aut_00966.hoa,?,?,acc,2,0,2,1.0,1.110,True,!a
+aut_00968.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_00972.hoa,?,?,daisy2,3,1,3,1.0,0.065,True,G!a
+aut_01046.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_01047.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_01090.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_01091.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_01120.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_01122.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_01123.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_01128.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_01132.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_01136.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_01138.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_01139.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_01144.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_01148.hoa,?,?,-,,,,,0.577,NOT_LTL,
+aut_01154.hoa,?,?,buchi,504,93,18160787,36033.3,1.184,UNVERIFIED_SIZE,<unflattened DAG: 18160787 tree nodes>
+aut_01155.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_01168.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_01170.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_01171.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_01218.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_01219.hoa,?,?,buchi,507,93,27364824,53974.0,1.184,UNVERIFIED_SIZE,<unflattened DAG: 27364824 tree nodes>
+aut_01376.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_01556.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_01558.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_01559.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_01560.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_01564.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_01575.hoa,?,?,acc,1,0,1,1.0,1.090,True,1
+aut_01576.hoa,?,?,buchi,31,5,72,2.3,1.134,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_01583.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_01588.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_01591.hoa,?,?,buchi,9,3,14,1.6,1.120,True,X(F!a & G(a | X(a R F!a)))
+aut_01592.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_01594.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_01596.hoa,?,?,buchi,31,5,70,2.3,1.134,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_01600.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_01603.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_01604.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_01607.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_01608.hoa,?,?,daisy2,3,2,3,1.0,0.062,True,GFa
+aut_01612.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_01635.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_01639.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_01648.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_01650.hoa,?,?,acc,1,0,1,1.0,1.096,True,1
+aut_01651.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_01652.hoa,?,?,daisy2,1,0,1,1.0,0.067,True,1
+aut_01655.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_01656.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_01660.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_01664.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_01666.hoa,?,?,buchi,308,66,30464,98.9,1.177,True,X(((((a & Xa) | (Fa & ((!a | X!a) U (!a & X(!a U (a & Xa)))))) & ((a & (Xa | ((!…
+aut_01667.hoa,?,?,-,,,,,0.591,NOT_LTL,
+aut_01668.hoa,?,?,-,,,,,0.604,NOT_LTL,
+aut_01671.hoa,?,?,acc,1,0,1,1.0,1.125,True,1
+aut_01672.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_01676.hoa,?,?,-,,,,,0.598,NOT_LTL,
+aut_01680.hoa,?,?,daisy,1,0,1,1.0,0.068,True,1
+aut_01682.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_01683.hoa,?,?,daisy,1,0,1,1.0,0.062,True,1
+aut_01728.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_01731.hoa,?,?,buchi,31,5,70,2.3,1.128,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_01732.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(F!a & Fa)
+aut_01735.hoa,?,?,buchi,507,85,30994,61.1,1.173,SPOT_TIMEOUT,((a | (F((a & X(a U (!a & X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa…
+aut_01736.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_01740.hoa,?,?,buchi,15,3,27,1.8,1.117,True,X(!a & XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa))))))
+aut_01812.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_01814.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_01815.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_01816.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_01820.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_01828.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_01830.hoa,?,?,buchi,9,3,14,1.6,1.112,True,X(Fa & G(!a | X(!a R Fa)))
+aut_01832.hoa,?,?,buchi,31,5,72,2.3,1.128,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_01836.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_01846.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_01852.hoa,?,?,buchi,31,5,70,2.3,1.127,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_01856.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_01858.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_01860.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_01862.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_01864.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_01868.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_01888.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_01890.hoa,?,?,-,,,,,0.594,NOT_LTL,
+aut_01891.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_01892.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_01894.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_01896.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_01900.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_01906.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_01910.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_01920.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_01922.hoa,?,?,buchi,31,5,72,2.3,1.123,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_01924.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(Fa & F!a)
+aut_01926.hoa,?,?,buchi,238,40,17921,75.3,1.170,True,((!a | (F((!a & X(!a U (a & X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & …
+aut_01928.hoa,?,?,buchi,15,3,30,2.0,1.115,True,X(a & XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a))))))
+aut_01932.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_01936.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_01938.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_01939.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_01984.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_01986.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_01987.hoa,?,?,buchi,291,63,17485,60.1,1.177,True,X(((((!a & X!a) | (F!a & ((a | Xa) U (a & X(a U (!a & X!a)))))) & ((!a & (X!a | …
+aut_01988.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_01990.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_01992.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_01996.hoa,?,?,-,,,,,0.576,NOT_LTL,
+aut_02070.hoa,?,?,buchi,24,5,50,2.1,1.135,True,a & X(Fa & (!a | XFa) & ((!a & (a | G(a | X!a))) | G((a | X(a R (!a | XFa))) & (…
+aut_02071.hoa,?,?,acc,1,0,1,1.0,1.110,True,a
+aut_02114.hoa,?,?,buchi,200,41,8880,44.4,1.150,True,a & (Xa | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (Xa | ((a | X(a | Xa)) U (!a…
+aut_02115.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_02144.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_02147.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_02152.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_02156.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_02160.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_02162.hoa,?,?,partscc,5,1,7,1.4,0.065,True,a & G(a | Xa)
+aut_02163.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_02172.hoa,?,?,-,,,,,0.598,NOT_LTL,
+aut_02179.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_02192.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_02195.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_02243.hoa,?,?,buchi,221,44,12981,58.7,1.157,True,a & X!a & ((!a | X(!a | X!a)) U (a & X(X!a & (!a | (X(a U (!a & X!a)) & ((!a | X…
+aut_02368.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_02400.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_02402.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_02416.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_02419.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_02432.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_02434.hoa,?,?,buchi,31,5,72,2.3,1.125,True,X(a & ((XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))) | (X(a | Xa) & (…
+aut_02435.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_02444.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_02496.hoa,?,?,-,,,,,0.577,NOT_LTL,
+aut_02498.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_02499.hoa,?,?,buchi,31,5,70,2.3,1.124,True,X(!a & ((XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))) | (X(!a | X!a) & ((…
+aut_02504.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_02656.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_03094.hoa,?,?,acc,2,0,2,1.0,1.108,True,!a
+aut_03095.hoa,?,?,buchi,24,5,52,2.2,1.123,True,!a & X(F!a & (a | XF!a) & ((a & (!a | G(!a | Xa))) | G((!a | X(!a R (a | XF!a)))…
+aut_03138.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_03139.hoa,?,?,buchi,191,40,9975,52.2,1.143,True,!a & (X!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (X!a | ((!a | X(!a | X!a)) U…
+aut_03168.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_03170.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_03171.hoa,?,?,partscc,6,1,10,1.7,0.064,True,!a & G(!a | X!a)
+aut_03176.hoa,?,?,-,,,,,0.594,NOT_LTL,
+aut_03184.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_03186.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_03192.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_03196.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_03202.hoa,?,?,buchi,230,45,11606,50.5,1.175,True,!a & Xa & ((a | X(a | Xa)) U (!a & X(Xa & (a | (X(!a U (a & Xa)) & ((a | X(a | X…
+aut_03216.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_03218.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_03266.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_03936.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_08450.hoa,?,?,daisy,6,2,8,1.3,0.065,True,a W (!a & XGa)
+aut_08451.hoa,?,?,daisy,4,2,5,1.2,0.065,True,a W G!a
+aut_08454.hoa,?,?,daisy,3,2,3,1.0,0.065,True,GFa
+aut_08455.hoa,?,?,daisy+strength2,6,3,9,1.5,0.067,True,a W (!a & GF!a)
+aut_08480.hoa,?,?,daisy2,4,1,5,1.2,0.065,True,G(a | Xa)
+aut_08484.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_08488.hoa,?,?,daisy2,4,1,5,1.2,0.062,True,G(a | Xa)
+aut_08490.hoa,?,?,daisy2,4,1,5,1.2,0.065,True,G(a | Xa)
+aut_08496.hoa,?,?,-,,,,,0.576,NOT_LTL,
+aut_08499.hoa,?,?,acc,4,0,5,1.2,1.110,True,a | X!a
+aut_08500.hoa,?,?,buchi,5,1,6,1.2,1.118,True,a | XF!a
+aut_08503.hoa,?,?,buchi,5,1,6,1.2,1.115,True,a | XF!a
+aut_08504.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_08508.hoa,?,?,acc,4,0,5,1.2,1.111,True,a | X!a
+aut_08511.hoa,?,?,acc,4,0,5,1.2,1.114,True,a | X!a
+aut_08516.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_08518.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_08519.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_08520.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_08522.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_08524.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_08527.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_08548.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_08550.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_08552.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_08556.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_08564.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_08567.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_08568.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_08572.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_08582.hoa,?,?,buchi,8,3,16,2.0,1.107,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_08583.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_08584.hoa,?,?,daisy2,4,1,5,1.2,0.064,True,G(a | Xa)
+aut_08586.hoa,?,?,daisy2,4,1,5,1.2,0.064,True,G(a | Xa)
+aut_08591.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_08644.hoa,?,?,buchi,5,1,6,1.2,1.121,True,a | XF!a
+aut_08646.hoa,?,?,acc,1,0,1,1.0,1.116,True,1
+aut_08647.hoa,?,?,buchi,5,1,6,1.2,1.108,True,a | XF!a
+aut_08648.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_08650.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_08652.hoa,?,?,acc,4,0,5,1.2,1.121,True,a | X!a
+aut_08707.hoa,?,?,daisy+inv+scc2,6,2,8,1.3,0.065,True,a & X(a W G!a)
+aut_08711.hoa,?,?,daisy+strength2,7,3,9,1.3,0.062,True,Ga | (a & GF!a)
+aut_08719.hoa,?,?,daisy+inv+scc2,6,2,8,1.3,0.065,True,a & X(a W G!a)
+aut_08724.hoa,?,?,buchi,16,4,31,1.9,1.109,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_08727.hoa,?,?,daisy,1,0,1,1.0,0.061,True,a
+aut_08728.hoa,?,?,partscc,5,1,7,1.4,0.065,True,a & G(a | Xa)
+aut_08735.hoa,?,?,daisy,1,0,1,1.0,0.064,True,a
+aut_08739.hoa,?,?,buchi,787,147,6052771,7690.9,1.193,UNVERIFIED_SIZE,<unflattened DAG: 6052771 tree nodes>
+aut_08740.hoa,?,?,buchi,107,21,2546,23.8,1.123,True,a & (Xa | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (!a | (X(!a | X(a | X((!a U …
+aut_08743.hoa,?,?,acc,1,0,1,1.0,1.105,True,a
+aut_08748.hoa,?,?,buchi,460,85,3620391,7870.4,1.162,UNVERIFIED_SIZE,<unflattened DAG: 3620391 tree nodes>
+aut_08751.hoa,?,?,buchi,787,147,6052771,7690.9,1.193,UNVERIFIED_SIZE,<unflattened DAG: 6052771 tree nodes>
+aut_08772.hoa,?,?,buchi,16,4,31,1.9,1.112,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_08775.hoa,?,?,acc,1,0,1,1.0,1.111,True,a
+aut_08776.hoa,?,?,partscc,5,1,7,1.4,0.065,True,a & G(a | Xa)
+aut_08783.hoa,?,?,daisy,1,0,1,1.0,0.064,True,a
+aut_08807.hoa,?,?,acc,1,0,1,1.0,1.101,True,a
+aut_08836.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_08839.hoa,?,?,acc,1,0,1,1.0,1.106,True,a
+aut_08844.hoa,?,?,buchi,460,85,3620391,7870.4,1.165,UNVERIFIED_SIZE,<unflattened DAG: 3620391 tree nodes>
+aut_08903.hoa,?,?,acc,1,0,1,1.0,1.105,True,a
+aut_08962.hoa,?,?,daisy,6,2,8,1.3,0.062,True,a W (!a & XGa)
+aut_08963.hoa,?,?,daisy,4,2,5,1.2,0.066,True,a W G!a
+aut_09008.hoa,?,?,-,,,,,0.576,NOT_LTL,
+aut_09011.hoa,?,?,buchi,719,142,3327077,4627.4,1.194,UNVERIFIED_SIZE,<unflattened DAG: 3327077 tree nodes>
+aut_09012.hoa,?,?,buchi,30,7,63,2.1,1.110,True,(F(!a & XF(a & X!a)) & ((a | X(a & XF!a)) U (!a & X(a & XF!a)))) | (a U (!a & X!…
+aut_09015.hoa,?,?,buchi,30,7,63,2.1,1.114,True,(F(!a & XF(a & X!a)) & ((a | X(a & XF!a)) U (!a & X(a & XF!a)))) | (a U (!a & X!…
+aut_09016.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_09020.hoa,?,?,buchi,719,142,3327077,4627.4,1.188,UNVERIFIED_SIZE,<unflattened DAG: 3327077 tree nodes>
+aut_09023.hoa,?,?,buchi,719,142,3327077,4627.4,1.191,UNVERIFIED_SIZE,<unflattened DAG: 3327077 tree nodes>
+aut_09028.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_09030.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_09031.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_09032.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_09034.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_09036.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_09039.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_09060.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_09062.hoa,?,?,acc,1,0,1,1.0,1.101,True,1
+aut_09064.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_09068.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_09076.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_09079.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_09080.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_09084.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_09156.hoa,?,?,buchi,30,7,63,2.1,1.113,True,(F(!a & XF(a & X!a)) & ((a | X(a & XF!a)) U (!a & X(a & XF!a)))) | (a U (!a & X!…
+aut_09158.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_09159.hoa,?,?,buchi,30,7,63,2.1,1.104,True,(F(!a & XF(a & X!a)) & ((a | X(a & XF!a)) U (!a & X(a & XF!a)))) | (a U (!a & X!…
+aut_09160.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_09164.hoa,?,?,buchi,719,142,3327077,4627.4,1.188,UNVERIFIED_SIZE,<unflattened DAG: 3327077 tree nodes>
+aut_09223.hoa,?,?,daisy+strength2,6,3,7,1.2,0.064,True,Ga | GF!a
+aut_09225.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_09238.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_09239.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_09263.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_09271.hoa,?,?,buchi,5,1,6,1.2,1.112,True,a | XF!a
+aut_09280.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_09283.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_09284.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_09287.hoa,?,?,acc,1,0,1,1.0,1.101,True,1
+aut_09288.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_09292.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_09296.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_09315.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_09328.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_09330.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_09331.hoa,?,?,buchi,132,31,819,6.2,1.131,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_09332.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_09335.hoa,?,?,acc,1,0,1,1.0,1.087,True,1
+aut_09336.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_09340.hoa,?,?,buchi,132,31,819,6.2,1.128,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_09344.hoa,?,?,buchi,313,65,17473,55.8,1.147,True,(((a | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (a | (Xa & ((a | X(a | Xa)) U (…
+aut_09346.hoa,?,?,buchi,313,65,17473,55.8,1.151,True,(((a | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (a | (Xa & ((a | X(a | Xa)) U (…
+aut_09347.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_09348.hoa,?,?,buchi,53,11,718,13.5,1.115,True,((!a & ((a & Xa) R (a | X(a R (!a | X!a))))) | ((!a | X((a | X(F(a & Xa) & ((!a …
+aut_09351.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_09360.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_09362.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_09363.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_09408.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_09411.hoa,?,?,-,,,,,0.592,NOT_LTL,
+aut_09412.hoa,?,?,-,,,,,15.023,BUILD_TIMEOUT>15s,
+aut_09415.hoa,?,?,buchi,5,1,6,1.2,1.118,True,a | XF!a
+aut_09416.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_09420.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_09456.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_09748.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_09751.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_09752.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_09756.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_09767.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_09780.hoa,?,?,buchi,5,1,6,1.2,1.113,True,a | XF!a
+aut_09783.hoa,?,?,buchi,5,1,6,1.2,1.112,True,a | XF!a
+aut_09784.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_09788.hoa,?,?,acc,4,0,5,1.2,1.112,True,a | X!a
+aut_09792.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_09795.hoa,?,?,buchi,132,31,819,6.2,1.132,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_09796.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_09799.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_09800.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_09804.hoa,?,?,buchi,87,22,401,4.6,1.124,True,(a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a &…
+aut_09827.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_09831.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_09840.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_09842.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_09843.hoa,?,?,buchi,132,31,819,6.2,1.136,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_09844.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_09847.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_09848.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_09852.hoa,?,?,buchi,132,31,819,6.2,1.131,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_09859.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_09863.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_09872.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_09874.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_09875.hoa,?,?,daisy,1,0,1,1.0,0.060,True,1
+aut_09920.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_09923.hoa,?,?,acc,4,0,5,1.2,1.109,True,a | X!a
+aut_09924.hoa,?,?,buchi,677,119,1241365,1833.6,1.203,UNVERIFIED_SIZE,<unflattened DAG: 1241365 tree nodes>
+aut_09927.hoa,?,?,buchi,5,1,6,1.2,1.110,True,a | XF!a
+aut_09928.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_09932.hoa,?,?,buchi,221,41,4276,19.3,1.149,True,(a | (X!a & (F(!a & X(!a U (a & Xa))) | (((a | Xa) & (!a | X(a & (Xa | ((!a | Xa…
+aut_10036.hoa,?,?,buchi,5,1,6,1.2,1.116,True,a | XF!a
+aut_10039.hoa,?,?,buchi,5,1,6,1.2,1.117,True,a | XF!a
+aut_10040.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_10044.hoa,?,?,acc,4,0,5,1.2,1.110,True,a | X!a
+aut_10048.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_10050.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_10051.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_10052.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_10054.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_10055.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_10056.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_10060.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_10080.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_10082.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_10084.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_10086.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_10088.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_10092.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_10096.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_10099.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_10100.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_10103.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_10104.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_10108.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_10112.hoa,?,?,daisy2,4,1,5,1.2,0.064,True,G(a | Xa)
+aut_10114.hoa,?,?,daisy2,4,1,5,1.2,0.066,True,G(a | Xa)
+aut_10116.hoa,?,?,daisy,3,2,3,1.0,0.063,True,GFa
+aut_10176.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_10178.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_10179.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_10180.hoa,?,?,buchi,5,1,6,1.2,1.114,True,a | XF!a
+aut_10182.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_10183.hoa,?,?,buchi,5,1,6,1.2,1.116,True,a | XF!a
+aut_10184.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_10188.hoa,?,?,buchi,5209,999,3079430739250379,591175031532.0,1.760,UNVERIFIED_SIZE,<unflattened DAG: 3079430739250379 tree nodes>
+aut_10246.hoa,?,?,daisy+strength2,4,2,5,1.2,0.066,True,a & GFa
+aut_10249.hoa,?,?,daisy,1,0,1,1.0,0.065,True,a
+aut_10262.hoa,?,?,buchi,24,5,50,2.1,1.128,True,a & X(Fa & (!a | XFa) & ((!a & (a | G(a | X!a))) | G((a | X(a R (!a | XFa))) & (…
+aut_10263.hoa,?,?,acc,1,0,1,1.0,1.110,True,a
+aut_10266.hoa,?,?,partscc,5,1,7,1.4,0.066,True,a & G(a | Xa)
+aut_10295.hoa,?,?,daisy,1,0,1,1.0,0.064,True,a
+aut_10304.hoa,?,?,buchi,200,41,8880,44.4,1.144,True,a & (Xa | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (Xa | ((a | X(a | Xa)) U (!a…
+aut_10306.hoa,?,?,buchi,200,41,8880,44.4,1.152,True,a & (Xa | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (Xa | ((a | X(a | Xa)) U (!a…
+aut_10307.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_10308.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_10311.hoa,?,?,acc,1,0,1,1.0,1.110,True,a
+aut_10320.hoa,?,?,partscc,5,1,7,1.4,0.066,True,a & G(a | Xa)
+aut_10339.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_10354.hoa,?,?,partscc,5,1,7,1.4,0.066,True,a & G(a | Xa)
+aut_10371.hoa,?,?,buchi,787,147,6052771,7690.9,1.186,UNVERIFIED_SIZE,<unflattened DAG: 6052771 tree nodes>
+aut_10372.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_10375.hoa,?,?,acc,1,0,1,1.0,1.102,True,a
+aut_10380.hoa,?,?,buchi,1704,297,61234521089706,35935751813.2,1.199,UNVERIFIED_SIZE,<unflattened DAG: 61234521089706 tree nodes>
+aut_10435.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_10439.hoa,?,?,acc,1,0,1,1.0,1.109,True,a
+aut_10562.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_10563.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_10592.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_10594.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_10608.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_10611.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_10688.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_10690.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_10691.hoa,?,?,acc,4,0,5,1.2,1.112,True,a | X!a
+aut_11273.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_11285.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_11286.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_11287.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_11319.hoa,?,?,buchi,30,7,63,2.1,1.112,True,(F(!a & XF(a & X!a)) & ((a | X(a & XF!a)) U (!a & X(a & XF!a)))) | (a U (!a & X!…
+aut_11328.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_11331.hoa,?,?,-,,,,,0.577,NOT_LTL,
+aut_11332.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_11335.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_11336.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_11340.hoa,?,?,buchi,1028,188,759621667,738931.6,1.202,UNVERIFIED_SIZE,<unflattened DAG: 759621667 tree nodes>
+aut_11363.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_11376.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_11378.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_11379.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_11380.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_11383.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_11384.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_11388.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_11395.hoa,?,?,buchi,66,11,401,6.1,1.125,True,(F(!a & X!a) & G(a | X(a | X((!a | XF(!a & X!a)) & (a | ((X(a | X(a R (!a | XF(!…
+aut_11399.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_11408.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_11410.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_11456.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_11459.hoa,?,?,buchi,719,142,3327077,4627.4,1.189,UNVERIFIED_SIZE,<unflattened DAG: 3327077 tree nodes>
+aut_11460.hoa,?,?,-,,,,,15.027,BUILD_TIMEOUT>15s,
+aut_11463.hoa,?,?,buchi,30,7,63,2.1,1.126,True,(F(!a & XF(a & X!a)) & ((a | X(a & XF!a)) U (!a & X(a & XF!a)))) | (a U (!a & X!…
+aut_11464.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_11468.hoa,?,?,buchi,609,124,3318705,5449.4,1.168,UNVERIFIED_SIZE,<unflattened DAG: 3318705 tree nodes>
+aut_12128.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_12546.hoa,?,?,daisy,4,2,5,1.2,0.064,True,!a W Ga
+aut_12547.hoa,?,?,daisy,6,2,9,1.5,0.065,True,!a W (a & XG!a)
+aut_12550.hoa,?,?,daisy+strength2,6,3,8,1.3,0.065,True,!a W (a & GFa)
+aut_12551.hoa,?,?,daisy,4,2,4,1.0,0.063,True,GF!a
+aut_12576.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_12578.hoa,?,?,acc,4,0,5,1.2,1.108,True,!a | Xa
+aut_12580.hoa,?,?,buchi,5,1,6,1.2,1.116,True,!a | XFa
+aut_12582.hoa,?,?,buchi,5,1,6,1.2,1.117,True,!a | XFa
+aut_12584.hoa,?,?,acc,4,0,5,1.2,1.143,True,!a | Xa
+aut_12586.hoa,?,?,acc,4,0,5,1.2,1.115,True,!a | Xa
+aut_12588.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_12592.hoa,?,?,daisy2,5,1,7,1.4,0.065,True,G(!a | X!a)
+aut_12596.hoa,?,?,daisy2,4,2,4,1.0,0.067,True,GF!a
+aut_12604.hoa,?,?,daisy2,5,1,7,1.4,0.065,True,G(!a | X!a)
+aut_12607.hoa,?,?,daisy2,5,1,7,1.4,0.062,True,G(!a | X!a)
+aut_12612.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_12614.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_12615.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_12616.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_12618.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_12620.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_12623.hoa,?,?,daisy,1,0,1,1.0,0.060,True,1
+aut_12644.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_12646.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_12648.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_12652.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_12660.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_12663.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_12664.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_12668.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_12676.hoa,?,?,buchi,5,1,6,1.2,1.128,True,!a | XFa
+aut_12678.hoa,?,?,buchi,5,1,6,1.2,1.123,True,!a | XFa
+aut_12679.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_12680.hoa,?,?,acc,4,0,5,1.2,1.113,True,!a | Xa
+aut_12684.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_12687.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_12742.hoa,?,?,daisy,1,0,1,1.0,0.067,True,1
+aut_12743.hoa,?,?,buchi,8,3,15,1.9,1.110,True,(a R F!a) & G(a | X(a R F!a))
+aut_12746.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_12748.hoa,?,?,daisy2,5,1,7,1.4,0.062,True,G(!a | X!a)
+aut_12751.hoa,?,?,daisy2,5,1,7,1.4,0.066,True,G(!a | X!a)
+aut_12802.hoa,?,?,daisy,4,2,5,1.2,0.065,True,!a W Ga
+aut_12803.hoa,?,?,daisy,6,2,9,1.5,0.065,True,!a W (a & XG!a)
+aut_12832.hoa,?,?,-,,,,,0.589,NOT_LTL,
+aut_12834.hoa,?,?,buchi,719,142,3219334,4477.5,1.188,UNVERIFIED_SIZE,<unflattened DAG: 3219334 tree nodes>
+aut_12836.hoa,?,?,buchi,30,7,62,2.1,1.110,True,(F(a & XF(!a & Xa)) & ((!a | X(!a & XFa)) U (a & X(!a & XFa)))) | (!a U (a & Xa)…
+aut_12838.hoa,?,?,buchi,30,7,62,2.1,1.110,True,(F(a & XF(!a & Xa)) & ((!a | X(!a & XFa)) U (a & X(!a & XFa)))) | (!a U (a & Xa)…
+aut_12840.hoa,?,?,buchi,719,142,3219334,4477.5,1.183,UNVERIFIED_SIZE,<unflattened DAG: 3219334 tree nodes>
+aut_12842.hoa,?,?,buchi,719,142,3219334,4477.5,1.183,UNVERIFIED_SIZE,<unflattened DAG: 3219334 tree nodes>
+aut_12844.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_12868.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_12870.hoa,?,?,acc,1,0,1,1.0,1.097,True,1
+aut_12871.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_12872.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_12874.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_12876.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_12879.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_12900.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_12902.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_12904.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_12908.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_12916.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_12919.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_12920.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_12924.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_12932.hoa,?,?,buchi,30,7,62,2.1,1.119,True,(F(a & XF(!a & Xa)) & ((!a | X(!a & XFa)) U (a & X(!a & XFa)))) | (!a U (a & Xa)…
+aut_12934.hoa,?,?,buchi,30,7,62,2.1,1.135,True,(F(a & XF(!a & Xa)) & ((!a | X(!a & XFa)) U (a & X(!a & XFa)))) | (!a U (a & Xa)…
+aut_12935.hoa,?,?,acc,1,0,1,1.0,1.137,True,1
+aut_12936.hoa,?,?,buchi,719,142,3219334,4477.5,1.179,UNVERIFIED_SIZE,<unflattened DAG: 3219334 tree nodes>
+aut_12940.hoa,?,?,-,,,,,0.578,NOT_LTL,
+aut_13058.hoa,?,?,daisy+inv+scc2,6,2,9,1.5,0.066,True,!a & X(!a W Ga)
+aut_13062.hoa,?,?,daisy+strength2,7,3,10,1.4,0.063,True,G!a | (!a & GFa)
+aut_13066.hoa,?,?,daisy+inv+scc2,6,2,9,1.5,0.065,True,!a & X(!a W Ga)
+aut_13076.hoa,?,?,buchi,16,4,33,2.1,1.124,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_13078.hoa,?,?,daisy,2,0,2,1.0,0.064,True,!a
+aut_13082.hoa,?,?,daisy,2,0,2,1.0,0.066,True,!a
+aut_13084.hoa,?,?,partscc,6,1,10,1.7,0.066,True,!a & G(!a | X!a)
+aut_13106.hoa,?,?,buchi,787,147,6256357,7949.6,1.193,UNVERIFIED_SIZE,<unflattened DAG: 6256357 tree nodes>
+aut_13108.hoa,?,?,buchi,107,21,2513,23.5,1.150,True,!a & (X!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (a | (X(a | X(!a | X((a U (!…
+aut_13110.hoa,?,?,acc,2,0,2,1.0,1.111,True,!a
+aut_13112.hoa,?,?,buchi,460,85,3800975,8263.0,1.171,UNVERIFIED_SIZE,<unflattened DAG: 3800975 tree nodes>
+aut_13114.hoa,?,?,buchi,787,147,6256357,7949.6,1.191,UNVERIFIED_SIZE,<unflattened DAG: 6256357 tree nodes>
+aut_13124.hoa,?,?,buchi,16,4,33,2.1,1.117,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_13126.hoa,?,?,acc,2,0,2,1.0,1.110,True,!a
+aut_13130.hoa,?,?,daisy,2,0,2,1.0,0.065,True,!a
+aut_13132.hoa,?,?,partscc,6,1,10,1.7,0.065,True,!a & G(!a | X!a)
+aut_13174.hoa,?,?,acc,2,0,2,1.0,1.105,True,!a
+aut_13190.hoa,?,?,acc,2,0,2,1.0,1.110,True,!a
+aut_13252.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_13254.hoa,?,?,acc,2,0,2,1.0,1.113,True,!a
+aut_13256.hoa,?,?,buchi,460,85,3800975,8263.0,1.192,UNVERIFIED_SIZE,<unflattened DAG: 3800975 tree nodes>
+aut_13318.hoa,?,?,daisy+strength2,6,3,7,1.2,0.065,True,G!a | GFa
+aut_13321.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_13334.hoa,?,?,acc,1,0,1,1.0,1.120,True,1
+aut_13335.hoa,?,?,acc,1,0,1,1.0,1.121,True,1
+aut_13350.hoa,?,?,buchi,5,1,6,1.2,1.130,True,!a | XFa
+aut_13370.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_13376.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_13378.hoa,?,?,-,,,,,0.597,NOT_LTL,
+aut_13380.hoa,?,?,daisy2,4,2,4,1.0,0.067,True,GF!a
+aut_13382.hoa,?,?,acc,1,0,1,1.0,1.138,True,1
+aut_13384.hoa,?,?,-,,,,,0.613,NOT_LTL,
+aut_13388.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_13392.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_13408.hoa,?,?,-,,,,,0.613,NOT_LTL,
+aut_13410.hoa,?,?,buchi,132,31,813,6.2,1.158,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_13411.hoa,?,?,acc,1,0,1,1.0,1.122,True,1
+aut_13412.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_13414.hoa,?,?,acc,1,0,1,1.0,1.124,True,1
+aut_13416.hoa,?,?,buchi,132,31,813,6.2,1.122,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_13420.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_13426.hoa,?,?,acc,1,0,1,1.0,1.120,True,1
+aut_13440.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_13442.hoa,?,?,buchi,4860,879,14571763424490,2998305231.4,1.426,UNVERIFIED_SIZE,<unflattened DAG: 14571763424490 tree nodes>
+aut_13444.hoa,?,?,-,,,,,15.022,BUILD_TIMEOUT>15s,
+aut_13446.hoa,?,?,buchi,5,1,6,1.2,1.110,True,!a | XFa
+aut_13448.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_13452.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_13456.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_13458.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_13459.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_13472.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_13504.hoa,?,?,buchi,304,64,19483,64.1,1.155,True,(((!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (!a | (X!a & ((!a | X(!a | X!a))…
+aut_13506.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_13507.hoa,?,?,buchi,304,64,19483,64.1,1.152,True,(((!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (!a | (X!a & ((!a | X(!a | X!a))…
+aut_13508.hoa,?,?,buchi,53,11,738,13.9,1.125,True,((a & ((!a & X!a) R (!a | X(!a R (a | Xa))))) | ((a | X((!a | X(F(!a & X!a) & ((…
+aut_13510.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_13860.hoa,?,?,buchi,5,1,6,1.2,1.114,True,!a | XFa
+aut_13862.hoa,?,?,buchi,5,1,6,1.2,1.118,True,!a | XFa
+aut_13864.hoa,?,?,acc,4,0,5,1.2,1.115,True,!a | Xa
+aut_13868.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_13888.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_13890.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_13891.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_13892.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_13894.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_13895.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_13896.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_13900.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_13920.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_13922.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_13924.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_13926.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_13928.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_13932.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_13936.hoa,?,?,daisy2,1,0,1,1.0,0.068,True,1
+aut_13939.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_13940.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_13943.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_13944.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_13948.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_13952.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_13954.hoa,?,?,buchi,112,16,1329,11.9,1.132,True,(((!a & X!a) | ((!a | Xa) & F((a & X(a U (!a & X!a))) | (!a & X(!a & X!a))))) & …
+aut_13955.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_13956.hoa,?,?,buchi,5,1,6,1.2,1.114,True,!a | XFa
+aut_13958.hoa,?,?,buchi,5,1,6,1.2,1.121,True,!a | XFa
+aut_13959.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_13960.hoa,?,?,buchi,9800,1693,37369973373132114,3813262589095.1,2.386,UNVERIFIED_SIZE,<unflattened DAG: 37369973373132114 tree nodes>
+aut_13964.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_14016.hoa,?,?,daisy2,5,1,7,1.4,0.066,True,G(!a | X!a)
+aut_14019.hoa,?,?,daisy2,5,1,7,1.4,0.066,True,G(!a | X!a)
+aut_14020.hoa,?,?,daisy,4,2,4,1.0,0.065,True,GF!a
+aut_14100.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_14102.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_14104.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_14108.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_14116.hoa,?,?,buchi,5,1,6,1.2,1.115,True,!a | XFa
+aut_14118.hoa,?,?,buchi,5,1,6,1.2,1.119,True,!a | XFa
+aut_14120.hoa,?,?,acc,4,0,5,1.2,1.124,True,!a | Xa
+aut_14124.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_14134.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_14144.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_14146.hoa,?,?,buchi,132,31,813,6.2,1.131,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_14148.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_14150.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_14152.hoa,?,?,buchi,87,22,402,4.6,1.131,True,(!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & X…
+aut_14156.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_14176.hoa,?,?,-,,,,,0.593,NOT_LTL,
+aut_14178.hoa,?,?,buchi,132,31,813,6.2,1.154,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_14179.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_14180.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_14182.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_14184.hoa,?,?,buchi,132,31,813,6.2,1.137,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_14188.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_14194.hoa,?,?,acc,1,0,1,1.0,1.125,True,1
+aut_14198.hoa,?,?,acc,1,0,1,1.0,1.131,True,1
+aut_14208.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_14210.hoa,?,?,acc,4,0,5,1.2,1.114,True,!a | Xa
+aut_14212.hoa,?,?,buchi,394,74,357961,908.5,1.172,UNVERIFIED_SIZE,<unflattened DAG: 357961 tree nodes>
+aut_14214.hoa,?,?,buchi,5,1,6,1.2,1.123,True,!a | XFa
+aut_14216.hoa,?,?,buchi,219,41,4333,19.8,1.142,True,(!a | (Xa & (F(a & X(a U (!a & X!a))) | (((!a | X!a) & (a | X(!a & (X!a | ((a | …
+aut_14220.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_14224.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14226.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_14227.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14274.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_14278.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_14345.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14357.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14358.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_14359.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_14374.hoa,?,?,buchi,30,7,62,2.1,1.123,True,(F(a & XF(!a & Xa)) & ((!a | X(!a & XFa)) U (a & X(!a & XFa)))) | (!a U (a & Xa)…
+aut_14400.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_14402.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_14404.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_14406.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_14408.hoa,?,?,buchi,1028,188,756238542,735640.6,1.207,UNVERIFIED_SIZE,<unflattened DAG: 756238542 tree nodes>
+aut_14412.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_14432.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_14434.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_14435.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_14436.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_14438.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_14440.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_14444.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_14450.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14464.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_14466.hoa,?,?,buchi,719,142,3219334,4477.5,1.185,UNVERIFIED_SIZE,<unflattened DAG: 3219334 tree nodes>
+aut_14468.hoa,?,?,-,,,,,15.026,BUILD_TIMEOUT>15s,
+aut_14470.hoa,?,?,buchi,30,7,62,2.1,1.113,True,(F(a & XF(!a & Xa)) & ((!a | X(!a & XFa)) U (a & X(!a & XFa)))) | (!a U (a & Xa)…
+aut_14472.hoa,?,?,buchi,609,124,3211283,5273.0,1.162,UNVERIFIED_SIZE,<unflattened DAG: 3211283 tree nodes>
+aut_14476.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_14480.hoa,?,?,daisy,1,0,1,1.0,0.061,True,1
+aut_14483.hoa,?,?,daisy,1,0,1,1.0,0.068,True,1
+aut_14530.hoa,?,?,buchi,66,11,412,6.2,1.121,True,((!a | F(!a & X!a)) & (a | X((!a | XF(!a & X!a)) & (a | ((X(a | X(a R (!a | XF(!…
+aut_14534.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_14658.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_14659.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14688.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14690.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_14704.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_14707.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_14720.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_14722.hoa,?,?,acc,4,0,5,1.2,1.109,True,!a | Xa
+aut_14723.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+aut_14944.hoa,?,?,daisy,1,0,1,1.0,0.064,True,1
+aut_15367.hoa,?,?,daisy+strength2,5,2,7,1.4,0.065,True,!a & GF!a
+aut_15369.hoa,?,?,daisy,2,0,2,1.0,0.064,True,!a
+aut_15382.hoa,?,?,acc,2,0,2,1.0,1.116,True,!a
+aut_15383.hoa,?,?,buchi,24,5,52,2.2,1.111,True,!a & X(F!a & (a | XF!a) & ((a & (!a | G(!a | Xa))) | G((!a | X(!a R (a | XF!a)))…
+aut_15391.hoa,?,?,partscc,6,1,10,1.7,0.065,True,!a & G(!a | X!a)
+aut_15398.hoa,?,?,daisy,2,0,2,1.0,0.065,True,!a
+aut_15424.hoa,?,?,buchi,191,40,9975,52.2,1.146,True,!a & (X!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (X!a | ((!a | X(!a | X!a)) U…
+aut_15426.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_15427.hoa,?,?,buchi,191,40,9975,52.2,1.145,True,!a & (X!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (X!a | ((!a | X(!a | X!a)) U…
+aut_15428.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_15430.hoa,?,?,acc,2,0,2,1.0,1.110,True,!a
+aut_15440.hoa,?,?,partscc,6,1,10,1.7,0.065,True,!a & G(!a | X!a)
+aut_15459.hoa,?,?,partscc,6,1,10,1.7,0.067,True,!a & G(!a | X!a)
+aut_15474.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_15490.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_15494.hoa,?,?,acc,2,0,2,1.0,1.106,True,!a
+aut_15554.hoa,?,?,buchi,787,147,6256357,7949.6,1.191,UNVERIFIED_SIZE,<unflattened DAG: 6256357 tree nodes>
+aut_15556.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_15558.hoa,?,?,acc,2,0,2,1.0,1.111,True,!a
+aut_15560.hoa,?,?,buchi,1704,297,68723622795505,40330764551.4,1.199,UNVERIFIED_SIZE,<unflattened DAG: 68723622795505 tree nodes>
+aut_16642.hoa,?,?,daisy,3,2,3,1.0,0.066,True,FGa
+aut_16643.hoa,?,?,daisy,4,2,4,1.0,0.064,True,FG!a
+aut_16646.hoa,?,?,daisy,5,3,6,1.2,0.065,True,F(a & GFa)
+aut_16647.hoa,?,?,daisy,6,3,8,1.3,0.065,True,F(!a & GF!a)
+aut_16672.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_16674.hoa,?,?,buchi,8,3,16,2.0,1.117,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_16676.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_16678.hoa,?,?,buchi,9,3,14,1.6,1.111,True,X(Fa & G(!a | X(!a R Fa)))
+aut_16680.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_16684.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_16688.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_16691.hoa,?,?,buchi,8,3,15,1.9,1.111,True,(a R F!a) & G(a | X(a R F!a))
+aut_16692.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_16695.hoa,?,?,buchi,9,3,14,1.6,1.106,True,X(F!a & G(a | X(a R F!a)))
+aut_16696.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_16700.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_16704.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_16706.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_16707.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_16736.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_16738.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_16740.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_16742.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_16744.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_16748.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_16752.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_16755.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_16756.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_16759.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_16760.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_16764.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_16768.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_16770.hoa,?,?,buchi,8,3,16,2.0,1.102,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_16771.hoa,?,?,acc,1,0,1,1.0,1.096,True,1
+aut_16772.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_16774.hoa,?,?,buchi,8,3,16,2.0,1.101,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_16832.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_16834.hoa,?,?,acc,1,0,1,1.0,1.094,True,1
+aut_16835.hoa,?,?,buchi,8,3,15,1.9,1.116,True,(a R F!a) & G(a | X(a R F!a))
+aut_16836.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_16839.hoa,?,?,buchi,8,3,15,1.9,1.109,True,(a R F!a) & G(a | X(a R F!a))
+aut_16897.hoa,?,?,daisy,2,1,2,1.0,0.064,True,Fa
+aut_16899.hoa,?,?,daisy,6,2,7,1.2,0.064,True,F(a & XG!a)
+aut_16903.hoa,?,?,daisy,6,3,7,1.2,0.064,True,F(a & GF!a)
+aut_16905.hoa,?,?,daisy,2,1,2,1.0,0.063,True,Fa
+aut_16912.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_16914.hoa,?,?,partscc,3,2,3,1.0,0.065,True,GFa
+aut_16915.hoa,?,?,buchi,2,1,2,1.0,1.109,True,Fa
+aut_16916.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_16918.hoa,?,?,buchi,8,3,13,1.6,1.105,True,Fa & G(!a | X(!a R Fa))
+aut_16919.hoa,?,?,buchi,2,1,2,1.0,1.110,True,Fa
+aut_16920.hoa,?,?,daisy2,3,2,3,1.0,0.063,True,GFa
+aut_16924.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_16928.hoa,?,?,daisy2,5,2,6,1.2,0.067,True,GF(a & Xa)
+aut_16930.hoa,?,?,buchi,46,9,373,8.1,1.117,True,F(a & Xa) & ((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (((a R …
+aut_16931.hoa,?,?,buchi,2,1,2,1.0,1.107,True,Fa
+aut_16935.hoa,?,?,buchi,2,1,2,1.0,1.106,True,Fa
+aut_16936.hoa,?,?,daisy2,5,2,6,1.2,0.067,True,GF(a & Xa)
+aut_16944.hoa,?,?,daisy2,6,2,7,1.2,0.065,True,GF(a & X!a)
+aut_16947.hoa,?,?,buchi,726,129,719222,990.7,1.224,UNVERIFIED_SIZE,<unflattened DAG: 719222 tree nodes>
+aut_16948.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(F!a & Fa)
+aut_16951.hoa,?,?,buchi,75,12,325,4.3,1.118,True,((!a U (a & X!a)) | (!a & X(!a U (a & X!a))) | ((!a | X(a & (X!a | (F!a & ((!a |…
+aut_16952.hoa,?,?,daisy2,6,3,7,1.2,0.066,True,G(F!a & Fa)
+aut_16956.hoa,?,?,daisy2,6,2,7,1.2,0.063,True,GF(a & X!a)
+aut_16960.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_16963.hoa,?,?,buchi,2,1,2,1.0,1.105,True,Fa
+aut_16967.hoa,?,?,buchi,2,1,2,1.0,1.110,True,Fa
+aut_16995.hoa,?,?,buchi,2,1,2,1.0,1.114,True,Fa
+aut_16999.hoa,?,?,buchi,2,1,2,1.0,1.110,True,Fa
+aut_17008.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_17011.hoa,?,?,buchi,2,1,2,1.0,1.105,True,Fa
+aut_17012.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_17015.hoa,?,?,buchi,2,1,2,1.0,1.101,True,Fa
+aut_17016.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_17020.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_17024.hoa,?,?,daisy2,5,2,6,1.2,0.066,True,GF(a & Xa)
+aut_17026.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_17027.hoa,?,?,buchi,2,1,2,1.0,1.110,True,Fa
+aut_17028.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_17031.hoa,?,?,buchi,2,1,2,1.0,1.099,True,Fa
+aut_17088.hoa,?,?,daisy2,6,2,7,1.2,0.065,True,GF(a & X!a)
+aut_17091.hoa,?,?,buchi,726,129,719222,990.7,1.222,UNVERIFIED_SIZE,<unflattened DAG: 719222 tree nodes>
+aut_17092.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(F!a & Fa)
+aut_17095.hoa,?,?,buchi,726,129,719222,990.7,1.215,UNVERIFIED_SIZE,<unflattened DAG: 719222 tree nodes>
+aut_17153.hoa,?,?,daisy,3,1,3,1.0,0.065,True,F!a
+aut_17154.hoa,?,?,daisy,6,2,7,1.2,0.066,True,F(!a & XGa)
+aut_17158.hoa,?,?,daisy,6,3,7,1.2,0.064,True,F(!a & GFa)
+aut_17161.hoa,?,?,daisy,3,1,3,1.0,0.066,True,F!a
+aut_17168.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_17170.hoa,?,?,buchi,3,1,3,1.0,1.104,True,F!a
+aut_17171.hoa,?,?,partscc,4,2,4,1.0,0.064,True,GF!a
+aut_17172.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_17174.hoa,?,?,buchi,3,1,3,1.0,1.099,True,F!a
+aut_17175.hoa,?,?,buchi,8,3,13,1.6,1.104,True,F!a & G(a | X(a R F!a))
+aut_17176.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_17180.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_17184.hoa,?,?,daisy2,6,2,7,1.2,0.065,True,GF(!a & Xa)
+aut_17186.hoa,?,?,buchi,726,129,739611,1018.7,1.218,UNVERIFIED_SIZE,<unflattened DAG: 739611 tree nodes>
+aut_17188.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(Fa & F!a)
+aut_17190.hoa,?,?,buchi,75,12,321,4.3,1.117,True,((a U (!a & Xa)) | (a & X(a U (!a & Xa))) | ((a | X(!a & (Xa | (Fa & ((a | X!a) …
+aut_17192.hoa,?,?,daisy2,6,2,7,1.2,0.066,True,GF(!a & Xa)
+aut_17196.hoa,?,?,daisy2,6,3,7,1.2,0.062,True,G(Fa & F!a)
+aut_17200.hoa,?,?,daisy2,6,2,8,1.3,0.065,True,GF(!a & X!a)
+aut_17202.hoa,?,?,buchi,3,1,3,1.0,1.104,True,F!a
+aut_17203.hoa,?,?,buchi,46,9,376,8.2,1.115,True,F(!a & X!a) & ((a U (!a & X!a)) | ((a | Xa) U (a & X(a U (!a & X!a))))) & (((!a …
+aut_17206.hoa,?,?,buchi,3,1,3,1.0,1.107,True,F!a
+aut_17212.hoa,?,?,daisy2,6,2,8,1.3,0.064,True,GF(!a & X!a)
+aut_17216.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_17218.hoa,?,?,buchi,3,1,3,1.0,1.107,True,F!a
+aut_17222.hoa,?,?,buchi,3,1,3,1.0,1.111,True,F!a
+aut_17248.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_17250.hoa,?,?,buchi,3,1,3,1.0,1.109,True,F!a
+aut_17252.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_17254.hoa,?,?,buchi,3,1,3,1.0,1.105,True,F!a
+aut_17256.hoa,?,?,daisy2,4,2,4,1.0,0.061,True,GF!a
+aut_17260.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_17266.hoa,?,?,buchi,3,1,3,1.0,1.105,True,F!a
+aut_17270.hoa,?,?,buchi,3,1,3,1.0,1.109,True,F!a
+aut_17280.hoa,?,?,daisy2,6,2,7,1.2,0.066,True,GF(!a & Xa)
+aut_17282.hoa,?,?,buchi,726,129,739611,1018.7,1.217,UNVERIFIED_SIZE,<unflattened DAG: 739611 tree nodes>
+aut_17284.hoa,?,?,daisy2,6,3,7,1.2,0.064,True,G(Fa & F!a)
+aut_17286.hoa,?,?,buchi,726,129,739611,1018.7,1.216,UNVERIFIED_SIZE,<unflattened DAG: 739611 tree nodes>
+aut_17344.hoa,?,?,daisy2,6,2,8,1.3,0.064,True,GF(!a & X!a)
+aut_17346.hoa,?,?,buchi,3,1,3,1.0,1.106,True,F!a
+aut_17347.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_17348.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_17350.hoa,?,?,buchi,3,1,3,1.0,1.105,True,F!a
+aut_17474.hoa,?,?,buchi,6899,1184,244623717373390601115304,35457851481865576448.0,1.501,UNVERIFIED_SIZE,<unflattened DAG: 244623717373390601115304 tree nodes>
+aut_17475.hoa,?,?,buchi,17073,3162,41404651671508723600705218,2425153849441148469248.0,2.065,UNVERIFIED_SIZE,<unflattened DAG: 41404651671508723600705218 tree nodes>
+aut_17507.hoa,?,?,acc,1,0,1,1.0,1.099,True,1
+aut_17522.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_17538.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_17539.hoa,?,?,buchi,11739,1724,8031191336912167,684146122916.1,2.167,UNVERIFIED_SIZE,<unflattened DAG: 8031191336912167 tree nodes>
+aut_17602.hoa,?,?,buchi,13070,1844,22313144827911142536,1707203123788151.8,2.086,UNVERIFIED_SIZE,<unflattened DAG: 22313144827911142536 tree nodes>
+aut_17603.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_17936.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_17938.hoa,?,?,acc,1,0,1,1.0,1.100,True,1
+aut_17939.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_17940.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_17943.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_17944.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_17948.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_17952.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_17954.hoa,?,?,buchi,8,3,16,2.0,1.131,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_17955.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_17959.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_17960.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_17968.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_17970.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_17971.hoa,?,?,buchi,8,3,15,1.9,1.109,True,(a R F!a) & G(a | X(a R F!a))
+aut_17972.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_17975.hoa,?,?,buchi,9,3,14,1.6,1.124,True,X(F!a & G(a | X(a R F!a)))
+aut_17976.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_17980.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_17987.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_17991.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_18019.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_18023.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_18032.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_18034.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_18035.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_18036.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_18039.hoa,?,?,acc,1,0,1,1.0,1.099,True,1
+aut_18040.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_18044.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_18051.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_18055.hoa,?,?,acc,1,0,1,1.0,1.098,True,1
+aut_18115.hoa,?,?,buchi,8,2,12,1.5,1.106,True,F!a & G(a | XXF!a)
+aut_18119.hoa,?,?,buchi,8,2,12,1.5,1.105,True,F!a & G(a | XXF!a)
+aut_18192.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_18194.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_18195.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_18196.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_18198.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_18200.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_18204.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_18208.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_18210.hoa,?,?,buchi,8,3,16,2.0,1.101,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_18211.hoa,?,?,acc,1,0,1,1.0,1.099,True,1
+aut_18212.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_18214.hoa,?,?,buchi,9,3,14,1.6,1.113,True,X(Fa & G(!a | X(!a R Fa)))
+aut_18216.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_18220.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_18224.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_18226.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_18227.hoa,?,?,buchi,8,3,15,1.9,1.108,True,(a R F!a) & G(a | X(a R F!a))
+aut_18230.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_18236.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_18242.hoa,?,?,acc,1,0,1,1.0,1.100,True,1
+aut_18246.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_18272.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_18274.hoa,?,?,acc,1,0,1,1.0,1.096,True,1
+aut_18275.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_18276.hoa,?,?,daisy2,1,0,1,1.0,0.067,True,1
+aut_18278.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_18280.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_18284.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_18290.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_18294.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_18306.hoa,?,?,buchi,8,2,11,1.4,1.106,True,Fa & G(!a | XXFa)
+aut_18310.hoa,?,?,buchi,8,2,11,1.4,1.112,True,Fa & G(!a | XXFa)
+aut_18370.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_18374.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_18438.hoa,?,?,daisy,5,3,6,1.2,0.064,True,F(a & GFa)
+aut_18439.hoa,?,?,daisy,6,3,7,1.2,0.062,True,F(a & GF!a)
+aut_18452.hoa,?,?,daisy2,3,2,3,1.0,0.067,True,GFa
+aut_18454.hoa,?,?,buchi,619,111,820086,1324.9,1.181,UNVERIFIED_SIZE,<unflattened DAG: 820086 tree nodes>
+aut_18455.hoa,?,?,buchi,2,1,2,1.0,1.110,True,Fa
+aut_18456.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_18460.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_18468.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_18476.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_18484.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(F!a & Fa)
+aut_18488.hoa,?,?,daisy2,6,3,7,1.2,0.066,True,G(F!a & Fa)
+aut_18492.hoa,?,?,daisy2,6,2,7,1.2,0.065,True,GF(a & X!a)
+aut_18498.hoa,?,?,buchi,46,9,373,8.1,1.119,True,F(a & Xa) & ((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & (((a R …
+aut_18499.hoa,?,?,-,,,,,15.026,BUILD_TIMEOUT>15s,
+aut_18531.hoa,?,?,buchi,2,1,2,1.0,1.116,True,Fa
+aut_18536.hoa,?,?,daisy2,5,2,6,1.2,0.065,True,GF(a & Xa)
+aut_18546.hoa,?,?,daisy,3,2,3,1.0,0.065,True,GFa
+aut_18562.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_18563.hoa,?,?,-,,,,,15.027,BUILD_TIMEOUT>15s,
+aut_18627.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_19462.hoa,?,?,daisy,6,3,7,1.2,0.063,True,F(!a & GFa)
+aut_19463.hoa,?,?,daisy,6,3,8,1.3,0.066,True,F(!a & GF!a)
+aut_19476.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_19478.hoa,?,?,buchi,3,1,3,1.0,1.102,True,F!a
+aut_19479.hoa,?,?,buchi,619,111,796540,1286.8,1.181,UNVERIFIED_SIZE,<unflattened DAG: 796540 tree nodes>
+aut_19480.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_19484.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_19492.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(Fa & F!a)
+aut_19496.hoa,?,?,daisy2,6,2,7,1.2,0.062,True,GF(!a & Xa)
+aut_19500.hoa,?,?,daisy2,6,3,7,1.2,0.062,True,G(Fa & F!a)
+aut_19508.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_19512.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_19522.hoa,?,?,-,,,,,15.027,BUILD_TIMEOUT>15s,
+aut_19523.hoa,?,?,buchi,46,9,376,8.2,1.124,True,F(!a & X!a) & ((a U (!a & X!a)) | ((a | Xa) U (a & X(a U (!a & X!a))))) & (((!a …
+aut_19555.hoa,?,?,daisy,4,2,4,1.0,0.065,True,GF!a
+aut_19570.hoa,?,?,buchi,3,1,3,1.0,1.097,True,F!a
+aut_19580.hoa,?,?,daisy2,6,2,8,1.3,0.065,True,GF(!a & X!a)
+aut_19586.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_19650.hoa,?,?,-,,,,,15.027,BUILD_TIMEOUT>15s,
+aut_19651.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_24834.hoa,?,?,daisy,3,2,3,1.0,0.064,True,GFa
+aut_24835.hoa,?,?,daisy+strength2,1,0,1,1.0,0.065,True,1
+aut_24838.hoa,?,?,daisy,3,2,3,1.0,0.064,True,GFa
+aut_24839.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
+aut_24864.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_24868.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_24880.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_24883.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_24884.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_24887.hoa,?,?,acc,1,0,1,1.0,1.119,True,1
+aut_24888.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_24892.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_24896.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_24898.hoa,?,?,acc,1,0,1,1.0,1.099,True,1
+aut_24899.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_24928.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_24944.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_24947.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_24948.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_24951.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_24952.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_24956.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_24960.hoa,?,?,daisy2,3,2,3,1.0,0.062,True,GFa
+aut_24962.hoa,?,?,buchi,8,3,13,1.6,1.101,True,Fa & G(!a | X(!a R Fa))
+aut_24963.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_24964.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_24966.hoa,?,?,buchi,8,3,13,1.6,1.103,True,Fa & G(!a | X(!a R Fa))
+aut_25024.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_25026.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_25027.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_25028.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_25031.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_25091.hoa,?,?,daisy+strength2,9,4,11,1.2,0.065,True,F((a & XG!a) | GFa)
+aut_25095.hoa,?,?,daisy,9,5,11,1.2,0.066,True,F(GFa | (a & GF!a))
+aut_25104.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_25107.hoa,?,?,buchi,2,1,2,1.0,1.113,True,Fa
+aut_25108.hoa,?,?,daisy2,3,2,3,1.0,0.062,True,GFa
+aut_25123.hoa,?,?,buchi,2,1,2,1.0,1.107,True,Fa
+aut_25127.hoa,?,?,buchi,2,1,2,1.0,1.107,True,Fa
+aut_25155.hoa,?,?,buchi,2,1,2,1.0,1.112,True,Fa
+aut_25159.hoa,?,?,buchi,2,1,2,1.0,1.109,True,Fa
+aut_25187.hoa,?,?,buchi,2,1,2,1.0,1.096,True,Fa
+aut_25191.hoa,?,?,buchi,2,1,2,1.0,1.105,True,Fa
+aut_25219.hoa,?,?,buchi,2,1,2,1.0,1.106,True,Fa
+aut_25223.hoa,?,?,buchi,2,1,2,1.0,1.105,True,Fa
+aut_25283.hoa,?,?,buchi,2,1,2,1.0,1.103,True,Fa
+aut_25287.hoa,?,?,buchi,2,1,2,1.0,1.105,True,Fa
+aut_25392.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_25395.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_25396.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_25399.hoa,?,?,acc,1,0,1,1.0,1.115,True,1
+aut_25400.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_25404.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_25456.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_25459.hoa,?,?,acc,1,0,1,1.0,1.115,True,1
+aut_25460.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_25463.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_25464.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_25468.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_25616.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_25618.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_25619.hoa,?,?,acc,1,0,1,1.0,1.116,True,1
+aut_25635.hoa,?,?,acc,1,0,1,1.0,1.124,True,1
+aut_25667.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_25671.hoa,?,?,acc,1,0,1,1.0,1.120,True,1
+aut_25699.hoa,?,?,acc,1,0,1,1.0,1.121,True,1
+aut_25731.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_25735.hoa,?,?,acc,1,0,1,1.0,1.123,True,1
+aut_25795.hoa,?,?,acc,1,0,1,1.0,1.144,True,1
+aut_25799.hoa,?,?,acc,1,0,1,1.0,1.125,True,1
+aut_26128.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_26131.hoa,?,?,acc,1,0,1,1.0,1.118,True,1
+aut_26147.hoa,?,?,acc,1,0,1,1.0,1.118,True,1
+aut_26151.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_26179.hoa,?,?,acc,1,0,1,1.0,1.118,True,1
+aut_26183.hoa,?,?,acc,1,0,1,1.0,1.115,True,1
+aut_26211.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_26215.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_26243.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_26247.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_26307.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_26311.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_26416.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_26419.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_26420.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_26423.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_26424.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_26428.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_26480.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_26483.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_26484.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_26487.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_26488.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_26492.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_26625.hoa,?,?,daisy+strength2,2,1,2,1.0,0.064,True,Fa
+aut_26640.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_26642.hoa,?,?,buchi,8,3,13,1.6,1.105,True,Fa & G(!a | X(!a R Fa))
+aut_26643.hoa,?,?,buchi,2,1,2,1.0,1.109,True,Fa
+aut_26644.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_26646.hoa,?,?,buchi,619,111,820086,1324.9,1.177,UNVERIFIED_SIZE,<unflattened DAG: 820086 tree nodes>
+aut_26647.hoa,?,?,buchi,2,1,2,1.0,1.108,True,Fa
+aut_26659.hoa,?,?,buchi,2,1,2,1.0,1.113,True,Fa
+aut_26691.hoa,?,?,buchi,2,1,2,1.0,1.110,True,Fa
+aut_26695.hoa,?,?,buchi,2,1,2,1.0,1.117,True,Fa
+aut_26723.hoa,?,?,buchi,2,1,2,1.0,1.106,True,Fa
+aut_26755.hoa,?,?,buchi,2,1,2,1.0,1.111,True,Fa
+aut_26759.hoa,?,?,buchi,2,1,2,1.0,1.115,True,Fa
+aut_26819.hoa,?,?,buchi,2,1,2,1.0,1.111,True,Fa
+aut_26823.hoa,?,?,buchi,2,1,2,1.0,1.124,True,Fa
+aut_27664.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_27666.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_27672.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_27699.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_27703.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_27715.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_27719.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_27779.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_27783.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_27843.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_27847.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_28930.hoa,?,?,daisy+strength2,1,0,1,1.0,0.063,True,1
+aut_28931.hoa,?,?,daisy,4,2,4,1.0,0.062,True,GF!a
+aut_28934.hoa,?,?,daisy,1,0,1,1.0,0.066,True,1
+aut_28935.hoa,?,?,daisy,4,2,4,1.0,0.064,True,GF!a
+aut_28960.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_28962.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_28964.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_28966.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_28968.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_28972.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_28976.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_28980.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_28992.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_28994.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_28995.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_29024.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_29026.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_29028.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_29030.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_29032.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_29036.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_29040.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_29056.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_29058.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_29059.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_29060.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_29062.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_29120.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_29122.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_29123.hoa,?,?,buchi,8,3,13,1.6,1.105,True,F!a & G(a | X(a R F!a))
+aut_29124.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_29127.hoa,?,?,buchi,8,3,13,1.6,1.114,True,F!a & G(a | X(a R F!a))
+aut_29216.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_29218.hoa,?,?,acc,1,0,1,1.0,1.101,True,1
+aut_29220.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_29222.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_29224.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_29228.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_29280.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_29282.hoa,?,?,acc,1,0,1,1.0,1.098,True,1
+aut_29284.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_29286.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_29288.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_29292.hoa,?,?,daisy2,1,0,1,1.0,0.068,True,1
+aut_29442.hoa,?,?,daisy+strength2,9,4,12,1.3,0.066,True,F((!a & XGa) | GF!a)
+aut_29446.hoa,?,?,daisy,9,5,12,1.3,0.065,True,F(GF!a | (!a & GFa))
+aut_29456.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_29458.hoa,?,?,buchi,3,1,3,1.0,1.104,True,F!a
+aut_29460.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_29490.hoa,?,?,buchi,3,1,3,1.0,1.113,True,F!a
+aut_29494.hoa,?,?,buchi,3,1,3,1.0,1.108,True,F!a
+aut_29506.hoa,?,?,buchi,3,1,3,1.0,1.114,True,F!a
+aut_29510.hoa,?,?,buchi,3,1,3,1.0,1.123,True,F!a
+aut_29554.hoa,?,?,buchi,3,1,3,1.0,1.112,True,F!a
+aut_29558.hoa,?,?,buchi,3,1,3,1.0,1.112,True,F!a
+aut_29570.hoa,?,?,buchi,3,1,3,1.0,1.117,True,F!a
+aut_29574.hoa,?,?,buchi,3,1,3,1.0,1.111,True,F!a
+aut_29634.hoa,?,?,buchi,3,1,3,1.0,1.104,True,F!a
+aut_29638.hoa,?,?,buchi,3,1,3,1.0,1.133,True,F!a
+aut_29712.hoa,?,?,daisy2,1,0,1,1.0,0.067,True,1
+aut_29714.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_29715.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_29746.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_29762.hoa,?,?,acc,1,0,1,1.0,1.115,True,1
+aut_29766.hoa,?,?,acc,1,0,1,1.0,1.101,True,1
+aut_29810.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_29826.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_29830.hoa,?,?,acc,1,0,1,1.0,1.100,True,1
+aut_29890.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_29894.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_30240.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_30242.hoa,?,?,acc,1,0,1,1.0,1.120,True,1
+aut_30244.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_30246.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_30248.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_30252.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_30304.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_30306.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_30308.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_30310.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_30312.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_30316.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_30480.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_30482.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_30514.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_30518.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_30530.hoa,?,?,acc,1,0,1,1.0,1.101,True,1
+aut_30534.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_30578.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_30582.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_30594.hoa,?,?,acc,1,0,1,1.0,1.118,True,1
+aut_30598.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_30658.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_30662.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_30736.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_30739.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_30748.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_30754.hoa,?,?,acc,1,0,1,1.0,1.098,True,1
+aut_30758.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_30786.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_30790.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_30850.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_30854.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_30914.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_30918.hoa,?,?,acc,1,0,1,1.0,1.120,True,1
+aut_31745.hoa,?,?,daisy+strength2,3,1,3,1.0,0.066,True,F!a
+aut_31760.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_31762.hoa,?,?,buchi,3,1,3,1.0,1.111,True,F!a
+aut_31763.hoa,?,?,buchi,8,3,13,1.6,1.117,True,F!a & G(a | X(a R F!a))
+aut_31764.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_31766.hoa,?,?,buchi,3,1,3,1.0,1.124,True,F!a
+aut_31767.hoa,?,?,buchi,619,111,796540,1286.8,1.185,UNVERIFIED_SIZE,<unflattened DAG: 796540 tree nodes>
+aut_31794.hoa,?,?,buchi,3,1,3,1.0,1.105,True,F!a
+aut_31810.hoa,?,?,buchi,3,1,3,1.0,1.102,True,F!a
+aut_31814.hoa,?,?,buchi,3,1,3,1.0,1.110,True,F!a
+aut_31858.hoa,?,?,buchi,3,1,3,1.0,1.115,True,F!a
+aut_31874.hoa,?,?,buchi,3,1,3,1.0,1.113,True,F!a
+aut_31878.hoa,?,?,buchi,3,1,3,1.0,1.100,True,F!a
+aut_31938.hoa,?,?,buchi,3,1,3,1.0,1.108,True,F!a
+aut_31942.hoa,?,?,buchi,3,1,3,1.0,1.109,True,F!a
+aut_33027.hoa,?,?,daisy,4,2,5,1.2,0.065,True,a U G!a
+aut_33030.hoa,?,?,daisy,3,2,3,1.0,0.066,True,GFa
+aut_33031.hoa,?,?,daisy,4,2,4,1.0,0.065,True,GF!a
+aut_33056.hoa,?,?,daisy2,4,1,5,1.2,0.067,True,G(a | Xa)
+aut_33058.hoa,?,?,buchi,32,8,88,2.8,1.119,True,((!a R (a | Xa)) & (Ga | ((!a & X!a) R (!a | X(!a | X(!a R (a | Xa)))))) & ((!a …
+aut_33060.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_33062.hoa,?,?,buchi,8,3,16,2.0,1.103,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_33064.hoa,?,?,daisy2,4,1,5,1.2,0.066,True,G(a | Xa)
+aut_33068.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_33072.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_33075.hoa,?,?,buchi,105,17,1371,13.1,1.143,True,X(a | X(!a | X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & ((…
+aut_33076.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_33079.hoa,?,?,buchi,9,3,14,1.6,1.109,True,X(F!a & G(a | X(a R F!a)))
+aut_33080.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_33084.hoa,?,?,buchi,105,17,1371,13.1,1.136,True,X(a | X(!a | X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & ((…
+aut_33088.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33090.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_33091.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_33092.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33094.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_33095.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_33096.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33100.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33120.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33122.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_33124.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_33126.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_33128.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_33132.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_33136.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_33139.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_33140.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33143.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_33144.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33148.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_33152.hoa,?,?,daisy2,4,1,5,1.2,0.067,True,G(a | Xa)
+aut_33154.hoa,?,?,buchi,32,8,88,2.8,1.121,True,((!a R (a | Xa)) & (Ga | ((!a & X!a) R (!a | X(!a | X(!a R (a | Xa)))))) & ((!a …
+aut_33155.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_33156.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_33158.hoa,?,?,buchi,64,13,369,5.8,1.118,True,(G(!a | X(!a R (a | X((a & XF!a) | (!a & X(F(a & XF!a) & (a | Xa | (X(!a & XFa) …
+aut_33216.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_33218.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_33219.hoa,?,?,buchi,105,17,1371,13.1,1.133,True,X(a | X(!a | X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & ((…
+aut_33220.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_33222.hoa,?,?,acc,1,0,1,1.0,1.100,True,1
+aut_33223.hoa,?,?,buchi,19,4,35,1.8,1.118,True,F!a & (a | XF!a) & (XG(a | X(a R F!a)) | (a & X(!a & (a | G(a | X!a)))))
+aut_33224.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_33228.hoa,?,?,buchi,276,58,3213,11.6,1.177,True,((!a & X!a) | (((a & X!a) | (!a & X(a & X!a)) | ((XXXF!a | (a & XXF!a)) & ((a & …
+aut_33283.hoa,?,?,daisy,6,2,8,1.3,0.064,True,a & X(a U G!a)
+aut_33287.hoa,?,?,daisy,5,2,6,1.2,0.064,True,a & GF!a
+aut_33296.hoa,?,?,buchi,30,5,71,2.4,1.117,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33298.hoa,?,?,partscc,5,1,7,1.4,0.065,True,a & G(a | Xa)
+aut_33299.hoa,?,?,acc,1,0,1,1.0,1.109,True,a
+aut_33300.hoa,?,?,buchi,16,4,31,1.9,1.106,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_33303.hoa,?,?,acc,1,0,1,1.0,1.109,True,a
+aut_33304.hoa,?,?,buchi,30,5,71,2.4,1.118,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33308.hoa,?,?,buchi,16,4,31,1.9,1.112,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_33315.hoa,?,?,buchi,787,147,6052771,7690.9,1.188,UNVERIFIED_SIZE,<unflattened DAG: 6052771 tree nodes>
+aut_33316.hoa,?,?,buchi,184,35,73119,397.4,1.140,True,a & (!a | X(a | X((a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))) & (…
+aut_33319.hoa,?,?,acc,1,0,1,1.0,1.111,True,a
+aut_33324.hoa,?,?,buchi,460,85,3620391,7870.4,1.171,UNVERIFIED_SIZE,<unflattened DAG: 3620391 tree nodes>
+aut_33328.hoa,?,?,buchi,14,3,29,2.1,1.116,True,a & XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))
+aut_33331.hoa,?,?,buchi,24,5,51,2.1,1.133,True,a & F!a & X((a | XF!a) & ((!a & (a | G(a | X!a))) | G((a | X(a | X(a R F!a))) & …
+aut_33332.hoa,?,?,buchi,4346,738,315091768906091,72501557502.6,1.474,UNVERIFIED_SIZE,<unflattened DAG: 315091768906091 tree nodes>
+aut_33335.hoa,?,?,buchi,18,5,35,1.9,1.112,True,a & F(a & XF!a) & G((!a | X(!a R (a | XF!a))) & (a | X(a | X(a R F!a))))
+aut_33336.hoa,?,?,buchi,14,3,29,2.1,1.115,True,a & XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))
+aut_33340.hoa,?,?,buchi,159,27,10512,66.1,1.147,True,(a & (X!a | F((!a & X(!a U (a & X!a))) | (a & X(a & (X(!a | X!a | (X(a & XF!a) &…
+aut_33344.hoa,?,?,buchi,30,5,71,2.4,1.115,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33346.hoa,?,?,partscc,5,1,7,1.4,0.065,True,a & G(a | Xa)
+aut_33347.hoa,?,?,acc,1,0,1,1.0,1.104,True,a
+aut_33348.hoa,?,?,buchi,5161,876,2945605709571695,570743210535.1,1.533,UNVERIFIED_SIZE,<unflattened DAG: 2945605709571695 tree nodes>
+aut_33351.hoa,?,?,acc,1,0,1,1.0,1.107,True,a
+aut_33352.hoa,?,?,buchi,30,5,71,2.4,1.114,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33356.hoa,?,?,buchi,5161,876,2945605709571695,570743210535.1,1.546,UNVERIFIED_SIZE,<unflattened DAG: 2945605709571695 tree nodes>
+aut_33376.hoa,?,?,buchi,30,5,71,2.4,1.115,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33379.hoa,?,?,acc,1,0,1,1.0,1.106,True,a
+aut_33380.hoa,?,?,buchi,16,4,31,1.9,1.118,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_33383.hoa,?,?,acc,1,0,1,1.0,1.107,True,a
+aut_33384.hoa,?,?,buchi,30,5,71,2.4,1.116,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33388.hoa,?,?,buchi,16,4,31,1.9,1.124,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_33392.hoa,?,?,buchi,30,5,71,2.4,1.134,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33395.hoa,?,?,acc,1,0,1,1.0,1.115,True,a
+aut_33396.hoa,?,?,buchi,16,4,31,1.9,1.150,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_33399.hoa,?,?,acc,1,0,1,1.0,1.121,True,a
+aut_33400.hoa,?,?,buchi,30,5,71,2.4,1.121,True,a & ((X(a | Xa) & ((!a & X!a) R ((!a | X(!a | X(!a R (a | Xa)))) & (a | X(!a | X…
+aut_33404.hoa,?,?,buchi,16,4,31,1.9,1.110,True,a & XFa & G((!a | X(!a | X(!a R Fa))) & (a | X(a R (!a | XFa))))
+aut_33408.hoa,?,?,daisy2,2,1,2,1.0,0.064,True,Ga
+aut_33411.hoa,?,?,buchi,787,147,6052771,7690.9,1.193,UNVERIFIED_SIZE,<unflattened DAG: 6052771 tree nodes>
+aut_33412.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_33415.hoa,?,?,acc,1,0,1,1.0,1.108,True,a
+aut_33420.hoa,?,?,buchi,35791,5941,2748385567836173565593641371998,76789851298822992244506624.0,2.937,UNVERIFIED_SIZE,<unflattened DAG: 2748385567836173565593641371998 tree nodes>
+aut_33472.hoa,?,?,buchi,14,3,29,2.1,1.129,True,a & XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))
+aut_33475.hoa,?,?,buchi,24,5,51,2.1,1.156,True,a & F!a & X((a | XF!a) & ((!a & (a | G(a | X!a))) | G((a | X(a | X(a R F!a))) & …
+aut_33476.hoa,?,?,buchi,185,37,564880,3053.4,1.134,UNVERIFIED_SIZE,<unflattened DAG: 564880 tree nodes>
+aut_33479.hoa,?,?,buchi,24,5,51,2.1,1.135,True,a & F!a & X((a | XF!a) & ((!a & (a | G(a | X!a))) | G((a | X(a | X(a R F!a))) & …
+aut_33480.hoa,?,?,buchi,14,3,29,2.1,1.113,True,a & XF!a & ((!a & X!a) R (!a | X(!a R (a | X(a & XF!a)))))
+aut_33484.hoa,?,?,buchi,185,37,564880,3053.4,1.139,UNVERIFIED_SIZE,<unflattened DAG: 564880 tree nodes>
+aut_33538.hoa,?,?,daisy,6,2,8,1.3,0.065,True,a U (!a & XGa)
+aut_33552.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_33554.hoa,?,?,-,,,,,0.591,NOT_LTL,
+aut_33556.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_33558.hoa,?,?,buchi,3,1,3,1.0,1.105,True,F!a
+aut_33560.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_33564.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_33568.hoa,?,?,daisy2,8,2,12,1.5,0.067,True,G(F(!a & Xa) & (a | Xa))
+aut_33570.hoa,?,?,buchi,194,37,1676,8.6,1.163,True,((a | X(a & X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & (((…
+aut_33572.hoa,?,?,daisy2,6,3,7,1.2,0.066,True,G(Fa & F!a)
+aut_33574.hoa,?,?,buchi,72,14,300,4.2,1.119,True,(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))) & ((a & Xa & (X(!a |…
+aut_33576.hoa,?,?,daisy2,8,2,12,1.5,0.066,True,G(F(!a & Xa) & (a | Xa))
+aut_33580.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(Fa & F!a)
+aut_33584.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_33586.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_33587.hoa,?,?,buchi,424,83,2005270,4729.4,1.154,UNVERIFIED_SIZE,<unflattened DAG: 2005270 tree nodes>
+aut_33590.hoa,?,?,buchi,3,1,3,1.0,1.109,True,F!a
+aut_33596.hoa,?,?,buchi,424,83,2005270,4729.4,1.155,UNVERIFIED_SIZE,<unflattened DAG: 2005270 tree nodes>
+aut_33600.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_33602.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_33604.hoa,?,?,daisy2,4,2,4,1.0,0.061,True,GF!a
+aut_33606.hoa,?,?,buchi,3,1,3,1.0,1.104,True,F!a
+aut_33608.hoa,?,?,daisy2,4,2,4,1.0,0.068,True,GF!a
+aut_33612.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_33632.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_33634.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_33636.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_33638.hoa,?,?,buchi,3,1,3,1.0,1.111,True,F!a
+aut_33640.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_33644.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_33650.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_33654.hoa,?,?,buchi,3,1,3,1.0,1.109,True,F!a
+aut_33664.hoa,?,?,daisy2,8,2,12,1.5,0.066,True,G(F(!a & Xa) & (a | Xa))
+aut_33666.hoa,?,?,buchi,194,37,1676,8.6,1.163,True,((a | X(a & X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & (((…
+aut_33668.hoa,?,?,daisy2,6,3,7,1.2,0.063,True,G(Fa & F!a)
+aut_33670.hoa,?,?,buchi,362,63,2878695,7952.2,1.154,UNVERIFIED_SIZE,<unflattened DAG: 2878695 tree nodes>
+aut_33728.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_33730.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_33731.hoa,?,?,buchi,424,83,2005270,4729.4,1.159,UNVERIFIED_SIZE,<unflattened DAG: 2005270 tree nodes>
+aut_33732.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_33734.hoa,?,?,buchi,3,1,3,1.0,1.108,True,F!a
+aut_33736.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_33740.hoa,?,?,buchi,4273,741,314685731206243,73645151230.1,1.372,UNVERIFIED_SIZE,<unflattened DAG: 314685731206243 tree nodes>
+aut_33816.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_33820.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_33832.hoa,?,?,daisy2,4,1,5,1.2,0.063,True,G(a | Xa)
+aut_33836.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_33848.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_33852.hoa,?,?,buchi,47258,8754,96278864367642944559027015727430,2037302982937131203031990272.0,3.058,UNVERIFIED_SIZE,<unflattened DAG: 96278864367642944559027015727430 tree nodes>
+aut_33858.hoa,?,?,buchi,4540,808,5354557336598856051,1179417915550408.8,1.492,UNVERIFIED_SIZE,<unflattened DAG: 5354557336598856051 tree nodes>
+aut_33859.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_33888.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_33890.hoa,?,?,buchi,1187,194,10733494,9042.5,1.231,UNVERIFIED_SIZE,<unflattened DAG: 10733494 tree nodes>
+aut_33891.hoa,?,?,acc,1,0,1,1.0,1.101,True,1
+aut_33896.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_33900.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_33904.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_33906.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_33907.hoa,?,?,buchi,86,22,417,4.8,1.121,True,((a & XF!a) | F((!a & X!a) | (a & X(a & XF!a)))) & (a | X!a | (((!a | X!a) U (!a…
+aut_33912.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_33916.hoa,?,?,-,,,,,15.036,BUILD_TIMEOUT>15s,
+aut_33922.hoa,?,?,buchi,428,85,15111111,35306.3,1.150,UNVERIFIED_SIZE,<unflattened DAG: 15111111 tree nodes>
+aut_33923.hoa,?,?,buchi,1097,199,1353922752,1234204.9,1.200,UNVERIFIED_SIZE,<unflattened DAG: 1353922752 tree nodes>
+aut_33986.hoa,?,?,-,,,,,15.027,BUILD_TIMEOUT>15s,
+aut_33987.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_34320.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_34322.hoa,?,?,acc,1,0,1,1.0,1.109,True,1
+aut_34323.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_34324.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_34327.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34328.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_34332.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_34336.hoa,?,?,daisy2,4,1,5,1.2,0.064,True,G(a | Xa)
+aut_34338.hoa,?,?,buchi,32,8,88,2.8,1.109,True,((!a R (a | Xa)) & (Ga | ((!a & X!a) R (!a | X(!a | X(!a R (a | Xa)))))) & ((!a …
+aut_34339.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34343.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_34344.hoa,?,?,daisy2,4,1,5,1.2,0.066,True,G(a | Xa)
+aut_34352.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_34354.hoa,?,?,acc,1,0,1,1.0,1.098,True,1
+aut_34355.hoa,?,?,buchi,105,17,1371,13.1,1.136,True,X(a | X(!a | X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & ((…
+aut_34356.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_34359.hoa,?,?,buchi,9,3,14,1.6,1.105,True,X(F!a & G(a | X(a R F!a)))
+aut_34360.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_34364.hoa,?,?,buchi,238,43,5565,23.4,1.145,True,((!a & X!a) | (((a & X!a) | (((a | Xa) U (a & X(a & (X!a | (F(a & X(a & X!a)) & …
+aut_34368.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_34371.hoa,?,?,buchi,132,31,819,6.2,1.131,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_34372.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_34375.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34376.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_34380.hoa,?,?,-,,,,,15.028,BUILD_TIMEOUT>15s,
+aut_34403.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_34407.hoa,?,?,acc,1,0,1,1.0,1.115,True,1
+aut_34416.hoa,?,?,-,,,,,0.577,NOT_LTL,
+aut_34418.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_34419.hoa,?,?,buchi,132,31,819,6.2,1.131,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_34420.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_34423.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34424.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_34428.hoa,?,?,buchi,132,31,819,6.2,1.135,True,((a | (F((a & Xa) | (!a & X(!a & XFa))) & (X!a | (((!a | X!a) U (!a & X(!a U (a …
+aut_34432.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_34434.hoa,?,?,buchi,301,57,741565,2463.7,1.142,UNVERIFIED_SIZE,<unflattened DAG: 741565 tree nodes>
+aut_34435.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_34436.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_34439.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34496.hoa,?,?,-,,,,,0.594,NOT_LTL,
+aut_34499.hoa,?,?,buchi,81,9,442,5.5,1.166,True,(!a | X(a | XXF!a)) & (a | X(a | X(a | XXF!a))) & ((a & X!a) | (!a & X(!a & X!a)…
+aut_34500.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(F!a & Fa)
+aut_34503.hoa,?,?,buchi,1280,222,6234046,4870.3,1.302,UNVERIFIED_SIZE,<unflattened DAG: 6234046 tree nodes>
+aut_34504.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_34508.hoa,?,?,buchi,207,38,55842,269.8,1.146,True,((a & X!a) | (((a | Xa) U (a & X(a & (X!a | (F(a & X(a & X!a)) & X(a & XF!a)))))…
+aut_34576.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_34578.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_34579.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_34580.hoa,?,?,daisy2,1,0,1,1.0,0.063,True,1
+aut_34582.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_34584.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_34588.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_34592.hoa,?,?,daisy2,4,1,5,1.2,0.065,True,G(a | Xa)
+aut_34594.hoa,?,?,buchi,32,8,88,2.8,1.115,True,((!a R (a | Xa)) & (Ga | ((!a & X!a) R (!a | X(!a | X(!a R (a | Xa)))))) & ((!a …
+aut_34595.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_34596.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_34598.hoa,?,?,buchi,8,3,16,2.0,1.108,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_34600.hoa,?,?,daisy2,4,1,5,1.2,0.065,True,G(a | Xa)
+aut_34604.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_34608.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_34610.hoa,?,?,acc,1,0,1,1.0,1.100,True,1
+aut_34611.hoa,?,?,buchi,105,17,1371,13.1,1.141,True,X(a | X(!a | X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & ((…
+aut_34614.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34620.hoa,?,?,buchi,105,17,1371,13.1,1.141,True,X(a | X(!a | X(!a | X!a | (X(a & XF!a) & ((!a | Xa) U (a & X(a & X!a))))))) & ((…
+aut_34624.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_34626.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_34628.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_34630.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_34632.hoa,?,?,daisy2,4,2,4,1.0,0.061,True,GF!a
+aut_34636.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_34656.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_34658.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34659.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34660.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_34662.hoa,?,?,acc,1,0,1,1.0,1.105,True,1
+aut_34664.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_34668.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_34674.hoa,?,?,acc,1,0,1,1.0,1.098,True,1
+aut_34678.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_34690.hoa,?,?,buchi,32,8,88,2.8,1.114,True,((!a R (a | Xa)) & (Ga | ((!a & X!a) R (!a | X(!a | X(!a R (a | Xa)))))) & ((!a …
+aut_34694.hoa,?,?,buchi,8,3,16,2.0,1.111,True,(!a R Fa) & G(!a | X(!a R Fa))
+aut_34752.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_34754.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_34755.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_34756.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_34758.hoa,?,?,acc,1,0,1,1.0,1.110,True,1
+aut_34760.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_34764.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_34844.hoa,?,?,buchi,13,3,23,1.8,1.117,True,a & XX(XG(!a | XXFa) & (a M (!a | XXFa)))
+aut_34860.hoa,?,?,buchi,4537,771,665375721868492,146655437925.6,1.397,UNVERIFIED_SIZE,<unflattened DAG: 665375721868492 tree nodes>
+aut_34876.hoa,?,?,buchi,185,37,564705,3052.5,1.134,UNVERIFIED_SIZE,<unflattened DAG: 564705 tree nodes>
+aut_34883.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_34912.hoa,?,?,-,,,,,0.579,NOT_LTL,
+aut_34915.hoa,?,?,buchi,642,126,18232761,28399.9,1.218,UNVERIFIED_SIZE,<unflattened DAG: 18232761 tree nodes>
+aut_34924.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_34947.hoa,?,?,buchi,660,127,6038633,9149.4,1.168,UNVERIFIED_SIZE,<unflattened DAG: 6038633 tree nodes>
+aut_35011.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_35864.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_35880.hoa,?,?,daisy2,8,2,12,1.5,0.064,True,G(F(!a & Xa) & (a | Xa))
+aut_35896.hoa,?,?,daisy2,4,2,4,1.0,0.063,True,GF!a
+aut_35900.hoa,?,?,buchi,37852,6573,6489218188825023032910004976529,171436600148605687954407424.0,2.555,UNVERIFIED_SIZE,<unflattened DAG: 6489218188825023032910004976529 tree nodes>
+aut_35906.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_35936.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_35938.hoa,?,?,-,,,,,0.581,NOT_LTL,
+aut_35944.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_35952.hoa,?,?,daisy2,6,2,8,1.3,0.064,True,GF(!a & X!a)
+aut_35954.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_35960.hoa,?,?,daisy2,4,2,4,1.0,0.061,True,GF!a
+aut_35970.hoa,?,?,buchi,2742,459,72751766372423,26532372856.5,1.289,UNVERIFIED_SIZE,<unflattened DAG: 72751766372423 tree nodes>
+aut_35984.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_36034.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_36035.hoa,?,?,buchi,1583,281,32012061523478,20222401467.8,1.208,UNVERIFIED_SIZE,<unflattened DAG: 32012061523478 tree nodes>
+aut_49410.hoa,?,?,daisy,4,2,5,1.2,0.066,True,!a U Ga
+aut_49414.hoa,?,?,daisy,3,2,3,1.0,0.063,True,GFa
+aut_49415.hoa,?,?,daisy,4,2,4,1.0,0.063,True,GF!a
+aut_49440.hoa,?,?,-,,,,,0.598,NOT_LTL,
+aut_49442.hoa,?,?,buchi,105,17,1343,12.8,1.144,True,X(!a | X(a | X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((a…
+aut_49444.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_49446.hoa,?,?,buchi,9,3,14,1.6,1.113,True,X(Fa & G(!a | X(!a R Fa)))
+aut_49448.hoa,?,?,buchi,105,17,1343,12.8,1.146,True,X(!a | X(a | X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((a…
+aut_49452.hoa,?,?,daisy2,3,2,3,1.0,0.063,True,GFa
+aut_49456.hoa,?,?,daisy2,5,1,7,1.4,0.068,True,G(!a | X!a)
+aut_49459.hoa,?,?,buchi,32,8,84,2.6,1.129,True,((a R (!a | X!a)) & (G!a | ((a & Xa) R (a | X(a | X(a R (!a | X!a)))))) & ((a & …
+aut_49460.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_49463.hoa,?,?,buchi,8,3,15,1.9,1.126,True,(a R F!a) & G(a | X(a R F!a))
+aut_49464.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_49468.hoa,?,?,daisy2,5,1,7,1.4,0.066,True,G(!a | X!a)
+aut_49472.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_49474.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_49475.hoa,?,?,acc,1,0,1,1.0,1.119,True,1
+aut_49476.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_49478.hoa,?,?,acc,1,0,1,1.0,1.128,True,1
+aut_49479.hoa,?,?,acc,1,0,1,1.0,1.120,True,1
+aut_49480.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_49484.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_49504.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_49506.hoa,?,?,acc,1,0,1,1.0,1.116,True,1
+aut_49508.hoa,?,?,daisy2,1,0,1,1.0,0.067,True,1
+aut_49510.hoa,?,?,acc,1,0,1,1.0,1.118,True,1
+aut_49512.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_49516.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_49520.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_49523.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_49524.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_49527.hoa,?,?,acc,1,0,1,1.0,1.117,True,1
+aut_49528.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_49532.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_49536.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_49538.hoa,?,?,buchi,105,17,1343,12.8,1.147,True,X(!a | X(a | X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((a…
+aut_49539.hoa,?,?,acc,1,0,1,1.0,1.124,True,1
+aut_49540.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_49542.hoa,?,?,buchi,19,4,36,1.9,1.136,True,Fa & (!a | XFa) & (XG(!a | X(!a R Fa)) | (!a & X(a & (!a | G(!a | Xa)))))
+aut_49543.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_49544.hoa,?,?,buchi,260,53,2686,10.3,1.204,True,(Xa | (!a & (X(!a & Xa) | (X(!a & XF(!a & Xa)) & (((a | XX(!a & XFa)) & (!a | XX…
+aut_49548.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_49600.hoa,?,?,daisy2,5,1,7,1.4,0.066,True,G(!a | X!a)
+aut_49602.hoa,?,?,acc,1,0,1,1.0,1.116,True,1
+aut_49603.hoa,?,?,buchi,32,8,84,2.6,1.112,True,((a R (!a | X!a)) & (G!a | ((a & Xa) R (a | X(a | X(a R (!a | X!a)))))) & ((a & …
+aut_49604.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_49607.hoa,?,?,buchi,64,13,389,6.1,1.126,True,((!a | F(!a & X!a)) & (a | X((!a | XF(!a & X!a)) & (a | ((X(a | X(a R (!a | XF(!…
+aut_49667.hoa,?,?,daisy,6,2,9,1.5,0.062,True,!a U (a & XG!a)
+aut_49680.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_49683.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_49684.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_49687.hoa,?,?,buchi,2,1,2,1.0,1.126,True,Fa
+aut_49688.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_49692.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_49696.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_49698.hoa,?,?,buchi,424,83,1909938,4504.6,1.176,UNVERIFIED_SIZE,<unflattened DAG: 1909938 tree nodes>
+aut_49699.hoa,?,?,-,,,,,0.589,NOT_LTL,
+aut_49703.hoa,?,?,buchi,2,1,2,1.0,1.112,True,Fa
+aut_49704.hoa,?,?,buchi,424,83,1909938,4504.6,1.177,UNVERIFIED_SIZE,<unflattened DAG: 1909938 tree nodes>
+aut_49712.hoa,?,?,daisy2,8,2,14,1.8,0.066,True,G(F(a & X!a) & (!a | X!a))
+aut_49715.hoa,?,?,buchi,194,37,1689,8.7,1.175,True,((!a | X(!a & X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((…
+aut_49716.hoa,?,?,daisy2,6,3,7,1.2,0.067,True,G(F!a & Fa)
+aut_49719.hoa,?,?,buchi,72,14,300,4.2,1.112,True,(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))) & ((!a & X!a & (X(a |…
+aut_49720.hoa,?,?,daisy2,6,3,7,1.2,0.066,True,G(F!a & Fa)
+aut_49724.hoa,?,?,daisy2,8,2,14,1.8,0.067,True,G(F(a & X!a) & (!a | X!a))
+aut_49728.hoa,?,?,daisy2,3,2,3,1.0,0.062,True,GFa
+aut_49731.hoa,?,?,-,,,,,0.590,NOT_LTL,
+aut_49732.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_49735.hoa,?,?,buchi,2,1,2,1.0,1.122,True,Fa
+aut_49736.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_49740.hoa,?,?,daisy2,3,2,3,1.0,0.067,True,GFa
+aut_49763.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_49767.hoa,?,?,buchi,2,1,2,1.0,1.116,True,Fa
+aut_49776.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_49779.hoa,?,?,-,,,,,0.588,NOT_LTL,
+aut_49780.hoa,?,?,daisy2,3,2,3,1.0,0.064,True,GFa
+aut_49783.hoa,?,?,buchi,2,1,2,1.0,1.110,True,Fa
+aut_49784.hoa,?,?,daisy2,3,2,3,1.0,0.068,True,GFa
+aut_49788.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_49792.hoa,?,?,-,,,,,0.575,NOT_LTL,
+aut_49794.hoa,?,?,buchi,424,83,1909938,4504.6,1.162,UNVERIFIED_SIZE,<unflattened DAG: 1909938 tree nodes>
+aut_49795.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_49796.hoa,?,?,daisy2,3,2,3,1.0,0.062,True,GFa
+aut_49799.hoa,?,?,buchi,2,1,2,1.0,1.111,True,Fa
+aut_49800.hoa,?,?,buchi,4273,741,305824859651111,71571462590.9,1.384,UNVERIFIED_SIZE,<unflattened DAG: 305824859651111 tree nodes>
+aut_49804.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_49856.hoa,?,?,daisy2,8,2,14,1.8,0.066,True,G(F(a & X!a) & (!a | X!a))
+aut_49859.hoa,?,?,buchi,194,37,1689,8.7,1.161,True,((!a | X(!a & X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((…
+aut_49860.hoa,?,?,daisy2,6,3,7,1.2,0.065,True,G(F!a & Fa)
+aut_49863.hoa,?,?,buchi,362,63,2904025,8022.2,1.147,UNVERIFIED_SIZE,<unflattened DAG: 2904025 tree nodes>
+aut_49922.hoa,?,?,daisy,6,2,9,1.5,0.065,True,!a & X(!a U Ga)
+aut_49926.hoa,?,?,daisy,5,2,6,1.2,0.063,True,!a & GFa
+aut_49936.hoa,?,?,buchi,30,5,69,2.3,1.117,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_49938.hoa,?,?,acc,2,0,2,1.0,1.103,True,!a
+aut_49939.hoa,?,?,partscc,6,1,10,1.7,0.066,True,!a & G(!a | X!a)
+aut_49940.hoa,?,?,buchi,16,4,33,2.1,1.111,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_49942.hoa,?,?,acc,2,0,2,1.0,1.121,True,!a
+aut_49944.hoa,?,?,buchi,16,4,33,2.1,1.122,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_49948.hoa,?,?,buchi,30,5,69,2.3,1.124,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_49952.hoa,?,?,buchi,14,3,26,1.9,1.136,True,!a & XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))
+aut_49954.hoa,?,?,buchi,24,5,51,2.1,1.149,True,!a & Fa & X((!a | XFa) & ((a & (!a | G(!a | Xa))) | G((!a | X(!a | X(!a R Fa))) …
+aut_49956.hoa,?,?,buchi,4339,736,351271146920796,80956705904.8,1.465,UNVERIFIED_SIZE,<unflattened DAG: 351271146920796 tree nodes>
+aut_49958.hoa,?,?,buchi,18,5,36,2.0,1.118,True,!a & F(!a & XFa) & G((a | X(a R (!a | XFa))) & (!a | X(!a | X(!a R Fa))))
+aut_49960.hoa,?,?,buchi,159,27,10509,66.1,1.151,True,(!a & (a | X((!a & X((a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))) …
+aut_49964.hoa,?,?,buchi,14,3,26,1.9,1.125,True,!a & XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))
+aut_49970.hoa,?,?,buchi,787,147,6256357,7949.6,1.207,UNVERIFIED_SIZE,<unflattened DAG: 6256357 tree nodes>
+aut_49972.hoa,?,?,buchi,107,21,2513,23.5,1.131,True,!a & (X!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (a | (X(a | X(!a | X((a U (!…
+aut_49974.hoa,?,?,acc,2,0,2,1.0,1.122,True,!a
+aut_49976.hoa,?,?,buchi,460,85,3800975,8263.0,1.173,UNVERIFIED_SIZE,<unflattened DAG: 3800975 tree nodes>
+aut_49984.hoa,?,?,buchi,30,5,69,2.3,1.117,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_49986.hoa,?,?,acc,2,0,2,1.0,1.112,True,!a
+aut_49987.hoa,?,?,partscc,6,1,10,1.7,0.066,True,!a & G(!a | X!a)
+aut_49988.hoa,?,?,buchi,5153,874,3075710591375372,596877661823.3,1.547,UNVERIFIED_SIZE,<unflattened DAG: 3075710591375372 tree nodes>
+aut_49990.hoa,?,?,acc,2,0,2,1.0,1.108,True,!a
+aut_49992.hoa,?,?,buchi,5153,874,3075710591375372,596877661823.3,1.559,UNVERIFIED_SIZE,<unflattened DAG: 3075710591375372 tree nodes>
+aut_49996.hoa,?,?,buchi,30,5,69,2.3,1.127,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_50016.hoa,?,?,buchi,30,5,69,2.3,1.125,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_50018.hoa,?,?,acc,2,0,2,1.0,1.109,True,!a
+aut_50020.hoa,?,?,buchi,16,4,33,2.1,1.120,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_50022.hoa,?,?,acc,2,0,2,1.0,1.116,True,!a
+aut_50024.hoa,?,?,buchi,16,4,33,2.1,1.126,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_50028.hoa,?,?,buchi,30,5,69,2.3,1.122,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_50032.hoa,?,?,buchi,30,5,69,2.3,1.127,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_50034.hoa,?,?,acc,2,0,2,1.0,1.113,True,!a
+aut_50036.hoa,?,?,buchi,16,4,33,2.1,1.114,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_50038.hoa,?,?,acc,2,0,2,1.0,1.111,True,!a
+aut_50040.hoa,?,?,buchi,16,4,33,2.1,1.117,True,!a & XF!a & G((a | X(a | X(a R F!a))) & (!a | X(!a R (a | XF!a))))
+aut_50044.hoa,?,?,buchi,30,5,69,2.3,1.123,True,!a & ((X(!a | X!a) & ((a & Xa) R ((a | X(a | X(a R (!a | X!a)))) & (!a | X(a | X…
+aut_50048.hoa,?,?,buchi,14,3,26,1.9,1.115,True,!a & XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))
+aut_50050.hoa,?,?,buchi,24,5,51,2.1,1.141,True,!a & Fa & X((!a | XFa) & ((a & (!a | G(!a | Xa))) | G((!a | X(!a | X(!a R Fa))) …
+aut_50052.hoa,?,?,buchi,185,37,562597,3041.1,1.131,UNVERIFIED_SIZE,<unflattened DAG: 562597 tree nodes>
+aut_50054.hoa,?,?,buchi,24,5,51,2.1,1.140,True,!a & Fa & X((!a | XFa) & ((a & (!a | G(!a | Xa))) | G((!a | X(!a | X(!a R Fa))) …
+aut_50056.hoa,?,?,buchi,185,37,562597,3041.1,1.139,UNVERIFIED_SIZE,<unflattened DAG: 562597 tree nodes>
+aut_50060.hoa,?,?,buchi,14,3,26,1.9,1.122,True,!a & XFa & ((a & Xa) R (a | X(a R (!a | X(!a & XFa)))))
+aut_50112.hoa,?,?,daisy2,3,1,3,1.0,0.066,True,G!a
+aut_50114.hoa,?,?,buchi,787,147,6256357,7949.6,1.200,UNVERIFIED_SIZE,<unflattened DAG: 6256357 tree nodes>
+aut_50116.hoa,?,?,-,,,,,0.594,NOT_LTL,
+aut_50118.hoa,?,?,acc,2,0,2,1.0,1.139,True,!a
+aut_50120.hoa,?,?,buchi,35753,5934,2899838860280408473429562548069,81107567484698021244960768.0,3.016,UNVERIFIED_SIZE,<unflattened DAG: 2899838860280408473429562548069 tree nodes>
+aut_50200.hoa,?,?,daisy2,1,0,1,1.0,0.067,True,1
+aut_50204.hoa,?,?,daisy2,1,0,1,1.0,0.062,True,1
+aut_50216.hoa,?,?,buchi,47259,8754,95436652464787067587293793586814,2019438677601876232749711360.0,3.087,UNVERIFIED_SIZE,<unflattened DAG: 95436652464787067587293793586814 tree nodes>
+aut_50220.hoa,?,?,daisy2,3,2,3,1.0,0.067,True,GFa
+aut_50232.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_50236.hoa,?,?,daisy2,5,1,7,1.4,0.062,True,G(!a | X!a)
+aut_50242.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_50243.hoa,?,?,buchi,12513,2203,15922626266016,1272486715.1,2.056,UNVERIFIED_SIZE,<unflattened DAG: 15922626266016 tree nodes>
+aut_50272.hoa,?,?,-,,,,,0.590,NOT_LTL,
+aut_50274.hoa,?,?,buchi,86,22,410,4.8,1.130,True,((!a & XFa) | F((a & Xa) | (!a & X(!a & XFa)))) & (!a | Xa | (((a | Xa) U (a & X…
+aut_50275.hoa,?,?,acc,1,0,1,1.0,1.114,True,1
+aut_50280.hoa,?,?,-,,,,,15.028,BUILD_TIMEOUT>15s,
+aut_50284.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_50288.hoa,?,?,daisy2,4,2,4,1.0,0.068,True,GF!a
+aut_50290.hoa,?,?,acc,1,0,1,1.0,1.116,True,1
+aut_50291.hoa,?,?,buchi,1181,194,10410430,8814.9,1.244,UNVERIFIED_SIZE,<unflattened DAG: 10410430 tree nodes>
+aut_50296.hoa,?,?,daisy2,4,2,4,1.0,0.062,True,GF!a
+aut_50300.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_50306.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_50307.hoa,?,?,-,,,,,15.027,BUILD_TIMEOUT>15s,
+aut_50370.hoa,?,?,buchi,1097,199,1356688549,1236726.1,1.208,UNVERIFIED_SIZE,<unflattened DAG: 1356688549 tree nodes>
+aut_50371.hoa,?,?,buchi,428,85,17271688,40354.4,1.149,UNVERIFIED_SIZE,<unflattened DAG: 17271688 tree nodes>
+aut_50704.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_50706.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_50707.hoa,?,?,acc,1,0,1,1.0,1.098,True,1
+aut_50708.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_50711.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_50712.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_50716.hoa,?,?,daisy2,1,0,1,1.0,0.066,True,1
+aut_50720.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_50722.hoa,?,?,buchi,105,17,1343,12.8,1.137,True,X(!a | X(a | X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((a…
+aut_50723.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_50727.hoa,?,?,acc,1,0,1,1.0,1.113,True,1
+aut_50728.hoa,?,?,buchi,105,17,1343,12.8,1.149,True,X(!a | X(a | X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((a…
+aut_50736.hoa,?,?,daisy2,5,1,7,1.4,0.067,True,G(!a | X!a)
+aut_50738.hoa,?,?,acc,1,0,1,1.0,1.120,True,1
+aut_50739.hoa,?,?,buchi,32,8,84,2.6,1.120,True,((a R (!a | X!a)) & (G!a | ((a & Xa) R (a | X(a | X(a R (!a | X!a)))))) & ((a & …
+aut_50740.hoa,?,?,daisy2,4,2,4,1.0,0.066,True,GF!a
+aut_50743.hoa,?,?,buchi,8,3,15,1.9,1.117,True,(a R F!a) & G(a | X(a R F!a))
+aut_50744.hoa,?,?,daisy2,4,2,4,1.0,0.068,True,GF!a
+aut_50748.hoa,?,?,daisy2,5,1,7,1.4,0.066,True,G(!a | X!a)
+aut_50752.hoa,?,?,daisy2,3,2,3,1.0,0.062,True,GFa
+aut_50755.hoa,?,?,acc,1,0,1,1.0,1.121,True,1
+aut_50756.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_50759.hoa,?,?,acc,1,0,1,1.0,1.127,True,1
+aut_50760.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_50764.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_50787.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_50791.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_50800.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_50802.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_50803.hoa,?,?,acc,1,0,1,1.0,1.112,True,1
+aut_50804.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_50807.hoa,?,?,acc,1,0,1,1.0,1.115,True,1
+aut_50808.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_50812.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_50816.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_50818.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_50819.hoa,?,?,acc,1,0,1,1.0,1.108,True,1
+aut_50820.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_50823.hoa,?,?,acc,1,0,1,1.0,1.101,True,1
+aut_50824.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_50828.hoa,?,?,daisy2,3,2,3,1.0,0.062,True,GFa
+aut_50883.hoa,?,?,buchi,32,8,84,2.6,1.111,True,((a R (!a | X!a)) & (G!a | ((a & Xa) R (a | X(a | X(a R (!a | X!a)))))) & ((a & …
+aut_50887.hoa,?,?,buchi,8,3,15,1.9,1.130,True,(a R F!a) & G(a | X(a R F!a))
+aut_50960.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_50962.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_50963.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_50964.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_50966.hoa,?,?,acc,1,0,1,1.0,1.100,True,1
+aut_50968.hoa,?,?,daisy2,1,0,1,1.0,0.061,True,1
+aut_50972.hoa,?,?,daisy2,1,0,1,1.0,0.064,True,1
+aut_50976.hoa,?,?,-,,,,,0.589,NOT_LTL,
+aut_50978.hoa,?,?,buchi,105,17,1343,12.8,1.137,True,X(!a | X(a | X(a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) & ((a…
+aut_50979.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_50980.hoa,?,?,daisy2,3,2,3,1.0,0.061,True,GFa
+aut_50982.hoa,?,?,buchi,9,3,14,1.6,1.104,True,X(Fa & G(!a | X(!a R Fa)))
+aut_50984.hoa,?,?,buchi,235,43,5274,22.4,1.157,True,((a & Xa) | (((!a & Xa) | (((a | X(!a & (Xa | (Fa & ((a | X!a) U (!a & X(!a & Xa…
+aut_50988.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_50992.hoa,?,?,daisy2,5,1,7,1.4,0.068,True,G(!a | X!a)
+aut_50994.hoa,?,?,acc,1,0,1,1.0,1.103,True,1
+aut_50995.hoa,?,?,buchi,32,8,84,2.6,1.116,True,((a R (!a | X!a)) & (G!a | ((a & Xa) R (a | X(a | X(a R (!a | X!a)))))) & ((a & …
+aut_50998.hoa,?,?,acc,1,0,1,1.0,1.102,True,1
+aut_51004.hoa,?,?,daisy2,5,1,7,1.4,0.065,True,G(!a | X!a)
+aut_51008.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_51010.hoa,?,?,buchi,132,31,813,6.2,1.127,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_51012.hoa,?,?,daisy2,4,2,4,1.0,0.064,True,GF!a
+aut_51014.hoa,?,?,acc,1,0,1,1.0,1.096,True,1
+aut_51016.hoa,?,?,-,,,,,15.026,BUILD_TIMEOUT>15s,
+aut_51020.hoa,?,?,daisy2,4,2,4,1.0,0.065,True,GF!a
+aut_51040.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_51042.hoa,?,?,buchi,132,31,813,6.2,1.131,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_51043.hoa,?,?,acc,1,0,1,1.0,1.104,True,1
+aut_51044.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_51046.hoa,?,?,acc,1,0,1,1.0,1.106,True,1
+aut_51048.hoa,?,?,buchi,132,31,813,6.2,1.135,True,((!a | (F((!a & X!a) | (a & X(a & XF!a))) & (Xa | (((a | Xa) U (a & X(a U (!a & …
+aut_51052.hoa,?,?,daisy2,1,0,1,1.0,0.065,True,1
+aut_51058.hoa,?,?,acc,1,0,1,1.0,1.111,True,1
+aut_51062.hoa,?,?,acc,1,0,1,1.0,1.107,True,1
+aut_51072.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_51074.hoa,?,?,buchi,424,93,4137,9.8,1.194,True,((!a & Xa) | (a & X(a & Xa)) | (((!a & Xa) | (a & X(a & Xa)) | (((!a & (X(!a & X…
+aut_51076.hoa,?,?,daisy2,6,3,7,1.2,0.066,True,G(Fa & F!a)
+aut_51078.hoa,?,?,buchi,2180,364,4695184,2153.8,1.364,UNVERIFIED_SIZE,<unflattened DAG: 4695184 tree nodes>
+aut_51080.hoa,?,?,buchi,207,38,54457,263.1,1.135,True,((!a & Xa) | (((a | X(!a & (Xa | (Fa & ((a | X!a) U (!a & X(!a & Xa))))))) U (!a…
+aut_51084.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_51136.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_51138.hoa,?,?,-,,,,,0.583,NOT_LTL,
+aut_51139.hoa,?,?,buchi,304,64,19483,64.1,1.155,True,(((!a | ((a | Xa) U (a & X(a U (!a & X!a))))) & (!a | (X!a & ((!a | X(!a | X!a))…
+aut_51140.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_51142.hoa,?,?,acc,1,0,1,1.0,1.097,True,1
+aut_51228.hoa,?,?,daisy2,3,2,3,1.0,0.066,True,GFa
+aut_51240.hoa,?,?,buchi,37836,6572,6096380853559894233505897913482,161126462986570833118363648.0,2.552,UNVERIFIED_SIZE,<unflattened DAG: 6096380853559894233505897913482 tree nodes>
+aut_51244.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_51260.hoa,?,?,daisy2,8,2,14,1.8,0.066,True,G(F(a & X!a) & (!a | X!a))
+aut_51267.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_51296.hoa,?,?,daisy2,5,2,6,1.2,0.064,True,GF(a & Xa)
+aut_51299.hoa,?,?,-,,,,,0.582,NOT_LTL,
+aut_51308.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_51312.hoa,?,?,-,,,,,0.580,NOT_LTL,
+aut_51315.hoa,?,?,-,,,,,0.589,NOT_LTL,
+aut_51324.hoa,?,?,-,,,,,0.585,NOT_LTL,
+aut_51330.hoa,?,?,buchi,1583,281,28523572777155,18018681476.4,1.201,UNVERIFIED_SIZE,<unflattened DAG: 28523572777155 tree nodes>
+aut_51331.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_51344.hoa,?,?,daisy2,3,2,3,1.0,0.065,True,GFa
+aut_51395.hoa,?,?,buchi,2720,459,80656940102923,29653286802.5,1.315,UNVERIFIED_SIZE,<unflattened DAG: 80656940102923 tree nodes>
+aut_52248.hoa,?,?,buchi,13,3,25,1.9,1.137,True,!a & XX(XG(a | XXF!a) & (!a M (a | XXF!a)))
+aut_52264.hoa,?,?,buchi,185,37,567302,3066.5,1.147,UNVERIFIED_SIZE,<unflattened DAG: 567302 tree nodes>
+aut_52280.hoa,?,?,buchi,4535,770,687706957167068,151644312495.5,1.393,UNVERIFIED_SIZE,<unflattened DAG: 687706957167068 tree nodes>
+aut_52290.hoa,?,?,-,,,,,0.584,NOT_LTL,
+aut_52336.hoa,?,?,-,,,,,0.591,NOT_LTL,
+aut_52338.hoa,?,?,-,,,,,0.587,NOT_LTL,
+aut_52344.hoa,?,?,-,,,,,0.575,NOT_LTL,
+aut_52354.hoa,?,?,-,,,,,0.586,NOT_LTL,
+aut_52418.hoa,?,?,buchi,660,127,6241705,9457.1,1.160,UNVERIFIED_SIZE,<unflattened DAG: 6241705 tree nodes>
