@@ -3,7 +3,7 @@
 Identical in shape to `cakeds`, but both peels are `daisy_trio_det` (daisy →
 daisy2 → daisystardet → daisystar → core) instead of `daisy_trio`: a *rejecting*
 SCC with a **deterministic L-partition** is labelled by the exact, fixpoint-free
-anchored read-off (`DaisystarDet`, see `aut2ltl/daisystar/algorithm2.md`) — smaller
+anchored read-off (`DaisystarDet`, see `aut2ltl/daisystardet/algorithm.md`) — smaller
 than, and gate-free in principle compared to, the flat `Daisystar` — and the flat
 `Daisystar` stays as the fallback for a non-deterministic rejecting star, so
 coverage is at least `cakeds`'s. An A/B for `cakeds` over `--use cakedsdet`,

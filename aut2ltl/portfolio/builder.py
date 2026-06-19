@@ -30,7 +30,7 @@ from aut2ltl.bls.hierarchy_class import make_hierarchy_class
 from aut2ltl.daisy import Daisy
 from aut2ltl.daisy2 import Daisy2
 from aut2ltl.daisystar import Daisystar
-from aut2ltl.daisystar.det import DaisystarDet
+from aut2ltl.daisystardet import DaisystarDet
 from aut2ltl.partscc import PartScc
 from aut2ltl.decomp.inv import Invariant
 

@@ -7,9 +7,10 @@ every exit target to a child. It is the **reachability dual of `partscc`**:
 fairness law; daisystardet labels an *exiting, rejecting* deterministic SCC with
 the same transition law, but run **`U`-to-an-exit** instead of `G`-with-fairness.
 
-It is the sound, exact replacement for `daisy`'s flat `LEAVE` (see
-[`algorithm.md`](algorithm.md)) whenever the phase is recoverable from the last
-letter — and, unlike `daisystar`, it is **not restricted to length-1 stars**: any
+It is the sound, exact replacement for `daisystar`'s flat `LEAVE` (see
+[`daisystar/algorithm.md`](../daisystar/algorithm.md)) whenever the phase is
+recoverable from the last letter — and, unlike `daisystar`, it is **not restricted
+to length-1 stars**: any
 rejecting SCC whose entry-letter partition is deterministic qualifies.
 
 ## Setting
@@ -48,7 +49,7 @@ daisystardet applies when three local tests hold; it declines otherwise:
    occupied state is a function of the last letter and the run is **unique**.
 
 The third test is the crux — it is exactly `partscc`'s input-determinizing
-condition, and it is what removes the phase ambiguity that makes `daisy`'s flat
+condition, and it is what removes the phase ambiguity that makes `daisystar`'s flat
 `LEAVE` unsound.
 
 ## The label
@@ -110,8 +111,8 @@ oracle, by `partscc`'s argument lifted to reachability:
 - *Soundness.* If `LEAVE` holds, `O(h)` + `law` force a legal deterministic run
   staying in `C` until an actual exit edge fires to `dst` with `φ_dst` after; that
   walk *is* a run of `A`. No standalone body residual can misfire, because the law
-  pins the phase at every step — the looseness of `algorithm.md`'s flat `LEAVE`
-  cannot arise.
+  pins the phase at every step — the looseness of
+  [`daisystar`'s flat `LEAVE`](../daisystar/algorithm.md) cannot arise.
 
 Confirmed on the flat form's own counterexample
 ([`tests/fixtures/daisystar_loose.hoa`](../../tests/fixtures/daisystar_loose.hoa)):

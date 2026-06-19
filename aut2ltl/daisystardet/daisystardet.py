@@ -28,11 +28,10 @@ import sys
 from typing import Dict, List, Tuple, TYPE_CHECKING
 
 import spot
-import buddy
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult, Status
-from .shape import init_scc_states, reroot
+from .shape import init_scc_states, scc_data, is_deterministic, reroot
 
 if TYPE_CHECKING:
     from aut2ltl.translator import Translator
@@ -53,40 +52,6 @@ def _or(fs: List["spot.formula"]) -> "spot.formula":
 
 def _and(fs: List["spot.formula"]) -> "spot.formula":
     return _F.And(fs) if fs else _F.tt()
-
-
-def scc_data(
-    aut: "spot.twa_graph", C: "set", h: int
-) -> Tuple[Dict[int, "buddy.bdd"], Dict[int, "buddy.bdd"],
-          Dict[int, List[Tuple["buddy.bdd", int]]]]:
-    """Per-state `L` (⋁ guards entering the state within `C`), `O` (⋁ all
-    out-guards) and `exits` (`state → [(guard, dst∉C)]`), in one edge pass."""
-    L = {p: buddy.bddfalse for p in C}
-    O = {p: buddy.bddfalse for p in C}
-    exits: Dict[int, List[Tuple["buddy.bdd", int]]] = {p: [] for p in C}
-    for src in C:
-        for e in aut.out(src):
-            O[src] = O[src] | e.cond
-            if e.dst in C:
-                L[e.dst] = L[e.dst] | e.cond
-            else:
-                exits[src].append((e.cond, e.dst))
-    return L, O, exits
-
-
-def is_deterministic(L: Dict[int, "buddy.bdd"], h: int) -> bool:
-    """The L-partition is deterministic iff each `L(p)` is tight (`⊊ true`, and
-    non-empty except possibly the hub, which the anchor covers) and the `L(p)` are
-    pairwise disjoint — partscc's input-determinizing condition."""
-    states = list(L)
-    for p in states:
-        if L[p] == buddy.bddtrue or (L[p] == buddy.bddfalse and p != h):
-            return False
-    for i in range(len(states)):
-        for j in range(i + 1, len(states)):
-            if (L[states[i]] & L[states[j]]) != buddy.bddfalse:
-                return False
-    return True
 
 
 def build_det_candidate(
