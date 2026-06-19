@@ -49,16 +49,14 @@ Generators live *outside* `inputs/` and emit committed files into it:
 - **`collect_kinska.py`** — import + dedup Kinská HOA into `inputs/kinska/`, AP-renamed.
 - **`collect_fixtures.py`** — port the dev fixtures (`tests/fixtures`) into
   `inputs/fixtures/`, one `.ltl` per source list (+ the 3 HOA), AP-normalized on store.
-- **`normalize.py`** — AP-canonical NAME form: the dedup key, and the basic rename the
-  generators APPLY to every emitted example — renames APs to `a,b,c…` by first
-  occurrence and NOTHING else (no simplification/reordering). LTL + HOA.
-  `--dedup PATHS...` reports duplicate groups.
-- **`polarity.py`** — a further dedup step that homogenises atomic-proposition
-  *polarity*: each AP is complemented so its first occurrence (left-to-right reading
-  order) is positive, collapsing sign-twin inputs that differ only by which
-  propositions are negated. For example `!a X F a` and `a X F !a` both fold to
-  `a X F !a`. LTL + HOA, nothing else changed. See [`polarity.py`](polarity.py) for
-  details.
+- **`normalize/`** — a small self-contained AP-normalisation + dedup tool (its own
+  [`README`](normalize/README.md)), orthogonal to collection: it does not generate
+  the corpus. It canonicalises AP **names** (rename to `a,b,c…` by first occurrence)
+  and AP **polarity** (complement each AP so its first occurrence is positive, so
+  `!a X F a` and `a X F !a` both fold to `a X F !a`) — LTL + HOA, nothing else
+  changed — and `dedup.py` walks a folder and dedups under the combined key,
+  reporting per-file drop counts by default (`--prune` to delete / rewrite). The
+  generators APPLY the name rename to every emitted example.
 
 ## Plan (phased)
 
