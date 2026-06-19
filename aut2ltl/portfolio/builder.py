@@ -29,6 +29,7 @@ from aut2ltl.bls.aut2cas import as_translator
 from aut2ltl.bls.hierarchy_class import make_hierarchy_class
 from aut2ltl.daisy import Daisy
 from aut2ltl.daisy2 import Daisy2
+from aut2ltl.daisystar import Daisystar
 from aut2ltl.partscc import PartScc
 from aut2ltl.decomp.inv import Invariant
 
@@ -66,6 +67,29 @@ def daisy_pair(child: Translator) -> Translator:
                                    name="daisy_pair"))
 
 
+def daisy_trio(child: Translator) -> Translator:
+    """Like `daisy_pair` but with the rejecting length-1 star `daisystar` added to
+    the peel: per level try `Daisy`, then `Daisy2` (the recurrence star, gated),
+    then `Daisystar` (the reachability star — a rejecting star that exits to a
+    sink, gated), then `child`. Each peel hands its stem exits back to `leaf`;
+    same well-founded recursion as `daisy` (every stem strictly descends, and
+    `daisystar` resolves a whole star SCC without recursing into it)."""
+    return recurse(
+        lambda leaf: first_success(
+            [Daisy(leaf), Daisy2(leaf), Daisystar(leaf), child], name="daisy_trio"))
+
+
+def daisy_trio_inv(child: Translator) -> Translator:
+    """`daisy_trio` with the invariant strip woven into EVERY descent level, exactly
+    as `daisy_pair_inv` does for `daisy_pair`: each recursion factors its
+    sub-automaton's local `G(Σ)`, peels (`Daisy` → `Daisy2` → `Daisystar` → child),
+    and re-asserts `G(Σ)`."""
+    return recurse(
+        lambda leaf: Invariant(
+            first_success([Daisy(leaf), Daisy2(leaf), Daisystar(leaf), child],
+                          name="daisy_trio")))
+
+
 def daisy_pair_inv(child: Translator) -> Translator:
     """`daisy_pair` with the invariant strip woven into EVERY descent level: each
     recursion first factors its sub-automaton's *local* `G(Σ)` (`Invariant`), peels
@@ -87,4 +111,5 @@ def core(options: Optional[Options] = None) -> Translator:
     return first_success([PartScc(), bls(options)], name="core")
 
 
-__all__ = ["bls", "daisy", "daisy_pair", "daisy_pair_inv", "core"]
+__all__ = ["bls", "daisy", "daisy_pair", "daisy_pair_inv",
+           "daisy_trio", "daisy_trio_inv", "core"]
