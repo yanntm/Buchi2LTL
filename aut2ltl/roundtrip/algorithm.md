@@ -128,26 +128,4 @@ a single self-loop state) — giving
 a & GFa                                                               -- 5 tree nodes
 ```
 
-equivalent, six times smaller. The conjecture this module tests: the cascade's
-outputs share a characteristic shape that reshapes *especially* well — so a one-line
-round trip recovers near-minimal formulas across the family.
-
-## Out of scope (the assembly's concern)
-
-roundtrip does one round trip and trusts its inputs. Pushed to the assembly:
-
-- **Choosing the smaller.** roundtrip returns the *re-derivation*, making no size
-  judgment; whether to keep it over the plain seed is a `best_of` outside.
-- **Iterating to a fixpoint.** A second, third round trip may keep shrinking; the
-  recursion/iteration brick drives that, with the stopping rule (no-improvement /
-  depth cap).
-- **Termination.** Unlike a peel, roundtrip does **not** strictly descend — the
-  re-described Language need be no smaller. A naive self-referential knot could loop;
-  bounding it is the recursion brick's contract, not roundtrip's.
-- **Mutual recursion.** When `Λ` is the whole recursive portfolio, the relabel
-  re-enters every translator (roundtrip included) on the fresh presentation — the rich
-  behaviour this module is built for, and the reason termination is delegated upward.
-- **Memoization.** The re-description and the two `Λ` calls are cacheable by language
-  identity (Language already interns); preserving that sharing is the assembly's.
-
-Stripping these out is the point: roundtrip *is* just seed → re-describe → relabel.
+equivalent, six times smaller.
