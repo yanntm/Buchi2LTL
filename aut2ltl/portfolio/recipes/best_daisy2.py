@@ -12,6 +12,7 @@ from aut2ltl.options import Options
 from aut2ltl.decomp.acceptance import AccDecompose
 from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.simplify_ltl import Simplify
+from aut2ltl.compose import compose
 from ..builder import daisy_pair, core
 
 
@@ -24,7 +25,7 @@ def best_daisy2(options: Optional[Options] = None) -> Translator:
     descending straight to the cascade. The single `hi` simplification stays
     outside the whole assembly, exactly as in `best`."""
     return Simplify(
-        StrengthDecompose(AccDecompose(daisy_pair(core(options)))), "hi")
+        compose(StrengthDecompose, AccDecompose, daisy_pair)(core(options)), "hi")
 
 
 __all__ = ["best_daisy2"]

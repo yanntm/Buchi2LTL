@@ -12,6 +12,7 @@ from aut2ltl.options import Options
 from aut2ltl.decomp.acceptance import AccDecompose
 from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.simplify_ltl import Simplify
+from aut2ltl.compose import compose
 from ..builder import daisy, core
 
 
@@ -27,7 +28,7 @@ def best(options: Optional[Options] = None) -> Translator:
     One `hi` simplification sits OUTSIDE the whole assembly (our DAG combinators are
     size-indifferent, so a single final pass suffices — it replaces the per-Translator
     `_simp_f` the old `Sl`/`SlDriven` ran on their own output)."""
-    return Simplify(StrengthDecompose(AccDecompose(daisy(core(options)))), "hi")
+    return Simplify(compose(StrengthDecompose, AccDecompose, daisy)(core(options)), "hi")
 
 
 __all__ = ["best"]

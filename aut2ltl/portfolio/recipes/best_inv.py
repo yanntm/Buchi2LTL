@@ -14,6 +14,7 @@ from aut2ltl.decomp.acceptance import AccDecompose
 from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.decomp.inv import Invariant
 from aut2ltl.simplify_ltl import Simplify
+from aut2ltl.compose import compose
 from ..builder import daisy_pair, core
 
 
@@ -25,7 +26,7 @@ def best_inv(options: Optional[Options] = None) -> Translator:
     is usually vacuous, so this is benchmark-neutral — see `best_inv_loop` for the
     per-descent placement where the invariant actually fires."""
     return Simplify(
-        Invariant(StrengthDecompose(AccDecompose(daisy_pair(core(options))))), "hi")
+        compose(Invariant, StrengthDecompose, AccDecompose, daisy_pair)(core(options)), "hi")
 
 
 __all__ = ["best_inv"]

@@ -19,6 +19,7 @@ from aut2ltl.decomp.acceptance import AccDecompose
 from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.decomp.inv import Invariant
 from aut2ltl.simplify_ltl import Simplify
+from aut2ltl.compose import compose
 from ..builder import daisy_pair_inv, core
 
 
@@ -27,10 +28,7 @@ def best_inv_all(options: Optional[Options] = None) -> Translator:
     (pre-determinization strip per strength-part), and per peel descent
     (`daisy_pair_inv`). See module docstring for the rationale."""
     return Simplify(
-        Invariant(
-            StrengthDecompose(
-                Invariant(
-                    AccDecompose(daisy_pair_inv(core(options)))))),
+        compose(Invariant, StrengthDecompose, Invariant, AccDecompose, daisy_pair_inv)(core(options)),
         "hi")
 
 

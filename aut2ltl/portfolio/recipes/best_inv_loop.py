@@ -13,6 +13,7 @@ from aut2ltl.options import Options
 from aut2ltl.decomp.acceptance import AccDecompose
 from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.simplify_ltl import Simplify
+from aut2ltl.compose import compose
 from ..builder import daisy_pair_inv, core
 
 
@@ -24,7 +25,7 @@ def best_inv_loop(options: Optional[Options] = None) -> Translator:
     per-descent invariant's effect (incl. faster NOT_LTL verdicts on counting-style
     automata, by shrinking the monoid the LTL-definability gate tests)."""
     return Simplify(
-        StrengthDecompose(AccDecompose(daisy_pair_inv(core(options)))), "hi")
+        compose(StrengthDecompose, AccDecompose, daisy_pair_inv)(core(options)), "hi")
 
 
 __all__ = ["best_inv_loop"]

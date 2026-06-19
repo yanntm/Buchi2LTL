@@ -1318,3 +1318,12 @@ distinct from the decline terminal) + `compose(*decorators)` (outermost-first,
 compose(f,g,h)(x)=f(g(h(x))), empty=identity). Free named combinators only — no DSL,
 no operators. Additive (nothing imports compose yet). tests/test_combinators.py green
 (identity neutrality, compose order/assoc/unit); r4 audit CLEAN.
+
+## 2026-06-19 — combinator algebra, Step B: point-free recipes
+
+Plan step B of D. All 5 portfolio/recipes/*.py rewritten from inside-out nested
+constructor calls to flat `compose` terms, e.g.
+best_inv_all = Simplify(compose(Invariant, StrengthDecompose, Invariant, AccDecompose,
+daisy_pair_inv)(core(options)), "hi") — the two Invariant inserts now visible in the
+list. Simplify stays the outer wrap (it takes the "hi" level arg). Pure move: survey
+SUCCESS, DAG=414 unchanged, all --use recipes resolve identically. r4 audit CLEAN.
