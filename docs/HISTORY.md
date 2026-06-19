@@ -1368,3 +1368,16 @@ a significant form win, so it is pure upside. Survey --use cake: SUCCESS, 40/40 
 DAG=412 (vs default 414 — best_of harvested 2 significant wins, kept the safe form
 elsewhere). Also defaulted best_of's name kwarg (="best_of") so it is frictionless to
 wire. Not the default; curate the best*/cake recipe set later.
+
+## 2026-06-19 — cake: decomposition BELOW daisy (the deep variant)
+
+cake's aggressive alternative reshaped: the `scc_variant` (scc only above the peel)
+became `deep` = compose(Strength, Acc, daisy_pair, Strength, Acc, Scc)(core) — decomp
+BOTH above daisy AND below it: the peel now delegates its residuals to a fresh
+Strength∘Acc∘Scc stack before the bls core, instead of the bare core (where the default
+only re-peels). Terminates (the below stack floors on core, a leaf; no re-entry into
+daisy). Survey --use cake: SUCCESS, DAG=412 vs reference default 414 (-0.5%, 0
+regressions; one win: Fa & Gb 7->5 via the inv variant clearing the margin). The deep
+below-daisy decomp did not fire on the 40-formula survey (too small) — it is a
+benchmark-scale lever; here it is confirmed sound and wired. Diffed with
+tests/survey_diff.py vs tests/logs/reference/default.csv.
