@@ -33,13 +33,19 @@ class Roundtrip:
     def __call__(self, lang: "Language") -> "LTLResult":
         res = LTLResult.start(_NAME)                   # start OK, credit ourselves
 
+        # SEED: label the input; fold its work in. A NOK seed leaves nothing to
+        # re-describe — bail with its reason intact.
         seed = self._labeler(lang)
         res.credit(seed)
-        if res.nok:                                    # nothing to re-describe
+        if res.nok:
             return res
 
+        # RE-DESCRIBE + RELABEL: rebuild the Language from the seed formula, label it
+        # again, fold that in. A NOK relabel bails with its reason intact.
         relabel = self._labeler(Language.of_ltl(seed.formula))
         res.credit(relabel)
-        if res.ok:                                     # finish: take the re-derivation
-            res.formula = relabel.formula
+        if res.nok:
+            return res
+
+        res.formula = relabel.formula                  # finish: the re-derivation IS the formula
         return res
