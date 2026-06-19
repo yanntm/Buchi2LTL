@@ -9,10 +9,14 @@ Slot model (full, symmetric; q0 is the initial state):
   general (a marked `a` plus an unmarked `!a` self-loop is a distinct automaton;
   `a`-marked + `!a`-marked = `1`-marked, so parallel edges are covered too).
 
-Pipeline:
+Pipeline (all dedup is in-memory, PRE-write -- a twin is never built into a file):
   build each automaton -> ONE spot postprocess(Small, Generic family) pass ->
-  drop byte-identical results (md5, first generator-id wins) -> write the rest
-  one HOA per file. 65536 combos collapse to 1845 distinct files.
+  drop byte-identical results (md5, first generator-id wins) -> drop AP-canonical
+  twins (key = polarity o names, from tests/benchmark/normalize; only the
+  byte-distinct survivors pay this cost) -> write the rest, one HOA per file.
+  65536 combos collapse to 1845 byte-distinct, then 929 AP-canonical survivors.
+  The AP-canonical key is reused verbatim from the shared normalize tool, so the
+  same pre-process applies to any future family/shape regen, not just this census.
 
 Each surviving file keeps its GENERATOR ID in the name (aut_<index>.hoa), so the
 exact raw automaton is reproducible from the index alone via `aut_at(index, ...)`
@@ -29,7 +33,7 @@ import hashlib
 import itertools
 import os
 import sys
-from typing import List, Optional, Set, Tuple
+from typing import Callable, List, Optional, Set, Tuple
 
 import spot
 import buddy
@@ -97,23 +101,43 @@ def reduce_aut(aut: "spot.twa_graph") -> "spot.twa_graph":
     return spot.postprocess(aut, *POST_ARGS)
 
 
+def _ap_canonical_key() -> "Callable[[str], str]":
+    """The shared AP-canonical key (polarity o names) from the normalize package,
+    loaded by path since it lives under tests/. Used to fold the `a <-> !a`
+    polarity / AP-rename twins that byte-identity cannot see -- here applied ON
+    THE FLY (pre-write), so a twin is never built into a file in the first place.
+    Reused verbatim from the shared tool, so it carries to any future regen."""
+    repo_root = os.path.dirname(os.path.dirname(__file__))
+    sys.path.insert(0, os.path.join(repo_root, "tests", "benchmark", "normalize"))
+    from dedup import default_key                          # noqa: E402
+    return default_key
+
+
 def main(limit: Optional[int]) -> None:
     os.makedirs(OUT_DIR, exist_ok=True)
     bdict = spot.make_bdd_dict()
+    ap_key = _ap_canonical_key()
 
     combos = itertools.product(GUARDS, repeat=len(SLOTS))
-    seen: Set[str] = set()                 # md5 of every distinct exported HOA
+    seen_md5: Set[str] = set()             # cheap pre-filter: byte-identical HOA
+    seen_key: Set[str] = set()             # AP-canonical key (polarity o names)
     total = 0
     written = 0
+    folded = 0                             # md5-distinct but AP-canonical twins
     for i, combo in enumerate(combos):
         if limit is not None and i >= limit:
             break
         total += 1
         content = reduce_aut(build_aut(combo, bdict)).to_str("hoa") + "\n"
         digest = hashlib.md5(content.encode()).hexdigest()
-        if digest in seen:                 # byte-identical to an earlier id -> drop
+        if digest in seen_md5:             # byte-identical to an earlier id -> drop
             continue
-        seen.add(digest)
+        seen_md5.add(digest)
+        key = ap_key(content)              # only the ~1845 md5-survivors pay this
+        if key in seen_key:                # AP-canonical twin of an earlier id -> drop
+            folded += 1
+            continue
+        seen_key.add(key)
         path = os.path.join(OUT_DIR, f"aut_{i:05d}.hoa")
         with open(path, "w") as out:
             out.write(content)
@@ -121,7 +145,9 @@ def main(limit: Optional[int]) -> None:
         if total % 5000 == 0:
             print(f"  ... {total} scanned, {written} kept", file=sys.stderr)
 
-    print(f"scanned {total} combos, kept {written} distinct -> {OUT_DIR}/aut_NNNNN.hoa")
+    print(f"scanned {total} combos, kept {written} AP-canonical distinct "
+          f"({len(seen_md5)} byte-distinct, {folded} polarity/name twins folded "
+          f"pre-write) -> {OUT_DIR}/aut_NNNNN.hoa")
 
 
 if __name__ == "__main__":
