@@ -124,6 +124,133 @@ hit/regress rates, no `roundtrip_fine`, no `Memo`. The default recipe is unchang
 5. **Gates + benchmark.** Run `tests/bls/test_kr_r4_audit.py` (must be CLEAN) and
    `tests/survey.py` (must end SUCCESS); then the benchmark. None run yet for any
    roundtrip recipe.
+6. **Exhaustive `genaut/corpus` sweep.** Run every roundtrip recipe (and the
+   `cakedsdet` baseline) over the *entire* generated corpus — the exhaustive census of
+   small automata under `genaut/corpus/` was built precisely for coverage and for
+   surfacing nice examples. This is the real validation: the true improve / regress /
+   no-change distribution, the size-gain histogram, fresh witnesses, and — important —
+   the **outliers** where the minimal LTL stays large (candidate genuinely-complex /
+   non-counter-free languages). Pair every run with a per-formula baseline so a
+   regression is visible per case, not hidden in the aggregate.
+
+## Why it matters — usage scenarios
+
+If aut2ltl reliably returns *small* formulas (and it should, except where the language
+is genuinely, humanly-incomprehensibly complex — such cases are real, but likely
+outliers), the tool stops being a curiosity and becomes a spec-engineering instrument.
+Humans author **reactive, simple, counter-free** properties — they think "after
+request, eventually grant," not in terms of syntactic-monoid aperiodicity — and for
+that vast, practically-dominant fragment a compact LTL formula *exists*; aut2ltl finds
+it. Concretely: **recover a readable spec** from an automaton produced by learning,
+synthesis, a runtime monitor, or a legacy SERE/regex ("what does this machine actually
+require?"); **simplify/normalize** bloated LTL that arose from products, negations, or
+compositional construction (an LTL *linter*); translate **PSL/SERE → LTL** when
+possible and *decide* when not, for portability and tool interop; and read the
+**not-LTL-definable verdict as design feedback** — it usually means a property
+accidentally demands counting, a smell, since humans rarely intend that. LTL is a
+remarkably compact notation for surprisingly rich languages, which is exactly why the
+reverse direction — automaton back to a *small* formula — is valuable rather than
+hopeless: for the languages people actually build, the small formula is out there, and
+the round-trip insight (re-present, re-derive) is one of the levers that reaches it.
+
+## Speculative directions (capture before context cools)
+
+- **Complement round-trip — aut2ltl in the middle.** A language and its complement are
+  two presentations of the same information, and one is often far cleaner: a safety
+  property is an awkward `G`/`R` tangle whose complement is a crisp reachability daisy.
+  So complement the automaton, reconstruct *that*, and negate —
+  `best_of( reconstruct(L), ¬reconstruct(¬L) )`. Complementation is exponential and
+  Spot avoids it, but this construction is already (triple-)exponential, so the cost is
+  in budget — and the complement is frequently the *simpler side to peel*. A
+  deliberately contrarian presentation move: we usually dodge complements; here we
+  court them. (Original to this session — worth real attention.)
+- **Syntactic LTL decomposition — a new decomposition brick.** When a seed comes back
+  as `ψ1 ∧ … ∧ ψk` (the cascade and the acceptance split both do this), the `∧` is
+  language *intersection* at the LTL level: each `ψi` is a separate, weaker constraint
+  and `L(∧ψi) = ⋂ L(ψi)`. So re-derive each conjunct *independently*
+  (`ψi' = reconstruct(L(ψi))`) and relink with `∧` — every subproblem is a strictly
+  *simpler* language (smaller automaton, likelier to peel) than the whole, and the
+  seed's own syntax handed us the split *for free*, a split the product automaton
+  hides. Same for `∨` (union, as strength / SCC do). This is `roundtrip` fused with
+  `decomp`, but the parts come from the *formula's boolean tree*, not from re-analyzing
+  the automaton: read the seed's top `∧`/`∨`, reshape-and-re-derive each operand,
+  recombine, recurse into operands that are themselves conjunctions/disjunctions. Sound
+  trivially (`ψi' ≡ ψi`); and it generalizes *below* the top layer — in LTL, ω-language
+  equivalence is a **congruence** (equivalence at position 0 entails equivalence at
+  every suffix, since `w,i ⊨ φ ⇔ w[i:] ∈ L(φ)`), so *any* subformula may be swapped for
+  an ω-equivalent reconstruction, the `∧`/`∨` seams being merely the highest-value
+  cuts. It turns the cascade's ugly-but-*structured* output into leverage: the `∧` it
+  emits is not noise, it is a decomposition certificate.
+- **Presentation portfolio.** `best_of` over the *formula-mediated* presentation moves
+  — plain reconstruction, the round trip, the complement round-trip, the syntactic
+  split — letting each language be reached by whichever move peels it. (Pure
+  automaton-level re-presentation is *not* a member: Spot's rewriting is already wired
+  into `Language`, and standalone automaton heuristics were explored earlier and
+  abandoned as ineffective.)
+- **Reshape the *simplified* seed.** Re-present `simplify(seed)` rather than `seed`:
+  our DAG-aware simplifier differs from Spot's, and a simpler formula may translate to
+  a simpler automaton. A cheap knob.
+
+## The deep frame — recovering what automata destroy
+
+LTL has a property automata do not: **compositional nesting**. Its meaning is built
+from subformula meanings *at every position*, because `w,i ⊨ φ ⇔ w[i:] ∈ L(φ)` — so
+ω-equivalence is a **congruence**, and a subformula may be replaced by an ω-equivalent
+*anywhere* in the tree, soundly. An automaton flattens exactly this: determinization
+and product braid every constraint into one monolithic transition structure and the
+compositional seams vanish. **Recovering those seams is, in a real sense, the whole
+problem** — automaton→LTL is hard precisely because the automaton has destroyed the
+nesting LTL carries natively. Several directions below are the same move seen twice:
+recover structure the automaton hid.
+
+### Syntactic decomposition — exploit the nesting a *seed* still carries
+
+The seed formula has not been flattened — it still wears its boolean tree. When the
+cascade returns `ψ1 ∧ … ∧ ψk`, that tree is a **decomposition certificate**: the engine
+has told us `L = ⋂ L(ψi)`, no automaton analysis needed. Three sources of leverage:
+
+- *The split is handed to us, not searched.* `decomp` normally has to discover a split
+  by analyzing SCCs / acceptance conjuncts; here we read the AST.
+- *Isolation un-mixes the product.* Each `L(ψi) ⊇ L(φ)` is weaker, and `of_ltl(ψi)`
+  builds a fresh automaton for that one constraint, free of the entanglement that
+  braids the conjuncts together in `φ`'s automaton. That entanglement is exactly what
+  blinds automaton-level decomp; cutting the syntactic `∧` un-braids it. So this is the
+  formula-side **dual** of `AccDecompose` / `SccDecompose`, and it splits where they are
+  blind.
+- *It generalizes past `∧`/`∨`.* By the congruence above, *any* ugly sub-DAG (a nested
+  `X(!a R Fa)` blob buried under a `U`) can be reconstructed in isolation and
+  substituted. The boolean operands are merely the highest-value, most-independent cuts.
+
+The pipeline is all bricks we have or are building: `split` (read the tree) →
+`reconstruct` each operand (the recursive leaf — *cheap now*, since `of_ltl` tags each
+sub-language definable and skips GAP) → `relink` with the same connective → `simplify`
+(which may re-factor structure shared across the rebuilt operands) → recurse into
+operands that are themselves `∧`/`∨`. It composes with `roundtrip` (each operand
+reconstruction *is* a round trip) and lands as a new `decomp/` brick —
+`SyntacticDecompose`, whose splitter is the formula, not the automaton. Open policy:
+target by sub-DAG size (biggest blobs first) or top-layer-plus-one, and let `best_of`
+keep the win; the cascade's top-level `∧` is the prime target, where ugliness and
+structure coincide. Soundness caveat: future-time LTL only (our output) — not PSL with
+past or SERE semantics.
+
+## Concrete next steps
+
+1. **Validate the floor patch.** Run `tests/bls/test_kr_r4_audit.py` (must be CLEAN)
+   and `tests/survey.py` (must end SUCCESS) against the committed `of_ltl` change
+   before relying on it — it is the only shared-floor edit so far.
+2. **Build `Memo`** as a peer Translator decorator (per-instance, keyed by Language;
+   decide share- vs clone-on-hit). The smallest, most reusable brick; it unblocks the
+   combo.
+3. **Build the never-regress combo recipe** `best_of([ Memo(C), Roundtrip(Memo(C)) ])`
+   and `roundtrip_fine` (floor injection, light `M`). Both are two-line wirings.
+4. **Exhaustive `genaut/corpus` sweep** of `cakedsdet` vs `roundtrip` vs
+   `roundtrip_fine`, per-formula with baselines, then pivot improve / regress /
+   no-change **by seed technique**. This answers "does it generalize, and to which
+   families."
+5. **Probe reshape-idempotence** on a sample (`reshape(reshape(F))` vs `reshape(F)`).
+   Its answer decides whether the iterating presentation-search combinator
+   (size-monotone, fixpoint stop — *not* `recurse`) is worth building.
+6. Only then, if the data warrants, consider re-pointing the default.
 
 ## Disposition
 
