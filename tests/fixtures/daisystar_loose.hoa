@@ -1,0 +1,24 @@
+HOA: v1
+name: "daisystar-loose: rejecting star whose flat LEAVE is too loose"
+States: 3
+Start: 0
+AP: 2 "x" "y"
+Acceptance: 1 Inf(0)
+properties: trans-labels explicit-labels state-acc
+/* Letters (disjoint): a=!x&!y, b=!x&y, c=x&!y, d=x&y.
+   Hub 0: only edge is a->1 (enter spoke). NO petal, NO hub-stem -> the hub is
+   STUCK on b/c/d (missing edge = reject). Spoke 1: body b (self-loop), return
+   c (->hub), spoke-exit d (->true sink 2). SCC {0,1} is rejecting (no mark);
+   acceptance lives only on the sink. L(A) = (a b* c)* a b* d . Sigma^w.
+   The flat LEAVE's standalone (b U c) body residual holds at HUB positions with
+   no legal move, so it should admit b.c.a.d... which has no legal run. */
+--BODY--
+State: 0
+[!0 & !1] 1
+State: 1
+[!0 & 1] 1
+[0 & !1] 0
+[0 & 1] 2
+State: 2 {0}
+[t] 2
+--END--
