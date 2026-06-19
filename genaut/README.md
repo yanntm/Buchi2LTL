@@ -98,6 +98,8 @@ canonicalization we never asked for.
 
 ## File map
 
+    research_log.md  dated, dense log of observations (idea/validation/results/
+                     conclusions) with reproduction pointers.
     enumerate.py     the generator: slot model, build_aut, postprocess+md5 dedup,
                      and per-index helpers combo_at(i) / aut_at(i, bdict).
                      `python3 genaut/enumerate.py [LIMIT]`  -> genaut/raw/*.hoa
