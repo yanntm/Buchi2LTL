@@ -75,6 +75,12 @@ canonical 1-state `t`:
   `aut2ltl/language.py::_clean`). Forcing `ba`/`tgba` output keeps a Büchi set, so
   those stay at 2 states `Inf(0)` even with `deterministic`.
 
+And it is a *complete* remedy: `probe_true_collapse.py` runs that strong setting
+over all **654** universal survivors and **every one** collapses to the canonical
+1-state `t` (state-count histogram `{1: 654}`). So the 651 that `Small` left at 2
+states were never "hard" — they were one determinization step from canonical; the
+cheap path simply refuses that step.
+
 That redundant-acc drop is exactly why the three 1-state `true` survivors differ:
 `aut_00257` had its `Inf(0)` dropped (`Acceptance: 0 t`), while `aut_00265`
 reached the same 1-state shape on a path that kept `Inf(0)` (state colored) — the
@@ -96,8 +102,12 @@ canonicalization we never asked for.
                      and per-index helpers combo_at(i) / aut_at(i, bdict).
                      `python3 genaut/enumerate.py [LIMIT]`  -> genaut/raw/*.hoa
     probe_post.py    diagnostic: rebuild a raw automaton from its generator id and
-                     run a spot postprocessor type×pref×level matrix on it.
+                     run a spot postprocess type×pref×level matrix on it.
                      `python3 genaut/probe_post.py [INDEX]`   (default 51142)
+    probe_true_collapse.py
+                     diagnostic: over all 654 universal survivors, does the strong
+                     determinizing setting reach the canonical 1-state true? (yes,
+                     654/654).  `python3 genaut/probe_true_collapse.py`
     raw/             generated automata, one HOA per survivor (gitignored —
                      regenerable in ~1.4s; the index naming is stable).
     logs/            the committed survey results for the census above:
