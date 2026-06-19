@@ -1327,3 +1327,18 @@ best_inv_all = Simplify(compose(Invariant, StrengthDecompose, Invariant, AccDeco
 daisy_pair_inv)(core(options)), "hi") — the two Invariant inserts now visible in the
 list. Simplify stays the outer wrap (it takes the "hi" level arg). Pure move: survey
 SUCCESS, DAG=414 unchanged, all --use recipes resolve identically. r4 audit CLEAN.
+
+## 2026-06-19 — combinator algebra, Step C: unify the three decomposers
+
+Plan step C of D. New aut2ltl/decomp/decompose.py: combine(connective, tag, parts)
+(the shared _recombine = fuse + root ∧/∨ + own_simplify) and decompose(split,
+connective, tag) -> Decorator (= recurse(λself.λlang. combine(...,[self(Language.of(p))
+for p in split(lang)]) if split(lang) else leaf(lang))). strength/acceptance/scc
+collapse from byte-identical class+_recombine scaffolding to one-liners over their kept
+split fns: StrengthDecompose=decompose(strength_pieces∘tgba, Or, "strength"),
+AccDecompose=decompose(conjunct_pieces∘det_generic_minimal, And, "acc"),
+SccDecompose=decompose(<accepting_sccs+restrict_marks>, Or, "scc"). Behavior-preserving
+(the three _recombine were byte-identical modulo connective/tag): survey SUCCESS
+DAG=414 unchanged, r4 CLEAN. The .name class attr dropped (nothing read it; tags come
+from combine's LTLResult.start). decomp's recurse body is a *combine* (∧/∨); daisy's is
+a *choice* (⊕) — same fix, different body op.
