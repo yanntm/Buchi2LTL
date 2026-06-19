@@ -1,4 +1,4 @@
 corpus     cases  answ valid false  decl    bTO   bCR unver    DAGsum tempsum    build
-kinska       165    99    88     0     0      3     0    11     13531    2325    20.29
+kinska       165    99    88     0     0      2     0    11     13531    2325    19.62
 
 SUCCESS
