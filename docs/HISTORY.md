@@ -1357,3 +1357,14 @@ contrast. Close-out: removed the prepended COMBINATOR-ALGEBRA plan block from TO
 still-open memoization lever, flipped the STATUS combinator-algebra note to done,
 removed the algebra_todo.md scratch. Scope held throughout: free named combinators
 only, no DSL/AST/meta. Whole campaign behavior-preserving (survey DAG=414 unchanged).
+
+## 2026-06-19 — cake recipe: the liberal best_of (first best_of wiring)
+
+First wiring of best_of into a recipe. cake (portfolio/recipes/cake.py) = best_of over
+[best_daisy2 (trusted incumbent), best_inv_all (inv everywhere), an scc_variant that
+finally wires the orphaned SccDecompose ∨-split], beats=significantly_smaller(rel=0.25,
+floor=2). Liberal in ingredients, but the guidance margin only displaces the default on
+a significant form win, so it is pure upside. Survey --use cake: SUCCESS, 40/40 equiv,
+DAG=412 (vs default 414 — best_of harvested 2 significant wins, kept the safe form
+elsewhere). Also defaulted best_of's name kwarg (="best_of") so it is frictionless to
+wire. Not the default; curate the best*/cake recipe set later.

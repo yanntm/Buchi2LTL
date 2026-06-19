@@ -68,7 +68,7 @@ class _BestOf(Generic[_In]):
 def best_of(
     stages: Sequence[Callable[[_In], LTLResult]],
     *,
-    name: str,
+    name: str = "best_of",
     beats: Comparator = smaller,
 ) -> "_BestOf[_In]":
     """Compose `stages` into a single named translator that walks them in order and

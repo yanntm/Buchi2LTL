@@ -21,6 +21,7 @@ from .best_daisy2 import best_daisy2
 from .best_inv import best_inv
 from .best_inv_loop import best_inv_loop
 from .best_inv_all import best_inv_all
+from .cake import cake
 
 # Public recipe names → builders. `build_portfolio` resolves `--use <name>` here.
 RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
@@ -29,6 +30,7 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
     "best_inv": best_inv,
     "best_inv_loop": best_inv_loop,
     "best_inv_all": best_inv_all,
+    "cake": cake,
 }
 
 # The shipped default — the assembly used when no `--use` is given (the CLI/build
@@ -39,4 +41,4 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
 RECIPES["default"] = RECIPES["best_daisy2"]
 
 __all__ = ["RECIPES", "best", "best_daisy2", "best_inv", "best_inv_loop",
-           "best_inv_all"]
+           "best_inv_all", "cake"]
