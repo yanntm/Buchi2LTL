@@ -1,41 +1,41 @@
 formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
-true,B,B,daisy,1,0,1,1.0,0.070,True,1
+true,B,B,daisy,1,0,1,1.0,0.063,True,1
 false,B,B,daisy,1,0,1,1.0,0.065,True,0
-a,G,B,daisy,1,0,1,1.0,0.061,True,a
-Ga,S,S,daisy,2,1,2,1.0,0.066,True,Ga
-G(a | b),S,S,daisy,4,1,4,1.0,0.065,True,G(a | b)
-G(a -> X b),S,S,partscc,6,1,6,1.0,0.067,True,G(!a | Xb)
-a & X a,S,B,daisy,3,0,4,1.3,0.065,True,a & Xa
-G(a -> X a),S,S,daisy,4,2,5,1.2,0.065,True,!a W Ga
-G(a & X a),S,S,daisy,2,1,2,1.0,0.063,True,Ga
-X a,G,B,daisy,2,0,2,1.0,0.063,True,Xa
-X X a,G,B,daisy,3,0,3,1.0,0.065,True,XXa
-X X X a,G,B,daisy,4,0,4,1.0,0.067,True,XXXa
+a,G,B,daisy,1,0,1,1.0,0.063,True,a
+Ga,S,S,daisy,2,1,2,1.0,0.062,True,Ga
+G(a | b),S,S,daisy,4,1,4,1.0,0.063,True,G(a | b)
+G(a -> X b),S,S,partscc,6,1,6,1.0,0.068,True,G(!a | Xb)
+a & X a,S,B,daisy,3,0,4,1.3,0.066,True,a & Xa
+G(a -> X a),S,S,daisy,4,2,5,1.2,0.064,True,!a W Ga
+G(a & X a),S,S,daisy,2,1,2,1.0,0.066,True,Ga
+X a,G,B,daisy,2,0,2,1.0,0.066,True,Xa
+X X a,G,B,daisy,3,0,3,1.0,0.064,True,XXa
+X X X a,G,B,daisy,4,0,4,1.0,0.062,True,XXXa
 X(a & X a),G,B,daisy,4,0,5,1.2,0.063,True,X(a & Xa)
 Fa,G,G,daisy,2,1,2,1.0,0.065,True,Fa
-a U b,G,G,daisy,3,1,3,1.0,0.064,True,a U b
-F(a & b),G,G,daisy,4,1,4,1.0,0.064,True,F(a & b)
-F(a & X b),G,G,buchi,181,40,829,4.6,1.191,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
-a | X b,G,B,daisy,4,0,4,1.0,0.066,True,a | Xb
+a U b,G,G,daisy,3,1,3,1.0,0.066,True,a U b
+F(a & b),G,G,daisy,4,1,4,1.0,0.068,True,F(a & b)
+F(a & X b),G,G,daisy+daisystar,13,3,21,1.6,0.067,True,(!a | X((a & !b) U (!a & !b))) U (a & X(a U b))
+a | X b,G,B,daisy,4,0,4,1.0,0.067,True,a | Xb
 Fa | Gb,O,O,daisy+strength2,7,2,8,1.1,0.065,True,Fa | G(!a & b)
 Ga | Gb,O,S,daisy,11,3,15,1.4,0.065,True,(a & b) W ((!a & Gb) | (!b & Ga))
-Fa & Gb,O,O,daisy+inv,5,2,5,1.0,0.062,True,Fa & Gb
-(a U b) | Gc,O,O,daisy+strength2,11,3,17,1.5,0.066,True,(a U b) | ((a & !b & c) W (!a & !b & Gc))
-Ga | Fb,O,O,daisy+strength2,7,2,8,1.1,0.065,True,Fb | G(a & !b)
-GFa,R,R,daisy,3,2,3,1.0,0.061,True,GFa
-G(a -> F b),R,R,daisy2,6,2,6,1.0,0.064,True,G(!a | Fb)
-G(a | F b),R,R,daisy2,5,2,5,1.0,0.063,True,G(a | Fb)
+Fa & Gb,O,O,daisy+inv,5,2,5,1.0,0.066,True,Fa & Gb
+(a U b) | Gc,O,O,daisy+strength2,11,3,17,1.5,0.067,True,(a U b) | ((a & !b & c) W (!a & !b & Gc))
+Ga | Fb,O,O,daisy+strength2,7,2,8,1.1,0.066,True,Fb | G(a & !b)
+GFa,R,R,daisy,3,2,3,1.0,0.065,True,GFa
+G(a -> F b),R,R,daisy2,6,2,6,1.0,0.067,True,G(!a | Fb)
+G(a | F b),R,R,daisy2,5,2,5,1.0,0.069,True,G(a | Fb)
 GFa & GFb,R,R,acc2+daisy,6,3,6,1.0,0.065,True,G(Fa & Fb)
-GFa & GFb & GFc,R,R,acc3+daisy,8,4,8,1.0,0.065,True,G(Fa & Fb & Fc)
-G(a -> F b) & G(c -> F d),R,R,acc2+daisy2,12,3,12,1.0,0.189,True,G((!a | Fb) & (!c | Fd))
-G(p -> (q U r)),R,R,daisy2,7,2,7,1.0,0.066,True,G(!p | (q U r))
-FGa,P,P,daisy,3,2,3,1.0,0.063,True,FGa
+GFa & GFb & GFc,R,R,acc3+daisy,8,4,8,1.0,0.066,True,G(Fa & Fb & Fc)
+G(a -> F b) & G(c -> F d),R,R,acc2+daisy2,12,3,12,1.0,0.207,True,G((!a | Fb) & (!c | Fd))
+G(p -> (q U r)),R,R,daisy2,7,2,7,1.0,0.068,True,G(!p | (q U r))
+FGa,P,P,daisy,3,2,3,1.0,0.067,True,FGa
 F(a & G b),P,P,daisy,5,2,5,1.0,0.065,True,F(a & Gb)
-FGa | FGb,P,P,daisy,6,3,6,1.0,0.065,True,F(Ga | Gb)
-GFa -> GFb,T,T,daisy+strength2,9,4,10,1.1,0.066,True,F(G!a | (b & GFb))
-GFa & FGb,T,T,acc2+daisy,7,4,7,1.0,0.067,True,G(Fa & FGb)
-G((!a & X a) | (a & X !a)),S,S,daisy+partscc,15,1,37,2.5,0.063,True,(!a & X(a & G((a | Xa) & (!a | X!a)))) | (a & X(!a & G((a | Xa) & (!a | X!a))))
-G(a <-> X b),S,S,daisy+partscc,17,1,37,2.2,0.068,True,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b))))
-GFa & G(a -> X !a),R,R,daisy2,8,2,14,1.8,0.062,True,G((!a | X!a) & F(a & X!a))
-G(a -> X b) & GFa,R,R,partscc,8,2,9,1.1,0.066,True,G(Fa & (!a | Xb))
-GFa & GFb & G(a -> X !a),R,R,acc2+daisy2,15,3,31,2.1,0.071,True,G((!a | X!a) & F(a & X!a) & F((a & X(!a & b)) | (b & (!a | X!a))))
+FGa | FGb,P,P,daisy,6,3,6,1.0,0.069,True,F(Ga | Gb)
+GFa -> GFb,T,T,daisy+strength2,9,4,10,1.1,0.069,True,F(G!a | (b & GFb))
+GFa & FGb,T,T,acc2+daisy,7,4,7,1.0,0.069,True,G(Fa & FGb)
+G((!a & X a) | (a & X !a)),S,S,daisy+partscc,15,1,37,2.5,0.072,True,(!a & X(a & G((a | Xa) & (!a | X!a)))) | (a & X(!a & G((a | Xa) & (!a | X!a))))
+G(a <-> X b),S,S,daisy+partscc,17,1,37,2.2,0.069,True,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b))))
+GFa & G(a -> X !a),R,R,daisy2,8,2,14,1.8,0.068,True,G((!a | X!a) & F(a & X!a))
+G(a -> X b) & GFa,R,R,partscc,8,2,9,1.1,0.071,True,G(Fa & (!a | Xb))
+GFa & GFb & G(a -> X !a),R,R,acc2+daisy2,15,3,31,2.1,0.074,True,G((!a | X!a) & F(a & X!a) & F((a & X(!a & b)) | (b & (!a | X!a))))

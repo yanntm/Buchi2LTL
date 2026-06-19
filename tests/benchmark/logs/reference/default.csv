@@ -1,374 +1,374 @@
 formula,class,mp,technique,dag_nodes,temporals,tree_nodes,sharing,build_s,equiv,reconstructed
-(a W ((a & b) U (b | c))),?,S,daisy+strength2,10,2,13,1.3,0.064,True,G(a & !b & !c) | (a U (b | c))
-(a W ((a & b) U ((b | c) W (a & X b)))),?,S,daisy+strength2,15,2,26,1.7,0.064,True,a W ((a & Xb) | (((!a & b) | (!a & c)) & X((b | c) W (a & Xb))))
-(a U ((a & b) R (b | c))),?,P,daisy+strength2,19,3,40,2.1,0.072,True,(a & !b) U ((a & b) | G((!a & b) | (!b & c)) | (((!a & b) | (!a & c)) & X((c | (…
-(a U ((a & b) R ((b | c) U (a & X b)))),?,R,-,,,,,15.012,BUILD_TIMEOUT>15s,
-(a R (a & b)),?,B,daisy,3,0,3,1.0,0.064,True,a & b
-(a R ((a & b) R (b | c))),?,S,daisy+strength2,13,2,18,1.4,0.066,True,G((!a & b) | (!b & c)) | ((b | c) U (a & b))
-(a R ((a & b) R ((b | c) R (a & X b)))),?,B,daisy,10,0,16,1.6,0.066,True,a & ((b & Xb) | (!b & X(a & b & Xb)))
-(a U (a & b)),?,G,daisy,3,1,3,1.0,0.067,True,b M a
+(a W ((a & b) U (b | c))),?,S,daisy+strength2,10,2,13,1.3,0.065,True,G(a & !b & !c) | (a U (b | c))
+(a W ((a & b) U ((b | c) W (a & X b)))),?,S,daisy+strength2,15,2,26,1.7,0.068,True,a W ((a & Xb) | (((!a & b) | (!a & c)) & X((b | c) W (a & Xb))))
+(a U ((a & b) R (b | c))),?,P,daisy+strength2,19,3,40,2.1,0.068,True,(a & !b) U ((a & b) | G((!a & b) | (!b & c)) | (((!a & b) | (!a & c)) & X((c | (…
+(a U ((a & b) R ((b | c) U (a & X b)))),?,R,daisy+daisy2+daisystar+strength2,36,5,112,3.1,0.100,True,a U ((a & b & X(b | ((b | c) U (a & Xb)))) | (((!a & b) | (!a & c)) & X(G(F(a & …
+(a R (a & b)),?,B,daisy,3,0,3,1.0,0.060,True,a & b
+(a R ((a & b) R (b | c))),?,S,daisy+strength2,13,2,18,1.4,0.062,True,G((!a & b) | (!b & c)) | ((b | c) U (a & b))
+(a R ((a & b) R ((b | c) R (a & X b)))),?,B,daisy,10,0,16,1.6,0.062,True,a & ((b & Xb) | (!b & X(a & b & Xb)))
+(a U (a & b)),?,G,daisy,3,1,3,1.0,0.065,True,b M a
 (a U ((a & b) U (b | c))),?,G,daisy,5,1,5,1.0,0.064,True,a U (b | c)
-(a U ((a & b) U ((b | c) U (a & X b)))),?,G,daisy,15,2,26,1.7,0.061,True,a U ((a & Xb) | (((!a & b) | (!a & c)) & X((b | c) U (a & Xb))))
-(a W (a & b)),?,S,daisy+strength2,3,1,3,1.0,0.065,True,b R a
-(a W ((a & b) W (b | c))),?,S,daisy+strength2,10,2,13,1.3,0.067,True,G(a & !b & !c) | (a U (b | c))
-(a W ((a & b) W ((b | c) W (a & X b)))),?,S,daisy+strength2,15,2,26,1.7,0.068,True,a W ((a & Xb) | (((!a & b) | (!a & c)) & X((b | c) W (a & Xb))))
-(a U X (a & b)),?,G,daisy,5,1,6,1.2,0.066,True,a U X(a & b)
-(a U (X (a & b) U (b | c))),?,G,daisy,12,1,17,1.4,0.064,True,(a & !b & !c) U (b | c | (!a & X(a & b)))
-(a U (X (a & b) U ((b | c) U X (a & X b)))),?,G,daisy,23,2,54,2.3,0.071,True,a U (X(a & Xb) | (((!a & b) | (!a & c)) & X((b | c) U X(a & Xb))) | (!a & !b & !…
-(a W X (a & b)),?,S,daisy+strength2,5,1,6,1.2,0.070,True,a W X(a & b)
-(a W (X (a & b) W (b | c))),?,S,daisy+strength2,12,1,17,1.4,0.072,True,(a & !b & !c) W (b | c | (!a & X(a & b)))
+(a U ((a & b) U ((b | c) U (a & X b)))),?,G,daisy,15,2,26,1.7,0.063,True,a U ((a & Xb) | (((!a & b) | (!a & c)) & X((b | c) U (a & Xb))))
+(a W (a & b)),?,S,daisy+strength2,3,1,3,1.0,0.064,True,b R a
+(a W ((a & b) W (b | c))),?,S,daisy+strength2,10,2,13,1.3,0.062,True,G(a & !b & !c) | (a U (b | c))
+(a W ((a & b) W ((b | c) W (a & X b)))),?,S,daisy+strength2,15,2,26,1.7,0.066,True,a W ((a & Xb) | (((!a & b) | (!a & c)) & X((b | c) W (a & Xb))))
+(a U X (a & b)),?,G,daisy,5,1,6,1.2,0.062,True,a U X(a & b)
+(a U (X (a & b) U (b | c))),?,G,daisy,12,1,17,1.4,0.066,True,(a & !b & !c) U (b | c | (!a & X(a & b)))
+(a U (X (a & b) U ((b | c) U X (a & X b)))),?,G,daisy,23,2,54,2.3,0.069,True,a U (X(a & Xb) | (((!a & b) | (!a & c)) & X((b | c) U X(a & Xb))) | (!a & !b & !…
+(a W X (a & b)),?,S,daisy+strength2,5,1,6,1.2,0.066,True,a W X(a & b)
+(a W (X (a & b) W (b | c))),?,S,daisy+strength2,12,1,17,1.4,0.065,True,(a & !b & !c) W (b | c | (!a & X(a & b)))
 (a W (X (a & b) W ((b | c) W X (a & X b)))),?,S,daisy+strength2,28,4,63,2.2,0.072,True,a W (X(a & Xb) | (((!a & b) | (!a & c)) & X((b | c) W X(a & Xb))) | (!a & !b & !…
-true,B,B,daisy,1,0,1,1.0,0.062,True,1
+true,B,B,daisy,1,0,1,1.0,0.063,True,1
 false,B,B,daisy,1,0,1,1.0,0.064,True,0
-a,G,B,daisy,1,0,1,1.0,0.065,True,a
-X a,G,B,daisy,2,0,2,1.0,0.065,True,Xa
-X X a,G,B,daisy,3,0,3,1.0,0.065,True,XXa
-X X X a,G,B,daisy,4,0,4,1.0,0.067,True,XXXa
-X(a & X a),G,B,daisy,4,0,5,1.2,0.067,True,X(a & Xa)
-Fa,G,G,daisy,2,1,2,1.0,0.065,True,Fa
-a U b,G,G,daisy,3,1,3,1.0,0.061,True,a U b
-F(a & b),G,G,daisy,4,1,4,1.0,0.064,True,F(a & b)
-F(a & X b),G,G,buchi,181,40,829,4.6,1.185,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
-a | X b,G,B,daisy,4,0,4,1.0,0.065,True,a | Xb
-Fa | Gb,O,O,daisy+strength2,7,2,8,1.1,0.067,True,Fa | G(!a & b)
+a,G,B,daisy,1,0,1,1.0,0.064,True,a
+X a,G,B,daisy,2,0,2,1.0,0.061,True,Xa
+X X a,G,B,daisy,3,0,3,1.0,0.064,True,XXa
+X X X a,G,B,daisy,4,0,4,1.0,0.063,True,XXXa
+X(a & X a),G,B,daisy,4,0,5,1.2,0.066,True,X(a & Xa)
+Fa,G,G,daisy,2,1,2,1.0,0.064,True,Fa
+a U b,G,G,daisy,3,1,3,1.0,0.064,True,a U b
+F(a & b),G,G,daisy,4,1,4,1.0,0.063,True,F(a & b)
+F(a & X b),G,G,daisy+daisystar,13,3,21,1.6,0.062,True,(!a | X((a & !b) U (!a & !b))) U (a & X(a U b))
+a | X b,G,B,daisy,4,0,4,1.0,0.066,True,a | Xb
+Fa | Gb,O,O,daisy+strength2,7,2,8,1.1,0.062,True,Fa | G(!a & b)
 Ga | Gb,O,S,daisy,11,3,15,1.4,0.067,True,(a & b) W ((!a & Gb) | (!b & Ga))
-Fa & Gb,O,O,daisy+inv,5,2,5,1.0,0.065,True,Fa & Gb
-(a U b) | Gc,O,O,daisy+strength2,11,3,17,1.5,0.066,True,(a U b) | ((a & !b & c) W (!a & !b & Gc))
-Ga | Fb,O,O,daisy+strength2,7,2,8,1.1,0.066,True,Fb | G(a & !b)
+Fa & Gb,O,O,daisy+inv,5,2,5,1.0,0.062,True,Fa & Gb
+(a U b) | Gc,O,O,daisy+strength2,11,3,17,1.5,0.067,True,(a U b) | ((a & !b & c) W (!a & !b & Gc))
+Ga | Fb,O,O,daisy+strength2,7,2,8,1.1,0.064,True,Fb | G(a & !b)
 FGa,P,P,daisy,3,2,3,1.0,0.064,True,FGa
-F(a & G b),P,P,daisy,5,2,5,1.0,0.065,True,F(a & Gb)
-FGa | FGb,P,P,daisy,6,3,6,1.0,0.067,True,F(Ga | Gb)
-GFa -> GFb,T,T,daisy+strength2,9,4,10,1.1,0.066,True,F(G!a | (b & GFb))
-GFa & FGb,T,T,acc2+daisy,7,4,7,1.0,0.063,True,G(Fa & FGb)
+F(a & G b),P,P,daisy,5,2,5,1.0,0.066,True,F(a & Gb)
+FGa | FGb,P,P,daisy,6,3,6,1.0,0.066,True,F(Ga | Gb)
+GFa -> GFb,T,T,daisy+strength2,9,4,10,1.1,0.065,True,F(G!a | (b & GFb))
+GFa & FGb,T,T,acc2+daisy,7,4,7,1.0,0.066,True,G(Fa & FGb)
 GFa,R,R,daisy,3,2,3,1.0,0.064,True,GFa
-G(a -> F b),R,R,daisy2,6,2,6,1.0,0.063,True,G(!a | Fb)
-G(a | F b),R,R,daisy2,5,2,5,1.0,0.067,True,G(a | Fb)
-GFa & GFb,R,R,acc2+daisy,6,3,6,1.0,0.065,True,G(Fa & Fb)
+G(a -> F b),R,R,daisy2,6,2,6,1.0,0.065,True,G(!a | Fb)
+G(a | F b),R,R,daisy2,5,2,5,1.0,0.065,True,G(a | Fb)
+GFa & GFb,R,R,acc2+daisy,6,3,6,1.0,0.061,True,G(Fa & Fb)
 GFa & GFb & GFc,R,R,acc3+daisy,8,4,8,1.0,0.065,True,G(Fa & Fb & Fc)
-G(a -> F b) & G(c -> F d),R,R,acc2+daisy2,12,3,12,1.0,0.192,True,G((!a | Fb) & (!c | Fd))
-G(a -> (b U c)),?,R,daisy2,7,2,7,1.0,0.064,True,G(!a | (b U c))
-GFa & G(a -> X !a),R,R,daisy2,8,2,14,1.8,0.067,True,G((!a | X!a) & F(a & X!a))
+G(a -> F b) & G(c -> F d),R,R,acc2+daisy2,12,3,12,1.0,0.183,True,G((!a | Fb) & (!c | Fd))
+G(a -> (b U c)),?,R,daisy2,7,2,7,1.0,0.068,True,G(!a | (b U c))
+GFa & G(a -> X !a),R,R,daisy2,8,2,14,1.8,0.065,True,G((!a | X!a) & F(a & X!a))
 G(a -> X b) & GFa,R,R,partscc,8,2,9,1.1,0.066,True,G(Fa & (!a | Xb))
-GFa & GFb & G(a -> X !a),R,R,acc2+daisy2,15,3,31,2.1,0.069,True,G((!a | X!a) & F(a & X!a) & F((a & X(!a & b)) | (b & (!a | X!a))))
-Ga,S,S,daisy,2,1,2,1.0,0.065,True,Ga
-G(a | b),S,S,daisy,4,1,4,1.0,0.063,True,G(a | b)
+GFa & GFb & G(a -> X !a),R,R,acc2+daisy2,15,3,31,2.1,0.071,True,G((!a | X!a) & F(a & X!a) & F((a & X(!a & b)) | (b & (!a | X!a))))
+Ga,S,S,daisy,2,1,2,1.0,0.064,True,Ga
+G(a | b),S,S,daisy,4,1,4,1.0,0.064,True,G(a | b)
 G(a -> X b),S,S,partscc,6,1,6,1.0,0.065,True,G(!a | Xb)
-a & X a,S,B,daisy,3,0,4,1.3,0.063,True,a & Xa
-G(a -> X a),S,S,daisy,4,2,5,1.2,0.065,True,!a W Ga
-G(a & X a),S,S,daisy,2,1,2,1.0,0.065,True,Ga
-G((!a & X a) | (a & X !a)),S,S,daisy+partscc,15,1,37,2.5,0.070,True,(!a & X(a & G((a | Xa) & (!a | X!a)))) | (a & X(!a & G((a | Xa) & (!a | X!a))))
-G(a <-> X b),S,S,daisy+partscc,17,1,37,2.2,0.069,True,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b))))
-F(a R Xa),?,G,buchi,73,18,265,3.6,1.148,True,((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & ((F(a & X(a & XF!a)…
-XF(!a & X!a),?,G,buchi+daisy,74,18,260,3.5,1.168,True,X(((a U (!a & X!a)) | ((a | Xa) U (a & X(a U (!a & X!a))))) & ((F(!a & X(!a & XF…
-F(a & Xa),?,G,buchi,73,18,265,3.6,1.168,True,((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & ((F(a & X(a & XF!a)…
-F(a & X!b),?,G,buchi,181,40,831,4.6,1.231,True,((!a U (a & X!b)) | ((!a | X(!a M b)) U (!a & X(!a U (a & X!b)))) | (F(a & X(a &…
-F(a & Xb),?,G,buchi,181,40,829,4.6,1.191,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
-XF(a & Xa),?,G,buchi+daisy,74,18,266,3.6,1.174,True,X(((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & ((F(a & X(a & XF!…
-F(a & b & Xa),?,G,buchi,149,25,3441,23.1,1.176,True,(((a & b) | ((!a | !b) & F((!a | !b) & X(a & b)))) & (((!a | !b) U (a & b & Xa))…
-X!a & F(b & Xb),?,G,buchi+daisy,103,19,995,9.7,2.828,True,(!b & X(!a & ((!b & X(((!b U (b & Xb)) | ((!b | X!b) U (!b & X(!b U (b & Xb)))))…
-F(a & X(a U b)),?,G,buchi,181,40,829,4.6,1.201,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
-XF(!a & X(!a U !b)),?,G,buchi+daisy,182,40,824,4.5,1.219,True,X(((a U (!a & X!b)) | ((a | X(a M b)) U (a & X(a U (!a & X!b)))) | (F(!a & X(!a …
-F(X!a & ((b R a) W b)),?,G,buchi,181,40,831,4.6,1.260,True,((!b U (b & X!a)) | ((!b | X(!b M a)) U (!b & X(!b U (b & X!a)))) | (F(b & X(b &…
-F(!a & X!a),?,G,buchi,73,18,259,3.5,1.214,True,((a U (!a & X!a)) | ((a | Xa) U (a & X(a U (!a & X!a))))) & ((F(!a & X(!a & XFa)…
-F(!a & Xb),?,G,buchi,181,40,821,4.5,1.210,True,((a U (!a & Xb)) | ((a | X(a M !b)) U (a & X(a U (!a & Xb)))) | (F(!a & X(!a & (…
-F(a & (!a M !b)),?,G,buchi,161,33,2287,14.2,1.205,True,(F(a & !b & X((!a & !b) | ((a & !b) U (a & !b & X(!a & !b))))) & ((a & !b) | ((!…
-F(a & !b & Xb),?,G,buchi,159,33,2193,13.8,1.216,True,(F(a & !b & X(b | ((a & !b) U (a & !b & Xb)))) & ((a & !b) | ((!a | b) & F((!a |…
-F(((a & !b) | (!a & b)) & Xc),?,G,buchi,247,38,9485,38.4,1.230,True,(((((a & !b) | (!a & b)) & Xc) | (((a & !b) | (!a & b) | (((!a | b) & (a | !b)) …
-F(!a & (b U a)),?,G,buchi,159,33,2193,13.8,1.225,True,(F(!a & b & X(a | ((!a & b) U (!a & b & Xa)))) & ((!a & b) | ((a | !b) & F((a | …
-F(!a R X!a),?,G,buchi,73,18,259,3.5,1.254,True,((a U (!a & X!a)) | ((a | Xa) U (a & X(a U (!a & X!a))))) & ((F(!a & X(!a & XFa)…
-a | F(a & Xa),?,G,buchi,80,19,440,5.5,1.230,True,(((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U (!a & X(!a U (a & Xa))))…
-F(a & Xa) & (a | Fb),?,G,buchi+daisy,12671,2323,194494479915412,15349576190.9,4.906,UNVERIFIED_SIZE,<unflattened DAG: 194494479915412 tree nodes>
-XF(!a & X!b),?,G,buchi+daisy,182,40,824,4.5,1.212,True,X(((a U (!a & X!b)) | ((a | X(a M b)) U (a & X(a U (!a & X!b)))) | (F(!a & X(!a …
-Fa & F(b R Xb),?,G,buchi,12583,2307,194494479914681,15456924415.1,2.898,UNVERIFIED_SIZE,<unflattened DAG: 194494479914681 tree nodes>
-F(!a & X(!a U !b)),?,G,buchi,181,40,823,4.5,1.222,True,((a U (!a & X!b)) | ((a | X(a M b)) U (a & X(a U (!a & X!b)))) | (F(!a & X(!a & …
-F((!a | !b) & X(!a U !b)),?,G,buchi,185,39,1431,7.7,1.204,True,(((!a | !b) & X!b) | ((!a | !b | ((a & b) U (a & b & X(!a | !b)))) & ((((a & b) …
-F(!a & X!b),?,G,buchi,181,40,823,4.5,1.212,True,((a U (!a & X!b)) | ((a | X(a M b)) U (a & X(a U (!a & X!b)))) | (F(!a & X(!a & …
-(!a U !b) M Fb,?,G,buchi,2112,426,3612393,1710.4,1.457,UNVERIFIED_SIZE,<unflattened DAG: 3612393 tree nodes>
-XF(((a & b) | (!a & c) | (a & !c)) & Xa),?,G,buchi+daisy,266,46,11806,44.4,1.192,True,X((((((!a & c) | (a & !c) | (b & c)) & Xa) | (((a & !c) | (c & (!a | b)) | (((a …
-(a & Xb) M Fb,?,G,buchi,181,40,829,4.6,1.217,True,((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a & …
-XF(a & X!b),?,G,buchi+daisy,182,40,832,4.6,1.237,True,X(((!a U (a & X!b)) | ((!a | X(!a M b)) U (!a & X(!a U (a & X!b)))) | (F(a & X(a…
-XXF(a & X(a U b)),?,G,buchi+daisy,183,40,831,4.5,1.245,True,XX(((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a…
-F(((!a & b) | (a & !b)) & X((!a & b) U a)),?,G,buchi,251,46,9453,37.7,1.217,True,(((((!a & b) | (a & !b)) & Xa) | (((!a & b) | (a & !b) | (((a | !b) & (!a | b)) …
-F(a & ((a & Xa) | (!a & X!a))),?,G,buchi,73,18,265,3.6,1.188,True,((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & ((F(a & X(a & XF!a)…
-(a U b) M XF!a,?,G,buchi,23123,3841,31419566618166,1358801479.8,3.397,UNVERIFIED_SIZE,<unflattened DAG: 31419566618166 tree nodes>
-F(a & X(a U !b)),?,G,buchi,181,40,831,4.6,1.193,True,((!a U (a & X!b)) | ((!a | X(!a M b)) U (!a & X(!a U (a & X!b)))) | (F(a & X(a &…
-F(a & b & Xb),?,G,buchi,149,25,3441,23.1,1.213,True,(((a & b) | ((!a | !b) & F((!a | !b) & X(a & b)))) & (((!a | !b) U (a & b & Xb))…
-!a | (F(!a & Fa) U b),?,G,-,,,,,15.019,BUILD_TIMEOUT>15s,
-F(a & X(b | !c)),?,G,buchi,174,34,841,4.8,1.187,True,((!a U (a & X(b | !c))) | ((!a | X(!b & c & (!a | X(!a M (!b & c))))) U (!a & X(…
-XF(!a & Xb),?,G,buchi+daisy,182,40,822,4.5,1.164,True,X(((a U (!a & Xb)) | ((a | X(a M !b)) U (a & X(a U (!a & Xb)))) | (F(!a & X(!a &…
-X((a U b) M F!b),?,G,buchi+daisy,2113,426,3851922,1823.0,1.408,UNVERIFIED_SIZE,<unflattened DAG: 3851922 tree nodes>
-XF(a & Xb),?,G,buchi+daisy,182,40,830,4.6,1.252,True,X(((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a …
-F(!a & (!a R Xb)),?,G,buchi,181,40,821,4.5,1.213,True,((a U (!a & Xb)) | ((a | X(a M !b)) U (a & X(a U (!a & Xb)))) | (F(!a & X(!a & (…
-F(!a & X(!a U b)),?,G,buchi,181,40,821,4.5,1.182,True,((a U (!a & Xb)) | ((a | X(a M !b)) U (a & X(a U (!a & Xb)))) | (F(!a & X(!a & (…
-XXF(a & Xa),?,G,buchi+daisy,75,18,267,3.6,1.162,True,XX(((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & ((F(a & X(a & XF…
-a M XF(!b & Xc),?,G,buchi+daisy,186,41,827,4.4,1.192,True,!a U (a & X(((b U (!b & Xc)) | ((b | X(b M !c)) U (b & X(b U (!b & Xc)))) | (F(!…
-F((a & Fb) | (!a & G!b)) U ((c U !a) M a),?,G,buchi,159,33,2199,13.8,1.191,True,(F(a & c & X(!a | ((a & c) U (a & c & X!a)))) & ((a & c) | ((!a | !c) & F((!a | …
-(a R Xa) M Fa,?,G,buchi,73,18,265,3.6,1.174,True,((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & ((F(a & X(a & XF!a)…
-XF(!a & (!a R X!a)),?,G,buchi+daisy,74,18,260,3.5,1.167,True,X(((a U (!a & X!a)) | ((a | Xa) U (a & X(a U (!a & X!a))))) & ((F(!a & X(!a & XF…
-F((a | !b) & Xa),?,G,buchi,185,39,1426,7.7,1.184,True,(((a | !b) & Xa) | ((a | !b | ((!a & b) U (!a & b & X(a | !b)))) & ((((!a & b) |…
-(!a U !b) | F(a & Xa),?,G,buchi+daisy,87,20,451,5.2,1.201,True,(!a & b) U (!b | (a & X((((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U …
-!a | F(a & Xa),?,G,buchi+daisy,82,19,444,5.4,1.181,True,!a | X((((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U (!a & X(!a U (a &…
-a & XF(a & (!b U !a)),?,G,buchi+daisy,161,33,2196,13.6,1.176,True,a & X((F(a & !b & X(!a | ((a & !b) U (a & !b & X!a)))) & ((a & !b) | ((!a | b) &…
-F(Fa & (!a M (a U b))),?,G,buchi,18721,3388,60475167511527,3230338524.2,2.656,UNVERIFIED_SIZE,<unflattened DAG: 60475167511527 tree nodes>
-XXXF(a & Xa),?,G,buchi+daisy,76,18,268,3.5,1.171,True,XXX(((!a U (a & Xa)) | ((!a | X!a) U (!a & X(!a U (a & Xa))))) & ((F(a & X(a & X…
-F(a & b & X(!c | b)),?,G,buchi,162,26,3529,21.8,1.185,True,(((a & b) | ((!a | !b) & F((!a | !b) & X(a & b)))) & (((!a | !b) U (a & b & X(b …
-XF(a & X(a U b)),?,G,buchi+daisy,182,40,830,4.6,1.177,True,X(((!a U (a & Xb)) | ((!a | X(!a M !b)) U (!a & X(!a U (a & Xb)))) | (F(a & X(a …
-F(a R (!b M (c & Xa))),?,G,buchi,165,27,4466,27.1,1.196,True,(((a & !b & c) | ((!a | b | !c) & F((!a | b | !c) & X(a & !b & c)))) & (((!a | b…
-(a U b) & GF c,?,R,daisy,9,3,10,1.1,0.064,True,(a & !b) U (b & GFc)
-FG a,?,P,daisy,3,2,3,1.0,0.061,True,FGa
-G (a -> X a) & GF b,?,R,daisy,13,5,20,1.5,0.067,True,G(!a & F(!a & b)) | (!a U G(a & F(a & b)))
-G(Xa & (b | Xc)),?,S,daisy+inv+partscc,14,1,24,1.7,0.069,True,(b & XG(a & (b | Xc))) | (!b & X(c & G(a & (b | Xc))))
-X(a | F(a & Xa)),?,G,buchi+daisy,81,19,441,5.4,1.135,True,X((((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U (!a & X(!a U (a & Xa))…
+a & X a,S,B,daisy,3,0,4,1.3,0.060,True,a & Xa
+G(a -> X a),S,S,daisy,4,2,5,1.2,0.063,True,!a W Ga
+G(a & X a),S,S,daisy,2,1,2,1.0,0.064,True,Ga
+G((!a & X a) | (a & X !a)),S,S,daisy+partscc,15,1,37,2.5,0.064,True,(!a & X(a & G((a | Xa) & (!a | X!a)))) | (a & X(!a & G((a | Xa) & (!a | X!a))))
+G(a <-> X b),S,S,daisy+partscc,17,1,37,2.2,0.068,True,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b))))
+F(a R Xa),?,G,daisy+daisystar,4,1,5,1.2,0.066,True,F(a & Xa)
+XF(!a & X!a),?,G,daisy+daisystar,6,1,8,1.3,0.066,True,XF(!a & X!a)
+F(a & Xa),?,G,daisy+daisystar,4,1,5,1.2,0.064,True,F(a & Xa)
+F(a & X!b),?,G,daisy+daisystar,13,3,20,1.5,0.065,True,(!a | X((a & b) U (!a & b))) U (a & X(a U !b))
+F(a & Xb),?,G,daisy+daisystar,13,3,21,1.6,0.065,True,(!a | X((a & !b) U (!a & !b))) U (a & X(a U b))
+XF(a & Xa),?,G,daisy+daisystar,5,1,6,1.2,0.062,True,XF(a & Xa)
+F(a & b & Xa),?,G,daisy+daisystar,5,1,6,1.2,0.065,True,F(a & b & Xa)
+X!a & F(b & Xb),?,G,buchi+daisy+daisystar,95,19,475,5.0,1.125,True,(!b & X(!a & ((!b & XF(b & Xb)) | (b & X((((b & XF!b) | F(b & X(b & XF!b))) & (b…
+F(a & X(a U b)),?,G,daisy+daisystar,13,3,21,1.6,0.062,True,(!a | X((a & !b) U (!a & !b))) U (a & X(a U b))
+XF(!a & X(!a U !b)),?,G,daisy+daisystar,14,3,22,1.6,0.066,True,X((a | X((!a & b) U (a & b))) U (!a & X(!a U !b)))
+F(X!a & ((b R a) W b)),?,G,daisy+daisystar,13,3,20,1.5,0.066,True,(!b | X((a & b) U (a & !b))) U (b & X(b U !a))
+F(!a & X!a),?,G,daisy+daisystar,5,1,7,1.4,0.064,True,F(!a & X!a)
+F(!a & Xb),?,G,daisy+daisystar,13,3,22,1.7,0.066,True,(a | X((!a & !b) U (a & !b))) U (!a & X(!a U b))
+F(a & (!a M !b)),?,G,daisy+daisystar,12,3,22,1.8,0.063,True,(!a | (a U b)) U (a & !b & X((a & !b) U (!a & !b)))
+F(a & !b & Xb),?,G,daisy+daisystar,10,3,16,1.6,0.066,True,(b | (!a M !b)) U (a & !b & X(a U b))
+F(((a & !b) | (!a & b)) & Xc),?,G,daisy+daisystar,25,3,70,2.8,0.069,True,((!a & !b) | (a & b) | (((a & !b) | (!a & b)) & X(((!a & b & !c) | (a & !b & !c)…
+F(!a & (b U a)),?,G,daisy+daisystar,10,3,16,1.6,0.063,True,(a | (!b M !a)) U (!a & b & X(b U a))
+F(!a R X!a),?,G,daisy+daisystar,5,1,7,1.4,0.061,True,F(!a & X!a)
+a | F(a & Xa),?,G,buchi,80,19,440,5.5,1.104,True,(((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U (!a & X(!a U (a & Xa))))…
+F(a & Xa) & (a | Fb),?,G,buchi+daisy+daisystar,121,23,715,5.9,1.657,True,(a & X((((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U (!a & X(!a U (a &…
+XF(!a & X!b),?,G,daisy+daisystar,14,3,22,1.6,0.067,True,X((a | X((!a & b) U (a & b))) U (!a & X(!a U !b)))
+Fa & F(b R Xb),?,G,buchi+daisy+daisystar,78,16,255,3.3,1.136,True,(!a & (!b | X(!a & !b))) U ((a & !b & XF(b & Xb)) | (b & ((a & X((((b & XF!b) | …
+F(!a & X(!a U !b)),?,G,daisy+daisystar,13,3,21,1.6,0.066,True,(a | X((!a & b) U (a & b))) U (!a & X(!a U !b))
+F((!a | !b) & X(!a U !b)),?,G,daisy+daisystar,13,3,27,2.1,0.067,True,((a M b) | ((!a | !b) & X(a M b))) U ((!a | !b) & X(!a U !b))
+F(!a & X!b),?,G,daisy+daisystar,13,3,21,1.6,0.065,True,(a | X((!a & b) U (a & b))) U (!a & X(!a U !b))
+(!a U !b) M Fb,?,G,daisy+daisystar,13,4,21,1.6,0.066,True,(a M b) U ((!b & XFb) | (!a & b & X(!a U !b)))
+XF(((a & b) | (!a & c) | (a & !c)) & Xa),?,G,daisy+daisystar,21,3,59,2.8,0.068,True,X(((a & !b & c) | ((!a & c) U (!a & !c)) | (((a & b) | (!a & c) | (a & !c)) & X(…
+(a & Xb) M Fb,?,G,daisy+daisystar,13,3,21,1.6,0.066,True,(!a | X((a & !b) U (!a & !b))) U (a & X(a U b))
+XF(a & X!b),?,G,daisy+daisystar,14,3,21,1.5,0.066,True,X((!a | X((a & b) U (!a & b))) U (a & X(a U !b)))
+XXF(a & X(a U b)),?,G,daisy+daisystar,15,3,23,1.5,0.063,True,XX((!a | X((a & !b) U (!a & !b))) U (a & X(a U b)))
+F(((!a & b) | (a & !b)) & X((!a & b) U a)),?,G,daisy+daisystar,17,3,50,2.9,0.068,True,((a & b) | ((!a & b) U (!a & !b)) | (((!a & b) | (a & !b)) & X((!a & b) U (!a & …
+F(a & ((a & Xa) | (!a & X!a))),?,G,daisy+daisystar,4,1,5,1.2,0.065,True,F(a & Xa)
+(a U b) M XF!a,?,G,daisy+daisystar,18,4,40,2.2,0.069,True,((a & !b) U (!a & !b)) U ((b & XF!a) | (a & !b & X((a & !b) U ((!a & b) | (a & b…
+F(a & X(a U !b)),?,G,daisy+daisystar,13,3,20,1.5,0.065,True,(!a | X((a & b) U (!a & b))) U (a & X(a U !b))
+F(a & b & Xb),?,G,daisy+daisystar,5,1,6,1.2,0.064,True,F(a & b & Xb)
+!a | (F(!a & Fa) U b),?,G,daisy+daisystar,22,6,50,2.3,0.070,True,!a | b | X((a M !b) U ((!a & !b & X((!a & !b) U (a & b))) | (a & b & XF(!a & XFa…
+F(a & X(b | !c)),?,G,daisy+daisystar,16,3,26,1.6,0.064,True,(!a | X((a & !b & c) U (!a & !b & c))) U (a & X(a U (b | !c)))
+XF(!a & Xb),?,G,daisy+daisystar,14,3,23,1.6,0.067,True,X((a | X((!a & !b) U (a & !b))) U (!a & X(!a U b)))
+X((a U b) M F!b),?,G,daisy+daisystar,16,4,27,1.7,0.067,True,X(((a & !b) U (!a & !b)) U ((b & XF!b) | (a & !b & X(a U b))))
+XF(a & Xb),?,G,daisy+daisystar,14,3,22,1.6,0.065,True,X((!a | X((a & !b) U (!a & !b))) U (a & X(a U b)))
+F(!a & (!a R Xb)),?,G,daisy+daisystar,13,3,22,1.7,0.065,True,(a | X((!a & !b) U (a & !b))) U (!a & X(!a U b))
+F(!a & X(!a U b)),?,G,daisy+daisystar,13,3,22,1.7,0.065,True,(a | X((!a & !b) U (a & !b))) U (!a & X(!a U b))
+XXF(a & Xa),?,G,daisy+daisystar,6,1,7,1.2,0.066,True,XXF(a & Xa)
+a M XF(!b & Xc),?,G,daisy+daisystar,18,4,28,1.6,0.067,True,!a U (a & X((b | X((!b & !c) U (b & !c))) U (!b & X(!b U c))))
+F((a & Fb) | (!a & G!b)) U ((c U !a) M a),?,G,daisy+daisystar,10,3,16,1.6,0.065,True,(!a | (!c M a)) U (a & c & X(c U !a))
+(a R Xa) M Fa,?,G,daisy+daisystar,4,1,5,1.2,0.066,True,F(a & Xa)
+XF(!a & (!a R X!a)),?,G,daisy+daisystar,6,1,8,1.3,0.066,True,XF(!a & X!a)
+F((a | !b) & Xa),?,G,daisy+daisystar,15,3,38,2.5,0.066,True,(((!a & !b) U (!a & b)) | ((a | !b) & X((!a & !b) U (!a & b)))) U ((a | !b) & X(…
+(!a U !b) | F(a & Xa),?,G,buchi+daisy,87,20,451,5.2,1.115,True,(!a & b) U (!b | (a & X((((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U …
+!a | F(a & Xa),?,G,buchi+daisy,82,19,444,5.4,1.116,True,!a | X((((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U (!a & X(!a U (a &…
+a & XF(a & (!b U !a)),?,G,daisy+daisystar,12,3,20,1.7,0.066,True,a & X((!a | (b M a)) U (a & !b & X(!b U !a)))
+F(Fa & (!a M (a U b))),?,G,daisy+daisystar,15,4,25,1.7,0.064,True,(a U (!a & !b)) U ((a & X(a U (!a & b))) | (!a & b & XFa))
+XXXF(a & Xa),?,G,daisy+daisystar,7,1,8,1.1,0.065,True,XXXF(a & Xa)
+F(a & b & X(!c | b)),?,G,daisy+daisystar,8,1,9,1.1,0.063,True,F(a & b & X(b | !c))
+XF(a & X(a U b)),?,G,daisy+daisystar,14,3,22,1.6,0.063,True,X((!a | X((a & !b) U (!a & !b))) U (a & X(a U b)))
+F(a R (!b M (c & Xa))),?,G,daisy+daisystar,7,1,8,1.1,0.062,True,F(a & !b & c & Xa)
+(a U b) & GF c,?,R,daisy,9,3,10,1.1,0.062,True,(a & !b) U (b & GFc)
+FG a,?,P,daisy,3,2,3,1.0,0.063,True,FGa
+G (a -> X a) & GF b,?,R,daisy,13,5,20,1.5,0.070,True,G(!a & F(!a & b)) | (!a U G(a & F(a & b)))
+G(Xa & (b | Xc)),?,S,daisy+inv+partscc,14,1,24,1.7,0.068,True,(b & XG(a & (b | Xc))) | (!b & X(c & G(a & (b | Xc))))
+X(a | F(a & Xa)),?,G,buchi+daisy,81,19,441,5.4,1.117,True,X((((a & XF!a) | F(a & X(a & XF!a))) & (a | ((!a | X!a) U (!a & X(!a U (a & Xa))…
 !a W b,?,S,daisy+strength2,4,1,4,1.0,0.065,True,!a W b
-G!a R b,?,S,daisy,5,2,5,1.0,0.067,True,G!a R b
-motivating_example.hoa,?,?,daisy,9,3,10,1.1,0.067,True,(a & !b) U (b & GFc)
-second_example.hoa,?,?,daisy,13,5,20,1.5,0.066,True,G(!b & F(a & !b)) | (!b U G(b & F(a & b)))
-G(a | X!b),?,S,partscc,6,1,6,1.0,0.065,True,G(a | X!b)
-G(a | (a & Xb) | (!a & X!b)),?,S,partscc,6,1,6,1.0,0.064,True,G(a | X!b)
-XG(Xa | (b & X!a) | (!b & Xa)),?,S,daisy+partscc,6,1,6,1.0,0.065,True,XG(b | Xa)
+G!a R b,?,S,daisy,5,2,5,1.0,0.065,True,G!a R b
+motivating_example.hoa,?,?,daisy,9,3,10,1.1,0.064,True,(a & !b) U (b & GFc)
+second_example.hoa,?,?,daisy,13,5,20,1.5,0.067,True,G(!b & F(a & !b)) | (!b U G(b & F(a & b)))
+G(a | X!b),?,S,partscc,6,1,6,1.0,0.062,True,G(a | X!b)
+G(a | (a & Xb) | (!a & X!b)),?,S,partscc,6,1,6,1.0,0.067,True,G(a | X!b)
+XG(Xa | (b & X!a) | (!b & Xa)),?,S,daisy+partscc,6,1,6,1.0,0.066,True,XG(b | Xa)
 FG(a | Xa),?,P,daisy+daisy2+partscc,12,2,21,1.8,0.063,True,F((!a & X(a & G(a | Xa))) | (a & XG(a | Xa)))
 X!a | G(b | Xb),?,S,daisy+daisy2+strength2,8,1,9,1.1,0.065,True,X!a | G(b | Xb)
-G(a | Xb),?,S,partscc,5,1,5,1.0,0.065,True,G(a | Xb)
+G(a | Xb),?,S,partscc,5,1,5,1.0,0.061,True,G(a | Xb)
 G(!a | X!b),?,S,partscc,7,1,7,1.0,0.066,True,G(!a | X!b)
 XG(a | Xa),?,S,daisy+daisy2,5,1,6,1.2,0.065,True,XG(a | Xa)
-G(!a | (a & X!b) | (!a & Xb)),?,S,partscc,7,1,7,1.0,0.066,True,G(!a | X!b)
-XG(a | X!b),?,S,daisy+partscc,7,1,7,1.0,0.065,True,XG(a | X!b)
-G((a R b) | (!b & F!b) | (b & Gb)),?,S,partscc,6,1,7,1.2,0.065,True,G(a | !b | Xb)
+G(!a | (a & X!b) | (!a & Xb)),?,S,partscc,7,1,7,1.0,0.061,True,G(!a | X!b)
+XG(a | X!b),?,S,daisy+partscc,7,1,7,1.0,0.062,True,XG(a | X!b)
+G((a R b) | (!b & F!b) | (b & Gb)),?,S,partscc,6,1,7,1.2,0.063,True,G(a | !b | Xb)
 FG(!a | X(!a R b)),?,P,daisy+partscc,13,2,23,1.8,0.067,True,F((!a & XG(!a | Xb)) | (a & X(b & G(!a | Xb))))
-G(a | Xa),?,S,daisy2,4,1,5,1.2,0.065,True,G(a | Xa)
-G(!a | Xb),?,S,partscc,6,1,6,1.0,0.065,True,G(!a | Xb)
+G(a | Xa),?,S,daisy2,4,1,5,1.2,0.064,True,G(a | Xa)
+G(!a | Xb),?,S,partscc,6,1,6,1.0,0.062,True,G(!a | Xb)
 FG(!a | X(a W b)),?,P,daisy+partscc,14,2,29,2.1,0.067,True,F((!a & XG(!a | X(a | b))) | (a & X((a | b) & G(!a | X(a | b)))))
 X(G!a U G(b | X!a)),?,S,daisy+partscc,7,1,7,1.0,0.065,True,XG(b | X!a)
-FG(a | X!b),?,P,daisy+partscc,14,2,24,1.7,0.068,True,F((a & XG(a | X!b)) | (!a & X(!b & G(a | X!b))))
-XG(!a | X!b),?,S,daisy+partscc,8,1,8,1.0,0.066,True,XG(!a | X!b)
-G(a | b | Xb),?,S,daisy2,5,1,6,1.2,0.065,True,G(a | b | Xb)
-XG(!a | b | (b & Xa) | (!b & X!a)),?,S,daisy+daisy2,7,1,9,1.3,0.065,True,XG(!a | b | X!a)
-G(a U Xa),?,S,daisy2,4,1,5,1.2,0.066,True,G(a | Xa)
-G(!a | X!a),?,S,daisy2,5,1,7,1.4,0.066,True,G(!a | X!a)
-FG(!a | X!a),?,P,daisy+daisy2+partscc,12,2,26,2.2,0.066,True,F((a & X(!a & G(!a | X!a))) | (!a & XG(!a | X!a)))
-XG(a | Xb),?,S,daisy+partscc,6,1,6,1.0,0.065,True,XG(a | Xb)
-FG(((a & X!b) | (!a & Xb)) U (!a | X!b)),?,P,daisy+partscc,14,2,26,1.9,0.064,True,F((!a & XG(!a | X!b)) | (a & X(!b & G(!a | X!b))))
+FG(a | X!b),?,P,daisy+partscc,14,2,24,1.7,0.064,True,F((a & XG(a | X!b)) | (!a & X(!b & G(a | X!b))))
+XG(!a | X!b),?,S,daisy+partscc,8,1,8,1.0,0.064,True,XG(!a | X!b)
+G(a | b | Xb),?,S,daisy2,5,1,6,1.2,0.066,True,G(a | b | Xb)
+XG(!a | b | (b & Xa) | (!b & X!a)),?,S,daisy+daisy2,7,1,9,1.3,0.064,True,XG(!a | b | X!a)
+G(a U Xa),?,S,daisy2,4,1,5,1.2,0.062,True,G(a | Xa)
+G(!a | X!a),?,S,daisy2,5,1,7,1.4,0.064,True,G(!a | X!a)
+FG(!a | X!a),?,P,daisy+daisy2+partscc,12,2,26,2.2,0.065,True,F((a & X(!a & G(!a | X!a))) | (!a & XG(!a | X!a)))
+XG(a | Xb),?,S,daisy+partscc,6,1,6,1.0,0.067,True,XG(a | Xb)
+FG(((a & X!b) | (!a & Xb)) U (!a | X!b)),?,P,daisy+partscc,14,2,26,1.9,0.067,True,F((!a & XG(!a | X!b)) | (a & X(!b & G(!a | X!b))))
 G(!a U X!a),?,S,daisy2,5,1,7,1.4,0.064,True,G(!a | X!a)
-Ga R (a | X((a & b) | (!a & !b))),?,S,partscc,10,1,13,1.3,0.065,True,G(a | X((a & b) | (!a & !b)))
+Ga R (a | X((a & b) | (!a & !b))),?,S,partscc,10,1,13,1.3,0.066,True,G(a | X((a & b) | (!a & !b)))
 XG(!a | X!b | (a M b)),?,S,daisy+partscc,8,1,9,1.1,0.066,True,XG(!a | b | X!b)
-a W FG(b | Xa),?,P,daisy+partscc,13,2,21,1.6,0.068,True,F((b & XG(b | Xa)) | (!b & X(a & G(b | Xa))))
-G((a & (!b M ((a & !b) | (!a & b)))) | (!a & (b W ((a & b) | (!a & !b))))),?,S,partscc,12,1,23,1.9,0.066,True,(!a | !b) & G((b | X(!a | !b)) & (a | !b | X!a))
-G((!a & b) | (a W !b)),?,S,partscc,8,1,11,1.4,0.065,True,G(!a | !b | X(a | !b))
-G(!a | X(!b & c)),?,S,partscc,9,1,9,1.0,0.065,True,G(!a | X(!b & c))
-!a & G(b | X!c),?,S,daisy+partscc,16,1,26,1.6,0.068,True,!a & ((b & XG(b | X!c)) | (!b & X(!c & G(b | X!c))))
+a W FG(b | Xa),?,P,daisy+partscc,13,2,21,1.6,0.066,True,F((b & XG(b | Xa)) | (!b & X(a & G(b | Xa))))
+G((a & (!b M ((a & !b) | (!a & b)))) | (!a & (b W ((a & b) | (!a & !b))))),?,S,partscc,12,1,23,1.9,0.063,True,(!a | !b) & G((b | X(!a | !b)) & (a | !b | X!a))
+G((!a & b) | (a W !b)),?,S,partscc,8,1,11,1.4,0.067,True,G(!a | !b | X(a | !b))
+G(!a | X(!b & c)),?,S,partscc,9,1,9,1.0,0.064,True,G(!a | X(!b & c))
+!a & G(b | X!c),?,S,daisy+partscc,16,1,26,1.6,0.067,True,!a & ((b & XG(b | X!c)) | (!b & X(!c & G(b | X!c))))
 G(a | X((b & !a) | (!b & a))),?,S,partscc,10,1,13,1.3,0.065,True,G(a | X((!a & b) | (a & !b)))
-FG(a | X(a R ((a & b) | (!a & !b)))),?,P,daisy+partscc,17,2,45,2.6,0.071,True,F((a & XG(a | X((a & b) | (!a & !b)))) | (!a & X(((a & b) | (!a & !b)) & G(a | X…
-G(!a | b | Xa),?,S,partscc,6,1,7,1.2,0.067,True,G(!a | b | Xa)
+FG(a | X(a R ((a & b) | (!a & !b)))),?,P,daisy+partscc,17,2,45,2.6,0.069,True,F((a & XG(a | X((a & b) | (!a & !b)))) | (!a & X(((a & b) | (!a & !b)) & G(a | X…
+G(!a | b | Xa),?,S,partscc,6,1,7,1.2,0.066,True,G(!a | b | Xa)
 G(a | X(a R b)),?,S,partscc,5,1,5,1.0,0.065,True,G(a | Xb)
-G(a | (a U Xa)),?,S,daisy2,4,1,5,1.2,0.064,True,G(a | Xa)
+G(a | (a U Xa)),?,S,daisy2,4,1,5,1.2,0.065,True,G(a | Xa)
 G(a | (b W (!a W b))),?,S,partscc,7,1,9,1.3,0.065,True,G(a | b | X(!a | b))
 G(!a | X(!a R !b)),?,S,partscc,7,1,7,1.0,0.064,True,G(!a | X!b)
-G(a | (Fb R Xb)),?,S,partscc,5,1,5,1.0,0.067,True,G(a | Xb)
-G((a & (a M !b)) | (!a & (!a W b))),?,S,inv+partscc,9,1,13,1.4,0.067,True,G((!a | !b) & (a | b | X!a))
-XG(!a | b | Xc),?,S,daisy+partscc,8,1,8,1.0,0.068,True,XG(!a | b | Xc)
-G(!a | b | Xb),?,S,daisy2,6,1,7,1.2,0.066,True,G(!a | b | Xb)
-G(!a | X(!a R b)),?,S,partscc,6,1,6,1.0,0.066,True,G(!a | Xb)
-G((a & (a W b)) | (!a & (!a M !b))),?,S,inv+partscc,9,1,12,1.3,0.073,True,G((a | !b) & (!a | b | Xa))
-FG(!a | Xb),?,P,daisy+partscc,13,2,23,1.8,0.069,True,F((!a & XG(!a | Xb)) | (a & X(b & G(!a | Xb))))
-!a U G(b | Xb),?,P,daisy+daisy2+partscc,14,2,23,1.6,0.068,True,!a U ((!b & X(b & G(b | Xb))) | (b & XG(b | Xb)))
-FG((a | (!a M !b)) & (!a | (a W b))),?,P,daisy+partscc,25,2,71,2.8,0.070,True,F((((!a & !b) | (a & b)) & X((a | !b) & G((((a | b) & (!a | !b)) | X(a | !b)) & …
-G(a | (a & !a) | X((a | (a & !a)) R b)),?,S,partscc,5,1,5,1.0,0.062,True,G(a | Xb)
-FG(a | (!b R !a)),?,P,daisy+partscc,15,2,32,2.1,0.069,True,F(((a | !b) & XG(a | !b | X!a)) | (!a & b & X(!a & G(a | !b | X!a))))
-XG(a | (a U Xb)),?,S,daisy+partscc,6,1,6,1.0,0.065,True,XG(a | Xb)
-G(!a | (!a & !b) | X!a),?,S,daisy2,5,1,7,1.4,0.065,True,G(!a | X!a)
-X(Xa U G(b | (!b W a))),?,S,daisy+partscc,8,1,10,1.2,0.064,True,XG(a | b | X(a | !b))
+G(a | (Fb R Xb)),?,S,partscc,5,1,5,1.0,0.065,True,G(a | Xb)
+G((a & (a M !b)) | (!a & (!a W b))),?,S,inv+partscc,9,1,13,1.4,0.063,True,G((!a | !b) & (a | b | X!a))
+XG(!a | b | Xc),?,S,daisy+partscc,8,1,8,1.0,0.066,True,XG(!a | b | Xc)
+G(!a | b | Xb),?,S,daisy2,6,1,7,1.2,0.062,True,G(!a | b | Xb)
+G(!a | X(!a R b)),?,S,partscc,6,1,6,1.0,0.062,True,G(!a | Xb)
+G((a & (a W b)) | (!a & (!a M !b))),?,S,inv+partscc,9,1,12,1.3,0.064,True,G((a | !b) & (!a | b | Xa))
+FG(!a | Xb),?,P,daisy+partscc,13,2,23,1.8,0.067,True,F((!a & XG(!a | Xb)) | (a & X(b & G(!a | Xb))))
+!a U G(b | Xb),?,P,daisy+daisy2+partscc,14,2,23,1.6,0.070,True,!a U ((!b & X(b & G(b | Xb))) | (b & XG(b | Xb)))
+FG((a | (!a M !b)) & (!a | (a W b))),?,P,daisy+partscc,25,2,71,2.8,0.067,True,F((((!a & !b) | (a & b)) & X((a | !b) & G((((a | b) & (!a | !b)) | X(a | !b)) & …
+G(a | (a & !a) | X((a | (a & !a)) R b)),?,S,partscc,5,1,5,1.0,0.066,True,G(a | Xb)
+FG(a | (!b R !a)),?,P,daisy+partscc,15,2,32,2.1,0.067,True,F(((a | !b) & XG(a | !b | X!a)) | (!a & b & X(!a & G(a | !b | X!a))))
+XG(a | (a U Xb)),?,S,daisy+partscc,6,1,6,1.0,0.066,True,XG(a | Xb)
+G(!a | (!a & !b) | X!a),?,S,daisy2,5,1,7,1.4,0.064,True,G(!a | X!a)
+X(Xa U G(b | (!b W a))),?,S,daisy+partscc,8,1,10,1.2,0.067,True,XG(a | b | X(a | !b))
 G((a & (a M b)) | (!a & (!a W !b))),?,S,inv+partscc,9,1,13,1.4,0.067,True,G((!a | b) & (a | !b | X!a))
-FG(a | Xb),?,P,daisy+partscc,13,2,21,1.6,0.073,True,F((a & XG(a | Xb)) | (!a & X(b & G(a | Xb))))
-a U G(a | Xb),?,S,partscc,5,1,5,1.0,0.067,True,G(a | Xb)
-XG(a U Xa),?,S,daisy+daisy2,5,1,6,1.2,0.064,True,XG(a | Xa)
-G((a & X(a W b)) | (!a & (!a | X(!a M !b)))),?,S,partscc,7,1,8,1.1,0.066,True,G(!a | X(a | b))
-XG(a | X(a R b)),?,S,daisy+partscc,6,1,6,1.0,0.066,True,XG(a | Xb)
-G(a | X(!a | b | !c)),?,S,partscc,9,1,10,1.1,0.066,True,G(a | X(!a | b | !c))
-Ga R (a | X!b),?,S,partscc,6,1,6,1.0,0.064,True,G(a | X!b)
-G(a | (a R b)),?,S,inv+partscc,9,1,12,1.3,0.066,True,G((a | b) & (a | X(!a | b)))
-!a & G(b | Xa),?,S,daisy+partscc,14,1,23,1.6,0.071,True,!a & ((b & XG(b | Xa)) | (!b & X(a & G(b | Xa))))
-FG(a | X(a R b)),?,P,daisy+partscc,13,2,21,1.6,0.071,True,F((a & XG(a | Xb)) | (!a & X(b & G(a | Xb))))
-G((a U b) & (!a | Xb)),?,S,inv+partscc,9,1,13,1.4,0.069,True,G((a | b) & (!a | X(!a | b)))
+FG(a | Xb),?,P,daisy+partscc,13,2,21,1.6,0.064,True,F((a & XG(a | Xb)) | (!a & X(b & G(a | Xb))))
+a U G(a | Xb),?,S,partscc,5,1,5,1.0,0.065,True,G(a | Xb)
+XG(a U Xa),?,S,daisy+daisy2,5,1,6,1.2,0.062,True,XG(a | Xa)
+G((a & X(a W b)) | (!a & (!a | X(!a M !b)))),?,S,partscc,7,1,8,1.1,0.065,True,G(!a | X(a | b))
+XG(a | X(a R b)),?,S,daisy+partscc,6,1,6,1.0,0.065,True,XG(a | Xb)
+G(a | X(!a | b | !c)),?,S,partscc,9,1,10,1.1,0.065,True,G(a | X(!a | b | !c))
+Ga R (a | X!b),?,S,partscc,6,1,6,1.0,0.065,True,G(a | X!b)
+G(a | (a R b)),?,S,inv+partscc,9,1,12,1.3,0.063,True,G((a | b) & (a | X(!a | b)))
+!a & G(b | Xa),?,S,daisy+partscc,14,1,23,1.6,0.068,True,!a & ((b & XG(b | Xa)) | (!b & X(a & G(b | Xa))))
+FG(a | X(a R b)),?,P,daisy+partscc,13,2,21,1.6,0.067,True,F((a & XG(a | Xb)) | (!a & X(b & G(a | Xb))))
+G((a U b) & (!a | Xb)),?,S,inv+partscc,9,1,13,1.4,0.065,True,G((a | b) & (!a | X(!a | b)))
 G(a & !a) R (b U Xb),?,S,daisy2,4,1,5,1.2,0.064,True,G(b | Xb)
-G(a->Xb) & G(c->Xd),?,S,partscc,15,1,23,1.5,0.066,True,G((a | !c | Xd) & (!a | c | Xb) & (!a | !c | X(b & d)))
+G(a->Xb) & G(c->Xd),?,S,partscc,15,1,23,1.5,0.063,True,G((a | !c | Xd) & (!a | c | Xb) & (!a | !c | X(b & d)))
 XG((a & (b | Xb)) | (!a & !b & X!b)),?,S,daisy+partscc,16,1,32,2.0,0.067,True,X((a | !b) & G((!a | !b | X(a | !b)) & (a | b | X!b) & (!a | b | X(a & b))))
 X(a | G(X!a | (!b W !a))),?,S,daisy+partscc+strength2,13,1,23,1.8,0.066,True,X(a | G((!a | !b | X!a) & (!a | b | X(!a | !b))))
-FG((a | b) & (a | Xb) & (!a | !b | X!b)),?,P,daisy+partscc,27,2,105,3.9,0.070,True,F((!a & b & X(b & G((!a | b | X(a | b)) & (a | !b | Xb) & (!a | !b | X(a & !b)))…
-G(a | (b & Xc) | (!b & X!c)),?,S,partscc,11,1,14,1.3,0.065,True,G((a | !b | Xc) & (a | b | X!c))
+FG((a | b) & (a | Xb) & (!a | !b | X!b)),?,P,daisy+partscc,27,2,105,3.9,0.071,True,F((!a & b & X(b & G((!a | b | X(a | b)) & (a | !b | Xb) & (!a | !b | X(a & !b)))…
+G(a | (b & Xc) | (!b & X!c)),?,S,partscc,11,1,14,1.3,0.063,True,G((a | !b | Xc) & (a | b | X!c))
 G((a & (!b M X!a)) | (!a & (b W Xa))),?,S,inv+partscc,11,1,18,1.6,0.066,True,G((!a | !b) & (!a | X!a) & (a | b | Xa))
-G((!a & b & Xc) | (!b & (a | X!c))),?,S,inv+partscc,13,1,19,1.5,0.064,True,G((!a | !b) & (a | !b | Xc) & (a | b | X!c))
-G(Fa & F!a),?,R,acc2+daisy,6,3,7,1.2,0.064,True,G(Fa & F!a)
-G(Fa & Fb),?,R,acc2+daisy,6,3,6,1.0,0.067,True,G(Fa & Fb)
-G(a M Fb),?,R,acc2+daisy,6,3,6,1.0,0.065,True,G(Fb & Fa)
+G((!a & b & Xc) | (!b & (a | X!c))),?,S,inv+partscc,13,1,19,1.5,0.066,True,G((!a | !b) & (a | !b | Xc) & (a | b | X!c))
+G(Fa & F!a),?,R,acc2+daisy,6,3,7,1.2,0.065,True,G(Fa & F!a)
+G(Fa & Fb),?,R,acc2+daisy,6,3,6,1.0,0.064,True,G(Fa & Fb)
+G(a M Fb),?,R,acc2+daisy,6,3,6,1.0,0.064,True,G(Fb & Fa)
 a & G(b | Xb),?,S,daisy+daisy2+partscc,13,1,22,1.7,0.066,True,a & ((!b & X(b & G(b | Xb))) | (b & XG(b | Xb)))
-(X!a & F(b & Xb)) | (Xa & G(!b | X!b)),?,O,buchi+daisy+daisy2+partscc+strength2,114,20,1036,9.1,2.713,True,(b & X((a & !b & XG(!b | X!b)) | (!a & (b | X(((!b U (b & Xb)) | ((!b | X!b) U (…
-GF(a & Xa),?,R,buchi,67,12,826,12.3,1.123,True,(a | X(F(a & Xa) & (a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) …
-G((a & (a W X!b)) | (!a & (!a M Xb))),?,S,daisy+partscc,18,1,43,2.4,0.067,True,(!a & X(b & G((a | Xb) & (!a | X(a | !b))))) | (a & X((a | !b) & G((a | Xb) & (!…
+(X!a & F(b & Xb)) | (Xa & G(!b | X!b)),?,O,buchi+daisy+daisy2+daisystar+partscc+strength2,106,20,516,4.9,1.134,True,(b & X((a & !b & XG(!b | X!b)) | (!a & (b | XF(b & Xb))))) | (!b & X((a & ((b & …
+GF(a & Xa),?,R,buchi,67,12,826,12.3,1.111,True,(a | X(F(a & Xa) & (a | Xa | (X(!a & XFa) & ((a | X!a) U (!a & X(!a & Xa))))))) …
+G((a & (a W X!b)) | (!a & (!a M Xb))),?,S,daisy+partscc,18,1,43,2.4,0.068,True,(!a & X(b & G((a | Xb) & (!a | X(a | !b))))) | (a & X((a | !b) & G((a | Xb) & (!…
 G(!a | !b | Xa),?,S,partscc,7,1,8,1.1,0.065,True,G(!a | !b | Xa)
-G((a & X!a) | (!a & Xa)),?,S,daisy+partscc,15,1,37,2.5,0.066,True,(a & X(!a & G((!a | X!a) & (a | Xa)))) | (!a & X(a & G((!a | X!a) & (a | Xa))))
-XG((!a & Xb) | (a & X!b)),?,S,daisy+partscc,18,1,38,2.1,0.069,True,X((!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | X!b)))…
+G((a & X!a) | (!a & Xa)),?,S,daisy+partscc,15,1,37,2.5,0.067,True,(a & X(!a & G((!a | X!a) & (a | Xa)))) | (!a & X(a & G((!a | X!a) & (a | Xa))))
+XG((!a & Xb) | (a & X!b)),?,S,daisy+partscc,18,1,38,2.1,0.068,True,X((!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | X!b)))…
 G((!a & Xb) | (a & X!b)),?,S,daisy+partscc,17,1,37,2.2,0.067,True,(!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | X!b))))
-X(a M G(!b | X(!b M c))),?,R,buchi+daisy,4043,662,38690996,9569.9,1.691,UNVERIFIED_SIZE,<unflattened DAG: 38690996 tree nodes>
-!a M G(b | X(b R a)),?,O,daisy2+partscc,16,3,27,1.7,0.067,True,(b M a) U (!a & ((b & XG(b | Xa)) | (!b & X(a & G(b | Xa)))))
-G((a & Xb) | (!a & X!b)),?,S,daisy+partscc,17,1,37,2.2,0.067,True,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b))))
-G(a | X(a M Gb)),?,R,daisy+inv+partscc+strength2,9,3,11,1.2,0.067,True,a W (!a & XG(b & Fa))
-G(a | X(a M b)),?,R,daisy2,9,2,12,1.3,0.066,True,G(a | X((!a & b) U (a & b)))
-G(!a | Xb) M c,?,P,daisy+partscc,14,2,24,1.7,0.078,True,((!a & XG(!a | Xb)) | (a & X(b & G(!a | Xb)))) M c
-XG(a & ((b & X!c) | (!b & Xc))),?,S,daisy+partscc,23,1,58,2.5,0.069,True,X(a & ((!b & X(a & c & G((!a | b | X(a & c)) & (!a | !b | X(a & !c))))) | (b & X…
-G((!a & Xa) | (a & X!a)),?,S,daisy+partscc,15,1,37,2.5,0.066,True,(!a & X(a & G((a | Xa) & (!a | X!a)))) | (a & X(!a & G((a | Xa) & (!a | X!a))))
-G((a & X!b) | (!a & Xb)),?,S,daisy+partscc,17,1,37,2.2,0.067,True,(!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | X!b))))
-G(a & ((b & X!c) | (!b & Xc))),?,S,daisy+partscc,22,1,57,2.6,0.069,True,a & ((!b & X(a & c & G((!a | b | X(a & c)) & (!a | !b | X(a & !c))))) | (b & X(a…
+X(a M G(!b | X(!b M c))),?,R,daisy+daisy2+daisystar+partscc,38,7,105,2.8,0.075,True,X((!a & (!b | X((!a & b & c) U (!a & !b & c)))) U ((a & !b & XG(!b | X((b & c) U…
+!a M G(b | X(b R a)),?,O,daisy2+partscc,16,3,27,1.7,0.068,True,(b M a) U (!a & ((b & XG(b | Xa)) | (!b & X(a & G(b | Xa)))))
+G((a & Xb) | (!a & X!b)),?,S,daisy+partscc,17,1,37,2.2,0.066,True,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b))))
+G(a | X(a M Gb)),?,R,daisy+inv+partscc+strength2,9,3,11,1.2,0.068,True,a W (!a & XG(b & Fa))
+G(a | X(a M b)),?,R,daisy2,9,2,12,1.3,0.065,True,G(a | X((!a & b) U (a & b)))
+G(!a | Xb) M c,?,P,daisy+partscc,14,2,24,1.7,0.079,True,((!a & XG(!a | Xb)) | (a & X(b & G(!a | Xb)))) M c
+XG(a & ((b & X!c) | (!b & Xc))),?,S,daisy+partscc,23,1,58,2.5,0.067,True,X(a & ((!b & X(a & c & G((!a | b | X(a & c)) & (!a | !b | X(a & !c))))) | (b & X…
+G((!a & Xa) | (a & X!a)),?,S,daisy+partscc,15,1,37,2.5,0.067,True,(!a & X(a & G((a | Xa) & (!a | X!a)))) | (a & X(!a & G((a | Xa) & (!a | X!a))))
+G((a & X!b) | (!a & Xb)),?,S,daisy+partscc,17,1,37,2.2,0.068,True,(!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | X!b))))
+G(a & ((b & X!c) | (!b & Xc))),?,S,daisy+partscc,22,1,57,2.6,0.071,True,a & ((!b & X(a & c & G((!a | b | X(a & c)) & (!a | !b | X(a & !c))))) | (b & X(a…
 G(Xa | (F!a R !b)),?,S,partscc,6,1,6,1.0,0.065,True,G(!b | Xa)
-G(a | (a M (!a W !b))) U a,?,R,daisy+partscc+strength2,13,2,21,1.6,0.066,True,a | X((!a | !b) & G((a | X(!a | !b)) & Fa))
-G((a & !b & X(!a | !c)) | ((!a | b) & X(a & c))),?,S,daisy+partscc,23,1,63,2.7,0.070,True,((!a | b) & X(a & c & G(((a & !b) | X(a & c)) & (!a | b | X(!a | !c))))) | (a & …
+G(a | (a M (!a W !b))) U a,?,R,daisy+partscc+strength2,13,2,21,1.6,0.067,True,a | X((!a | !b) & G((a | X(!a | !b)) & Fa))
+G((a & !b & X(!a | !c)) | ((!a | b) & X(a & c))),?,S,daisy+partscc,23,1,63,2.7,0.068,True,((!a | b) & X(a & c & G(((a & !b) | X(a & c)) & (!a | b | X(!a | !c))))) | (a & …
 a | G((b & X!c) | (!b & Xc)),?,S,daisy+partscc+strength2,18,1,38,2.1,0.068,True,a | (!b & X(c & G((b | Xc) & (!b | X!c)))) | (b & X(!c & G((b | Xc) & (!b | X!c)…
-G((a & ((a & b) | (!a & !b))) | Xa),?,S,partscc,6,1,7,1.2,0.066,True,G((a & b) | Xa)
-G((!a & b) | (a & !b) | Xb),?,S,partscc,10,1,13,1.3,0.064,True,G(((a | b) & (!a | !b)) | Xb)
-G(X!a | (b W a)),?,S,partscc,6,1,7,1.2,0.065,True,G(a | b | X!a)
-((a M b) & G((c & X!a) | (!c & Xa))) | (F((c & Xa) | (!c & X!a)) & (!a W !b)),?,O,buchi+daisy+partscc+strength2,535,96,29614,55.4,5.547,SPOT_ERR:too-many-acceptance-sets,(!a & b & !c & X((!a & !b) | (a & !b & !c & X(((!a | (((!c & (X!a | (X((a & X!a)…
-G((a & ((Xb & G!c) | (Fc & X!b))) | (!a & ((Xb & Fc) | (G!c & X!b)))),?,R,-,,,,,15.014,BUILD_TIMEOUT>15s,
-G(a | b | X!c),?,S,partscc,7,1,7,1.0,0.064,True,G(a | b | X!c)
+G((a & ((a & b) | (!a & !b))) | Xa),?,S,partscc,6,1,7,1.2,0.065,True,G((a & b) | Xa)
+G((!a & b) | (a & !b) | Xb),?,S,partscc,10,1,13,1.3,0.065,True,G(((a | b) & (!a | !b)) | Xb)
+G(X!a | (b W a)),?,S,partscc,6,1,7,1.2,0.064,True,G(a | b | X!a)
+((a M b) & G((c & X!a) | (!c & Xa))) | (F((c & Xa) | (!c & X!a)) & (!a W !b)),?,O,buchi+daisy+partscc+strength2,535,96,29614,55.4,5.441,SPOT_ERR:too-many-acceptance-sets,(!a & b & !c & X((!a & !b) | (a & !b & !c & X(((!a | (((!c & (X!a | (X((a & X!a)…
+G((a & ((Xb & G!c) | (Fc & X!b))) | (!a & ((Xb & Fc) | (G!c & X!b)))),?,R,-,,,,,15.012,BUILD_TIMEOUT>15s,
+G(a | b | X!c),?,S,partscc,7,1,7,1.0,0.065,True,G(a | b | X!c)
 a | X(a M G(!a | X!b)),?,O,daisy+partscc+strength2,13,2,19,1.5,0.063,True,a | X(!a U (a & X(!b & G(!a | X!b))))
-X(a | FG(!b | X(!b M !c))),?,T,acc2+cobuchi+daisy+daisy2+partscc+strength2,140,22,8345,59.6,2.216,True,X(a | (!a & ((!a & !b & X((((b | X(G(!b | X(!b R (b | !c))) | (!b & X!b & (X(b |…
-(a & G(!b | X!c)) | (!a & F(b & Xc)),?,?,buchi+daisy+partscc+strength2,250,48,2436,9.7,2.188,SPOT_TIMEOUT,(!a & !b & X(((!b U (b & Xc)) | ((!b | X(!b M !c)) U (!b & X(!b U (b & Xc)))) | …
-G(((a U b) & (b W a)) U !b),?,R,daisy2,15,4,25,1.7,0.065,True,G(F(!b | (!a & X((!a & b) U (a & !b)))) & (!b | (b U a)))
-G(!a | Xb) M !b,?,P,daisy+partscc,14,2,25,1.8,0.070,True,((!a & XG(!a | Xb)) | (a & X(b & G(!a | Xb)))) M !b
-G(a | (b & Xb)),?,S,inv+partscc,9,1,12,1.3,0.064,True,G((a | b) & (a | X(!a | b)))
-G((a & F!a) | (!b R !a)),?,R,buchi,2470,407,4966985808,2010925.4,1.369,UNVERIFIED_SIZE,<unflattened DAG: 4966985808 tree nodes>
-GF((a & Xb) | (!a & X!b)),?,R,buchi,248,46,93446,376.8,1.155,SPOT_ERR:too-many-acceptance-sets,(((a & ((!b & X((!a | !b | X(!a | !b) | (X((b & X(!a | !b)) M a) & ((!a | X(a & …
-(!a & b) | (a & !b) | G(b | Xc),?,S,daisy+partscc+strength2,16,1,25,1.6,0.068,True,(!a & (b | X(c & G(b | Xc)))) | (a & (!b | XG(b | Xc)))
-G((!a & !b) | X!c),?,S,partscc,10,1,10,1.0,0.070,True,G((!a & !b) | X!c)
-FG((!a | X!b) & (a | Xb)),?,P,daisy+partscc,18,2,38,2.1,0.069,True,F((!a & X(b & G((!a | X!b) & (a | Xb)))) | (a & X(!b & G((!a | X!b) & (a | Xb)))…
-G(!a | (b M a)),?,R,daisy2,6,2,7,1.2,0.063,True,G(!a | (b M a))
-FG(a | b | Xb),?,P,daisy+daisy2+partscc,15,2,27,1.8,0.067,True,F((!a & !b & X(b & G(a | b | Xb))) | ((a | b) & XG(a | b | Xb)))
-F((a & F((!a & X!b) | (a & Xb))) | (!a & G((!a & Xb) | (a & X!b)))),?,P,buchi+daisy+partscc+strength2,430,86,3702,8.6,1.171,SPOT_ERR:too-many-acceptance-sets,(!a U (a & X(((b | (((a & (Xb | (X((!b & Xb) M a) & ((!a | X!b) U (a & X(a & !b …
-FG((a | Xb) & (!a | X!b)),?,P,daisy+partscc,18,2,38,2.1,0.068,True,F((!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | X!b)))…
-FG((a | X!b) & (!a | Xb)),?,P,daisy+partscc,18,2,38,2.1,0.067,True,F((!a & X(!b & G((a | X!b) & (!a | Xb)))) | (a & X(b & G((a | X!b) & (!a | Xb)))…
-GF((!a & X!a) | (a & Xa)),?,R,buchi,66,11,412,6.2,1.140,True,((!a | F(!a & X!a)) & (a | X((!a | XF(!a & X!a)) & (a | ((X(a | X(a R (!a | XF(!…
-G((a & b) | (!a & !b) | Xc),?,S,partscc,11,1,13,1.2,0.063,True,G(((a | !b) & (!a | b)) | Xc)
-a & G((!b & X!a) U b),?,R,daisy+daisy2+partscc,20,4,30,1.5,0.070,True,a & ((!b & X(!a & G((b | X!a) & Fb))) | (b & XG(b | X(b M !a))))
-G((a & Xb) | (!a & X!b)) R Fc,?,R,daisy+partscc+strength2,23,4,44,1.9,0.071,True,F(GFc | (c & ((!a & X(!b & G((a | X!b) & (!a | Xb)))) | (a & X(b & G((a | X!b) &…
-G((a & Xb) | (!a & X!b)) U b,?,O,daisy+partscc+strength2,16,2,27,1.7,0.070,True,b | ((!a & !b) U (a & !b & X(b & G((!a | Xb) & (a | X!b)))))
-a U G(b | Xa),?,S,daisy+partscc,15,2,25,1.7,0.078,True,a W (!a & ((!b & X(a & G(b | Xa))) | (b & XG(b | Xa))))
-((!a | b) & F((a & Xc) | (!a & X!c))) | (a & !b & G((a & X!c) | (!a & Xc))),?,?,buchi+daisy+partscc+strength2,502,91,7377,14.7,2.275,SPOT_TIMEOUT,(a & !b & X(!c & G((!a | X!c) & (a | Xc)))) | (!a & X(((!c | (((!a & (X!c | (X((…
-(Ga & F((((b & c) | (!b & !c)) & ((b & X!a) | (!b & Xa))) | (((b & !c) | (!b & c)) & ((b & Xa) | (!b & X!a))))) | (F!a & G((((b & c) | (!b & !c)) & ((b & Xa) | (!b & X!a))) | (((b & !c) | (!b & c)) & ((b & X!a) | (!b & Xa))))),?,O,daisy+partscc,28,3,75,2.7,0.071,True,(!c & (Ga | X(!a & G((c | X!a) & (!c | Xa))))) | (c & ((!a & X(a & G((c | X!a) &…
-G((a & !b) | (!a & b) | X(((a & !b) | (!a & b)) M c)),?,R,daisy2,21,2,44,2.1,0.066,True,G((a & !b) | (!a & b) | (((!a & !b) | (a & b)) & X(((!a & !b & c) | (a & b & c))…
+X(a | FG(!b | X(!b M !c))),?,T,acc2+daisy+daisy2+daisystar+partscc+strength2,38,7,111,2.9,0.104,True,X(a | (GF!b & ((b & XF((b & !c & X(!c & G(!b | X!c))) | (!b & (X(!b & XG(!b | X!…
+(a & G(!b | X!c)) | (!a & F(b & Xc)),?,?,buchi+daisy+daisystar+partscc+strength2,246,50,1628,6.6,1.141,SPOT_TIMEOUT,(a & ((!b & XG(!b | X!c)) | (b & X(!c & G(!b | X!c))))) | (!a & ((b & X((c | (((…
+G(((a U b) & (b W a)) U !b),?,R,daisy2,15,4,25,1.7,0.067,True,G(F(!b | (!a & X((!a & b) U (a & !b)))) & (!b | (b U a)))
+G(!a | Xb) M !b,?,P,daisy+partscc,14,2,25,1.8,0.072,True,((!a & XG(!a | Xb)) | (a & X(b & G(!a | Xb)))) M !b
+G(a | (b & Xb)),?,S,inv+partscc,9,1,12,1.3,0.066,True,G((a | b) & (a | X(!a | b)))
+G((a & F!a) | (!b R !a)),?,R,buchi,2470,407,4966985808,2010925.4,1.367,UNVERIFIED_SIZE,<unflattened DAG: 4966985808 tree nodes>
+GF((a & Xb) | (!a & X!b)),?,R,buchi,248,46,93446,376.8,1.165,SPOT_ERR:too-many-acceptance-sets,(((a & ((!b & X((!a | !b | X(!a | !b) | (X((b & X(!a | !b)) M a) & ((!a | X(a & …
+(!a & b) | (a & !b) | G(b | Xc),?,S,daisy+partscc+strength2,16,1,25,1.6,0.077,True,(!a & (b | X(c & G(b | Xc)))) | (a & (!b | XG(b | Xc)))
+G((!a & !b) | X!c),?,S,partscc,10,1,10,1.0,0.072,True,G((!a & !b) | X!c)
+FG((!a | X!b) & (a | Xb)),?,P,daisy+partscc,18,2,38,2.1,0.068,True,F((!a & X(b & G((!a | X!b) & (a | Xb)))) | (a & X(!b & G((!a | X!b) & (a | Xb)))…
+G(!a | (b M a)),?,R,daisy2,6,2,7,1.2,0.066,True,G(!a | (b M a))
+FG(a | b | Xb),?,P,daisy+daisy2+partscc,15,2,27,1.8,0.066,True,F((!a & !b & X(b & G(a | b | Xb))) | ((a | b) & XG(a | b | Xb)))
+F((a & F((!a & X!b) | (a & Xb))) | (!a & G((!a & Xb) | (a & X!b)))),?,P,buchi+daisy+partscc+strength2,430,86,3702,8.6,1.180,SPOT_ERR:too-many-acceptance-sets,(!a U (a & X(((b | (((a & (Xb | (X((!b & Xb) M a) & ((!a | X!b) U (a & X(a & !b …
+FG((a | Xb) & (!a | X!b)),?,P,daisy+partscc,18,2,38,2.1,0.069,True,F((!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | X!b)))…
+FG((a | X!b) & (!a | Xb)),?,P,daisy+partscc,18,2,38,2.1,0.068,True,F((!a & X(!b & G((a | X!b) & (!a | Xb)))) | (a & X(b & G((a | X!b) & (!a | Xb)))…
+GF((!a & X!a) | (a & Xa)),?,R,buchi,66,11,412,6.2,1.111,True,((!a | F(!a & X!a)) & (a | X((!a | XF(!a & X!a)) & (a | ((X(a | X(a R (!a | XF(!…
+G((a & b) | (!a & !b) | Xc),?,S,partscc,11,1,13,1.2,0.066,True,G(((a | !b) & (!a | b)) | Xc)
+a & G((!b & X!a) U b),?,R,daisy+daisy2+partscc,20,4,30,1.5,0.067,True,a & ((!b & X(!a & G((b | X!a) & Fb))) | (b & XG(b | X(b M !a))))
+G((a & Xb) | (!a & X!b)) R Fc,?,R,daisy+partscc+strength2,23,4,44,1.9,0.072,True,F(GFc | (c & ((!a & X(!b & G((a | X!b) & (!a | Xb)))) | (a & X(b & G((a | X!b) &…
+G((a & Xb) | (!a & X!b)) U b,?,O,daisy+partscc+strength2,16,2,27,1.7,0.066,True,b | ((!a & !b) U (a & !b & X(b & G((!a | Xb) & (a | X!b)))))
+a U G(b | Xa),?,S,daisy+partscc,15,2,25,1.7,0.068,True,a W (!a & ((!b & X(a & G(b | Xa))) | (b & XG(b | Xa))))
+((!a | b) & F((a & Xc) | (!a & X!c))) | (a & !b & G((a & X!c) | (!a & Xc))),?,?,buchi+daisy+partscc+strength2,502,91,7377,14.7,2.212,SPOT_TIMEOUT,(a & !b & X(!c & G((!a | X!c) & (a | Xc)))) | (!a & X(((!c | (((!a & (X!c | (X((…
+(Ga & F((((b & c) | (!b & !c)) & ((b & X!a) | (!b & Xa))) | (((b & !c) | (!b & c)) & ((b & Xa) | (!b & X!a))))) | (F!a & G((((b & c) | (!b & !c)) & ((b & Xa) | (!b & X!a))) | (((b & !c) | (!b & c)) & ((b & X!a) | (!b & Xa))))),?,O,daisy+partscc,28,3,75,2.7,0.072,True,(!c & (Ga | X(!a & G((c | X!a) & (!c | Xa))))) | (c & ((!a & X(a & G((c | X!a) &…
+G((a & !b) | (!a & b) | X(((a & !b) | (!a & b)) M c)),?,R,daisy2,21,2,44,2.1,0.067,True,G((a & !b) | (!a & b) | (((!a & !b) | (a & b)) & X(((!a & !b & c) | (a & b & c))…
 FG((!a | b) & (!c | X!a) & (c | X(!b | (a & b)))),?,P,daisy+partscc,35,2,107,3.1,0.071,True,F((((!a & !c) | (b & !c)) & X(((a & b) | (!a & !b)) & G((((a | c) & (!b | c)) | …
 G(!a | X(!a M b)),?,R,daisy2,9,2,13,1.4,0.062,True,G(!a | X((a & b) U (!a & b)))
-G((Xa & (b U !a)) | (X!a & (!b R a))),?,S,daisy+partscc,18,1,49,2.7,0.067,True,(!a & X(a & !b & G((a | X(a & !b)) & (!a | b | X!a)))) | (a & !b & X(!a & G((a |…
-G(!a | (Xa & F!b) | (Gb & X!a)),?,R,-,,,,,15.019,BUILD_TIMEOUT>15s,
+G((Xa & (b U !a)) | (X!a & (!b R a))),?,S,daisy+partscc,18,1,49,2.7,0.065,True,(!a & X(a & !b & G((a | X(a & !b)) & (!a | b | X!a)))) | (a & !b & X(!a & G((a |…
+G(!a | (Xa & F!b) | (Gb & X!a)),?,R,daisy+daisy2+daisystar+partscc+strength2,34,9,116,3.4,0.079,True,!a W ((a & ((!b & X((!b M a) U (a & b & X(!a & b & G((!a | !b | X(!a & b)) & (a …
 G((a & !b & ((b & Xb) | (!b & X!b))) | ((!a | b) & ((b & X!b) | (!b & Xb)))),?,S,daisy+partscc,19,1,49,2.6,0.067,True,(!a & !b & X(b & G((a | b | Xb) & ((!a & !b) | X!b)))) | ((a | b) & X(!b & G((a …
-GF((a & X!b) | (!a & Xb)),?,R,buchi,248,46,93372,376.5,1.164,SPOT_ERR:too-many-acceptance-sets,(((a & ((!b & X((!a | !b | X(!a | !b) | (X((b & X(!a | !b)) M a) & ((!a | X(a & …
+GF((a & X!b) | (!a & Xb)),?,R,buchi,248,46,93372,376.5,1.146,SPOT_ERR:too-many-acceptance-sets,(((a & ((!b & X((!a | !b | X(!a | !b) | (X((b & X(!a | !b)) M a) & ((!a | X(a & …
 G((a & b) | Xb),?,S,partscc,6,1,7,1.2,0.066,True,G((a & b) | Xb)
-XG((a & Xb) | (!a & X!b)),?,S,daisy+partscc,18,1,38,2.1,0.068,True,X((a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b)))…
-(Ga & F((b & Xa) | (!b & X!a))) | (F!a & G((b & X!a) | (!b & Xa))),?,O,daisy+partscc,28,3,75,2.7,0.070,True,(!b & ((!a & X(a & G((!b | X!a) & (b | Xa)))) | (a & X((a & !b) U (b & (Ga | (a …
-(a & F(b & Xa)) | (!a & G(!b | X!a)),?,?,buchi+daisy+partscc+strength2,242,48,2417,10.0,2.200,SPOT_TIMEOUT,(!a & G(!b | X!a)) | (a & !b & X(((!b U (b & Xa)) | ((!b | X(!b M !a)) U (!b & X…
-G((((a & Xb) | (!a & X!b)) & G!c) | (Fc & ((a & X!b) | (!a & Xb)))),?,R,-,,,,,15.018,BUILD_TIMEOUT>15s,
-(!a & XG((a & X!b) | (!a & Xb))) | (a & XF((a & Xb) | (!a & X!b))),?,O,buchi+daisy+partscc+strength2,509,91,7401,14.5,2.395,SPOT_ERR:too-many-acceptance-sets,(!a & X((!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | …
-G(!a & ((b & Xc) | (!b & X!c))),?,S,daisy+partscc,22,1,60,2.7,0.070,True,!a & ((!b & X(!a & !c & G((a | b | X(!a & !c)) & (a | !b | X(!a & c))))) | (b & …
-very_weak_w_until.hoa,?,?,daisy+strength2,4,1,4,1.0,0.065,True,!a W b
-counting-1ap-counting_buchi_1ap_01.hoa,?,?,-,,,,,0.595,NOT_LTL,
-counting-1ap-counting_buchi_1ap_02.hoa,?,?,-,,,,,0.589,NOT_LTL,
-counting-1ap-counting_buchi_1ap_03.hoa,?,?,partscc,9,1,15,1.7,0.066,True,!a & G((!a | X!a) & (a | Xa))
-counting-1ap-counting_buchi_1ap_04.hoa,?,?,partscc,9,1,15,1.7,0.065,True,!a & G((!a | X!a) & (a | Xa))
-counting-1ap-counting_buchi_1ap_05.hoa,?,?,-,,,,,0.582,NOT_LTL,
-counting-1ap-counting_buchi_1ap_06.hoa,?,?,buchi,2150,347,3244605,1509.1,1.447,UNVERIFIED_SIZE,<unflattened DAG: 3244605 tree nodes>
-counting-1ap-counting_buchi_1ap_07.hoa,?,?,buchi,2175,343,2063370,948.7,1.441,UNVERIFIED_SIZE,<unflattened DAG: 2063370 tree nodes>
-counting-1ap-counting_buchi_1ap_08.hoa,?,?,-,,,,,0.580,NOT_LTL,
-counting-1ap-counting_buchi_1ap_09.hoa,?,?,-,,,,,0.586,NOT_LTL,
-counting-1ap-counting_buchi_1ap_10.hoa,?,?,-,,,,,0.579,NOT_LTL,
-counting-1ap-counting_buchi_1ap_11.hoa,?,?,-,,,,,0.587,NOT_LTL,
-counting-1ap-counting_buchi_1ap_12.hoa,?,?,buchi,709,128,9874589,13927.5,1.291,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
-counting-1ap-counting_buchi_1ap_13.hoa,?,?,buchi,709,128,9874589,13927.5,1.260,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
-counting-1ap-counting_buchi_1ap_14.hoa,?,?,buchi,709,128,9874589,13927.5,1.250,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
-counting-1ap-counting_buchi_1ap_15.hoa,?,?,buchi,1128,202,41719086,36985.0,1.213,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
-counting-1ap-counting_buchi_1ap_16.hoa,?,?,buchi,1128,202,41719086,36985.0,1.217,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
-counting-1ap-counting_buchi_1ap_17.hoa,?,?,buchi,1128,202,41719086,36985.0,1.203,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
-counting-1ap-counting_buchi_1ap_18.hoa,?,?,buchi,1152,200,43867210,38079.2,1.215,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
-counting-1ap-counting_buchi_1ap_19.hoa,?,?,buchi,1152,200,43867210,38079.2,1.231,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
-counting-1ap-counting_buchi_1ap_20.hoa,?,?,buchi,1152,200,43867210,38079.2,1.294,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
-counting-1ap-counting_buchi_1ap_21.hoa,?,?,-,,,,,0.592,NOT_LTL,
-counting-1ap-counting_buchi_1ap_22.hoa,?,?,-,,,,,0.588,NOT_LTL,
-counting-1ap-counting_buchi_1ap_23.hoa,?,?,-,,,,,0.583,NOT_LTL,
-counting-1ap-counting_buchi_1ap_24.hoa,?,?,-,,,,,0.585,NOT_LTL,
-counting-1ap-counting_buchi_1ap_25.hoa,?,?,-,,,,,0.580,NOT_LTL,
-counting-1ap-counting_buchi_1ap_26.hoa,?,?,-,,,,,0.588,NOT_LTL,
+XG((a & Xb) | (!a & X!b)),?,S,daisy+partscc,18,1,38,2.1,0.067,True,X((a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b)))…
+(Ga & F((b & Xa) | (!b & X!a))) | (F!a & G((b & X!a) | (!b & Xa))),?,O,daisy+partscc,28,3,75,2.7,0.069,True,(!b & ((!a & X(a & G((!b | X!a) & (b | Xa)))) | (a & X((a & !b) U (b & (Ga | (a …
+(a & F(b & Xa)) | (!a & G(!b | X!a)),?,?,buchi+daisy+daisystar+partscc+strength2,234,49,1605,6.9,1.143,SPOT_TIMEOUT,(!a & G(!b | X!a)) | (a & ((b & X((a | (((!b | X(!b M !a)) U (!b & X(!b U (b & X…
+G((((a & Xb) | (!a & X!b)) & G!c) | (Fc & ((a & X!b) | (!a & Xb)))),?,R,-,,,,,15.013,BUILD_TIMEOUT>15s,
+(!a & XG((a & X!b) | (!a & Xb))) | (a & XF((a & Xb) | (!a & X!b))),?,O,buchi+daisy+partscc+strength2,509,91,7401,14.5,2.237,SPOT_ERR:too-many-acceptance-sets,(!a & X((!a & X(b & G((a | Xb) & (!a | X!b)))) | (a & X(!b & G((a | Xb) & (!a | …
+G(!a & ((b & Xc) | (!b & X!c))),?,S,daisy+partscc,22,1,60,2.7,0.072,True,!a & ((!b & X(!a & !c & G((a | b | X(!a & !c)) & (a | !b | X(!a & c))))) | (b & …
+very_weak_w_until.hoa,?,?,daisy+strength2,4,1,4,1.0,0.064,True,!a W b
+counting-1ap-counting_buchi_1ap_01.hoa,?,?,-,,,,,0.578,NOT_LTL,
+counting-1ap-counting_buchi_1ap_02.hoa,?,?,-,,,,,0.580,NOT_LTL,
+counting-1ap-counting_buchi_1ap_03.hoa,?,?,partscc,9,1,15,1.7,0.064,True,!a & G((!a | X!a) & (a | Xa))
+counting-1ap-counting_buchi_1ap_04.hoa,?,?,partscc,9,1,15,1.7,0.064,True,!a & G((!a | X!a) & (a | Xa))
+counting-1ap-counting_buchi_1ap_05.hoa,?,?,-,,,,,0.577,NOT_LTL,
+counting-1ap-counting_buchi_1ap_06.hoa,?,?,buchi,2150,347,3244605,1509.1,1.446,UNVERIFIED_SIZE,<unflattened DAG: 3244605 tree nodes>
+counting-1ap-counting_buchi_1ap_07.hoa,?,?,buchi,2175,343,2063370,948.7,1.438,UNVERIFIED_SIZE,<unflattened DAG: 2063370 tree nodes>
+counting-1ap-counting_buchi_1ap_08.hoa,?,?,-,,,,,0.591,NOT_LTL,
+counting-1ap-counting_buchi_1ap_09.hoa,?,?,-,,,,,0.580,NOT_LTL,
+counting-1ap-counting_buchi_1ap_10.hoa,?,?,-,,,,,0.581,NOT_LTL,
+counting-1ap-counting_buchi_1ap_11.hoa,?,?,-,,,,,0.581,NOT_LTL,
+counting-1ap-counting_buchi_1ap_12.hoa,?,?,buchi,709,128,9874589,13927.5,1.216,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
+counting-1ap-counting_buchi_1ap_13.hoa,?,?,buchi,709,128,9874589,13927.5,1.227,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
+counting-1ap-counting_buchi_1ap_14.hoa,?,?,buchi,709,128,9874589,13927.5,1.230,UNVERIFIED_SIZE,<unflattened DAG: 9874589 tree nodes>
+counting-1ap-counting_buchi_1ap_15.hoa,?,?,buchi,1128,202,41719086,36985.0,1.195,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
+counting-1ap-counting_buchi_1ap_16.hoa,?,?,buchi,1128,202,41719086,36985.0,1.204,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
+counting-1ap-counting_buchi_1ap_17.hoa,?,?,buchi,1128,202,41719086,36985.0,1.210,UNVERIFIED_SIZE,<unflattened DAG: 41719086 tree nodes>
+counting-1ap-counting_buchi_1ap_18.hoa,?,?,buchi,1152,200,43867210,38079.2,1.209,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
+counting-1ap-counting_buchi_1ap_19.hoa,?,?,buchi,1152,200,43867210,38079.2,1.208,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
+counting-1ap-counting_buchi_1ap_20.hoa,?,?,buchi,1152,200,43867210,38079.2,1.213,UNVERIFIED_SIZE,<unflattened DAG: 43867210 tree nodes>
+counting-1ap-counting_buchi_1ap_21.hoa,?,?,-,,,,,0.612,NOT_LTL,
+counting-1ap-counting_buchi_1ap_22.hoa,?,?,-,,,,,0.583,NOT_LTL,
+counting-1ap-counting_buchi_1ap_23.hoa,?,?,-,,,,,0.587,NOT_LTL,
+counting-1ap-counting_buchi_1ap_24.hoa,?,?,-,,,,,0.631,NOT_LTL,
+counting-1ap-counting_buchi_1ap_25.hoa,?,?,-,,,,,0.584,NOT_LTL,
+counting-1ap-counting_buchi_1ap_26.hoa,?,?,-,,,,,0.595,NOT_LTL,
 counting-1ap-counting_buchi_1ap_27.hoa,?,?,daisy+partscc,11,1,17,1.5,0.064,True,a & X(a & G((a | Xa) & (!a | X!a)))
-counting-1ap-counting_buchi_1ap_28.hoa,?,?,daisy+partscc,11,1,17,1.5,0.066,True,a & X(a & G((a | Xa) & (!a | X!a)))
-counting-1ap-counting_buchi_1ap_29.hoa,?,?,-,,,,,0.585,NOT_LTL,
-counting-1ap-counting_buchi_1ap_30.hoa,?,?,-,,,,,0.582,NOT_LTL,
-counting-1ap-counting_buchi_1ap_31.hoa,?,?,-,,,,,0.589,NOT_LTL,
-counting-1ap-counting_buchi_1ap_32.hoa,?,?,-,,,,,0.585,NOT_LTL,
-counting-1ap-counting_buchi_1ap_33.hoa,?,?,-,,,,,0.588,NOT_LTL,
-counting-1ap-counting_buchi_1ap_34.hoa,?,?,-,,,,,0.594,NOT_LTL,
-counting-1ap-counting_buchi_1ap_35.hoa,?,?,-,,,,,0.626,NOT_LTL,
-counting-1ap-counting_buchi_1ap_36.hoa,?,?,-,,,,,0.939,NOT_LTL,
-counting-1ap-counting_buchi_1ap_37.hoa,?,?,-,,,,,1.677,NOT_LTL,
-counting-1ap-counting_buchi_1ap_38.hoa,?,?,-,,,,,14.200,NOT_LTL,
+counting-1ap-counting_buchi_1ap_28.hoa,?,?,daisy+partscc,11,1,17,1.5,0.065,True,a & X(a & G((a | Xa) & (!a | X!a)))
+counting-1ap-counting_buchi_1ap_29.hoa,?,?,-,,,,,0.587,NOT_LTL,
+counting-1ap-counting_buchi_1ap_30.hoa,?,?,-,,,,,0.573,NOT_LTL,
+counting-1ap-counting_buchi_1ap_31.hoa,?,?,-,,,,,0.584,NOT_LTL,
+counting-1ap-counting_buchi_1ap_32.hoa,?,?,-,,,,,0.584,NOT_LTL,
+counting-1ap-counting_buchi_1ap_33.hoa,?,?,-,,,,,0.585,NOT_LTL,
+counting-1ap-counting_buchi_1ap_34.hoa,?,?,-,,,,,0.589,NOT_LTL,
+counting-1ap-counting_buchi_1ap_35.hoa,?,?,-,,,,,0.615,NOT_LTL,
+counting-1ap-counting_buchi_1ap_36.hoa,?,?,-,,,,,0.848,NOT_LTL,
+counting-1ap-counting_buchi_1ap_37.hoa,?,?,-,,,,,1.539,NOT_LTL,
+counting-1ap-counting_buchi_1ap_38.hoa,?,?,-,,,,,13.552,NOT_LTL,
 counting-1ap-counting_buchi_1ap_39.hoa,?,?,-,,,,,15.004,BUILD_TIMEOUT>15s,
 counting-1ap-counting_buchi_1ap_40.hoa,?,?,-,,,,,15.004,BUILD_TIMEOUT>15s,
-counting-2ap-counting_buchi_2ap_01.hoa,?,?,-,,,,,0.585,NOT_LTL,
-counting-2ap-counting_buchi_2ap_02.hoa,?,?,-,,,,,0.577,NOT_LTL,
-counting-2ap-counting_buchi_2ap_03.hoa,?,?,-,,,,,0.584,NOT_LTL,
-counting-2ap-counting_buchi_2ap_04.hoa,?,?,-,,,,,0.583,NOT_LTL,
-counting-2ap-counting_buchi_2ap_05.hoa,?,?,-,,,,,0.586,NOT_LTL,
-counting-2ap-counting_buchi_2ap_06.hoa,?,?,-,,,,,0.587,NOT_LTL,
-counting-2ap-counting_buchi_2ap_07.hoa,?,?,-,,,,,0.640,NOT_LTL,
-counting-2ap-counting_buchi_2ap_08.hoa,?,?,-,,,,,0.595,NOT_LTL,
-counting-2ap-counting_buchi_2ap_09.hoa,?,?,-,,,,,0.585,NOT_LTL,
-counting-2ap-counting_buchi_2ap_10.hoa,?,?,-,,,,,0.581,NOT_LTL,
+counting-2ap-counting_buchi_2ap_01.hoa,?,?,-,,,,,0.598,NOT_LTL,
+counting-2ap-counting_buchi_2ap_02.hoa,?,?,-,,,,,0.592,NOT_LTL,
+counting-2ap-counting_buchi_2ap_03.hoa,?,?,-,,,,,0.620,NOT_LTL,
+counting-2ap-counting_buchi_2ap_04.hoa,?,?,-,,,,,0.597,NOT_LTL,
+counting-2ap-counting_buchi_2ap_05.hoa,?,?,-,,,,,0.605,NOT_LTL,
+counting-2ap-counting_buchi_2ap_06.hoa,?,?,-,,,,,0.596,NOT_LTL,
+counting-2ap-counting_buchi_2ap_07.hoa,?,?,-,,,,,0.595,NOT_LTL,
+counting-2ap-counting_buchi_2ap_08.hoa,?,?,-,,,,,0.578,NOT_LTL,
+counting-2ap-counting_buchi_2ap_09.hoa,?,?,-,,,,,0.579,NOT_LTL,
+counting-2ap-counting_buchi_2ap_10.hoa,?,?,-,,,,,0.578,NOT_LTL,
 counting-2ap-counting_buchi_2ap_11.hoa,?,?,daisy+partscc,12,1,18,1.5,0.065,True,b & X(!a & G((!a | X!a) & (a | Xa)))
-counting-2ap-counting_buchi_2ap_12.hoa,?,?,daisy+partscc,12,1,18,1.5,0.061,True,b & X(!a & G((!a | X!a) & (a | Xa)))
-counting-2ap-counting_buchi_2ap_13.hoa,?,?,daisy+partscc,12,1,18,1.5,0.064,True,b & X(!a & G((!a | X!a) & (a | Xa)))
+counting-2ap-counting_buchi_2ap_12.hoa,?,?,daisy+partscc,12,1,18,1.5,0.065,True,b & X(!a & G((!a | X!a) & (a | Xa)))
+counting-2ap-counting_buchi_2ap_13.hoa,?,?,daisy+partscc,12,1,18,1.5,0.063,True,b & X(!a & G((!a | X!a) & (a | Xa)))
 counting-2ap-counting_buchi_2ap_14.hoa,?,?,-,,,,,0.578,NOT_LTL,
-counting-2ap-counting_buchi_2ap_15.hoa,?,?,-,,,,,0.577,NOT_LTL,
-counting-2ap-counting_buchi_2ap_16.hoa,?,?,-,,,,,0.582,NOT_LTL,
-counting-2ap-counting_buchi_2ap_17.hoa,?,?,-,,,,,0.578,NOT_LTL,
-counting-2ap-counting_buchi_2ap_18.hoa,?,?,-,,,,,0.580,NOT_LTL,
-counting-2ap-counting_buchi_2ap_19.hoa,?,?,-,,,,,0.576,NOT_LTL,
-counting-2ap-counting_buchi_2ap_20.hoa,?,?,-,,,,,0.577,NOT_LTL,
-counting-2ap-counting_buchi_2ap_21.hoa,?,?,-,,,,,0.579,NOT_LTL,
-counting-2ap-counting_buchi_2ap_22.hoa,?,?,-,,,,,0.581,NOT_LTL,
-counting-2ap-counting_buchi_2ap_23.hoa,?,?,-,,,,,0.581,NOT_LTL,
-counting-2ap-counting_buchi_2ap_24.hoa,?,?,-,,,,,0.595,NOT_LTL,
-counting-2ap-counting_buchi_2ap_25.hoa,?,?,-,,,,,0.598,NOT_LTL,
-counting-2ap-counting_buchi_2ap_26.hoa,?,?,-,,,,,0.613,NOT_LTL,
-counting-2ap-counting_buchi_2ap_27.hoa,?,?,-,,,,,0.592,NOT_LTL,
-counting-2ap-counting_buchi_2ap_28.hoa,?,?,daisy,1,0,1,1.0,0.064,True,0
-counting-2ap-counting_buchi_2ap_29.hoa,?,?,-,,,,,0.593,NOT_LTL,
-counting-2ap-counting_buchi_2ap_30.hoa,?,?,-,,,,,0.574,NOT_LTL,
-counting-2ap-counting_buchi_2ap_31.hoa,?,?,-,,,,,0.581,NOT_LTL,
-counting-2ap-counting_buchi_2ap_32.hoa,?,?,-,,,,,0.579,NOT_LTL,
-counting-2ap-counting_buchi_2ap_33.hoa,?,?,-,,,,,0.575,NOT_LTL,
-counting-2ap-counting_buchi_2ap_34.hoa,?,?,-,,,,,0.581,NOT_LTL,
-counting-2ap-counting_buchi_2ap_35.hoa,?,?,-,,,,,0.586,NOT_LTL,
-counting-2ap-counting_buchi_2ap_36.hoa,?,?,-,,,,,0.587,NOT_LTL,
-counting-2ap-counting_buchi_2ap_37.hoa,?,?,-,,,,,0.591,NOT_LTL,
-counting-2ap-counting_buchi_2ap_38.hoa,?,?,-,,,,,0.609,NOT_LTL,
-counting-2ap-counting_buchi_2ap_39.hoa,?,?,-,,,,,0.856,NOT_LTL,
-counting-2ap-counting_buchi_2ap_40.hoa,?,?,-,,,,,1.748,NOT_LTL,
-counting-2ap-counting_buchi_2ap_41.hoa,?,?,-,,,,,0.606,NOT_LTL,
-counting-2ap-counting_buchi_2ap_42.hoa,?,?,-,,,,,0.602,NOT_LTL,
-counting-2ap-counting_buchi_2ap_43.hoa,?,?,-,,,,,0.600,NOT_LTL,
-counting-2ap-counting_buchi_2ap_44.hoa,?,?,-,,,,,0.573,NOT_LTL,
-counting-2ap-counting_buchi_2ap_45.hoa,?,?,-,,,,,0.582,NOT_LTL,
-randltl-1ap-ba-randltl-10-a-hoa-10.hoa,?,?,daisy,3,1,3,1.0,0.062,True,XFa
-randltl-1ap-ba-randltl-10-a-hoa-1.hoa,?,?,daisy,1,0,1,1.0,0.063,True,1
-randltl-1ap-ba-randltl-10-a-hoa-2.hoa,?,?,daisy,1,0,1,1.0,0.060,True,0
+counting-2ap-counting_buchi_2ap_15.hoa,?,?,-,,,,,0.580,NOT_LTL,
+counting-2ap-counting_buchi_2ap_16.hoa,?,?,-,,,,,0.578,NOT_LTL,
+counting-2ap-counting_buchi_2ap_17.hoa,?,?,-,,,,,0.581,NOT_LTL,
+counting-2ap-counting_buchi_2ap_18.hoa,?,?,-,,,,,0.567,NOT_LTL,
+counting-2ap-counting_buchi_2ap_19.hoa,?,?,-,,,,,0.583,NOT_LTL,
+counting-2ap-counting_buchi_2ap_20.hoa,?,?,-,,,,,0.579,NOT_LTL,
+counting-2ap-counting_buchi_2ap_21.hoa,?,?,-,,,,,0.583,NOT_LTL,
+counting-2ap-counting_buchi_2ap_22.hoa,?,?,-,,,,,0.584,NOT_LTL,
+counting-2ap-counting_buchi_2ap_23.hoa,?,?,-,,,,,0.585,NOT_LTL,
+counting-2ap-counting_buchi_2ap_24.hoa,?,?,-,,,,,0.578,NOT_LTL,
+counting-2ap-counting_buchi_2ap_25.hoa,?,?,-,,,,,0.579,NOT_LTL,
+counting-2ap-counting_buchi_2ap_26.hoa,?,?,-,,,,,0.582,NOT_LTL,
+counting-2ap-counting_buchi_2ap_27.hoa,?,?,-,,,,,0.583,NOT_LTL,
+counting-2ap-counting_buchi_2ap_28.hoa,?,?,daisy,1,0,1,1.0,0.065,True,0
+counting-2ap-counting_buchi_2ap_29.hoa,?,?,-,,,,,0.579,NOT_LTL,
+counting-2ap-counting_buchi_2ap_30.hoa,?,?,-,,,,,0.581,NOT_LTL,
+counting-2ap-counting_buchi_2ap_31.hoa,?,?,-,,,,,0.579,NOT_LTL,
+counting-2ap-counting_buchi_2ap_32.hoa,?,?,-,,,,,0.572,NOT_LTL,
+counting-2ap-counting_buchi_2ap_33.hoa,?,?,-,,,,,0.584,NOT_LTL,
+counting-2ap-counting_buchi_2ap_34.hoa,?,?,-,,,,,0.574,NOT_LTL,
+counting-2ap-counting_buchi_2ap_35.hoa,?,?,-,,,,,0.579,NOT_LTL,
+counting-2ap-counting_buchi_2ap_36.hoa,?,?,-,,,,,0.584,NOT_LTL,
+counting-2ap-counting_buchi_2ap_37.hoa,?,?,-,,,,,0.589,NOT_LTL,
+counting-2ap-counting_buchi_2ap_38.hoa,?,?,-,,,,,0.616,NOT_LTL,
+counting-2ap-counting_buchi_2ap_39.hoa,?,?,-,,,,,0.838,NOT_LTL,
+counting-2ap-counting_buchi_2ap_40.hoa,?,?,-,,,,,1.535,NOT_LTL,
+counting-2ap-counting_buchi_2ap_41.hoa,?,?,-,,,,,0.588,NOT_LTL,
+counting-2ap-counting_buchi_2ap_42.hoa,?,?,-,,,,,0.583,NOT_LTL,
+counting-2ap-counting_buchi_2ap_43.hoa,?,?,-,,,,,0.586,NOT_LTL,
+counting-2ap-counting_buchi_2ap_44.hoa,?,?,-,,,,,0.587,NOT_LTL,
+counting-2ap-counting_buchi_2ap_45.hoa,?,?,-,,,,,0.583,NOT_LTL,
+randltl-1ap-ba-randltl-10-a-hoa-10.hoa,?,?,daisy,3,1,3,1.0,0.063,True,XFa
+randltl-1ap-ba-randltl-10-a-hoa-1.hoa,?,?,daisy,1,0,1,1.0,0.065,True,1
+randltl-1ap-ba-randltl-10-a-hoa-2.hoa,?,?,daisy,1,0,1,1.0,0.063,True,0
 randltl-1ap-ba-randltl-10-a-hoa-4.hoa,?,?,daisy,3,1,3,1.0,0.065,True,G!a
-randltl-1ap-ba-randltl-10-a-hoa-5.hoa,?,?,daisy,1,0,1,1.0,0.063,True,a
-randltl-1ap-ba-randltl-10-a-hoa-6.hoa,?,?,daisy,2,0,2,1.0,0.063,True,!a
-randltl-1ap-ba-randltl-10-a-hoa-7.hoa,?,?,daisy,2,1,2,1.0,0.062,True,Ga
-randltl-1ap-ba-randltl-10-a-hoa-8.hoa,?,?,daisy,2,1,2,1.0,0.060,True,Fa
-randltl-1ap-ba-randltl-10-a-hoa-9.hoa,?,?,daisy,3,2,3,1.0,0.065,True,FGa
-randltl-2ap-ba-randltl-10-a-hoa-3.hoa,?,?,daisy,3,0,3,1.0,0.063,True,XXa
-randltl-2ap-ba-randltl-10-a-hoa-4.hoa,?,?,daisy,3,1,3,1.0,0.064,True,XFa
-randltl-4ap-ba-randltl-10-a-hoa-10.hoa,?,?,daisy,4,0,4,1.0,0.062,True,a | !b
+randltl-1ap-ba-randltl-10-a-hoa-5.hoa,?,?,daisy,1,0,1,1.0,0.065,True,a
+randltl-1ap-ba-randltl-10-a-hoa-6.hoa,?,?,daisy,2,0,2,1.0,0.064,True,!a
+randltl-1ap-ba-randltl-10-a-hoa-7.hoa,?,?,daisy,2,1,2,1.0,0.067,True,Ga
+randltl-1ap-ba-randltl-10-a-hoa-8.hoa,?,?,daisy,2,1,2,1.0,0.065,True,Fa
+randltl-1ap-ba-randltl-10-a-hoa-9.hoa,?,?,daisy,3,2,3,1.0,0.064,True,FGa
+randltl-2ap-ba-randltl-10-a-hoa-3.hoa,?,?,daisy,3,0,3,1.0,0.066,True,XXa
+randltl-2ap-ba-randltl-10-a-hoa-4.hoa,?,?,daisy,3,1,3,1.0,0.062,True,XFa
+randltl-4ap-ba-randltl-10-a-hoa-10.hoa,?,?,daisy,4,0,4,1.0,0.065,True,a | !b
 randltl-4ap-ba-randltl-10-a-hoa-2.hoa,?,?,daisy+strength2,3,1,3,1.0,0.064,True,b R a
-randltl-4ap-ba-randltl-10-a-hoa-3.hoa,?,?,daisy,2,1,2,1.0,0.061,True,Fa
-randltl-4ap-ba-randltl-10-a-hoa-4.hoa,?,?,daisy,3,0,3,1.0,0.060,True,X!a
-randltl-4ap-ba-randltl-10-a-hoa-8.hoa,?,?,daisy,3,2,3,1.0,0.060,True,FGa
-randltl-8ap-ba-randltl-10-a-hoa-10.hoa,?,?,daisy+strength2,3,1,3,1.0,0.063,True,a W b
-randltl-8ap-ba-randltl-10-a-hoa-4.hoa,?,?,daisy,3,1,3,1.0,0.064,True,XFa
+randltl-4ap-ba-randltl-10-a-hoa-3.hoa,?,?,daisy,2,1,2,1.0,0.064,True,Fa
+randltl-4ap-ba-randltl-10-a-hoa-4.hoa,?,?,daisy,3,0,3,1.0,0.064,True,X!a
+randltl-4ap-ba-randltl-10-a-hoa-8.hoa,?,?,daisy,3,2,3,1.0,0.069,True,FGa
+randltl-8ap-ba-randltl-10-a-hoa-10.hoa,?,?,daisy+strength2,3,1,3,1.0,0.067,True,a W b
+randltl-8ap-ba-randltl-10-a-hoa-4.hoa,?,?,daisy,3,1,3,1.0,0.065,True,XFa
 randltl-8ap-ba-randltl-10-a-hoa-5.hoa,?,?,daisy,3,1,3,1.0,0.063,True,b M a
-randltl-8ap-ba-randltl-10-a-hoa-8.hoa,?,?,daisy,3,1,3,1.0,0.063,True,b M a
+randltl-8ap-ba-randltl-10-a-hoa-8.hoa,?,?,daisy,3,1,3,1.0,0.066,True,b M a

@@ -1,6 +1,6 @@
-survey: 373 formulas  (--use cake)
-aut2ltl answered: 366/373  (302 LTL built + 64 not-LTL)   |   Failures: 7  (timeout 7, crash 0, declined 0)
-Spot check of the 302 LTL built: 275 EQUIVALENT, 27 not checked (formula too large)
+survey: 373 formulas  (--use cakeds)
+aut2ltl answered: 369/373  (305 LTL built + 64 not-LTL)   |   Failures: 4  (timeout 4, crash 0, declined 0)
+Spot check of the 305 LTL built: 285 EQUIVALENT, 20 not checked (formula too large)
 NOT EQUIVALENT: 0   (clean)
-totals over LTL built: DAG=104185 temporals=18597 build=136.541s
+totals over LTL built: DAG=22419 temporals=3894 build=60.769s
 SUCCESS
