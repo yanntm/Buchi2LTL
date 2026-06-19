@@ -38,7 +38,7 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
 # names it explicitly). This single alias IS the default pointer: re-point it to one
 # of the recipes above to ship a different default; nothing else in the CLI, build,
 # or survey changes.
-RECIPES["default"] = RECIPES["best_daisy2"]
+RECIPES["default"] = RECIPES["cake"]
 
 __all__ = ["RECIPES", "best", "best_daisy2", "best_inv", "best_inv_loop",
            "best_inv_all", "cake"]

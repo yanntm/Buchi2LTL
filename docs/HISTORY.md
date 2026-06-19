@@ -1393,3 +1393,14 @@ NOT_LTL short-circuits) + a RICH cheap variant weaving every technique
 PartScc ONLY (no bls) — declines to the incumbent where partscc cannot label, so no
 second cascade. Curated-40 survey --use cake: SUCCESS, DAG=412 (keeps the Fa&Gb inv
 win), build 3.75s ~= default 3.7s (was 1.8x). Re-sweeping bench+kinska to confirm.
+
+## 2026-06-19 — cake adopted as the default
+
+After the lean (one-cascade) cake cleared the bar on the full benchmark — Pareto over
+best_daisy2: 11 wins (-25..-41%), 0 regressions, 366/373 answered (+1 vs the old
+default's 365), build 136.5s ~= default 140s; kinska size-identical (the lone counting
+NOT_LTL->TIMEOUT is a shared 14s-vs-15s budget oscillation: the reference logs 14.003s
+and the default itself times out under load) — repointed RECIPES["default"] = cake (the
+single-line alias). Gate after: default resolves, r4 audit CLEAN, curated-40 survey
+SUCCESS DAG=412 (was 414). STATUS updated. Reference logs regenerated under the new
+default next.

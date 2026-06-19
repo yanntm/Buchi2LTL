@@ -6,11 +6,17 @@ Project-level snapshot. For the **engine** state read `aut2ltl/bls/STATUS.md`
 ## What works
 
 The FoSSaCS'22 automaton→LTL construction is implemented end-to-end and
-semantically validated. The portfolio front end is the **`best_daisy2` recipe**
-(the no-`--use` default): `Simplify(strength(acceptance(daisy_pair(core))), "hi")`
-with `core = first(partscc, bls)` — strength/acceptance decomposition over a
-**daisy/daisy2 peel pair** (the self-loop daisy, then the length-1 star `daisy2`,
-see `aut2ltl/daisy2/algorithm.md`) flooring on the `bls` cascade. It sweeps the
+semantically validated. The portfolio front end is the **`cake` recipe** (the
+no-`--use` default since 2026-06-19): a **shy `best_of`** over the `best_daisy2`
+incumbent (`Simplify(strength(acceptance(daisy_pair(core))), "hi")`, `core =
+first(partscc, bls)` — the one cascade) and one CHEAP every-technique rich variant
+(`Invariant ∘ Strength ∘ Scc ∘ Invariant ∘ Acc ∘ daisy_pair_inv`) that floors on
+`partscc` only (no second cascade), displacing the incumbent only on a significant
+form win. On the 373-case benchmark it is a Pareto step over `best_daisy2` (11 wins
+−25…−41 %, 0 regressions, +1 answered, ≈same build); kinská-neutral.
+`best_daisy2` (`--use best_daisy2`) remains the prior default — the daisy/daisy2 peel
+pair (self-loop daisy, then the length-1 star `daisy2`, see
+`aut2ltl/daisy2/algorithm.md`) flooring on the `bls` cascade. It sweeps the
 Manna–Pnueli class ladder, every probed case verifying equiv=True; on the 373-case
 benchmark it is sound (0 non-equivalent) and −3.6% DAG vs the prior `best`, even
 turning one 3804-node unverifiable answer into a verified 16-node one. `--use best`
