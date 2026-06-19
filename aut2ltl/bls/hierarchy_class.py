@@ -1,5 +1,5 @@
 """
-kr/hierarchy_class.py — the hierarchy-class CascadeTranslator.
+bls/hierarchy_class.py — the hierarchy-class CascadeTranslator.
 
 Acceptance-dispatch ladder over a cascade (§9.3 / Theorem 2), as a configured
 `first_success` chain over the acceptance-class members. Tries the direct
@@ -12,7 +12,7 @@ leaf's method tag (`acc`/`weak`/`buchi`/`cobuchi`/`muller`); the formula it carr
 is the hash-consed `spot.formula` DAG (serialization to text is a separate
 concern — `ltl_builders._str_f` — never done here).
 
-Per-leaf gates are the `kr.dispatch.*` Options (declared in `kr/options.py`,
+Per-leaf gates are the `kr.dispatch.*` Options (declared in `bls/options.py`,
 seeded from the legacy KR_DISPATCH_* env vars): each =False drops a leaf; weak is
 off by default. The chain membership is read once, HERE, at construction — passing
 a different `Options` builds a different chain (the A/B move). The build-state

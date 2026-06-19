@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/simplify/testing/test_now_eval.py
+bls/simplify/testing/test_now_eval.py
 
 Validation for Rule 2 (now-evaluation) via the combined `simplify`
 pipeline (context pass + now hook). Same harness contract as
@@ -9,7 +9,7 @@ Spot-verified language equivalence; expected shapes checked when given;
 MUST-NOT-CHANGE cases assert boundary safety.
 
 Run from project root:
-    python3 kr/simplify/testing/test_now_eval.py
+    python3 bls/simplify/testing/test_now_eval.py
 """
 
 import sys

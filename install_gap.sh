@@ -20,9 +20,9 @@ USER_GAP_DIR="${HOME}/.gap"
 USER_PKG_DIR="${USER_GAP_DIR}/pkg"
 GAP_CMD="${GAP_CMD:-gap}"
 
-log() { echo "[kr/install] $*"; }
-warn() { echo "[kr/install] WARNING: $*" >&2; }
-die() { echo "[kr/install] ERROR: $*" >&2; exit 1; }
+log() { echo "[bls/install] $*"; }
+warn() { echo "[bls/install] WARNING: $*" >&2; }
+die() { echo "[bls/install] ERROR: $*" >&2; exit 1; }
 
 check_only=false
 if [[ "${1:-}" == "--check-only" ]]; then
@@ -148,13 +148,13 @@ verify_sgpdec() {
 }
 
 main() {
-  log "Starting GAP + SgpDec setup for BuchiToLTL/kr (Linux assumed)."
+  log "Starting GAP + SgpDec setup for BuchiToLTL/bls (Linux assumed)."
   ensure_gap_base
   install_sgpdec_user
   verify_sgpdec
 
   log "All done."
-  log "You can now run Python code that calls into kr/gap/ (decompose_aut)."
+  log "You can now run Python code that calls into bls/gap/ (decompose_aut)."
   log "Example verification command:"
   echo "    $GAP_CMD --no-window -c 'LoadPackage(\"SgpDec\"); Print(\"HolonomyCascadeSemigroup example:\\n\"); T:=Semigroup([Transformation([2,1,3])]); HT:=HolonomyCascadeSemigroup(T); Print(HT, \"\\n\"); QUIT;'"
 }

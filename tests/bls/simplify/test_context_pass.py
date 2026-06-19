@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/simplify/testing/test_context_pass.py
+bls/simplify/testing/test_context_pass.py
 
 Validation for Rule 1 (context pass). Every case checks:
   1. language equivalence input == output (Spot, both containments) —
@@ -11,7 +11,7 @@ Validation for Rule 1 (context pass). Every case checks:
      (boundary safety: no context leaking under temporal operators).
 
 Run from project root:
-    python3 kr/simplify/testing/test_context_pass.py
+    python3 bls/simplify/testing/test_context_pass.py
 """
 
 import sys

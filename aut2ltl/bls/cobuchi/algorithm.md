@@ -11,8 +11,8 @@ Label             =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ 
 CascadeTranslator =  CascadeHolder → Label
 ```
 
-See [`kr/cascade_translator.py`](../cascade_translator.py) and the adapter
-[`kr/aut2cas.py`](../aut2cas.py).
+See [`bls/cascade_translator.py`](../cascade_translator.py) and the adapter
+[`bls/aut2cas.py`](../aut2cas.py).
 
 ## When it applies
 
@@ -25,7 +25,7 @@ wrongly pass). It declines otherwise.
 ## The formula
 
 With `Fin(C)` the formula true on words whose run visits configuration `C` only
-finitely often (Lemma 7; [`kr/fin.py`](../fin.py)), persistence is "eventually stay
+finitely often (Lemma 7; [`bls/fin.py`](../fin.py)), persistence is "eventually stay
 out of every marked configuration":
 
 ```

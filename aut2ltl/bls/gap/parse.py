@@ -1,5 +1,5 @@
 """
-kr/gap/parse.py
+bls/gap/parse.py
 
 Focused service: parsing the structured textual output emitted by the
 self-contained GAP scripts generated for SgpDec holonomy decomposition.

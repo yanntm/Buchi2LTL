@@ -12,8 +12,8 @@ Label             =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ 
 CascadeTranslator =  CascadeHolder → Label
 ```
 
-See [`kr/cascade_translator.py`](../cascade_translator.py) and the adapter
-[`kr/aut2cas.py`](../aut2cas.py).
+See [`bls/cascade_translator.py`](../cascade_translator.py) and the adapter
+[`bls/aut2cas.py`](../aut2cas.py).
 
 ## When it applies
 

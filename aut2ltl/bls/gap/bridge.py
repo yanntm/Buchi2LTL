@@ -1,5 +1,5 @@
 """
-kr/gap/bridge.py — high-level orchestration for SgpDec holonomy decompositions.
+bls/gap/bridge.py — high-level orchestration for SgpDec holonomy decompositions.
 
 This is the pure, module-level API of the GAP bridge. It wires the focused
 sub-services into the two entry points the rest of kr calls:
@@ -8,13 +8,13 @@ sub-services into the two entry points the rest of kr calls:
     decompose_aut  : caller spot automaton   -> Cascade
 
 The heavy/IO-bound work lives in siblings, kept out of this file on purpose:
-- kr/gap/export.py : GAP-source generation (generate_gap_script)
-- kr/gap/runner.py : process spawn (run_gap_script, check_gap_available)
-- kr/gap/parse.py  : structured-output parser (parse_cascade_output -> Cascade)
+- bls/gap/export.py : GAP-source generation (generate_gap_script)
+- bls/gap/runner.py : process spawn (run_gap_script, check_gap_available)
+- bls/gap/parse.py  : structured-output parser (parse_cascade_output -> Cascade)
 
 See also:
-- kr/cascade.py : the result data model + config automaton helpers
-- kr/extract.py : Spot aut -> generator images (assumes complete deterministic input)
+- bls/cascade.py : the result data model + config automaton helpers
+- bls/extract.py : Spot aut -> generator images (assumes complete deterministic input)
 """
 
 from __future__ import annotations

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tests/kr/probe_aperiodic.py — does the transition monoid carry a group?
+tests/bls/probe_aperiodic.py — does the transition monoid carry a group?
 
 LTL-definability of an omega-regular language == its deterministic automaton is
 counter-free == its transition monoid is APERIODIC (group-free). SgpDec's
@@ -11,7 +11,7 @@ deterministic D and print `IsAperiodicSemigroup(T)` (the `Semigroups` package,
 already loaded by SgpDec). False => language is NOT LTL-definable.
 
 Usage:
-    python3 tests/kr/probe_aperiodic.py <hoa-file> ...
+    python3 tests/bls/probe_aperiodic.py <hoa-file> ...
 """
 from __future__ import annotations
 

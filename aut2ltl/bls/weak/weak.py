@@ -1,5 +1,5 @@
 """
-kr/weak.py — the weak (Δ₁) CascadeTranslator member.
+bls/weak.py — the weak (Δ₁) CascadeTranslator member.
 
 φ := ⋁ over accepting SCC G of the config aut : end_in(G), with
 end_in(G) = (⋁_{C∈H} reach_to(ι,C)) ∧ (⋀_{C'∈G'} ¬reach_to(ι,C')), H = configs of

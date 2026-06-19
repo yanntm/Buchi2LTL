@@ -75,7 +75,7 @@ class Cascade:
     letter_valuations: List[Dict[str, bool]] = field(default_factory=list)
     original_aut: Any = None  # the normalized det parity aut (our working D)
 
-    # LTL-definability oracle (kr/gap/export.py emits APERIODIC: from GAP's
+    # LTL-definability oracle (bls/gap/export.py emits APERIODIC: from GAP's
     # IsAperiodicSemigroup(T) over the transition monoid of D). True  => the
     # language is LTL/star-free; False => it is NOT LTL-definable (T carries a
     # non-trivial group, so a holonomy level is a real GROUP, not the reset the
@@ -91,7 +91,7 @@ class Cascade:
     # pi (config_to_state) is many-to-one and state_to_config is just one
     # section of it, so the dynamics CANNOT be reconstructed by conjugating
     # D's transitions through the lift (that shortcut produced non-reset
-    # "cascades", e.g. Ga|Gb — see kr/testing/probe_reset_consistency.py).
+    # "cascades", e.g. Ga|Gb — see bls/testing/probe_reset_consistency.py).
     # Empty dict = legacy data; move_config then falls back to the shortcut.
     transitions: Dict[Tuple[int, ...], Dict[int, Tuple[int, ...]]] = field(default_factory=dict)
 
@@ -354,7 +354,7 @@ class Cascade:
 
     # ------------------------------------------------------------------
     # Config-graph analysis (reachability, pruned config aut, accepting
-    # configs, good Muller sets, basins) lives in kr/config_graph.py.
+    # configs, good Muller sets, basins) lives in bls/config_graph.py.
     # Thin delegating methods below keep all call sites unchanged.
     # ------------------------------------------------------------------
 

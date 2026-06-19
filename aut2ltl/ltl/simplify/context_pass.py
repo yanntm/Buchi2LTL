@@ -24,7 +24,7 @@ Core ideas:
 - Hash-consing makes set membership identity-based and the empty-context
   bulk memoizable per node: O(DAG) outside the skeleton.
 
-No kr/ dependencies: generic LTL in, generic LTL out.
+No bls/ dependencies: generic LTL in, generic LTL out.
 """
 
 from __future__ import annotations

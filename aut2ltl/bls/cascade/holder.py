@@ -1,11 +1,11 @@
 """
-kr/cascade/holder.py — CascadeHolder: a pure Cascade plus its per-build caches.
+bls/cascade/holder.py — CascadeHolder: a pure Cascade plus its per-build caches.
 
 The CascadeTranslator members and the recursive reachability core need somewhere
 to memoize subproblems and count distinct expansions for the duration of ONE
 construction. Rather than module-global memos plus a reset band-aid (the old
 `reachability_operators` globals + `reset_build_state`), that build state lives
-here, on a lightweight wrapper created once per construction (in `kr/aut2cas.py`)
+here, on a lightweight wrapper created once per construction (in `bls/aut2cas.py`)
 and threaded as the CascadeTranslator input. A fresh holder IS a fresh build: no
 reset call, and the memo lifetime equals the holder's — so the previous
 `id(casc)`-reuse hazard (a recycled id returning another build's cached formulas)

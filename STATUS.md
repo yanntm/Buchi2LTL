@@ -67,7 +67,7 @@ client cost):
 - `tests/survey_sweep.sh` — the same survey across every `--use` configuration,
   one log each + a cross-config SUMMARY. `tests/survey_diff.py` diffs two CSVs.
   The committed release baseline is `tests/logs/reference/`.
-- `tests/kr/test_kr_r4_audit.py` — structural audit gate (must stay CLEAN).
+- `tests/bls/test_kr_r4_audit.py` — structural audit gate (must stay CLEAN).
 - `tests/benchmark/` — the portfolio evaluation **bench** (size, not a gate):
   A/B two portfolios over `inputs/` (the survey corpus + W/U/R chains + 105
   Kinská HOA), reusing the survey engine; `bench_sweep.sh` + `survey_diff.py`.
@@ -79,5 +79,5 @@ client cost):
 cascade engine) + the (de)composition translators (`aut2ltl/daisy`,
 `aut2ltl/partscc`, `aut2ltl/decomp`) ← `aut2ltl/portfolio` (combinators) ←
 `aut2ltl/__main__`. Engine-agnostic helpers in `aut2ltl/ltl`. Tests under `tests/`
-(`survey*`, `tests/kr`, `tests/heur`, `tests/fixtures`, `tests/benchmark`).
+(`survey*`, `tests/bls`, `tests/heur`, `tests/fixtures`, `tests/benchmark`).
 `aut2ltl/ltl/simplify` carries its own `algorithm.md` spec.

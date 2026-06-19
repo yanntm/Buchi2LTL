@@ -1,5 +1,5 @@
 """
-kr/options.py — the kr engine's OPTIONS contract.
+bls/options.py — the kr engine's OPTIONS contract.
 
 The COMPLETE, discoverable contract of every `os.environ` knob the kr package
 reads: each is declared as an `OptionSpec` (dotted key + native default + one-line
@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from aut2ltl.options import OptionSpec
 
-# --- Bucket 1: acceptance-dispatch chain membership (kr/hierarchy_class.py) ---
+# --- Bucket 1: acceptance-dispatch chain membership (bls/hierarchy_class.py) ---
 # Which acceptance-class leaves enter the dispatch chain. Read at BUILD time when
 # the chain is assembled (not per-call). Weak is OFF by default (correct, but a
 # size regression vs buchi/cobuchi). These are the knobs wired to Options now.

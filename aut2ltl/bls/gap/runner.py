@@ -1,5 +1,5 @@
 """
-kr/gap/runner.py — process-spawn service for the GAP bridge.
+bls/gap/runner.py — process-spawn service for the GAP bridge.
 
 Everything that shells out to `gap` lives here: running a generated script and
 probing whether a usable GAP (with SgpDec) is installed. Isolated from the pure

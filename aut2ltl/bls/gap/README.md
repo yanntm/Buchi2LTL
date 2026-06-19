@@ -21,7 +21,7 @@ casc = decompose_aut(aut, *, gap_cmd="gap", timeout=180, max_aps=5)  # -> Cascad
   normalizable to deterministic parity (always possible for ω-regular languages;
   otherwise `ExtractionError`).
 - **out** — a `Cascade` (levels, configs, transitions, cover map). See
-  `kr/cascade.py`.
+  `bls/cascade.py`.
 - **config** — `timeout` (per GAP run, seconds), `gap_cmd`, `max_aps`.
 
 Lower-level entry, skipping the Spot normalization to decompose an explicit list

@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-kr/testing/test_kr_basic.py
+bls/testing/test_kr_basic.py
 
 Minimal direct test using the *normal path* (direct calls to decompose + reconstruct).
 
 - I/O validation: print produced LTL, levels, basic equiv check.
 - Failing tests are fine; they focus development.
-- Not lots of code in the test itself (the logic lives in kr/).
+- Not lots of code in the test itself (the logic lives in bls/).
 - Wraps each case invocation in subprocess to detect segfaults (rc 139 / -11 etc.).
 
 Run:
-  python3 kr/testing/test_kr_basic.py
-  python3 kr/testing/test_kr_basic.py FGa "a U b"   # test specific formulas
+  python3 bls/testing/test_kr_basic.py
+  python3 bls/testing/test_kr_basic.py FGa "a U b"   # test specific formulas
 
 See also test_kr_reconstruct.py (paper path verification) and diag_stability.py.
 

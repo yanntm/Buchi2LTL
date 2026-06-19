@@ -17,9 +17,9 @@ CascadeTranslator =  CascadeHolder → Label
 ```
 
 `CascadeHolder` wraps the decomposed `Cascade` with this build's caches/counters (see
-[`kr/cascade`](../cascade)); the adapter [`kr/aut2cas.py`](../aut2cas.py) lifts a
+[`bls/cascade`](../cascade)); the adapter [`bls/aut2cas.py`](../aut2cas.py) lifts a
 cascade translator to a `Language → LTLResult` `Translator` by first decomposing the
-Language. The contract itself is [`kr/cascade_translator.py`](../cascade_translator.py).
+Language. The contract itself is [`bls/cascade_translator.py`](../cascade_translator.py).
 
 ## When it applies
 
@@ -31,7 +31,7 @@ set infinitely often — recurrence.
 
 The cascade exposes **configurations** (the reachable states of the holonomy
 product). Let `Fin(C)` be the formula true on exactly the words whose run visits
-configuration `C` only finitely often (Lemma 7 of the construction; [`kr/fin.py`](../fin.py)).
+configuration `C` only finitely often (Lemma 7 of the construction; [`bls/fin.py`](../fin.py)).
 Then "visit `C` infinitely often" is `¬Fin(C)`, and a Büchi run accepts iff it is
 recurrent in *some* accepting configuration:
 

@@ -2,7 +2,7 @@
 
 The test and data-collection harness. Everything runs the engine through the
 real front end (`python3 -m aut2ltl`), so it tests what a user runs. Subdirs with
-their own README (`kr/`, `fixtures/`, `samples/kinska/`) keep the detail; this
+their own README (`bls/`, `fixtures/`, `samples/kinska/`) keep the detail; this
 file is just the index.
 
 ## Ground rules
@@ -20,7 +20,7 @@ file is just the index.
 
 ## Gate before committing engine changes
 
-    python3 tests/kr/test_kr_r4_audit.py     # must report CLEAN
+    python3 tests/bls/test_kr_r4_audit.py     # must report CLEAN
     python3 tests/survey.py                  # must end SUCCESS (no verified non-equiv)
 
 ## Survey & sweeps (end-to-end data collection)
@@ -88,8 +88,8 @@ exception to one-commit-per-file). Logs are otherwise never committed.
 
 ## Folders
 
-- `kr/` — development & verification scripts for the `kr/` algebraic path
-  (audit, tracing, language-diff tools). See `kr/README.md`.
+- `bls/` — development & verification scripts for the `bls/` algebraic path
+  (audit, tracing, language-diff tools). See `bls/README.md`.
 - `sl/` — case-finder probes for the heuristic `sl` engine (f2/t2 SCC patterns)
   plus debug artifacts.
 - `fixtures/` — interesting LTL formulas and HOA automata used in development.

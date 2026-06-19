@@ -14,8 +14,8 @@ Label             =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ 
 CascadeTranslator =  CascadeHolder → Label
 ```
 
-See [`kr/cascade_translator.py`](../cascade_translator.py) for the contract and
-[`kr/aut2cas.py`](../aut2cas.py) for the adapter that lifts it to a `Translator`.
+See [`bls/cascade_translator.py`](../cascade_translator.py) for the contract and
+[`bls/aut2cas.py`](../aut2cas.py) for the adapter that lifts it to a `Translator`.
 
 ## The unrolling
 

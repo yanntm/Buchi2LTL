@@ -1,5 +1,5 @@
 """
-kr/muller/muller.py — the general Muller-DNF member (the BLS general case).
+bls/muller/muller.py — the general Muller-DNF member (the BLS general case).
 
 The explosive but fully general Δ₂ form: for the lifted Müller condition
 α' = good config-sets M (the recurrent sets the normalized D actually exhibits),

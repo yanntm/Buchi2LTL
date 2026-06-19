@@ -47,7 +47,7 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
 
 ## Housekeeping
 
-- Two stale bls probes (`tests/kr/test_kr_zoom.py`, `tests/kr/measure_formula_dag.py`)
+- Two stale bls probes (`tests/bls/test_kr_zoom.py`, `tests/bls/measure_formula_dag.py`)
   import the removed `reachability` shell — repoint to `aut2ltl.bls.operators` or drop.
 
 ## Deferred (intentional — revisit only if needed)

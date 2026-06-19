@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/testing/measure_formula_dag.py
+bls/testing/measure_formula_dag.py
 
 Measure the assembled paper-style formula as a hash-consed DAG vs its flat
 serialization: distinct subformula nodes, tree (unfolded) node count, string
@@ -10,8 +10,8 @@ now build shared spot.formula objects end-to-end, so the interesting numbers
 are DAG size (real complexity) vs string size (unfolded form).
 
 Run from project root:
-    python3 kr/testing/measure_formula_dag.py "G(a -> X b)"
-    python3 kr/testing/measure_formula_dag.py "G(a -> X b)" --out out.ltl
+    python3 bls/testing/measure_formula_dag.py "G(a -> X b)"
+    python3 bls/testing/measure_formula_dag.py "G(a -> X b)" --out out.ltl
                                   (also dump the flat formula string to a file,
                                    re-parsed afterwards as a sanity check)
 """

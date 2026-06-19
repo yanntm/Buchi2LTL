@@ -1,11 +1,11 @@
 """
 fold_pass.py — Rule 4: unroll-inverse folding (the expansion laws, backwards).
 
-The kr/ construction emits temporal obligations in locally-unrolled form
+The bls/ construction emits temporal obligations in locally-unrolled form
 (last-step decomposition, first-occurrence splits): `a | F(!a & Xa)` instead
 of `Fa`, `a & G(!a | Xa)` instead of `Ga`, `g | (f & X(f U g))` instead of
 `f U g`. Spot's tl_simplifier never folds these back (measured on the
-F(a&Xa) dump, kr/testing/logs/faxa_dag_dump.txt). Folding them is the
+F(a&Xa) dump, bls/testing/logs/faxa_dag_dump.txt). Folding them is the
 canonical orientation: every rule below strictly shrinks the tree AND
 removes a distinct temporal subformula — the Couvreur acc-set driver.
 now_eval only ever returns constants or an arm, so the passes cannot

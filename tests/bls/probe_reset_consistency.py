@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/testing/probe_reset_consistency.py
+bls/testing/probe_reset_consistency.py
 
 Soundness probe for the parsed cascade: the paper's reachability formulas
 (esp. Formula 5 dashed/Enter) are only sound if every combined letter
@@ -19,8 +19,8 @@ and the operator formulas built on it are unsound (Enter/Stay/Leave keyed
 on that context are ambiguous).
 
 Run from project root:
-    python3 kr/testing/probe_reset_consistency.py "Ga | Gb"
-    python3 kr/testing/probe_reset_consistency.py            # survey set
+    python3 bls/testing/probe_reset_consistency.py "Ga | Gb"
+    python3 bls/testing/probe_reset_consistency.py            # survey set
 """
 
 import sys

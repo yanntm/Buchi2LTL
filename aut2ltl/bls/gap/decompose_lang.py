@@ -1,5 +1,5 @@
 """
-kr/gap/decompose_lang.py — the Language-native entry to the GAP bridge.
+bls/gap/decompose_lang.py — the Language-native entry to the GAP bridge.
 
 `decompose_lang` is the cascade builder over a contract `Language` (the floor
 input type). It pulls the det parity + state-based-acceptance form the Language
@@ -11,7 +11,7 @@ the per-piece entry the portfolio/surveys use.
 The det normalization is idempotent (parity-min-even / deterministic / complete /
 sbacc applied to an already-normalized automaton is a no-op on the language), so
 routing through `decompose_aut` re-applies it harmlessly. This is the seam the
-`kr/aut2cas.py` adapter uses to lift a CascadeTranslator to a Language Translator.
+`bls/aut2cas.py` adapter uses to lift a CascadeTranslator to a Language Translator.
 """
 from __future__ import annotations
 

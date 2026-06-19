@@ -14,8 +14,8 @@ Label             =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ 
 CascadeTranslator =  CascadeHolder → Label
 ```
 
-See [`kr/cascade_translator.py`](../cascade_translator.py) and the adapter
-[`kr/aut2cas.py`](../aut2cas.py).
+See [`bls/cascade_translator.py`](../cascade_translator.py) and the adapter
+[`bls/aut2cas.py`](../aut2cas.py).
 
 ## The formula
 
@@ -28,8 +28,8 @@ set of configurations it visits infinitely often is *exactly* some good `M`:
 ```
 
 with `Fin(C)` the "only finitely often in configuration `C`" formula (Lemma 7;
-[`kr/fin.py`](../fin.py), built on the five inductive reachability operators in
-[`kr/reachability_operators.py`](../reachability_operators.py)). Each disjunct pins
+[`bls/fin.py`](../fin.py), built on the five inductive reachability operators in
+[`bls/reachability_operators.py`](../reachability_operators.py)). Each disjunct pins
 the infinity-set to one good `M`; the disjunction covers all of them.
 
 **Fin-reach fold** (default; `KR_FOLD_FIN_REACH=0` restores the full term): for a good

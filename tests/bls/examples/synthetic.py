@@ -8,7 +8,7 @@ part.  With GAP installed it will also run a tiny decomposition.
 Run:
     python3 -m kr.examples.synthetic
     # or after chmod +x
-    ./kr/examples/synthetic.py
+    ./bls/examples/synthetic.py
 """
 
 import sys

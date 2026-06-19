@@ -1,5 +1,5 @@
 """
-kr/buchi.py — the Büchi (recurrence, Π₂) CascadeTranslator member.
+bls/buchi.py — the Büchi (recurrence, Π₂) CascadeTranslator member.
 
 φ = ⋁_{C ∈ accepting configs} ¬Fin(C). Self-gating: declines when the cascade is
 not Büchi. α is the cover-aware `buchi_accepting_configs()` reader — the lift

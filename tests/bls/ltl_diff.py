@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/testing/ltl_diff.py
+bls/testing/ltl_diff.py
 
 Directional language comparison of two LTL formulas (or a formula vs an
 automaton), with witness words. Far more useful for debugging than a bare
@@ -12,9 +12,9 @@ are_equivalent boolean:
     difference, via spot.difference(X, Y).accepting_word().
 
 Usage:
-    python3 kr/testing/ltl_diff.py "GFa" "!a R (a | (!a & XFa))"
+    python3 bls/testing/ltl_diff.py "GFa" "!a R (a | (!a & XFa))"
 
-Library use (from other kr/testing scripts):
+Library use (from other bls/testing scripts):
     from ltl_diff import diff_report, to_aut
     print(diff_report(aut_or_formula_A, aut_or_formula_B, "GT", "produced"))
 """

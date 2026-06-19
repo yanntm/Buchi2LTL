@@ -8,7 +8,7 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
 ((de)composition approaches, one isolated subpackage each: `scc` / `strength` /
 `acceptance` / `inv`) ← `aut2ltl/portfolio` (combinators: build / builder recipes)
 ← `aut2ltl/__main__` + `__init__`. Engine-agnostic helpers in `aut2ltl/ltl`
-(metrics, printers, simplify). Tests under `tests/` (`survey*`, `tests/kr`,
+(metrics, printers, simplify). Tests under `tests/` (`survey*`, `tests/bls`,
 `tests/heur`, `tests/fixtures`).
 
 ## Orientation (don't duplicate here — follow the pointers)
@@ -55,13 +55,13 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
   neither belongs only in `docs/HISTORY.md`.
 - Test BEFORE commit, via placed scripts under `tests/` only (no /tmp, no
   `python -c` one-liners), under timeout:
-  - `python3 tests/kr/test_kr_r4_audit.py` → must stay CLEAN
+  - `python3 tests/bls/test_kr_r4_audit.py` → must stay CLEAN
   - `python3 tests/survey.py` → must end **SUCCESS** (no verified non-equivalent
     answer; spot timeouts / size explosions are not failures)
 - When comparing languages, report containment direction + witness word
-  (`tests/kr/ltl_diff.py`), not just equivalence.
+  (`tests/bls/ltl_diff.py`), not just equivalence.
 - Debug method: ground sub-terms against GT automata built from D's semiautomaton
-  (`tests/kr/trace_fin_semantics.py` pattern), find the first diverging sub-term,
+  (`tests/bls/trace_fin_semantics.py` pattern), find the first diverging sub-term,
   fix against the paper text.
 - Keep files roughly under 500 LOC (technical cores like the mutually-recursive
   formula cluster or parsers may exceed).

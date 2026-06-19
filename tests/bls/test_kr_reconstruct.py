@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-kr/testing/test_kr_reconstruct.py
+bls/testing/test_kr_reconstruct.py
 
-Verification for the pure paper reconstruction path in kr/:
+Verification for the pure paper reconstruction path in bls/:
 - decomp (Spot -> det parity complete -> SgpDec cascade)
 - reconstruct_bls (which uses the inductive reach formulas +
   fin_c (Lemma 7) + Muller DNF assembly from good SCC sets)
@@ -15,8 +15,8 @@ Failing equiv is expected for some multi-level cases until the 5 formulas
 are fully polished for conj/neg/entry per the paper.
 
 Run from project root:
-    python3 kr/testing/test_kr_reconstruct.py
-    python3 kr/testing/test_kr_reconstruct.py "a" "Fa"   # specific
+    python3 bls/testing/test_kr_reconstruct.py
+    python3 bls/testing/test_kr_reconstruct.py "a" "Fa"   # specific
 
 See also test_kr_basic.py and diag_stability.py.
 """

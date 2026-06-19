@@ -1,5 +1,5 @@
 """
-kr/aut2cas.py — lift a CascadeTranslator up to a Translator via the GAP bridge.
+bls/aut2cas.py — lift a CascadeTranslator up to a Translator via the GAP bridge.
 
 A CascadeTranslator works on an already-decomposed `Cascade`; a `Translator`
 works on a contract `Language` (the floor input type). `as_translator` is the
@@ -8,7 +8,7 @@ with `decompose_lang` (pulls `Language.det_parity_sbacc()` -> GAP SgpDec holonom
 and runs the cascade-translator on it. The result `LTLResult` (formula +
 technique) is forwarded unchanged.
 
-Before building, it runs the LTL-definability gate (`kr/ltl_tester`): the cascade
+Before building, it runs the LTL-definability gate (`bls/ltl_tester`): the cascade
 is unsound on a non-aperiodic language, so a non-definable Language is reported as
 NOT_LTL (cached on the Language) instead of built — skipping the explosive
 holonomy step entirely on the non-LTL case.
@@ -51,7 +51,7 @@ def as_translator(
         # is UNSOUND on a non-aperiodic language: the holonomy decomposition still
         # succeeds, but it emits a GROUP component the parser labels a reset, from
         # which the members build a WRONG formula (the kinská counting cases). The
-        # oracle runs on a sbacc-FREE form (kr/ltl_tester.py — the cascade's own
+        # oracle runs on a sbacc-FREE form (bls/ltl_tester.py — the cascade's own
         # parity+sbacc D degeneralizes generalized-Büchi acceptance into a spurious
         # counter that reads as non-aperiodic even for LTL languages), is cached on
         # the Language, and is the one choke point for ALL cascade members (they

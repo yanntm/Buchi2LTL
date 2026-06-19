@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/simplify/testing/test_factor_pass.py
+bls/simplify/testing/test_factor_pass.py
 
 Validation for Rule 3 (partial factoring) — factor_simplify alone for the
 core cases, the combined `simplify` pipeline for the end-to-end ones.
@@ -9,7 +9,7 @@ equivalence; expected shapes when given; the soundness-bug regression case
 from the draft script is here for good.
 
 Run from project root:
-    python3 kr/simplify/testing/test_factor_pass.py
+    python3 bls/simplify/testing/test_factor_pass.py
 """
 
 import sys

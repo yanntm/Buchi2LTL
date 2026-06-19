@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tests/kr/trace_gap_decomp.py — dump the raw SgpDec holonomy output for one HOA.
+tests/bls/trace_gap_decomp.py — dump the raw SgpDec holonomy output for one HOA.
 
 Replays `decompose_aut`'s steps (normalize -> extract generators -> GAP script ->
 run -> parse) but prints the RAW GAP stdout and the parsed cascade levels. Used to
@@ -9,7 +9,7 @@ non-trivial GROUP component (=> language NOT LTL-definable), and how is it
 currently labelled (`export.py` hardcodes `KIND reset`)?
 
 Usage:
-    python3 tests/kr/trace_gap_decomp.py <hoa-file>
+    python3 tests/bls/trace_gap_decomp.py <hoa-file>
 """
 from __future__ import annotations
 

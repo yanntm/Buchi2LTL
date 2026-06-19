@@ -62,7 +62,7 @@ def make_guard(valuations: List[Dict[str, bool]], aps: List[str], pred: Callable
 # cache across calls. This is what kills vacuous structure at construction
 # time (X(0)→0, σ∧0→0, absorption …) — dead tails then collapse memo keys in
 # the operators and delete whole wrapped-descendant subtrees (see
-# kr/dag_folding.md counter-measure A). KR_SIMP_NODE=0 is the escape hatch
+# bls/dag_folding.md counter-measure A). KR_SIMP_NODE=0 is the escape hatch
 # if Spot ever becomes the blocker (then we grow our own small rule set).
 #
 # Legacy tree-size policy (only when KR_SIMP_NODE=0):
@@ -131,9 +131,9 @@ def _tree_size_f(f: "spot.formula") -> int:
     return total
 
 
-# Own rewrite pass (kr/simplify: context propagation, now-evaluation,
-# partial factoring — rules Spot does not have; see kr/simplify/README.md).
-# Runs per node AFTER Spot's pass; persistent memos in kr/simplify make
+# Own rewrite pass (bls/simplify: context propagation, now-evaluation,
+# partial factoring — rules Spot does not have; see bls/simplify/README.md).
+# Runs per node AFTER Spot's pass; persistent memos in bls/simplify make
 # this amortized O(1) per distinct node. KR_SIMP_OWN=0 disables.
 # Size cap (same rationale as the hybrid full/basics policy): factoring and
 # sibling contexts on GIANT top-level nodes cost more than they fold —
@@ -168,7 +168,7 @@ def _own_simp(f: "spot.formula") -> "spot.formula":
 
 
 def own_simplify(f: "spot.formula") -> "spot.formula":
-    """Public entry to the kr/simplify own-rules pass (NO Spot tl_simplifier —
+    """Public entry to the bls/simplify own-rules pass (NO Spot tl_simplifier —
     Spot's simplifier is not DAG-size aware, so it is deliberately excluded
     here). Used by the portfolio combinators to fold a recombined formula
     that no per-node pass ever saw as a whole (e.g. `G(!b&h) | (h U b)` →
@@ -180,7 +180,7 @@ def own_simplify(f: "spot.formula") -> "spot.formula":
 def _simp_f(f: "spot.formula") -> "spot.formula":
     """Normalize a spot.formula for the construction path (no string
     round-trip). Default: per-DAG-node memoized tl_simplifier (see policy
-    note above) followed by the kr/simplify own-rules pass. With
+    note above) followed by the bls/simplify own-rules pass. With
     KR_SIMP_NODE=0 falls back to the legacy tree-size policy
     (_SIMP_TREE_LIMIT)."""
     if f is None:

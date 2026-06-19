@@ -22,7 +22,7 @@ Entailment ctx ⊨ x is two-tier:
     arms too, courtesy of hash-consing;
   - propositional: BDD implication of the propositional fragment of the
     context against a propositional x (own process-lifetime bdd_dict —
-    no kr/ dependencies; spot's dict aborts at exit if vars stay
+    no bls/ dependencies; spot's dict aborts at exit if vars stay
     registered, hence dict+owner live for the process).
 
 The returned right arm `g` is at the SAME instant, so the caller may keep

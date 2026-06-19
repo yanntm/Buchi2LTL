@@ -46,7 +46,7 @@ Wired into the construction pipeline since 2026-06-12: `_simp_f` calls `simplify
 per DAG node (`KR_SIMP_OWN`, size cap `KR_SIMP_OWN_LIMIT`); `KR_SIMP_OWN_FOLD=0` /
 `KR_SIMP_OWN_FACTOR=0` disable rules 4 / 3.
 
-## Testing (`tests/kr/simplify/`)
+## Testing (`tests/bls/simplify/`)
 
 Placed scripts, run from project root, under timeout. Every firing validates **language
 equivalence** of input vs output via Spot (`spot.are_equivalent` / both containments) on
@@ -54,6 +54,6 @@ top of any expected-shape check — a rule that fires is PASS only if the rewrit
 equivalence. `test_random_equiv.py` fuzzes it (`[N] [seed] [n_aps] [tree_size]`).
 
 ```
-python3 tests/kr/simplify/test_context_pass.py
-python3 tests/kr/simplify/test_random_equiv.py
+python3 tests/bls/simplify/test_context_pass.py
+python3 tests/bls/simplify/test_random_equiv.py
 ```

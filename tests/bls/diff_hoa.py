@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-tests/kr/diff_hoa.py — directional language diff of an HOA automaton FILE against
+tests/bls/diff_hoa.py — directional language diff of an HOA automaton FILE against
 an LTL formula, with witness words. The CLI of `ltl_diff.py` parses both args as
 LTL strings, so it cannot take a `.hoa`/`.txt` automaton path; this wraps the
 same `diff_report` after loading the automaton with spot.
 
 Usage:
-    python3 tests/kr/diff_hoa.py <hoa-file> "<ltl-formula>"
+    python3 tests/bls/diff_hoa.py <hoa-file> "<ltl-formula>"
 """
 import sys
 from pathlib import Path

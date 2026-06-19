@@ -28,7 +28,7 @@ class CascadeTranslator(Protocol):
     self-gating (it inspects the cascade and either builds its faithful form or
     DECLINES). The member stamps its own `name` into the `LTLResult`'s technique, so
     composites (`first_success`) need no out-of-band tagging. The holder wraps the
-    pure `Cascade` with that build's caches/counters (kr/cascade/holder.py); members
+    pure `Cascade` with that build's caches/counters (bls/cascade/holder.py); members
     read cascade attributes off it transparently.
     """
 

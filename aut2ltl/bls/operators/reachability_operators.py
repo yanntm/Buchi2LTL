@@ -7,9 +7,9 @@ paper/automata-to-ltl-construction.md §7; ground truth paper/Automata2LTL.txt).
 The formulas are mutually recursive (well-founded on cascade level) and are kept
 together in this module on purpose — they are one technical unit.
 
-Leaf utilities (guards, simplify, spot.formula builders) live in kr/ltl_builders.py.
-Fin(C) (Lemma 7) lives in kr/fin.py (imports this module one-way).
-The high-level assembly (Fin + Muller DNF) lives in kr/reachability.py.
+Leaf utilities (guards, simplify, spot.formula builders) live in bls/ltl_builders.py.
+Fin(C) (Lemma 7) lives in bls/fin.py (imports this module one-way).
+The high-level assembly (Fin + Muller DNF) lives in bls/reachability.py.
 
 All driven uniformly by Cascade config transitions and letter valuations (no patterns
 on the automaton shape; the normalized det aut in the Cascade *is* the working D).
@@ -68,7 +68,7 @@ def _trace(msg: str) -> None:
         print("[KR] " + msg)
 
 # Guard helpers, simplification, and native spot.formula builders live in
-# kr/ltl_builders.py (no kr deps). Re-imported here under their original names;
+# bls/ltl_builders.py (no kr deps). Re-imported here under their original names;
 # letters_to_prop / make_guard / simplify_ltl / normalize_ltl stay importable
 # from this module for compat.
 from aut2ltl.ltl.builders import (
@@ -81,7 +81,7 @@ from aut2ltl.ltl.builders import (
     _to_f, _letters_to_f, _str_f, _short_f, _simp_f, _fuse_or,
 )
 
-# Fin(C) (Lemma 7) lives in kr/fin.py (one-way dependency: fin imports this
+# Fin(C) (Lemma 7) lives in bls/fin.py (one-way dependency: fin imports this
 # module, never the reverse). Import fin_c from aut2ltl.bls.operators.fin directly.
 
 
@@ -90,7 +90,7 @@ from aut2ltl.ltl.builders import (
 import spot  # used for formula types in signatures and lru keys
 
 # ---------------------------------------------------------------------------
-# Generalized inductive reachability (the 5 formulas, per kr/algorithm.md + paper Sec 4.2)
+# Generalized inductive reachability (the 5 formulas, per bls/algorithm.md + paper Sec 4.2)
 # These recurse on config tuple length (level). Base case when level == num_levels
 # (empty suffix): plain Until (paper's level 0 on the empty configuration).
 # All driven by cascade's move_config + letter_valuations (algebraic, no pattern match on orig aut).

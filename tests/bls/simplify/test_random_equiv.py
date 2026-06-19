@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/simplify/testing/test_random_equiv.py
+bls/simplify/testing/test_random_equiv.py
 
 Random soundness fuzz for the combined kr.simplify.simplify pipeline:
 N random LTL formulas (spot.randltl, few APs so the rules actually fire),
@@ -11,7 +11,7 @@ Also reports fire rate and size deltas (tree nodes before/after), so the
 run doubles as a usefulness measurement.
 
 Run from project root:
-    python3 kr/simplify/testing/test_random_equiv.py [N] [seed] [n_aps] [tree_size]
+    python3 bls/simplify/testing/test_random_equiv.py [N] [seed] [n_aps] [tree_size]
 Defaults: N=500 seed=42 n_aps=2 tree_size=15.
 """
 

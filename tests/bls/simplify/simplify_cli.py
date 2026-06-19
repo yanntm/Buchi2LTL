@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-kr/simplify/testing/simplify_cli.py
+bls/simplify/testing/simplify_cli.py
 
 One-formula CLI: show what each stage produces for an argv formula —
-the kr/simplify package alone (rules 1+2+3), and the full in-pipeline
+the bls/simplify package alone (rules 1+2+3), and the full in-pipeline
 node simplification (`kr.ltl_builders._simp_f` = Spot pass + own rules +
 bounded Spot closing pass), with an equivalence verdict.
 
 Run from project root:
-    python3 kr/simplify/testing/simplify_cli.py "<formula>"
+    python3 bls/simplify/testing/simplify_cli.py "<formula>"
 """
 
 import sys
@@ -31,7 +31,7 @@ def main() -> int:
     own = simplify(f)
     pipe = _simp_f(f)
     print(f"input          : {f}")
-    print(f"kr/simplify    : {own}")
+    print(f"bls/simplify    : {own}")
     print(f"_simp_f (full) : {pipe}")
     print(f"equivalent     : {spot.are_equivalent(f, pipe)}")
     return 0

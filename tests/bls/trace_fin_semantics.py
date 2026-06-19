@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/testing/trace_fin_semantics.py
+bls/testing/trace_fin_semantics.py
 
 Semantic grounding of every fin_c sub-term, per config, against ground-truth
 automata built directly from the normalized D's semiautomaton (no LTL
@@ -22,8 +22,8 @@ Ground truths:
 This is the contradiction-milking tool for the Fin/R4 P0 work (GFa canary).
 
 Run from project root:
-    python3 kr/testing/trace_fin_semantics.py "GFa"
-    python3 kr/testing/trace_fin_semantics.py "FGa" "G(a -> F b)"
+    python3 bls/testing/trace_fin_semantics.py "GFa"
+    python3 bls/testing/trace_fin_semantics.py "FGa" "G(a -> F b)"
 """
 
 import json

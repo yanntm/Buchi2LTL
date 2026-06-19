@@ -22,7 +22,7 @@ Translator :  Language  →  LTLResult
   docstring for the type and the combine algebras.
 - **`translator.py` — `Translator`**: the behavioral contract (a `Protocol`). The
   floor; it names no implementor. The kr-private cascade peer `CascadeTranslator`
-  lives in [`kr/cascade_translator.py`](kr/cascade_translator.py). (`contract.py` is
+  lives in [`bls/cascade_translator.py`](bls/cascade_translator.py). (`contract.py` is
   a deprecated shim re-exporting both until the portfolio is reworked.)
 
 Because every translator is faithful-or-declines, translators **compose soundly**.
@@ -45,7 +45,7 @@ Each engine/approach folder declares one or more Translator (or, in kr,
 different algorithm. Many are **compositional**: a decorator/composite that takes a
 child or leaf Translator and delegates to it.
 
-- **[`kr/`](kr/README.md)** — the systematic construction: a family of
+- **[`bls/`](bls/README.md)** — the systematic construction: a family of
   `CascadeTranslator` members implementing the Boker–Lehtinen–Sickert / Krohn-Rhodes
   cascade (no pattern matching). The largest engine; see its README for the pipeline.
 - **`daisy/`** — the pure self-loop *daisy* peel: a local, context-free combinator

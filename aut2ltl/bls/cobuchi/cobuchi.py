@@ -1,5 +1,5 @@
 """
-kr/cobuchi.py — the coBüchi (persistence, Σ₂) CascadeTranslator member.
+bls/cobuchi.py — the coBüchi (persistence, Σ₂) CascadeTranslator member.
 
 φ = ⋀_{C ∈ marked configs} Fin(C), the dual of `buchi`. Self-gating: declines
 when the cascade is not coBüchi. The predicate tests the NATURAL automaton

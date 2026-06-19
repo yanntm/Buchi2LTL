@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kr/simplify/testing/test_fold_pass.py
+bls/simplify/testing/test_fold_pass.py
 
 Validation for Rule 4 (unroll-inverse folding) — fold_simplify alone for
 the core cases, the combined `simplify` pipeline for the end-to-end ones.
@@ -9,7 +9,7 @@ equivalence; expected shapes when given; must-not-change cases guard
 against over-firing (a & XFa is NOT Fa; mismatched guards stay put).
 
 Run from project root:
-    python3 kr/simplify/testing/test_fold_pass.py
+    python3 bls/simplify/testing/test_fold_pass.py
 """
 
 import sys

@@ -1,5 +1,5 @@
 """
-kr/ltl_tester.py — the Language LTL-definability labeler (the "LtlTester").
+bls/ltl_tester.py — the Language LTL-definability labeler (the "LtlTester").
 
 A Translator that is *unsound when its input is not LTL-definable* — the kr
 cascade — must check definability before it builds, and report the impossibility
@@ -16,7 +16,7 @@ Inf(0)&Inf(1)&Inf(2) for `GFa & GFb & GFc`) into a "which mark am I waiting for"
 counter — a spurious cyclic group that reads as non-aperiodic even though the
 language IS LTL. So the oracle must run on a form WITHOUT that degeneralization:
 `det_generic_minimal()` (deterministic, generic acceptance, simulation-reduced
-and SAT-minimized when small). See `kr/aut2cas.py` for the consumer.
+and SAT-minimized when small). See `bls/aut2cas.py` for the consumer.
 
 LAYERING: this sits above the floor (it reads `Language`) and above the gap
 oracle (`gap/aperiodic.is_aperiodic_gens`); it imports neither Cascade nor any

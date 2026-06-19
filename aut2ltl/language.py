@@ -33,7 +33,7 @@ Both behaviours are knobs declared as `OptionSpec`s (`CLEAN_LEVEL`, `CACHE_SIZE`
 LAYERING: this is a contract-floor module. It knows spot automata and formulas
 (shared dependencies, below every engine) but NOT any engine type — in particular
 NOT `Cascade` (kr-specific). The cascade is built on the kr side from
-`det_parity_sbacc()` (see kr/aut2cas.py); it is never a representation Language
+`det_parity_sbacc()` (see bls/aut2cas.py); it is never a representation Language
 carries, which would invert the floor -> kr layering.
 """
 from __future__ import annotations
@@ -185,7 +185,7 @@ class Language:
 
     def det_parity_sbacc(self) -> "spot.twa_graph":
         """Deterministic, complete, min-even parity with STATE-BASED acceptance —
-        the input form the Krohn-Rhodes cascade is built from (kr/aut2cas.py).
+        the input form the Krohn-Rhodes cascade is built from (bls/aut2cas.py).
         State-based acceptance is the cascade's soundness requirement (the lifted
         Muller condition is over configurations/states)."""
         a = self._cache.get("det_parity_sbacc")

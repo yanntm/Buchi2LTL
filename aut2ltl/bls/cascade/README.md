@@ -17,7 +17,7 @@ members consume; it builds no LTL itself.
   functions of a `Cascade` (it imports nothing from the engine, so it stays a
   leaf): reachable configs, accepting / Büchi-accepting / coBüchi-finite config
   sets, the pruned config twa, basins, and `good_muller_sets` — the recurrent
-  config families the BLS Muller assembly (`kr/muller.py`) consumes.
+  config families the BLS Muller assembly (`bls/muller.py`) consumes.
 
 ## Layering
 

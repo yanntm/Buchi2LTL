@@ -1,6 +1,6 @@
-# tests/kr/
+# tests/bls/
 
-Development and verification scripts for the kr/ algebraic path.
+Development and verification scripts for the bls/ algebraic path.
 The script-by-script overview lives in `aut2ltl/bls/STATUS.md` ("Tooling for
 targeted work"); this file only records the ground rules.
 
@@ -18,7 +18,7 @@ targeted work"); this file only records the ground rules.
 
 ## Gate before committing operator/assembly changes
 
-    python3 tests/kr/test_kr_r4_audit.py     # must report CLEAN
+    python3 tests/bls/test_kr_r4_audit.py     # must report CLEAN
     python3 tests/survey.py                  # must end SUCCESS (no verified non-equiv)
 
 ## Debug method (contradiction milking)
