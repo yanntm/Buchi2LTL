@@ -26,9 +26,9 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
 - `paper/Automata2LTL.txt` — ground truth for any formula-fidelity question
   (Sec 4.2 + Table 1 + Formulas 3/4/5 ≈ lines 440–1040). LLM summaries have twice
   introduced guard/case errors; the paper text settles disputes.
-- The default translator is the `best_daisy2` recipe in `aut2ltl/portfolio/builder.py`
-  (strength/acceptance decomposition over a daisy/daisy2 peel flooring on the `bls`
-  cascade); `aut2ltl/portfolio/README.md` maps the package. The kr core stays pure.
+- The default translator is whichever recipe `RECIPES["default"]` points at in
+  `aut2ltl/portfolio/recipes/` (do not hardcode its name elsewhere — the registry
+  decides); `aut2ltl/portfolio/README.md` maps the package. The kr core stays pure.
 
 ## Discipline (mandatory)
 - One commit per file (preference). The exception is a mechanical bulk change —
