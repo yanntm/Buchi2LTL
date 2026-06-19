@@ -28,9 +28,13 @@ def check(cond: bool, msg: str) -> None:
         _fail.append(msg)
 
 
-# --- default assembly (techniques=None) is the `best` recipe ---
+# --- default assembly (techniques=None) resolves to the `default` alias, whatever
+# recipe that currently points at (the single source of truth is RECIPES["default"];
+# no test should name the shipped recipe and need editing on each adoption) ---
 top = build_portfolio(_opts)
-check(getattr(top, "name", None) == "simplify", "default top is best's Simplify")
+named_default = build_portfolio(_opts, {"default"})
+check(getattr(top, "name", None) == getattr(named_default, "name", None),
+      "techniques=None resolves to the 'default' recipe")
 check(callable(top), "default is callable")
 # --- the recipe cited by name resolves to the same shape ---
 best = build_portfolio(_opts, {"best"})
