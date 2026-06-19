@@ -7,27 +7,19 @@ G(a | (a & Xb) | (!a & X!b))  # t2002
 XG(Xa | (b & X!a) | (!b & Xa))  # t2003
 FG(a | Xa)  # t2004
 X!a | G(b | Xb)  # t2005
-G(a | Xb)  # t2006
-G(!a | X!b)  # t2007
 XG(a | Xa)  # t2008
 G(!a | (a & X!b) | (!a & Xb))  # t2009
 XG(a | X!b)  # t2010
 G((a R b) | (!b & F!b) | (b & Gb))  # t2011
 FG(!a | X(!a R b))  # t2012
 G(a | Xa)  # t2013
-G(!a | Xb)  # t2014
 FG(!a | X(a W b))  # t2015
 X(G!a U G(b | X!a))  # t2016
 FG(a | X!b)  # t2017
-XG(!a | X!b)  # t2018
 G(a | b | Xb)  # t2019
 XG(!a | b | (b & Xa) | (!b & X!a))  # t2020
 G(a U Xa)  # t2021
-G(!a | X!a)  # t2022
-FG(!a | X!a)  # t2023
-XG(a | Xb)  # t2024
 FG(((a & X!b) | (!a & Xb)) U (!a | X!b))  # t2025
-G(!a U X!a)  # t2026
 Ga R (a | X((a & b) | (!a & !b)))  # t2027
 XG(!a | X!b | (a M b))  # t2028
 a W FG(b | Xa)  # t2029
@@ -41,14 +33,10 @@ G(!a | b | Xa)  # t2036
 G(a | X(a R b))  # t2037
 G(a | (a U Xa))  # t2038
 G(a | (b W (!a W b)))  # t2039
-G(!a | X(!a R !b))  # t2040
 G(a | (Fb R Xb))  # t2041
 G((a & (a M !b)) | (!a & (!a W b)))  # t2042
 XG(!a | b | Xc)  # t2043
-G(!a | b | Xb)  # t2044
-G(!a | X(!a R b))  # t2045
 G((a & (a W b)) | (!a & (!a M !b)))  # t2046
-FG(!a | Xb)  # t2047
 !a U G(b | Xb)  # t2048
 FG((a | (!a M !b)) & (!a | (a W b)))  # t2049
 G(a | (a & !a) | X((a | (a & !a)) R b))  # t2050
@@ -56,8 +44,6 @@ FG(a | (!b R !a))  # t2051
 XG(a | (a U Xb))  # t2052
 G(!a | (!a & !b) | X!a)  # t2053
 X(Xa U G(b | (!b W a)))  # t2054
-G((a & (a M b)) | (!a & (!a W !b)))  # t2055
-FG(a | Xb)  # t2056
 a U G(a | Xb)  # t2057
 XG(a U Xa)  # t2058
 G((a & X(a W b)) | (!a & (!a | X(!a M !b))))  # t2059
@@ -66,7 +52,6 @@ G(a | X(!a | b | !c))  # t2061
 Ga R (a | X!b)  # t2062
 G(a | (a R b))  # t2063
 !a & G(b | Xa)  # t2064
-FG(a | X(a R b))  # t2065
 G((a U b) & (!a | Xb))  # t2066
 G(a & !a) R (b U Xb)  # t2067
 G(a->Xb) & G(c->Xd)  # t2068

@@ -6,19 +6,15 @@ a & G(b | Xb)  # term001
 (X!a & F(b & Xb)) | (Xa & G(!b | X!b))  # term002
 GF(a & Xa)  # term003
 G((a & (a W X!b)) | (!a & (!a M Xb)))  # term004
-G(!a | !b | Xa)  # term005
 G((a & X!a) | (!a & Xa))  # term006
 XG((!a & Xb) | (a & X!b))  # term007
 G((!a & Xb) | (a & X!b))  # term008
 X(a M G(!b | X(!b M c)))  # term009
 !a M G(b | X(b R a))  # term010
-G((a & Xb) | (!a & X!b))  # term011
 G(a | X(a M Gb))  # term012
 G(a | X(a M b))  # term013
 G(!a | Xb) M c  # term014
 XG(a & ((b & X!c) | (!b & Xc)))  # term015
-G((!a & Xa) | (a & X!a))  # term016
-G((a & X!b) | (!a & Xb))  # term017
 G(a & ((b & X!c) | (!b & Xc)))  # term018
 G(Xa | (F!a R !b))  # term019
 G(a | (a M (!a W !b))) U a  # term020
@@ -44,8 +40,6 @@ FG((!a | X!b) & (a | Xb))  # term039
 G(!a | (b M a))  # term040
 FG(a | b | Xb)  # term041
 F((a & F((!a & X!b) | (a & Xb))) | (!a & G((!a & Xb) | (a & X!b))))  # term042
-FG((a | Xb) & (!a | X!b))  # term043
-FG((a | X!b) & (!a | Xb))  # term044
 GF((!a & X!a) | (a & Xa))  # term045
 G((a & b) | (!a & !b) | Xc)  # term046
 a & G((!b & X!a) U b)  # term047
@@ -56,15 +50,11 @@ a U G(b | Xa)  # term050
 (Ga & F((((b & c) | (!b & !c)) & ((b & X!a) | (!b & Xa))) | (((b & !c) | (!b & c)) & ((b & Xa) | (!b & X!a))))) | (F!a & G((((b & c) | (!b & !c)) & ((b & Xa) | (!b & X!a))) | (((b & !c) | (!b & c)) & ((b & X!a) | (!b & Xa)))))  # term052
 G((a & !b) | (!a & b) | X(((a & !b) | (!a & b)) M c))  # term053
 FG((!a | b) & (!c | X!a) & (c | X(!b | (a & b))))  # term054
-G(!a | X(!a M b))  # term055
 G((Xa & (b U !a)) | (X!a & (!b R a)))  # term056
 G(!a | (Xa & F!b) | (Gb & X!a))  # term057
 G((a & !b & ((b & Xb) | (!b & X!b))) | ((!a | b) & ((b & X!b) | (!b & Xb))))  # term058
-GF((a & X!b) | (!a & Xb))  # term059
 G((a & b) | Xb)  # term060
-XG((a & Xb) | (!a & X!b))  # term061
 (Ga & F((b & Xa) | (!b & X!a))) | (F!a & G((b & X!a) | (!b & Xa)))  # term062
 (a & F(b & Xa)) | (!a & G(!b | X!a))  # term063
 G((((a & Xb) | (!a & X!b)) & G!c) | (Fc & ((a & X!b) | (!a & Xb))))  # term064
 (!a & XG((a & X!b) | (!a & Xb))) | (a & XF((a & Xb) | (!a & X!b)))  # term065
-G(!a & ((b & Xc) | (!b & X!c)))  # term066

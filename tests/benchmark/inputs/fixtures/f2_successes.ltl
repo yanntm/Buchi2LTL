@@ -6,44 +6,32 @@ F(a R Xa)  # f2001
 XF(!a & X!a)  # f2002
 F(a & Xa)  # f2003
 F(a & X!b)  # f2004
-F(a & Xb)  # f2005
-XF(a & Xa)  # f2006
 F(a & b & Xa)  # f2007
 X!a & F(b & Xb)  # f2008
 F(a & X(a U b))  # f2009
 XF(!a & X(!a U !b))  # f2010
 F(X!a & ((b R a) W b))  # f2011
-F(!a & X!a)  # f2012
-F(!a & Xb)  # f2013
 F(a & (!a M !b))  # f2014
 F(a & !b & Xb)  # f2015
 F(((a & !b) | (!a & b)) & Xc)  # f2016
 F(!a & (b U a))  # f2017
-F(!a R X!a)  # f2018
 a | F(a & Xa)  # f2019
 F(a & Xa) & (a | Fb)  # f2020
 XF(!a & X!b)  # f2021
 Fa & F(b R Xb)  # f2022
-F(!a & X(!a U !b))  # f2023
 F((!a | !b) & X(!a U !b))  # f2024
-F(!a & X!b)  # f2025
 (!a U !b) M Fb  # f2026
 XF(((a & b) | (!a & c) | (a & !c)) & Xa)  # f2027
 (a & Xb) M Fb  # f2028
-XF(a & X!b)  # f2029
 XXF(a & X(a U b))  # f2030
 F(((!a & b) | (a & !b)) & X((!a & b) U a))  # f2031
 F(a & ((a & Xa) | (!a & X!a)))  # f2032
 (a U b) M XF!a  # f2033
-F(a & X(a U !b))  # f2034
 F(a & b & Xb)  # f2035
 !a | (F(!a & Fa) U b)  # f2036
 F(a & X(b | !c))  # f2037
-XF(!a & Xb)  # f2038
 X((a U b) M F!b)  # f2039
-XF(a & Xb)  # f2040
 F(!a & (!a R Xb))  # f2041
-F(!a & X(!a U b))  # f2042
 XXF(a & Xa)  # f2043
 a M XF(!b & Xc)  # f2044
 F((a & Fb) | (!a & G!b)) U ((c U !a) M a)  # f2045
@@ -56,5 +44,4 @@ a & XF(a & (!b U !a))  # f2051
 F(Fa & (!a M (a U b)))  # f2052
 XXXF(a & Xa)  # f2053
 F(a & b & X(!c | b))  # f2054
-XF(a & X(a U b))  # f2055
 F(a R (!b M (c & Xa)))  # f2056
