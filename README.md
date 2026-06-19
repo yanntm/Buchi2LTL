@@ -77,14 +77,14 @@ Fine-tune any declared option with `-O key=value` (see `--list-options`).
 
 ## Evaluation
 
-Reference runs of the **default** portfolio are committed as per-formula CSVs — which
-GitHub renders as readable tables — one per corpus:
+Reference runs of the **default** portfolio (currently the `cake` recipe) are committed
+as per-formula CSVs — which GitHub renders as readable tables — one per corpus:
 
 - [`tests/logs/reference/default.csv`](tests/logs/reference/default.csv) — the curated
   40-formula survey (the correctness gate's corpus).
 - [`tests/benchmark/logs/reference/default.csv`](tests/benchmark/logs/reference/default.csv)
   — the larger benchmark corpus (the survey set + scalable W/U/R chains + the Kinská
-  automata, 164 formulas).
+  automata, 373 formulas).
 - [`tests/samples/kinska/logs/reference/kinska.csv`](tests/samples/kinska/logs/reference/kinska.csv)
   — the 165 Kinská Büchi automata on their own (many are not LTL-definable); see
   [`tests/samples/kinska/README.md`](tests/samples/kinska/README.md) for provenance.
