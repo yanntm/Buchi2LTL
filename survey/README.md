@@ -36,16 +36,17 @@ not track them. `all` is the sole token survey interprets, via discovery.
 | module | concern |
 |---|---|
 | `__main__.py` | entry: parse args; orchestrate examples × techniques → CSV |
-| `inputs.py` | discovery: walk PATHs recursively → readable examples + format detect |
+| `discovery/` | recurse PATHs → readable examples (small files: `walk` + `detect` + `read`) |
 | `techniques.py` | resolve the `--use` set (pass-through; `all` → discovery — see TODO) |
 | `bounded.py` | the `timeout --signal=INT --kill-after` subprocess primitive (one home) |
 | `build.py` | run the front end on one example × technique via `bounded` → `BuildResult` |
 | `verify.py` | **optional** spot-oracle equivalence (the gate's VERIFY), decoupled from build |
-| `report.py` | CSV schema + writer + summary + CSV-vs-CSV diff (was `survey_diff` / `survey_summary`) |
+| `report.py` | CSV schema + writer + summary (was `survey_summary`) |
 | `normalize/` | shared AP-normalization + dedup-key (to migrate in from `tests/benchmark/normalize`) |
-| `diff/` | **language** diff (containment + witnesses) — distinct from `report`'s CSV diff |
+| `diff/` | comparison tooling: **language** diff (`ltl_diff`/`diff_hoa`) + **result** CSV diff (`results`) |
 
-Old → new: `survey.py` splits into `inputs` + `build` + `verify`; the
+Old → new: `survey.py` splits into `discovery` + `build` + `verify`;
+`survey_diff.py` → `survey.diff.results`; `survey_summary.sh` → `report`; the
 `*_sweep.sh` shells dissolve into `__main__`'s multi-`--use` loop;
 `kinska_breakdown.py` is retired in favour of CSV-native provenance (see TODO).
 

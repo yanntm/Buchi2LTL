@@ -28,4 +28,13 @@ as LTL, so a file path needs this wrapper):
 
     python3 -m survey.diff.diff_hoa model.hoa "<ltl-formula>"
 
+## Result diff (CSV)
+
+Comparing two survey *runs* (not languages) lives here too: `survey.diff.results`
+keys two result CSVs on the input and reports key-set differences plus
+equivalence regressions/fixes, technique changes and size movers on the common
+inputs.
+
+    python3 -m survey.diff.results A.csv B.csv
+
 Run from the repo root (so `import survey.diff` and `import aut2ltl` resolve).

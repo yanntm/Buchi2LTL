@@ -1,15 +1,13 @@
-"""survey.report — CSV emission, summaries, and CSV-vs-CSV result diffs.
+"""survey.report — CSV emission and run summaries.
 
-The result-level reporting layer (distinct from survey.diff, which compares
-LANGUAGES): defines the per-row CSV schema (input, provenance, technique,
-status, sizes, timings, verdict), writes one CSV per --use config plus a compact
-SUMMARY, and diffs two CSVs keyed on the input (regressions / fixes / size
-movers) for regression triage.
+Defines the per-row CSV schema (input, provenance, technique, status, sizes,
+timings, verdict), writes one CSV per --use config, and produces a compact
+SUMMARY. Comparing two result CSVs lives in survey.diff.results; comparing two
+LANGUAGES lives in survey.diff (ltl_diff).
 
-Bones only — fold in tests/survey_diff.py and survey_summary.sh.
+Bones only — fold in survey_summary.sh.
 """
 from __future__ import annotations
 
 # TODO: Row schema + write_csv(rows, path)
 # TODO: summarize(csv_path) -> str          (the SUMMARY.txt content)
-# TODO: diff_csv(a_path, b_path) -> str      (keyed on input; common-set diff)
