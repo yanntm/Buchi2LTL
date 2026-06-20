@@ -29,7 +29,8 @@ import spot
 
 from aut2ltl.proc import setup_signals
 from aut2ltl.options import Options, OptionSpec
-from aut2ltl.language import Language, LANGUAGE_OPTIONS
+from aut2ltl.language import Language, LANGUAGE_OPTIONS, UntranslatableLanguage
+from aut2ltl.result import LTLResult
 from aut2ltl.portfolio import build_portfolio, TECHNIQUES
 from aut2ltl.bls.options import KR_OPTIONS, FLATTEN_TREE_LIMIT
 from aut2ltl.ltl.metrics import dag_metrics
@@ -194,7 +195,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     t0 = time.monotonic()
-    res = translator(lang)
+    try:
+        res = translator(lang)
+    except UntranslatableLanguage as e:
+        # The input — or an intermediate a translator tried to re-present — exceeds
+        # the ltl2tgba size bounds; the floor REFUSED rather than blow Spot up. That
+        # refusal is a BOTTOM result: a DECLINE carrying the limit as its diagnosis,
+        # handled by the declined path below (prints like any decline, exit 1).
+        res = LTLResult.decline(
+            f"{e}; raise KR_TRANSLATE_TREE_LIMIT / KR_TRANSLATE_TEMPORAL_LIMIT "
+            f"to attempt a larger translation")
     dt = time.monotonic() - t0
 
     if res.not_ltl:
@@ -209,8 +219,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 3
 
     if not res.ok:
-        print("aut2ltl: DECLINED — no cited technique translated this language",
-              file=sys.stderr)
+        msg = "aut2ltl: DECLINED — no cited technique translated this language"
+        if res.diagnosis:
+            msg += f"\n  ({res.diagnosis})"
+        print(msg, file=sys.stderr)
         return 1
 
     limit = options.get(FLATTEN_TREE_LIMIT)
