@@ -1452,3 +1452,29 @@ CLEAN, survey SUCCESS. Regenerated the three reference baselines (survey /
 benchmark / kinska) under the new default. Also decoupled
 tests/test_build_portfolio.py from the recipe name (asserts the "default" alias,
 not a hardcoded name) so future adoptions touch only RECIPES.
+
+## 2026-06-20 — never-regress round trip + ltl2tgba size guard
+
+LANDED. New brick `aut2ltl/memo/` (`Memo`: transparent per-instance WeakKeyDict
+cache, share-on-hit, identity-on-results; pushed). Recipe `roundtrip_best` =
+`best_of([Memo(C), Roundtrip(Memo(C))])`, one shared Memo, registered `--use
+roundtrip_best` over cakedsdet (naive `roundtrip` kept for A/B).
+
+Guard: ltl2tgba dies on exp-flat formulas; the round trip fed huge SEEDs back in
+mid-construction (real inputs tiny, so never hit before). `Language._base` now
+gates the formula-translate via `_guard_translation` on unfolded(flat)-tree /
+temporal-op knobs (env-seeded, tree 100 / temporal 32, 0=off; tree measured
+capped at limit+1 since tree_node_count saturates), raising
+`UntranslatableLanguage` (unchecked) before the call. `Roundtrip` catches it on
+the relabel -> decline (best_of keeps plain); `__main__` catches the escapee
+(e.g. user input over budget) -> declined bottom carrying the limit, prints like
+a decline, exit 1.
+
+Bug it fixed: at no guard, exp seeds -> false NOT_LTL / timeout / crash (7+9+1
+across genaut/bench/kinska). Tuned 50->100 after 50 erased sound wins.
+
+Bound=100 vs reference, roundtrip_best, 0 regressions ALL corpora: core +0%,
+kinska +0% (seeds>100, parked = syntactic-decomp room), bench -14.7% DAG / tree
+-94.5%, genaut -85.5% DAG / tree 1e32->9e8. Motivator aut_33300 seed 31 tree /
+4 temporal -> 5 (collapses at any bound>=31/4). Audit CLEAN, survey SUCCESS.
+5 commits on master, NOT pushed (memo 3 commits pushed earlier).
