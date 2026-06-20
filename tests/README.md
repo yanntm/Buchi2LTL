@@ -20,7 +20,7 @@ file is just the index.
 
 ## Gate before committing engine changes
 
-    python3 tests/bls/test_kr_r4_audit.py     # must report CLEAN
+    python3 -m tests.probes.bls.test_kr_r4_audit     # must report CLEAN
     python3 tests/survey.py                  # must end SUCCESS (no verified non-equiv)
 
 ## Survey & sweeps (end-to-end data collection)
