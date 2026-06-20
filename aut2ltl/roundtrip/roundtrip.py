@@ -8,7 +8,7 @@ child `labeler` Translator it applies on both ends.
 
 from typing import TYPE_CHECKING
 
-from aut2ltl.language import Language
+from aut2ltl.language import Language, UntranslatableLanguage
 from aut2ltl.result import LTLResult
 
 if TYPE_CHECKING:
@@ -41,8 +41,14 @@ class Roundtrip:
             return res
 
         # RE-DESCRIBE + RELABEL: rebuild the Language from the seed formula, label it
-        # again, fold that in. A NOK relabel bails with its reason intact.
-        relabel = self._labeler(Language.of_ltl(seed.formula))
+        # again, fold that in. A NOK relabel bails with its reason intact. If the seed
+        # is too large for ltl2tgba — the floor raises `UntranslatableLanguage` rather
+        # than blow Spot up — the reshape is simply unavailable: DECLINE (the sound
+        # bottom), so an outer `best_of` keeps the plain arm. Never a wrong answer.
+        try:
+            relabel = self._labeler(Language.of_ltl(seed.formula))
+        except UntranslatableLanguage:
+            return LTLResult.decline()
         res.credit(relabel)
         if res.nok:
             return res
