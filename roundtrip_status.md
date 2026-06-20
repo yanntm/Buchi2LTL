@@ -369,6 +369,52 @@ LTL (witness), and the smallest carrier of both the hardness and the non-definab
 (the peeled kernel). A candidate spine for a second paper, distinct from the
 size-reconstruction one.
 
+## Approximation as abstract interpretation — the third pillar
+
+The over/under-approximation bracket is far wider than non-LTL cleanup: it makes aut2ltl
+an **abstract-interpreter of ω-regular languages into LTL**. Every move so far has been
+language-*preserving* (a homomorphism); approximation is language-*inclusion*-preserving
+(lax): `B ⊆ L ⊆ A`. And over/under are not separate knobs — they are the two **adjoints
+of a Galois connection** between ω-regular and the LTL-definable sublattice (a Boolean
+subalgebra, closed under ∩/∪/complement): `A` the upper adjoint (the "LTL hull"), `B`
+the lower (the "LTL interior"), `[B, A]` the abstract element. The equivalence-preserving
+rewrite algebra thus gains a **lax / adjoint layer**: the homomorphisms compute exact
+reconstruction, the adjoints compute sound abstraction — one backbone, two regimes.
+
+**Interpolant-shaped, with exactness as a dial.** A small over-approximation `A ⊇ L`,
+over the same AP vocabulary, kept minimal by our size objective, *is* a temporal
+interpolant / abstraction lemma (and the smallest LTL `A` with `L ⊆ A` and `A ∩ Bad = ∅`
+is one in the literal sense). The move is to stop fixing exactness: `best_of` today
+optimizes **size at fixed (exact) precision**; adding an **exactness axis** makes the
+objective "smallest LTL within a tolerance, in a chosen direction" — the **precision
+knob** of the abstraction. The two-sided bracket are the `ε = anything` extremes;
+everything between trades tightness for compactness, which is exactly what a CEGAR-style
+consumer wants — a coarse-but-small over-approximation, refined only if it proves too
+coarse.
+
+**Structure-guided refinement with a principled stop.** Classic CEGAR refines by
+guessing predicates from a spurious counterexample; here refinement has a canonical
+direction — **peel one more kernel layer exactly**, tightening `A` toward `L`. The
+bracket narrows monotonically until it either closes (the property was LTL and is now
+reconstructed) or stabilizes on the irreducible counting kernel — at which point the
+**counting witness** proves no LTL abstraction can ever close it. Termination of the
+abstraction-refinement *is* the non-definability certificate: the same kernel once more.
+That is something predicate abstraction cannot offer — a principled stop *with a proof*.
+
+**Fan-out.** A small over-approximation is a sound LTL **rejection monitor for a
+necessary condition** of a complex/non-LTL property (cheap runtime checking of "at least
+this must hold"); a small under-approximation is a sound **synthesis target** or a
+strengthening lemma (a controller for `B` satisfies `L`); the dial itself is a
+**specification compressor** — "the 10-symbol LTL closest to this 200-node exact one,"
+lossy on purpose where the exact form is too big to read. Exact reconstruction is the
+`ε = 0` corner of a much larger, more useful surface.
+
+The wide statement: aut2ltl is not only an exact automaton→LTL reconstructor; it is an
+**abstract-interpreter of ω-regular into LTL**, with exactness as one extreme of a
+size↔precision dial, producing interpolants, monitors, synthesis targets, and lossy
+compressions — the algebra absorbing it as a lax adjoint layer over the homomorphism
+layer. A third pillar alongside reconstruction and the definability atlas.
+
 ## Concrete next steps
 
 1. **Validate the floor patch.** Run `tests/bls/test_kr_r4_audit.py` (must be CLEAN)
