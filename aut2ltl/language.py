@@ -46,6 +46,17 @@ import spot
 
 from aut2ltl.options import OptionSpec
 
+
+class UntranslatableLanguage(Exception):
+    """A formula too large to hand ltl2tgba safely — its unfolded (flat) size or
+    temporal-operator count exceeds the configured bound (`TRANSLATE_TREE_LIMIT` /
+    `TRANSLATE_TEMPORAL_LIMIT`). Spot's `translate` has no graceful failure on an
+    exp-sized formula, so the floor REFUSES rather than dying. Unchecked, in the
+    Java-`RuntimeException` sense: most call sites trust and never catch it; only
+    the round trip — which deliberately re-translates a derived formula — catches
+    it and DECLINES, and `main` is a last-resort net."""
+
+
 # kr's census is acutely state-count sensitive, so the decomposition wants a
 # state-minimal form; SAT minimization is state-optimal but exponential, so it is
 # gated to small automata (our domain — explicit 2^|AP| letters, few states).
@@ -85,7 +96,27 @@ CACHE_SIZE = OptionSpec(
     "0 disables interning",
     env="AUT2LTL_LANG_CACHE_SIZE")
 
-LANGUAGE_OPTIONS = [SAT_MIN_STATES, CLEAN_LEVEL, CACHE_SIZE]
+# Bound on what we hand ltl2tgba (`formula.translate()` in `_base`). Spot's
+# translate has no graceful failure on an exponentially large formula — it blows
+# up — so we refuse one whose unfolded (flat) size or temporal-operator count is
+# over budget, raising `UntranslatableLanguage` BEFORE the call. Only a
+# re-presentation (the round trip) ever feeds a formula this large here; real
+# inputs are tiny and never trip it. 0 disables a bound. (Bucket 3, like
+# SAT_MIN_STATES: a process-wide gate, env-read; the OptionSpec is discoverability.)
+_TRANSLATE_TREE_LIMIT = int(os.environ.get("KR_TRANSLATE_TREE_LIMIT", "100"))
+_TRANSLATE_TEMPORAL_LIMIT = int(os.environ.get("KR_TRANSLATE_TEMPORAL_LIMIT", "32"))
+
+TRANSLATE_TREE_LIMIT = OptionSpec(
+    "language.translate_tree_limit", 100,
+    "refuse ltl2tgba on a formula whose unfolded (flat) size exceeds this; 0 disables",
+    env="KR_TRANSLATE_TREE_LIMIT")
+TRANSLATE_TEMPORAL_LIMIT = OptionSpec(
+    "language.translate_temporal_limit", 32,
+    "refuse ltl2tgba on a formula whose temporal-operator count exceeds this; 0 disables",
+    env="KR_TRANSLATE_TEMPORAL_LIMIT")
+
+LANGUAGE_OPTIONS = [SAT_MIN_STATES, CLEAN_LEVEL, CACHE_SIZE,
+                    TRANSLATE_TREE_LIMIT, TRANSLATE_TEMPORAL_LIMIT]
 
 
 def _clean(aut: "spot.twa_graph") -> "spot.twa_graph":
@@ -95,6 +126,23 @@ def _clean(aut: "spot.twa_graph") -> "spot.twa_graph":
     a = spot.postprocess(aut, "generic", _CLEAN_LEVEL, "any")
     a.remove_unused_ap()
     return a
+
+
+def _guard_translation(f: "spot.formula") -> None:
+    """Refuse to hand ltl2tgba a formula too large to translate safely — raise
+    `UntranslatableLanguage` BEFORE the call. The temporal-operator count walks the
+    DAG (cheap); the unfolded (flat) size is measured with a CAP so we never unfold
+    an exp tree merely to reject it — `tree_node_count` SATURATES at its `limit`, so
+    we cap at limit+1 and test `> limit` to catch strict overflow. 0 disables a
+    bound. The metrics import is deferred to keep the floor import-acyclic."""
+    from aut2ltl.ltl.metrics import temporal_node_count, tree_node_count
+    if _TRANSLATE_TEMPORAL_LIMIT and temporal_node_count(f) > _TRANSLATE_TEMPORAL_LIMIT:
+        raise UntranslatableLanguage(
+            f"temporal-operator count over budget (> {_TRANSLATE_TEMPORAL_LIMIT})")
+    if _TRANSLATE_TREE_LIMIT and \
+            tree_node_count(f, limit=_TRANSLATE_TREE_LIMIT + 1) > _TRANSLATE_TREE_LIMIT:
+        raise UntranslatableLanguage(
+            f"unfolded (flat) size over budget (> {_TRANSLATE_TREE_LIMIT})")
 
 
 # The intern table: literal-arg key -> shared Language. Bounded LRU (insertion
@@ -176,11 +224,16 @@ class Language:
     def _base(self) -> "spot.twa_graph":
         """The source automaton — the HOA as given, or `formula.translate()` —
         after a language-preserving `_clean` (state purge, redundant-acc-set merge,
-        unused-AP drop). Cleaned once, lazily, then cached."""
+        unused-AP drop). Cleaned once, lazily, then cached. Translating a formula is
+        gated by `_guard_translation`: an over-budget formula raises
+        `UntranslatableLanguage` rather than blowing ltl2tgba up."""
         a = self._cache.get("base")
         if a is None:
-            raw = (self._source_aut if self._source_aut is not None
-                   else self._source_formula.translate())
+            if self._source_aut is not None:
+                raw = self._source_aut
+            else:
+                _guard_translation(self._source_formula)
+                raw = self._source_formula.translate()
             a = _clean(raw)
             self._cache["base"] = a
         return a
