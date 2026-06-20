@@ -17,12 +17,8 @@ Run from project root:
 """
 
 import argparse
-import sys
 import time
 from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
@@ -32,7 +28,6 @@ from aut2ltl.bls.reachability import reconstruct_ltl_paper_style
 # reconstruct now returns the spot.formula DAG itself (no final str), so this
 # tool measures the REAL pipeline output — the former local re-implementation
 # of the Muller-DNF assembly is gone.
-
 
 def dag_stats(f: "spot.formula") -> dict:
     """Traverse the formula sharing-aware (seen-set on node ids)."""
@@ -53,7 +48,6 @@ def dag_stats(f: "spot.formula") -> dict:
             stack.append(child)
     return {"unique_nodes": n_unique, "kinds": kinds}
 
-
 def tree_size(f: "spot.formula", limit: int = 50_000_000) -> int:
     """Unfolded (tree) node count, memoized per shared node."""
     memo = {}
@@ -71,7 +65,6 @@ def tree_size(f: "spot.formula", limit: int = 50_000_000) -> int:
         return total
 
     return rec(f)
-
 
 def main():
     parser = argparse.ArgumentParser(description="DAG vs string measurement of the assembled paper-style formula.")
@@ -121,7 +114,6 @@ def main():
         same = (reparsed == res_f)
         print(f"formula written to        : {out_path} ({out_path.stat().st_size} bytes; "
               f"parse-back == built object: {same})")
-
 
 if __name__ == "__main__":
     main()

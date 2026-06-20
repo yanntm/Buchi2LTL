@@ -15,10 +15,6 @@ Run from project root:
 """
 
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
@@ -66,14 +62,12 @@ CASES = [
 
 MUST_NOT_CHANGE = {"a | X(a & b)", "a & F(!a & b)", "a & X(!a)"}
 
-
 def equiv(f: "spot.formula", g: "spot.formula") -> bool:
     try:
         return spot.are_equivalent(f, g)
     except AttributeError:
         a, b = f.translate(), g.translate()
         return spot.contains(a, b) and spot.contains(b, a)
-
 
 def main() -> int:
     failures = 0
@@ -99,7 +93,6 @@ def main() -> int:
     print(f"\n{'CLEAN' if failures == 0 else f'{failures} FAILURE(S)'} "
           f"({len(CASES)} cases)")
     return 1 if failures else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

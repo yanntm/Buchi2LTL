@@ -7,9 +7,6 @@ from the result formula — there is no score field on LTLResult.
     python3 tests/test_best_of.py
 """
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import spot
 
@@ -19,17 +16,14 @@ from aut2ltl.ltl.metrics import dag_node_count
 
 _fail = []
 
-
 def check(cond: bool, msg: str) -> None:
     print(("ok  " if cond else "FAIL") + " : " + msg)
     if not cond:
         _fail.append(msg)
 
-
 # A stage is Language -> LTLResult; here the input is ignored.
 def const(r: LTLResult):
     return lambda _lang: r
-
 
 SMALL = spot.formula("a")            # dag 1
 BIG = spot.formula("a & b")          # dag 3 (And, a, b)

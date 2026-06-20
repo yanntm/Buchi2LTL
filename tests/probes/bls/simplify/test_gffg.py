@@ -3,8 +3,6 @@
     FG α ∨ GF β → FG(α|¬β) ∨ GF β   (dual)
 Every firing Spot-verified equivalent; must-not-fire guards included."""
 import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 import spot
 from aut2ltl.ltl.simplify import fold_simplify, reset_caches
 

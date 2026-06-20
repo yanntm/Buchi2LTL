@@ -16,21 +16,16 @@ Bounded: each formula is a tiny automaton; the whole sweep is a few seconds.
 from __future__ import annotations
 
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot
 
 from aut2ltl.heur.fuse2 import fuse2
 from tests.fixtures.f2_successes import F2_SUCCESS
 
-
 def _self_loop_only(aut: "spot.twa_graph") -> bool:
     """True iff every SCC of `aut` is a single state (only cycles are self-loops)."""
     si = spot.scc_info(aut)
     return all(len(list(si.states_of(s))) == 1 for s in range(si.scc_count()))
-
 
 def main() -> int:
     gate_violation = []
@@ -62,7 +57,6 @@ def main() -> int:
     ok = not gate_violation
     print("SUCCESS" if ok else "FAILURE")
     return 0 if ok else 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

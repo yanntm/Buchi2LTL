@@ -7,13 +7,8 @@ build offers (re-run after a spot upgrade). Self-contained (≤15s):
 
     python3 tests/language/probe_spot_api.py
 """
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
-
 
 def main() -> int:
     f = spot.formula("G(a -> X b)")
@@ -39,7 +34,6 @@ def main() -> int:
     print("  two translate() are same object:", a is a2)
     print("  to_str('hoa') stable across translate:", a.to_str("hoa") == a2.to_str("hoa"))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

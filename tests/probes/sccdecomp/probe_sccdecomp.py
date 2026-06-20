@@ -8,10 +8,7 @@ spot equivalence check. Single input, one formula per call (≤15s; kr calls GAP
     python3 tests/sccdecomp/probe_sccdecomp.py 'Ga | Gb'
 """
 import sys
-from pathlib import Path
 from typing import List
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
 
@@ -24,12 +21,10 @@ from aut2ltl.bls.hierarchy_class import make_hierarchy_class  # noqa: E402
 
 _STR = as_translator(make_hierarchy_class())
 
-
 def _leaf(lang: "Language") -> "LTLResult":
     """Λ = first(sl(Λ), kr-cascade)."""
     r = Daisy(_leaf)(lang)
     return r if not r.declined else _STR(lang)
-
 
 def main(argv: List[str]) -> int:
     if len(argv) != 2:
@@ -51,7 +46,6 @@ def main(argv: List[str]) -> int:
     eq = spot.are_equivalent(spot.translate(f), spot.translate(g))
     print(f"EQUIV   : {eq}")
     return 0 if eq else 1
-
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))

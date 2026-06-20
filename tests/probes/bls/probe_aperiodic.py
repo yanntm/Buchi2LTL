@@ -19,15 +19,11 @@ import sys
 from pathlib import Path
 from typing import List
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
-
 import spot  # noqa: E402
 
 from aut2ltl.bls.extract import extract_generators  # noqa: E402
 from aut2ltl.bls.gap.export import _format_transformation  # noqa: E402
 from aut2ltl.bls.gap.runner import run_gap_script  # noqa: E402
-
 
 def _aperiodicity_script(gens: List[List[int]]) -> str:
     body = ",\n    ".join(_format_transformation(g) for g in gens)
@@ -39,7 +35,6 @@ def _aperiodicity_script(gens: List[List[int]]) -> str:
         'Print("APERIODIC: ", IsAperiodicSemigroup(T), "\\n");\n'
         'QUIT;\n'
     )
-
 
 def probe(path: str) -> None:
     aut = list(spot.automata(path))[0]
@@ -56,12 +51,10 @@ def probe(path: str) -> None:
     print(f"  {Path(path).name:34.34s} states={aut.num_states():>2} "
           f"|T|={size:>4} aperiodic={aper:<5} -> {ltl}")
 
-
 def main(paths: List[str]) -> int:
     for p in paths:
         probe(p)
     return 0
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -11,17 +11,12 @@ equivalence. Single formula per call (≤15s):
     python3 tests/language/probe_cleanup.py 'a U G(p -> X q)'
 """
 import sys
-from pathlib import Path
 from typing import List, Optional
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
 
-
 def _aps(aut: "spot.twa_graph") -> List[str]:
     return sorted(str(x) for x in aut.ap())
-
 
 def _terminal_scc_state(aut: "spot.twa_graph") -> Optional[int]:
     si = spot.scc_info(aut)
@@ -33,10 +28,8 @@ def _terminal_scc_state(aut: "spot.twa_graph") -> Optional[int]:
             return states[0]
     return None
 
-
 def _show(tag: str, aut: "spot.twa_graph") -> None:
     print(f"  {tag:18} states={aut.num_states():2}  aps={_aps(aut)}  acc={aut.acc()}")
-
 
 def main(argv: List[str]) -> int:
     if len(argv) != 2:
@@ -74,7 +67,6 @@ def main(argv: List[str]) -> int:
     print(f"  => low alone removes unused APs: {not dropped}")
     print(f"  EQUIV(sub, clean): {eq}")
     return 0 if eq else 1
-
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))

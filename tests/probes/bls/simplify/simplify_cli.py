@@ -12,16 +12,11 @@ Run from project root:
 """
 
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
 from aut2ltl.ltl.simplify import simplify
 from aut2ltl.ltl.builders import _simp_f
-
 
 def main() -> int:
     if len(sys.argv) < 2:
@@ -35,7 +30,6 @@ def main() -> int:
     print(f"_simp_f (full) : {pipe}")
     print(f"equivalent     : {spot.are_equivalent(f, pipe)}")
     return 0
-
 
 if __name__ == "__main__":
     main()

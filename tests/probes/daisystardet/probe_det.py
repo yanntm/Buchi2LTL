@@ -23,8 +23,6 @@ and the Spot equivalence verdict with a containment witness each way.
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 import spot                                                  # noqa: E402
 import buddy                                                 # noqa: E402
 
@@ -35,14 +33,11 @@ from aut2ltl.daisystardet.shape import init_scc_states, reroot  # noqa: E402
 
 _F = spot.formula
 
-
 def _or(fs):
     return _F.Or(fs) if fs else _F.ff()
 
-
 def _and(fs):
     return _F.And(fs) if fs else _F.tt()
-
 
 def main(arg: str) -> None:
     lang = Language.of(spot.automaton(arg)) if os.path.exists(arg) else Language.of_ltl(arg)
@@ -117,7 +112,6 @@ def main(arg: str) -> None:
             print(f"  too tight (input\\cand): {tight}")
     except Exception as e:
         print(f"  (verdict failed: {e})")
-
 
 if __name__ == "__main__":
     main(sys.argv[1])

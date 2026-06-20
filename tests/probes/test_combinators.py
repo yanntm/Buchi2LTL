@@ -7,9 +7,6 @@ engine. Decorators wrap the result formula with a unary op so order is observabl
     python3 tests/test_combinators.py
 """
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import spot
 
@@ -18,17 +15,14 @@ from aut2ltl.compose import compose, identity
 
 _fail = []
 
-
 def check(cond: bool, msg: str) -> None:
     print(("ok  " if cond else "FAIL") + " : " + msg)
     if not cond:
         _fail.append(msg)
 
-
 def leaf(_lang):
     """A trivial Translator: always OK with formula `a` (a fresh result each call)."""
     return LTLResult.success(spot.formula("a"), "leaf")
-
 
 def wrap(op: str):
     """A Decorator: wrap the child result's formula with unary `op` (so composition
@@ -41,14 +35,11 @@ def wrap(op: str):
         return translator
     return deco
 
-
 G, F, X = wrap("G"), wrap("F"), wrap("X")
-
 
 def form(t):
     """Run translator `t` and return its formula."""
     return t(None).formula
-
 
 # --- identity ----------------------------------------------------------------
 check(identity(leaf) is leaf, "identity returns its argument unchanged")

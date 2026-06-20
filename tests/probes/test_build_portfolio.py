@@ -9,9 +9,6 @@ runs the `muller` leaf on a very-weak formula. Self-bound, no Spot/GAP waits.
     python3 tests/test_build_portfolio.py
 """
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from aut2ltl.options import Options
 from aut2ltl.bls.options import KR_OPTIONS
@@ -21,12 +18,10 @@ from aut2ltl.language import Language
 _opts = Options.from_specs(KR_OPTIONS)
 _fail = []
 
-
 def check(cond: bool, msg: str) -> None:
     print(("ok  " if cond else "FAIL") + " : " + msg)
     if not cond:
         _fail.append(msg)
-
 
 # --- default assembly (techniques=None) resolves to the `default` alias, whatever
 # recipe that currently points at (the single source of truth is RECIPES["default"];

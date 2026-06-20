@@ -18,13 +18,10 @@ import io                                  # noqa: E402
 import sys                                 # noqa: E402
 from typing import List, Tuple            # noqa: E402
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from tests.survey_formulas import SURVEY_FORMULAS   # noqa: E402
 from aut2ltl.options import Options                 # noqa: E402
 from aut2ltl.portfolio.build import build_portfolio  # noqa: E402
 from aut2ltl.language import Language               # noqa: E402
-
 
 def main() -> None:
     translator = build_portfolio(Options(), ["best_daisy2"])
@@ -48,7 +45,6 @@ def main() -> None:
         for line in tr.splitlines():
             if "[daisy2]" in line:
                 print("  " + line)
-
 
 if __name__ == "__main__":
     main()

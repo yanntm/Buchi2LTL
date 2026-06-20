@@ -10,15 +10,11 @@ on the input's tgba, reporting num_sets and language preservation. (≤15s)
     python3 tests/sccdecomp/probe_marked_form.py 'Ga | Gb'
 """
 import sys
-from pathlib import Path
 from typing import List
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
 
 from aut2ltl.language import Language  # noqa: E402
-
 
 def _materialize(aut: "spot.twa_graph") -> "spot.twa_graph":
     """Mark every edge with a fresh Büchi set 0; acceptance becomes Inf(0).
@@ -35,11 +31,9 @@ def _materialize(aut: "spot.twa_graph") -> "spot.twa_graph":
     out.set_init_state(aut.get_init_state_number())
     return out
 
-
 def _show(tag: str, a: "spot.twa_graph", base: "spot.twa_graph") -> None:
     print(f"  {tag:13} states={a.num_states()} sets={a.num_sets()} acc={a.acc()}"
           f"  EQUIV={spot.are_equivalent(a, base)}")
-
 
 def main(argv: List[str]) -> int:
     if len(argv) != 2:
@@ -52,7 +46,6 @@ def main(argv: List[str]) -> int:
     _show("Buchi", spot.postprocess(a, "Buchi"), a)
     _show("materialized", _materialize(a), a)
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))

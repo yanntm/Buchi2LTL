@@ -6,9 +6,6 @@ spot.formula DAGs in, no engine).
     python3 tests/test_ltl_metrics.py
 """
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import spot
 
@@ -17,12 +14,10 @@ from aut2ltl.ltl.printers import format_gated, to_dot
 
 _fail = []
 
-
 def check(cond: bool, msg: str) -> None:
     print(("ok  " if cond else "FAIL") + " : " + msg)
     if not cond:
         _fail.append(msg)
-
 
 # A small formula with sharing: spot hash-conses `a`, `X a`, etc.
 f = spot.formula("(X a) & (X a) | a")  # shared `X a`, shared `a`

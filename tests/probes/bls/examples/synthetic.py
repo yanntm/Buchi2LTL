@@ -11,15 +11,10 @@ Run:
     ./bls/examples/synthetic.py
 """
 
-import sys
-from pathlib import Path
-
 # Make sure we can import the kr package when run directly
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from aut2ltl.bls.gap import generate_gap_script, check_gap_available, decompose_gens
 from aut2ltl.bls.cascade import Cascade, LevelInfo
-
 
 def main():
     # A very small transformation semigroup: the symmetric group on 3 points
@@ -61,7 +56,6 @@ def main():
             state_to_config={0:(1,1), 1:(2,1), 2:(3,2)},
         )
         print("Returning a synthetic Cascade for illustration:", dummy)
-
 
 if __name__ == "__main__":
     main()

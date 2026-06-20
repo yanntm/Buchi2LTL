@@ -12,8 +12,6 @@ each direction when the candidate is wrong, so we can see *why*.
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 import spot                                                         # noqa: E402
 
 from aut2ltl.language import Language                               # noqa: E402
@@ -22,7 +20,6 @@ from aut2ltl.daisy.daisy import Daisy                              # noqa: E402
 from aut2ltl.daisystar.daisystar import Daisystar, build_leave     # noqa: E402
 from aut2ltl.daisystar.shape import star_partition, reroot         # noqa: E402
 from aut2ltl.simplify_ltl import Simplify                          # noqa: E402
-
 
 def main(arg: str) -> None:
     # An existing path is loaded as a HOA automaton; otherwise arg is an LTL
@@ -77,7 +74,6 @@ def main(arg: str) -> None:
             print(f"  input \\ cand (too tight) : {miss}")
         except Exception as e:
             print(f"  (witness probe failed: {e})")
-
 
 if __name__ == "__main__":
     main(sys.argv[1])

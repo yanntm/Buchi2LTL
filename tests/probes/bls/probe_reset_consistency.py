@@ -24,20 +24,14 @@ Run from project root:
 """
 
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
 from aut2ltl.bls import decompose_aut
 
-
 def letter_str(casc, li):
     val = casc.letter_valuations[li]
     return "&".join(("" if v else "!") + k for k, v in sorted(val.items()))
-
 
 def classify(action: dict) -> str:
     """action: {from_val: to_val} observed. Classify as identity/constant/OTHER."""
@@ -46,7 +40,6 @@ def classify(action: dict) -> str:
     if len(set(action.values())) == 1:
         return f"reset->{next(iter(action.values()))}"
     return "OTHER " + str(dict(sorted(action.items())))
-
 
 def probe(fs: str) -> bool:
     f = spot.formula(fs)
@@ -82,7 +75,6 @@ def probe(fs: str) -> bool:
                 ok_all = False
     return ok_all
 
-
 def main():
     cases = sys.argv[1:] or [
         "Fa", "GFa", "a U b", "Fa | Gb", "Fa & Gb", "Ga | Fb",
@@ -99,7 +91,6 @@ def main():
     print("=== SUMMARY (lower-context convention, the one the operators use) ===")
     for fs, ok in summary.items():
         print(f"  {fs:15s}: {'CONSISTENT' if ok else 'VIOLATED' if ok is False else 'ERROR'}")
-
 
 if __name__ == "__main__":
     main()

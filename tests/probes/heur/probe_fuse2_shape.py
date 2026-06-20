@@ -3,13 +3,9 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot
 from aut2ltl.heur.fuse2 import fuse2
-
 
 def _sccs(aut: "spot.twa_graph") -> list:
     si = spot.scc_info(aut)
@@ -17,7 +13,6 @@ def _sccs(aut: "spot.twa_graph") -> list:
         (s, sorted(si.states_of(s)), "acc" if si.is_accepting_scc(s) else "non")
         for s in range(si.scc_count())
     ]
-
 
 def main() -> int:
     f = sys.argv[1] if len(sys.argv) > 1 else "F(p2 & Xp1)"
@@ -30,7 +25,6 @@ def main() -> int:
         return 0
     print(f"AFTER   states={out.num_states()} sccs={_sccs(out)}")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

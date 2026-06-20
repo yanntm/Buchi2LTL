@@ -1,10 +1,6 @@
 """Rule 4 left-arm cofactoring: φ U ψ ≡ φ' U ψ, φ' = restrict(φ, ¬ψ).
 Every firing must be a language equivalence AND a strict shrink."""
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 

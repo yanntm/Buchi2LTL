@@ -15,10 +15,6 @@ Spot only (no GAP), small inputs. Run from project root:
 """
 
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 from aut2ltl.language import Language
@@ -28,10 +24,8 @@ CASES = ["GFa", "FGa", "Ga", "GFa & FGb", "Fa", "a U b", "G(a -> X b)"]
 
 REPRS = ["tgba", "det_parity_sbacc", "det_generic", "det_generic_minimal"]
 
-
 def _equiv(a: "spot.twa_graph", f: "spot.formula") -> bool:
     return spot.are_equivalent(a, f.translate())
-
 
 def test_ctors_and_representations() -> None:
     for s in CASES:
@@ -41,7 +35,6 @@ def test_ctors_and_representations() -> None:
                 a = getattr(lang, name)()
                 assert a.num_states() >= 1, (s, name)
                 assert _equiv(a, f), f"{s}: {name} not language-equivalent"
-
 
 def test_determinism_and_acceptance() -> None:
     for s in CASES:
@@ -53,14 +46,12 @@ def test_determinism_and_acceptance() -> None:
         assert lang.det_parity_sbacc().prop_state_acc().is_true(), \
             f"{s}: det_parity_sbacc not state-based"
 
-
 def test_caching() -> None:
     lang = Language.of_ltl("GFa")
     for name in REPRS:
         a1 = getattr(lang, name)()
         a2 = getattr(lang, name)()
         assert a1 is a2, f"{name} not cached"
-
 
 def main() -> int:
     tests = [
@@ -78,7 +69,6 @@ def main() -> int:
             print(f"FAIL  {t.__name__}: {e}")
     print(f"\n{'ALL PASS' if not failed else f'{failed} FAILED'} ({len(tests)} checks)")
     return 1 if failed else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

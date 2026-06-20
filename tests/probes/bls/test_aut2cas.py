@@ -11,10 +11,6 @@ GAP + Spot, small inputs (bounded). Run from project root:
     python3 tests/bls/test_aut2cas.py
 """
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 from aut2ltl.language import Language
@@ -22,10 +18,8 @@ from aut2ltl.bls.aut2cas import reconstruct
 
 CASES = ["GFa", "FGa"]
 
-
 def _equiv(g: "spot.formula", f: "spot.formula") -> bool:
     return spot.are_equivalent(g.translate(), f.translate())
-
 
 def test_reconstruct_from_language() -> None:
     for s in CASES:
@@ -35,14 +29,12 @@ def test_reconstruct_from_language() -> None:
         assert _equiv(r.formula, f), \
             f"{s}: reconstruct(Language) not equivalent; tech={r.technique_str()}"
 
-
 def test_of_and_of_ltl_agree() -> None:
     for s in CASES:
         f = spot.formula(s)
         r1 = reconstruct(Language.of_ltl(s))
         r2 = reconstruct(Language.of(f.translate()))
         assert _equiv(r1.formula, r2.formula), s
-
 
 def main() -> int:
     tests = [test_reconstruct_from_language, test_of_and_of_ltl_agree]
@@ -56,7 +48,6 @@ def main() -> int:
             print(f"FAIL  {t.__name__}: {e}")
     print(f"\n{'ALL PASS' if not failed else f'{failed} FAILED'} ({len(tests)} checks)")
     return 1 if failed else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

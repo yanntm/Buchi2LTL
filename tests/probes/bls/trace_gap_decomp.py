@@ -14,10 +14,6 @@ Usage:
 from __future__ import annotations
 
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot  # noqa: E402
 
@@ -25,7 +21,6 @@ from aut2ltl.bls.extract import extract_generators  # noqa: E402
 from aut2ltl.bls.gap.export import generate_gap_script  # noqa: E402
 from aut2ltl.bls.gap.runner import run_gap_script  # noqa: E402
 from aut2ltl.bls.gap.parse import parse_cascade_output  # noqa: E402
-
 
 def main(path: str) -> int:
     aut = list(spot.automata(path))[0]
@@ -52,7 +47,6 @@ def main(path: str) -> int:
         if hasattr(casc, attr):
             print(f"  {attr}: {getattr(casc, attr)}")
     return 0
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

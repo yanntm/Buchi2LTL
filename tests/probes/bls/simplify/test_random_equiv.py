@@ -17,22 +17,16 @@ Defaults: N=500 seed=42 n_aps=2 tree_size=15.
 
 import sys
 import time
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
 
 from aut2ltl.ltl.simplify import simplify
-
 
 def tree_size(f: "spot.formula") -> int:
     n = 1
     for c in f:
         n += tree_size(c)
     return n
-
 
 def main() -> int:
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 500
@@ -73,7 +67,6 @@ def main() -> int:
     print(f"  worst growth  : +{worst_growth} nodes")
     print(f"  equivalence   : {'ALL EQUIVALENT' if failures == 0 else f'{failures} FAILURE(S)'}")
     return 1 if failures else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

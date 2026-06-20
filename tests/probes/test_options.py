@@ -15,10 +15,6 @@ No spot, no GAP — pure, fast. Run from project root:
 """
 import os
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from aut2ltl.options import OptionSpec, Options
 
@@ -26,25 +22,21 @@ FLAG = OptionSpec("demo.flag", True, "a demo bool", env="DEMO_FLAG")
 LIMIT = OptionSpec("demo.limit", 30, "a demo int limit", env="DEMO_LIMIT")
 SPECS = [FLAG, LIMIT]
 
-
 def test_lazy_default() -> None:
     o = Options()                      # empty store == all defaults
     assert o.get(FLAG) is True
     assert o.get(LIMIT) == 30
     assert "demo.flag" not in o        # nothing stored
 
-
 def test_override_wins() -> None:
     o = Options({"demo.flag": False})
     assert o.get(FLAG) is False
     assert o.get(LIMIT) == 30          # still the spec default
 
-
 def test_bare_key_default() -> None:
     o = Options()
     assert o.get("unknown.key", 7) == 7
     assert o.get("unknown.key") is None
-
 
 def test_clone_is_independent() -> None:
     base = Options({"demo.flag": False})
@@ -53,7 +45,6 @@ def test_clone_is_independent() -> None:
     assert base.get(LIMIT) == 30       # parent unchanged
     base.set("demo.limit", 99)
     assert variant.get(LIMIT) == 5     # variant unaffected by later parent edits
-
 
 def test_from_specs_env_seeding() -> None:
     saved = {k: os.environ.get(k) for k in ("DEMO_FLAG", "DEMO_LIMIT")}
@@ -76,13 +67,11 @@ def test_from_specs_env_seeding() -> None:
             else:
                 os.environ[k] = v
 
-
 def test_effective_is_pure() -> None:
     o = Options({"demo.flag": False})
     eff = o.effective(SPECS)
     assert eff == {"demo.flag": False, "demo.limit": 30}
     assert o.as_dict() == {"demo.flag": False}   # not mutated by effective()
-
 
 def test_package_contracts_wellformed() -> None:
     """The declared per-package contracts import and are well-formed: dotted
@@ -108,7 +97,6 @@ def test_package_contracts_wellformed() -> None:
             DISPATCH_COBUCHI.default) == (True, True, True)
     assert DISPATCH_WEAK.default is False
 
-
 def main() -> int:
     tests = [
         test_lazy_default,
@@ -129,7 +117,6 @@ def main() -> int:
             print(f"FAIL  {t.__name__}: {e}")
     print(f"\n{'ALL PASS' if not failed else f'{failed} FAILED'} ({len(tests)} checks)")
     return 1 if failed else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

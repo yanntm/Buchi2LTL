@@ -12,11 +12,7 @@ No args (self-contained, ≤15s):
 
     python3 tests/language/probe_acc_merge.py
 """
-import sys
-from pathlib import Path
 from typing import List
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
 
@@ -48,14 +44,11 @@ State: 0
 --END--
 """
 
-
 def _aps(aut: "spot.twa_graph") -> List[str]:
     return sorted(str(x) for x in aut.ap())
 
-
 def _desc(aut: "spot.twa_graph") -> str:
     return f"states={aut.num_states()} sets={aut.num_sets()} aps={_aps(aut)} acc={aut.acc()}"
-
 
 def _case(tag: str, build) -> None:
     print(tag)
@@ -67,7 +60,6 @@ def _case(tag: str, build) -> None:
         print(f"  generic/{lvl:<6}/any {_desc(clean)}  EQUIV={eq}")
     print()
 
-
 def main() -> int:
     _case("REDUNDANT acc sets (both on every edge):",
           lambda: spot.automaton(_REDUNDANT_HOA))
@@ -76,7 +68,6 @@ def main() -> int:
     _case("STATE reduction (FG(!p|Xq) base):",
           lambda: spot.translate("F G(!p | X q)"))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

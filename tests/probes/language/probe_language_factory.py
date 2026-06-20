@@ -8,11 +8,7 @@ Self-contained (≤15s):
 
     python3 tests/language/probe_language_factory.py
 """
-import sys
-from pathlib import Path
 from typing import List
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
 
@@ -30,10 +26,8 @@ State: 0
 --END--
 """
 
-
 def _aps(aut: "spot.twa_graph") -> List[str]:
     return sorted(str(x) for x in aut.ap())
-
 
 def main() -> int:
     print("--- interning ---")
@@ -49,7 +43,6 @@ def main() -> int:
     print(f"  unused 'c' dropped:        {'c' not in _aps(base)}")
     print(f"  language preserved (EQUIV): {spot.are_equivalent(spot.automaton(_HOA), base)}")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

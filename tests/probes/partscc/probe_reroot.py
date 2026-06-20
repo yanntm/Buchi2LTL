@@ -9,16 +9,12 @@ Language.of, and run PartScc on THAT. Single input, one formula per call (≤15s
     python3 tests/partscc/probe_reroot.py 'G((!p & X p) | (p & X !p))'
 """
 import sys
-from pathlib import Path
 from typing import List, Optional
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import spot  # noqa: E402
 
 from aut2ltl.language import Language  # noqa: E402
 from aut2ltl.partscc import PartScc  # noqa: E402
-
 
 def _terminal_scc_state(aut: "spot.twa_graph") -> Optional[int]:
     """One state of a terminal (escape-free) SCC of size >= 2, or None."""
@@ -32,13 +28,11 @@ def _terminal_scc_state(aut: "spot.twa_graph") -> Optional[int]:
             return states[0]
     return None
 
-
 def _reroot(aut: "spot.twa_graph", state: int) -> "spot.twa_graph":
     sub = spot.automaton(aut.to_str("hoa"))
     sub.set_init_state(state)
     sub.purge_unreachable_states()
     return sub
-
 
 def main(argv: List[str]) -> int:
     if len(argv) != 2:
@@ -68,7 +62,6 @@ def main(argv: List[str]) -> int:
     eq = spot.are_equivalent(sub, spot.translate(g))
     print(f"EQUIV   : {eq}")
     return 0 if eq else 1
-
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))
