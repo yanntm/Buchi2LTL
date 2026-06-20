@@ -1478,3 +1478,59 @@ kinska +0% (seeds>100, parked = syntactic-decomp room), bench -14.7% DAG / tree
 -94.5%, genaut -85.5% DAG / tree 1e32->9e8. Motivator aut_33300 seed 31 tree /
 4 temporal -> 5 (collapses at any bound>=31/4). Audit CLEAN, survey SUCCESS.
 5 commits on master, NOT pushed (memo 3 commits pushed earlier).
+
+## 2026-06-20 — tests/ restructure, part 1: probes extracted + the import architecture
+
+Began a large tests/ restructure separating three tangled concerns: the survey
+HARNESS, the module PROBES, and the sample DATA. Part 1 extracted the probes —
+and turned out to hinge on a question the plan never anticipated: how the test
+code finds aut2ltl.
+
+LANDED (one bulk move + follow-ups):
+  * Moved the per-module probe folders (bls, daisy2, daisychain, daisystar,
+    daisystardet, heur, inv, language, partscc, sccdecomp, the smoke scratchpad)
+    and the root-level test_*.py unit tests under a single tests/probes/ home.
+  * Decided the import architecture (the pivotal, unplanned piece):
+      - `pip install -e .` makes `import aut2ltl` resolve anywhere (editable =
+        dev mode = installed, same thing). setuptools gives a STRICT editable
+        finder (maps only aut2ltl*, does NOT leak `tests` onto sys.path).
+      - Probes are NEVER installed. They run as `python -m tests.probes.<...>`
+        from the repo root: cwd carries the live source (incl. undeclared
+        modules, no install friction) and sibling `tests.*` corpora resolve.
+      - Consequently DELETED every per-file `sys.path.insert(... parents[N] ...)`
+        bootstrap (~44 files) — the move had silently broken all the parents[N]
+        depths anyway. The convention replaces them. Documented in
+        tests/probes/README.md ("run with -m from the repo root").
+  * Modernized the gate (test_kr_r4_audit): drop the bootstrap, locate
+    reachability_operators.py via the module's own __file__ instead of a
+    PROJECT_ROOT path. Runs CLEAN under `python -m tests.probes.bls.test_kr_r4_audit`.
+
+CONSIDERED THEN DROPPED:
+  * Extracting survey's bounded-subprocess runner (run_build core) into a shared
+    survey/constrain_run.py for the probes' crash-isolation subprocesses. Moot
+    once the only probes using that pattern were retired (below); survey keeps
+    run_build to itself.
+
+RETIRED (probe rot, surfaced by actually running them under -m):
+  * test_kr_zoom — targeted removed internals (reconstruct_bls renamed
+    reconstruct; aut2ltl.bls.reachability._compute_good_muller_sets moved to
+    aut2ltl.bls.cascade).
+  * test_kr_basic, test_kr_reconstruct, trace_fin_semantics — algo-invention-era
+    scaffolding (hand-rolled subprocess crash-isolation + bootstrap, called
+    reconstruct_bls). Superseded by the survey harness (end-to-end equivalence
+    over corpora) + the standing gate audit. Retired with thanks.
+
+BORN (step 3 started early, out of order):
+  * survey/diff — the directional language-comparison tooling (ltl_diff +
+    diff_hoa) turned out to be reusable HARNESS tooling, not module probes, so
+    it left tests/probes/bls for a new top-level survey/ package, exportable as
+    a module path: `from survey.diff import diff_report, to_aut` (lazy PEP 562
+    re-export so running a submodule via -m doesn't trip runpy's double-import
+    warning). This plants survey/ (the aut2ltl evaluation harness, a client of
+    aut2ltl). Rename to aut2ltl_survey / pyproject wiring deferred.
+
+PLAN REORDER: do step 3 (survey/) BEFORE step 2 (samples/) — the harness infra
+(how it discovers/descends a folder, where it writes logs) dictates the shape of
+the samples/ and logs/ trees, not the other way round. READMEs come LAST, once
+stable; given how intense this refactor is, they will likely be rewritten from
+scratch rather than curated step by step.
