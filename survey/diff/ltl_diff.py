@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-bls/testing/ltl_diff.py
+survey/diff/ltl_diff.py
 
 Directional language comparison of two LTL formulas (or a formula vs an
 automaton), with witness words. Far more useful for debugging than a bare
@@ -12,21 +12,16 @@ are_equivalent boolean:
     difference, via spot.difference(X, Y).accepting_word().
 
 Usage:
-    python3 bls/testing/ltl_diff.py "GFa" "!a R (a | (!a & XFa))"
+    python3 -m survey.diff.ltl_diff "GFa" "!a R (a | (!a & XFa))"
 
-Library use (from other bls/testing scripts):
-    from ltl_diff import diff_report, to_aut
+Library use:
+    from survey.diff import diff_report, to_aut
     print(diff_report(aut_or_formula_A, aut_or_formula_B, "GT", "produced"))
 """
 
 import sys
-from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import spot
-
 
 def to_aut(x):
     """Accept an LTL string, spot.formula, or twa; return a Buchi twa."""
@@ -35,7 +30,6 @@ def to_aut(x):
     if isinstance(x, spot.formula):
         return x.translate("Buchi")
     return x
-
 
 def diff_report(a, b, name_a: str = "A", name_b: str = "B") -> str:
     """Compare languages of a and b; return a multi-line report with
@@ -64,7 +58,6 @@ def diff_report(a, b, name_a: str = "A", name_b: str = "B") -> str:
         lines.append(f"  witness in {name_b} \\ {name_a}: {w}")
     return "\n".join(lines)
 
-
 def main():
     if len(sys.argv) != 3:
         print(__doc__)
@@ -73,7 +66,6 @@ def main():
     print(f"A: {fa}")
     print(f"B: {fb}")
     print(diff_report(fa, fb, "A", "B"))
-
 
 if __name__ == "__main__":
     main()
