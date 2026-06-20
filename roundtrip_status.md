@@ -439,3 +439,134 @@ layer. A third pillar alongside reconstruction and the definability atlas.
 Experimental. Default unchanged. The `of_ltl` definability patch is the only change
 that touches a shared floor; it is committed but the gates have **not** been run on it
 yet (do that before relying on it).
+
+---
+
+# Appendix A — the abstraction menu, in depth
+
+Expansion of "Approximation as abstract interpretation." These are operators to
+*build*, not ones in the tree today; what exists is the soundness substrate (the
+algebra, faithful-or-declines). The one concrete contract change they all share:
+`LTLResult` gains a **direction tag** — `exact | over | under` — plus an optional
+tightness estimate, and `best_of` / `credit` must respect it (an `∧` of
+over-approximations is an over-approximation; an `∨` of under-approximations is an
+under-approximation; you may not credit a bound into a slot expecting exactness).
+Given that tag, each abstraction below is just a translator returning a *tagged bound*
+instead of an exact formula, and the algebra hosts it unchanged.
+
+## Alphabet projection — predicate abstraction at the word level (ship this first)
+
+Forget a subset of the atomic propositions. The over-approximation existentially
+projects (`∃` the hidden APs): "the observable behaviour, ignoring the signals we chose
+not to track"; the under-approximation universally projects (`∀`). This is textbook
+predicate abstraction lifted to ω-words, with a *clean* Galois adjoint pair (projection
+/ co-projection between the full- and sub-alphabet lattices). The win is large and
+immediate: reconstruct over `{req, grant}` instead of eight signals and the formula
+collapses, because most temporal tangle lives in the interaction of a few APs a reader
+does not care about. Headline use: take a complex spec **as a HOA**, `∃`-project onto
+the few signals of interest, reconstruct, and read off a small, sound,
+*over-approximating* LTL — "ignoring the internals, here is what the interface must do."
+Refinement is canonical: add one AP back. The first one to ship.
+
+## The aperiodic quotient — abstracting away *exactly* the non-LTL-ness (the keystone)
+
+Every ω-regular `L` has a **syntactic monoid**: words collapse into classes where
+`u ≡ v` iff interchangeable in every context (`∀ x,y: xuy ∈ L ⇔ xvy ∈ L`); the classes
+under concatenation form a finite monoid, the algebraic fingerprint of `L` — the same
+substrate the cascade is built on. The theorem that *is* this project: **`L` is
+LTL-definable iff its syntactic monoid is aperiodic** (counter-free) — iff it contains
+**no non-trivial group**. A group inside the monoid is an element `g` with period
+`p > 1` (`g, g², …, gᵖ = 1` cycling): the language can tell `gⁿ` apart by `n mod p` —
+it *counts*, the one thing LTL cannot do.
+
+Concretely: `L =` "an **even** number of `a`s before the first `b`, then anything." The
+letter `a` is a **toggle** flipping even↔odd, so the monoid carries a two-element group
+`{even, odd} ≅ ℤ/2`. *That group is the sole reason `L` is not LTL* — everything else is
+aperiodic; the parity counter is the lone obstruction.
+
+The abstraction is the canonical algebraic move: **quotient the monoid to kill the
+group.** Take the largest *aperiodic* quotient — the surjective morphism collapsing each
+group to a point (identify `g` with `g²` with `1`, destroying the period). Collapsing the
+`ℤ/2`, "even" and "odd" merge into one class: the abstracted monoid *cannot see parity*,
+is aperiodic, and so its language is LTL-definable. Round the acceptance *up* to whole
+collapsed classes → the **over-approximation** "**some** number of `a`s then `b`" (both
+parities admitted, `⊇ L`); round *down* → the **under-approximation**. The thing
+collapsed — the toggle group — is **precisely the counting witness**: extract the
+subgroup and it is your witness; collapse the subgroup and it is your abstraction. One
+object, residual vs. production.
+
+And it is mechanizable from what `bls` already computes. **Krohn–Rhodes separates the
+group factors from the aperiodic ones** — that is the holonomy decomposition. LTL ⇔ every
+cascade factor aperiodic. Today, meeting a group factor, `bls` concludes NOT_LTL and
+stops; the abstraction is one step further — **collapse each group factor to its
+aperiodic image** (group → reset), rebuild the cascade, and out comes a sound LTL formula
+approximating `L`, the rounding choosing over vs. under, the collapsed factor returned as
+the witness. So the most principled LTL abstraction is "drop the group factors of the
+Krohn–Rhodes cascade we already build," and it abstracts away *only* the non-LTL-ness —
+nothing aperiodic is touched. No other abstraction on the menu has that alignment with
+the boundary.
+
+## Acceptance-class weakening — abstract into the tool's sweet spot
+
+The chain `Ga ⟹ FGa ⟹ GFa` (always → eventually-always → infinitely-often) orders the
+strengths: `Ga` *under*-approximates `GFa`, `GFa` *over*-approximates `Ga`. Acceptance
+weakening moves along it — snap a Rabin/Muller condition *up* to a Büchi `GF` (over) or
+*down* to coBüchi `FG` / weak (under). Its force is structural: the **weak / Büchi /
+coBüchi classes are exactly where the peels and daisy already fire effortlessly**, so
+this abstraction lands its output *in the tool's sweet spot* rather than in a vacuum. One
+acceptance transform in, an easy reconstruction out. Ranks just behind the aperiodic
+quotient, because its landing zone is the fragment we are strongest on.
+
+## Assume-guarantee — temporal `restrict`/`constrain` (Coudert–Madre lifted)
+
+Given an environment assumption `E`, reconstruct `L` *only where `E` holds*: find the
+smallest LTL `φ` that **agrees with `L` on `E`** (`L(φ) ∩ E = L ∩ E`), free off `E`.
+This is exactly BDD minimization with **don't-cares**, `restrict` / `constrain` (the
+generalized cofactor), lifted to temporal logic: `E` is the **care-set**, `¬E` the
+don't-care region and thus *simplification fuel* — every behaviour the environment never
+produces is a degree of freedom to shrink the formula.
+
+Is that the same as AND-ing the care onto the system? **No — and the difference is the
+point.** `L ∧ E` (system restricted to `E`) and `L ∨ ¬E` (vacuously true off `E`) are the
+**two endpoints** of the admissible interval `[L ∩ E, L ∪ ¬E]`: the smallest and largest
+*languages* agreeing with `L` on `E`. Both are valid completions, but their *formulas*
+may be large and you have committed a value off `E`. `restrict` is free to pick **any**
+member of that interval to **minimise formula size** — it need equal neither endpoint; it
+spends the don't-cares to be smaller than both. So AND-ing throws the freedom away by
+fixing the off-`E` value; the cofactor keeps it and optimises (`best_of` over the
+interval *is* that search, the direction tag fixing which corner). It is also the most
+*practically* requested form — nobody specifies over all of `Σω`; they specify under a
+contract — and the don't-care interval is usually exactly where the size collapses.
+
+## Galois connections — met for the structured domains, one honest caveat
+
+For the **named** domains the conditions hold cleanly: alphabet projection (`∃` and its
+co-projection, a genuine adjoint), the safety / topological closure (closure / interior,
+a *unique* hull), and the aperiodic quotient (the canonical largest-aperiodic morphism).
+For the **general** "smallest LTL formula `⊇ L`," the caveat: LTL-definable languages are
+closed under *finite* Boolean operations but **not** under arbitrary intersection, so
+there need be **no unique least** LTL over-approximation — two incomparable minimal hulls
+can exist. There the adjoint is not a function and "Galois connection" softens to
+"best-effort bound found by search" (`best_of`, direction-tagged). Abstract
+interpretation has always lived with non-unique best abstractions; that is what widening
+is for. So: immediate for projection / closure / quotient; subtle (uniqueness fails) for
+the unstructured hull.
+
+## Covered, and parked
+
+- **Manna–Pnueli hierarchy (the class lattice).** Covered, not a new lever: the hierarchy
+  is a fact about *which fragment a method handles*, already exploited by the decomp
+  family (and the sketched syntactic decompositions). We are complete regardless, via
+  `bls`; the goal is intelligible formulas, not more coverage.
+- **Bounded horizon / LTL_f / finite-star.** Parked. A finite-star (LTL_f) generator may
+  be useful but currently raises more than it answers; revisit only if SERE→LTL matures
+  into a real path.
+
+## The percolation, restated
+
+The abstraction layer and the diagnostic layer are one structure. The aperiodic quotient
+(the best LTL over-approximation) collapses *the same subgroup* the certificate extracts
+as a witness; the safety closure is the topological hull; the bracket gap is the kernel.
+Build two things — the `LTLResult` direction tag and the aperiodic-quotient operator (a
+modification of the cascade `bls` already produces) — and the seed of the whole
+abstract-interpreter is in hand, sharing the kernel with everything else in this document.
