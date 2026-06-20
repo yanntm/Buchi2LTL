@@ -191,6 +191,60 @@ the round-trip insight (re-present, re-derive) is one of the levers that reaches
   our DAG-aware simplifier differs from Spot's, and a simpler formula may translate to
   a simpler automaton. A cheap knob.
 
+## The wider frame — an algebra of translators, on benign reality
+
+**It is not a portfolio; it is an algebra.** What this codebase has built is an
+**algebra over translators**: sound translators (language-faithful-or-decline) as the
+carrier, and the combinators as operations — `compose` (`∘`), `recurse` (fixpoint),
+`first_success` / `best_of` (choice), and now the *moves* `roundtrip`, `complement`,
+`syntactic-decompose`, `simplify`. Soundness is the **homomorphism property** — every
+operation preserves the language — so the algebra is **closed**: any term over the
+bricks is itself a sound translator, by construction. "Portfolio" undersells this. The
+operational reading is a best-first **search over a rewrite graph** of equivalent
+presentations for the size-minimal node (`best_of` is its greedy depth-1 case); the
+structural reading is the algebra, and that is the one to claim. The empirical fact
+that one move took 31→5 says the graph has **low diameter** from cascade-blob to
+minimal — `translate` is a violent normalizer funnelling many formulas onto few
+automata. Whether that low diameter holds broadly is *the* measurable hypothesis under
+the whole approach.
+
+**Worst case is mostly a stale worry on real inputs.** The construction is
+(triple-)exponential and LTL-definability is hard — and it mostly does not matter,
+because decomposition + round-trip **localize the expense to the largest irreducible
+core**, the residual no structural move can simplify. Practical cost is governed by
+*kernel size*, not input size (the "the hard part is small" phenomenon — treewidth,
+parameterized kernels). Human specs *have* small kernels: people author reactive,
+counter-free, compositional properties; they do not intend counting, the way Zeno
+undecidability in timed systems is a modelling artefact, not a real requirement. The
+analogy is SAT — worst-case intractable, random instances brutal, yet it *just works*
+on human formulas because those are structured and benign. aut2ltl sits in the same
+place: realistically useful on the inputs that occur, worst case notwithstanding. The
+corpus sweep can make this concrete via the **kernel-size distribution**, expected
+sharply peaked at small.
+
+**The scientific output is the definability atlas, not only the formulas.** Deciding
+LTL-definability over the exhaustive `genaut` census yields a map nobody has: the
+smallest non-definable automata, the structural patterns that tip a language out of
+LTL, definable-vs-not density as state/acceptance counts grow. The moves preserve
+language, so they do not move the boundary — they let us reach the verdict cheaply and
+at scale. The size wins sell the tool; this atlas is the contribution to the empirics
+of where the LTL / ω-regular frontier actually lies, and the natural companion to the
+corpus generation already underway.
+
+**On confluence / scheduling — resolve it experimentally, do not theorize it.** The
+moves are not independent (simplify can erase the `∧` seams syntactic-decompose needs;
+order matters), so the rewrite system is not obviously confluent. This is a real but
+*experimental* question: the goal is to *have the bricks* — composable, toggleable —
+and let measurement pick the schedule, not to seek an analytic confluence proof.
+
+**Exhaustive generation is the engine of discovery.** This whole direction began with
+a single automaton from the exhaustive small-automata census whose cascade output was
+ugly and whose round trip was tiny — the census *surfaced the witness*. The byproduct
+of the sweep — `(automaton, smallest formula, winning move sequence)` triples — is
+also, for free, a training set for a future learned dispatcher that predicts the first
+move to try from shallow automaton features, bootstrapping the portfolio's intuition
+from its own exhaustive play.
+
 ## The deep frame — recovering what automata destroy
 
 LTL has a property automata do not: **compositional nesting**. Its meaning is built
