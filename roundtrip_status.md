@@ -570,3 +570,120 @@ as a witness; the safety closure is the topological hull; the bracket gap is the
 Build two things — the `LTLResult` direction tag and the aperiodic-quotient operator (a
 modification of the cascade `bls` already produces) — and the seed of the whole
 abstract-interpreter is in hand, sharing the kernel with everything else in this document.
+
+---
+
+# Appendix B — aut2ltl as a certifying LTL learner
+
+Consigns two conversation posts on the "synthesize LTL from scenarios" community.
+Sound-looking directions, **not yet vetted against that literature** — flagged for
+later decompression by someone who knows the domain.
+
+## Where the field sits, and the one caveat that places us
+
+LTL-from-scenarios splits into two poles. **SAT/SMT-minimal learners** (Neider–Gavran
+"Learning LTL" and descendants) encode "∃ an LTL formula of size ≤ n consistent with
+this sample of positive/negative ultimately-periodic traces" and minimize `n` — exact,
+Occam-optimal, but they avoid automata *precisely because automaton→LTL was the hard
+part*, and they scale poorly. **Template/mining learners** (Texada, Perracotta,
+Dwyer-pattern miners) instantiate known patterns against logs — scalable and legible,
+but boxed into a template catalog. The field is thus "exact-but-small-and-cryptic" vs
+"scalable-and-readable-but-template-bound."
+
+The placing caveat, stated honestly: **a finite sample is always LTL-consistent** (any
+two distinct ω-words differ at some position `i`, and `Xⁱ(a)` separates them). So our
+headline "decide non-LTL + emit a witness" does **not** apply to raw finite-sample
+consistency. It bites in the mode where the object is a *language / model* — learning
+the LTL of an inferred or given automaton — a real and common regime (spec mining from
+models, RPNI / L*-learned automata, synthesized controllers).
+
+## What we bring — five differentiators (most-novel last)
+
+1. **The missing back-end: automaton → small, legible LTL.** State-merging / RPNI /
+   Büchi-learning produce *automata*; the community wants *formulas*; that conversion
+   is the gap the SAT learners route around and is our entire purpose. aut2ltl is a
+   drop-in back-end for any automaton-learner — learn the automaton (often far more
+   scalable than SAT-LTL on large samples), then we reconstruct the small LTL.
+   Re-legitimizes the automaton-learning route the field abandoned.
+2. **A *certifying* learner — it knows when to stop trying LTL.** In the language/model
+   mode, when the target is non-LTL, existing learners just grow the bound and cannot
+   tell "need a bigger formula" from "no LTL exists." We decide it (aperiodicity) and
+   return the counting witness `u·vⁿ·wω` — a checkable proof of impossibility. A
+   learner that *certifies impossibility* rather than failing silently appears new here.
+3. **The LTL bracket as version space + approximate learning.** (Developed below.)
+4. **Legibility as the objective, via patterns — not minimal size.** Bias the pluggable
+   `best_of` comparator toward Dwyer-pattern shapes, so the learned spec reads
+   `response(req,grant) ∧ absence(error after reset)` rather than a minimal-but-cryptic
+   blob. Template-*aware* (legible) without being template-*bound* (still complete via
+   `bls`) — a third position between the poles.
+5. **The witness as a *reformulation* guide (the freshest).** When the target is
+   non-LTL because of a counter, the witness names *which* counter, so aut2ltl can say
+   "not LTL over your signals, but it becomes LTL if you add one observable tracking
+   `parity-of-a` — here is the formula over the enriched alphabet." Alphabet projection
+   run in reverse: an impossibility result turned into actionable **spec repair**. No
+   learner offers "here is the one extra variable that fixes it."
+
+## The precise spine of #3: learning = temporal `restrict` over a sampled don't-care set
+
+A sample `(P, N)` partitions `Σω` into **on-set `P`** (must accept), **off-set `N`**
+(must reject), and **don't-care `U = Σω \ (P ∪ N)`** (everything unseen) — an
+*incompletely-specified* ω-language. "Smallest LTL agreeing with the spec on `P ∪ N`,
+free on `U`" is two-level / cofactor minimization with don't-cares — the **temporal
+`restrict` of Appendix A's assume-guarantee**, with the care-set being "the seen words"
+instead of "the assumption." So **learning and assume-guarantee are the same operator**,
+two readings of the care-set; the don't-care freedom (unseen words) is the
+generalization power, and minimizing formula size over it is Occam, mechanized. No new
+machinery — the restrict operator pointed at a sampled care-set.
+
+**Version space = the bracket; its width is a query oracle.** Mitchell's
+concept-learning boundaries land in our terms: the under-approximation `B`
+(most-specific consistent: smallest LTL covering `P`, avoiding `N`), the
+over-approximation `A` (most-general: largest LTL avoiding `N`), and `[B, A]` is the
+version space — every sample-consistent LTL lives between them. Bracket width is a
+**sufficiency signal** (wide ⇒ the sample under-constrains; narrow ⇒ it nearly
+determines the formula), and the gap `A ∖ B` is exactly the words the sample has not
+pinned — so **the most informative active query is any word in `A ∖ B`**: ask "accept
+`w`?" and provably cut the version space. Active-learning query selection becomes
+"sample the bracket gap," not a heuristic.
+
+**Abstraction domains = declarative generalization biases.** A learner needs an
+inductive bias; each abstraction domain is one, by intersecting the version space with a
+sub-lattice: "simplest *safety* property consistent" = version space ∩ safety
+sublattice; "*bounded-horizon*" = ∩ depth-≤`k`; "over *these signals only*" = alphabet
+projection of the bracket; "as a *Dwyer pattern*" = ∩ the pattern sublattice (legible by
+construction). Declarative, lattice-defined biases instead of an opaque size prior — a
+genuinely new knob for the community.
+
+**The lossy dial is noise tolerance.** Allow a budget of misclassifications: let the
+smallest formula absorb a few stubborn points into the don't-care set (treat outliers
+as unseen). "Smallest LTL consistent with ≥ 95% of the sample" is regularized cofactor
+minimization — the size↔accuracy dial is the regularization strength. Soft / noisy
+learning is a precision *setting*, not a separate algorithm. (This corrects the earlier
+"not noise-tolerant" scoping.)
+
+**Convergence measures definability.** If the target `L` is LTL and the sample grows
+toward a characteristic sample, the version space `[B, A]` **collapses to `{L}`**
+(modulo equivalence) — bracket-width → 0 *is* identification-in-the-limit, a clean stop.
+If `L` is non-LTL, the bracket **never collapses**; it stabilizes at a residual gap, and
+that gap *is the non-LTL kernel*, its counting witness sitting in the leftover `A ∖ B`.
+Collapse ⇒ learned and LTL; stable gap ⇒ non-LTL — the learner's convergence behaviour
+literally decides definability.
+
+## Honest scope and soft spots
+
+- Not **end-to-end** from raw traces — we need an automaton / language as input, so we
+  are a back-end (pair with an ω-automaton learner for the full pipeline).
+- Not natively **active** (the bracket-gap query loop is the *path* to it, not a built
+  feature), and the certification / convergence differentiators (#2, #5) fire only in
+  the language/model regime, not raw finite-sample consistency.
+- Computing genuinely-extremal `B` / `A` in the LTL lattice is neither unique nor cheap
+  (the Galois uniqueness caveat), so in practice the version space is *approximated* by
+  our reconstruction bounds — fine for the active loop and the biases, not a tight
+  theoretical version space. Be candid about this in any write-up.
+
+## One experiment to back it
+
+Take a published LTL-learning benchmark, learn an automaton with an off-the-shelf
+method, run aut2ltl as the back-end, and compare (a) formula size / legibility vs the
+SAT-minimal learners, (b) the cases where we *certify* non-LTL that they can only fail
+on, (c) the reformulation suggestions.
