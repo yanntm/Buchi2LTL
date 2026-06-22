@@ -56,10 +56,10 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
 - Test BEFORE commit, via placed scripts under `tests/` only (no /tmp, no
   `python -c` one-liners), under timeout:
   - `python3 -m tests.probes.bls.test_kr_r4_audit` → must stay CLEAN
-  - `python3 tests/survey.py` → must end **SUCCESS** (no verified non-equivalent
-    answer; spot timeouts / size explosions are not failures)
+  - `python3 -m survey --folder samples/validation` → must end **SUCCESS** (no
+    verified non-equivalent answer; spot timeouts / size explosions are not failures)
 - When comparing languages, report containment direction + witness word
-  (`tests/bls/ltl_diff.py`), not just equivalence.
+  (`python3 -m survey.diff.ltl_diff`), not just equivalence.
 - Debug method: ground sub-terms against GT automata built from D's semiautomaton
   (`tests/bls/trace_fin_semantics.py` pattern), find the first diverging sub-term,
   fix against the paper text.
