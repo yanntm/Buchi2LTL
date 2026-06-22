@@ -1,5 +1,5 @@
 # Recurrence (Buchi / Pi_2, infinitely-often)
-# from tests/survey_formulas.py (the curated survey corpus), AP-renamed to canonical a,b,c… -- resync via tests/benchmark/from_survey.py
+# AP-renamed to canonical a,b,c… (the curated 40-formula survey corpus)
 
 GFa  # smallest recurrence; the Buchi acceptance core
 G(a -> F b)  # request/response; a former equiv residual
