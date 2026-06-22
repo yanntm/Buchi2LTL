@@ -1566,3 +1566,40 @@ regressions.
 STILL OPEN (see TODO_REFACTORING.md): survey/normalize/ (from
 tests/benchmark/normalize), pyproject wiring (survey* + aut2ltl_survey script),
 retire tests/survey.py + sweeps, then samples/ (step 2), logs/ (step 4), docs.
+
+=== 2026-06-22 — tests/survey refactor: samples/ + results/ + survey tooling ===
+
+Continued the big tests restructure (split harness / probes / data). Landed on master:
+
+- survey/normalize: `git mv tests/benchmark/normalize` -> survey package; absolute
+  `survey.normalize.*` imports, no sys.path hacks. Then EXTENDED it: new `sweep.py`
+  (shared folder engine: walk .ltl/.hoa + dry-run/--prune + tally), `dedup.py`
+  refactored onto sweep, new `canon.py` (= dedup with AP-renaming built in, the
+  maximal normalize), lazy PEP-562 `__init__` (kills the -m runpy warning). names.py
+  stays for isolated print-only rename.
+- survey/ltl2hoa.py (NEW): fill a peer hoa/ folder from an ltl/ folder via
+  spot.translate ('small'/ltl2tgba); one .hoa per formula named <stem>_l<line>.hoa
+  (traceable to the source line), mirroring layout.
+- survey README/discovery README/CLI doc corrected to the real flag CLI (--ltl/
+  --hoa/--folder, one flat CSV, stdout default), defaults header, CSV schema.
+- samples/ (root, NEW): each corpus a peer, data + its own provenance.
+  * kinska   -> samples/kinska (verbatim upstream clone); baseline -> results/reference/kinska.
+  * fixtures -> samples/fixtures/{ltl,hoa}: the *.py formula lists became <set>.ltl
+    (metadata dicts dropped, # comments kept); 4 hand-written hoa -> hoa/various/;
+    hoa/<set>/ generated (315) via ltl2hoa. test_fuse2 repointed to the .ltl.
+  * benchmark-> samples/benchmark; baseline -> results/reference/benchmark.
+    collect_kinska/patterns curated to survey.normalize + new paths; from_survey +
+    collect_fixtures + bench_sweep.sh retired. (inputs/ ltl|hoa split: TODO.)
+  * validation-> samples/validation/{ltl,hoa}: the 40 (copy of benchmark/inputs/core,
+    stale from_survey header dropped); hoa/ (40) generated via ltl2hoa. Gate corpus.
+- results/ (root, NEW): persisted reference evaluations. logs/ (root) = gitignored
+  scratch.
+- tests/ now probes + unit tests ONLY: retired survey.py/survey_diff.py/
+  survey_formulas.py/survey_summary.sh/survey_sweep.sh + kinska_sweep/kinska_breakdown;
+  scan_corpus repointed to samples/validation/ltl; tests/README rewritten.
+- CLAUDE.md gate patched: `python3 -m survey --folder samples/validation`.
+
+Gates green throughout (validation 80 inputs SUCCESS; canon/dedup dry-run on benchmark
+= 0; test_fuse2 0 gate failures). NOT done: benchmark inputs ltl/hoa split; reference-log
+REGENERATION under the new default; root README/STATUS eval-link refresh; pyproject. See
+TODO_REFACTORING.md.
