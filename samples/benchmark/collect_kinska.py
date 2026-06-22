@@ -1,6 +1,6 @@
 """Collect the Kinská HOA automata into the benchmark corpus: flatten her folder
 hierarchy into a single `inputs/kinska/`, rename `.txt` -> `.hoa`, and DEDUP by
-the normalised key (tests/benchmark/normalize.normalize_hoa) — one representative
+the normalised key (survey.normalize.normalize_hoa) — one representative
 per key. Her LTL formula files (`*-formulae/`) are skipped: they are the randltl
 SOURCES of the `-ba` automata, redundant with the HOA we keep.
 
@@ -8,20 +8,19 @@ Stores the representative with the basic AP renaming APPLIED (normalize_hoa: the
 `AP:` line's quoted names become a, b, c… in index order) — a plain, healthy
 rename, nothing more. The `name:` comment, state numbering and transition order
 are left as-is, so two HOA syntaxes of the same automaton may both survive; that
-residual dup is accepted. Run: `python3 tests/benchmark/collect_kinska.py`.
+residual dup is accepted. Run from the repo root (needs `pip install -e .`):
+`python3 samples/benchmark/collect_kinska.py`.
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from typing import Dict
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from normalize import normalize_hoa, _is_hoa_text  # noqa: E402
+from survey.normalize import normalize_hoa, _is_hoa_text
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "tests/samples/kinska"
-DST = ROOT / "tests/benchmark/inputs/kinska"
+SRC = ROOT / "samples/kinska"
+DST = ROOT / "samples/benchmark/inputs/kinska"
 
 
 def collect() -> None:
