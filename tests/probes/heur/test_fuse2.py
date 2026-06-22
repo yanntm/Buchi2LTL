@@ -16,11 +16,18 @@ Bounded: each formula is a tiny automaton; the whole sweep is a few seconds.
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 import spot
 
 from aut2ltl.heur.fuse2 import fuse2
-from tests.fixtures.f2_successes import F2_SUCCESS
+
+# The f2 success corpus now lives as data under samples/ (one formula per line,
+# '#' comments). Read it straight off disk — run from the repo root.
+_F2_LTL = (Path(__file__).resolve().parents[3]
+           / "samples/fixtures/ltl/f2_successes/f2_successes.ltl")
+F2_SUCCESS = [s for ln in _F2_LTL.read_text(encoding="utf-8").splitlines()
+              if (s := ln.split("#", 1)[0].strip())]
 
 def _self_loop_only(aut: "spot.twa_graph") -> bool:
     """True iff every SCC of `aut` is a single state (only cycles are self-loops)."""
