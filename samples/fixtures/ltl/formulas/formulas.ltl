@@ -1,0 +1,15 @@
+# Interesting LTL formulas used during development of aut2ltl.
+
+# basic — reconstructed cleanly
+(p U q) & GF r
+FG a
+a U b
+G (p -> X p) & GF q
+G(Xp2 & (p0 | Xp1))   # exercises downstream invariants + t2 + precise SCC attachment
+
+# f2-required — needs the size-2 fusion heuristic
+X(p1 | F(p1 & Xp1))
+
+# problematic — very-weak / release shapes
+!p1 W p0
+G!p2 R p1
