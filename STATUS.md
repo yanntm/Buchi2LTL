@@ -57,19 +57,18 @@ The front-end survey is the correctness gate — it reconstructs a corpus throug
 the CLI and verifies each result with a Spot oracle (a test-only check, never a
 client cost):
 
-- `tests/survey.py` — corpus survey; per-formula CSV + a compact summary ending
-  in `SUCCESS`/`FAIL`. `FAIL` = a verified non-equivalent formula (a definite
-  wrong answer); spot timeouts / size explosions / >32-acc-set walls are their
-  own categories, NOT failures (a DAG we built that Spot cannot verify is not
-  our fault). The corpus is `tests/survey_formulas.py`.
-- `tests/survey_sweep.sh` — the same survey across every `--use` configuration,
-  one log each + a cross-config SUMMARY. `tests/survey_diff.py` diffs two CSVs.
-  The committed release baseline is `tests/logs/reference/`.
-- `tests/bls/test_kr_r4_audit.py` — structural audit gate (must stay CLEAN).
-- `tests/benchmark/` — the portfolio evaluation **bench** (size, not a gate):
-  A/B two portfolios over `inputs/` (the survey corpus + W/U/R chains + 105
-  Kinská HOA), reusing the survey engine; `bench_sweep.sh` + `survey_diff.py`.
-  Reference runs committed under `tests/benchmark/logs/reference/`.
+- `survey/` — the survey harness (`python3 -m survey --folder <dir>`): runs a
+  corpus through the CLI, emits a per-formula CSV + a compact summary ending in
+  `SUCCESS`/`FAIL`. `FAIL` = a verified non-equivalent formula (a definite wrong
+  answer); spot timeouts / size explosions / >32-acc-set walls are their own
+  categories, NOT failures (a DAG we built that Spot cannot verify is not our
+  fault). Corpora live in `samples/` (`validation` is the gate corpus). Sub-tools:
+  `survey.diff.ltl_diff` (containment + witness), `survey.diff.results` (CSV diff),
+  `survey.ltl2hoa` (generate HOA from an LTL folder).
+- `tests/probes/bls/test_kr_r4_audit.py` — structural audit gate (must stay CLEAN).
+- Committed release baselines: `results/reference/{validation,benchmark,kinska}/`
+  (per-corpus `*.csv` + `SUMMARY.txt`). The benchmark corpus (`samples/benchmark`)
+  is the survey set + scalable W/U/R chains + the Kinská automata.
 
 ## Layout
 
