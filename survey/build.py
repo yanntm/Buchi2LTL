@@ -44,6 +44,8 @@ def _parse_report(stderr: str) -> Dict[str, object]:
             out["tree_nodes"] = int(val)
         elif key == "sharing":
             out["sharing"] = val.rstrip("x")
+        elif key == "dag md5":
+            out["md5"] = val
         elif key == "build time":
             out["build_s"] = val.rstrip("s")
     return out
@@ -63,6 +65,7 @@ def build(value: str, *, is_hoa: bool, technique: Optional[str],
         tool = [sys.executable, "-m", "aut2ltl", "--hoa", value]
     else:
         tool = [sys.executable, "-m", "aut2ltl", value, "--ltl"]
+    tool += ["--dagmd5"]  # report a stable DAG fingerprint (the `md5` column)
     if technique:
         tool += ["--use", technique]
 

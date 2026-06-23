@@ -15,7 +15,8 @@ from typing import Dict, List, Sequence, TextIO
 from survey.build import BuildResult
 
 COLS: List[str] = ["input", "result", "technique", "build_s", "formula",
-                   "dag", "temporals", "tree", "sharing", "validation", "source"]
+                   "dag", "temporals", "tree", "sharing", "md5", "validation",
+                   "source"]
 FORMULA_SHOWN = 80
 
 
@@ -46,7 +47,8 @@ def row(display: str, br: BuildResult, validation: str,
         rec = str(br.rec or "").replace("\n", " ").replace("\r", " ")
         r["formula"] = rec[:FORMULA_SHOWN] + ("…" if len(rec) > FORMULA_SHOWN else "")
         for src, dst in (("dag_nodes", "dag"), ("temporals", "temporals"),
-                         ("tree_nodes", "tree"), ("sharing", "sharing")):
+                         ("tree_nodes", "tree"), ("sharing", "sharing"),
+                         ("md5", "md5")):
             if src in br.report:
                 r[dst] = br.report[src]
     r["validation"] = validation
