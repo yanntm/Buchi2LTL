@@ -15,13 +15,13 @@ requires-python = ">=3.9"
 authors = [{ name = "Yann Thierry-Mieg", email = "yann.thierrymieg@gmail.com" }]
 keywords = ["LTL", "omega-automata", "Buchi", "Krohn-Rhodes", "holonomy", "temporal-logic"]
 
-# pandas is the one pip-installable runtime dep (survey.diff.results — the
-# result-CSV diff). The rest are system-level and NOT pip-installable, so
-# intentionally omitted:
+# pip-installable runtime deps: pandas (survey.diff.results — the result-CSV diff)
+# and matplotlib (genaut/analyze_frontier.py — the PDF frontier report). The rest
+# are system-level and NOT pip-installable, so intentionally omitted:
 #   * Spot (the `spot` and `buddy` Python bindings) — install at system level.
 #   * GAP 4.12+ with the SgpDec package — needed only by the bls cascade engine;
 #     see README.md and install_gap.sh.
-dependencies = ["pandas"]
+dependencies = ["pandas", "matplotlib"]
 
 [project.scripts]
 # The portfolio front end (aut2ltl/__main__.py:main). Equivalent to `python3 -m aut2ltl`.

@@ -1,6 +1,0 @@
-survey: 929 formulas  (--use default)
-aut2ltl answered: 922/929  (799 LTL built + 123 not-LTL)   |   Failures: 7  (timeout 7, crash 0, declined 0)
-Spot check of the 799 LTL built: 745 EQUIVALENT, 54 not checked (formula too large)
-NOT EQUIVALENT: 0   (clean)
-totals over LTL built: DAG=211884 temporals=37488 build=516.538s
-SUCCESS
