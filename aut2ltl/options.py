@@ -13,10 +13,10 @@ lazily — the stored value if set, else `spec.default`. So the store holds only
 OVERRIDES, a bare `Options()` behaves as "everything at its declared default",
 and a call site reads like documentation:
 
-    if options.get(kr.options.FOLD_FIN_REACH):   # store value, else spec.default
+    if options.get(bls.options.FOLD_FIN_REACH):   # store value, else spec.default
         ...
 
-Keys are dotted and package-owned (`kr.fold_fin_reach`, `portfolio.gate.verify`)
+Keys are dotted and package-owned (`bls.fold_fin_reach`, `portfolio.gate.verify`)
 so the open store stays collision-free and self-documenting. `OptionSpec.env` is
 the migration bridge: seeding from the legacy env var reproduces today's behaviour
 while the `os.environ` call sites are repointed to `options.get(SPEC)` one package
@@ -36,7 +36,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 class OptionSpec:
     """One declared option — the single source of its default and its doc.
 
-    `key`     dotted, package-owned (e.g. "kr.fold_fin_reach").
+    `key`     dotted, package-owned (e.g. "bls.fold_fin_reach").
     `default` the native value (bool/int/...); also fixes the coercion type when
               seeding from a string env var.
     `doc`     one line: what this option controls (the contract).
@@ -136,4 +136,16 @@ class Options:
         return f"Options({self._values!r})"
 
 
-__all__ = ["OptionSpec", "Options"]
+# --- the root package's own declared options (no subpackage owns these) ---
+# Front-end output concerns that belong to aut2ltl itself rather than to bls /
+# language / portfolio.
+
+MD5_LENGTH = OptionSpec(
+    "aut2ltl.md5_length", 12,
+    "hex-char length of the --dagmd5 DAG fingerprint (1..32); raise it for a huge "
+    "corpus where 12 hex (48 bits) is no longer collision-comfortable",
+    env="AUT2LTL_MD5_LENGTH")
+
+ROOT_OPTIONS = [MD5_LENGTH]
+
+__all__ = ["OptionSpec", "Options", "MD5_LENGTH", "ROOT_OPTIONS"]
