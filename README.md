@@ -76,6 +76,12 @@ the formula:
 python3 -m aut2ltl samples/fixtures/hoa/various/collapse_example.hoa -q | ltlfilt --simplify
 ```
 
+[`genaut/`](genaut/) is an exhaustive generator of small ω-automata of a fixed
+shape, run through `aut2ltl`. Its committed results — CSV,
+[`SUMMARY.txt`](genaut/logs/SUMMARY.txt), and a
+[`frontier.pdf`](genaut/logs/frontier.pdf) report — are in
+[`genaut/logs/`](genaut/logs/).
+
 ## Using it
 
 The input is auto-detected as a HOA file or an LTL/PSL formula; force it with
