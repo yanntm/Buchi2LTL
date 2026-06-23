@@ -1,7 +1,7 @@
 """survey.diff.results — quantitative diff of two survey RESULT CSVs.
 
 Where ltl_diff compares LANGUAGES, this compares RUNS. Reads two CSVs written by
-survey, keys both on the `input` column, and reports:
+survey, keys both on the unique `source` column, and reports:
 
   1. KEY SETS — inputs absent left / absent right / common, and how many each
      side answered (produced a formula for). A "one side has fewer answers"
@@ -23,11 +23,11 @@ from typing import List, Tuple
 
 import pandas as pd
 
-KEY = "input"
+KEY = "source"  # the unique provenance key every survey CSV carries
 
 
 def _load(path: str) -> pd.DataFrame:
-    """Survey CSV -> DataFrame indexed by the input key (deduped, last wins)."""
+    """Survey CSV -> DataFrame indexed by the unique source key (last wins)."""
     df = pd.read_csv(path, dtype=str).fillna("")
     if KEY not in df.columns:
         sys.exit(f"{path}: no '{KEY}' column — not a survey CSV?")
@@ -60,7 +60,7 @@ def _print_sample(keys: List[str], cap: int) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Quantitative diff of two survey CSVs, keyed on the input column.")
+        description="Quantitative diff of two survey CSVs, keyed on the source column.")
     ap.add_argument("left")
     ap.add_argument("right")
     ap.add_argument("--top", type=int, default=10, help="max mover / sample rows to show")
@@ -73,7 +73,7 @@ def main() -> int:
     only_right = sorted(rk - lk)
 
     # --- stage 1: key sets -------------------------------------------------
-    print("=== survey diff (keyed on input) ===")
+    print("=== survey diff (keyed on source) ===")
     print(f"left ={args.left}   {len(lk)} inputs, {_answered(L)} answered")
     print(f"right={args.right}   {len(rk)} inputs, {_answered(R)} answered")
     print(f"key sets: {len(common)} common | "
