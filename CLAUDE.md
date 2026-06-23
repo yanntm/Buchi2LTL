@@ -55,7 +55,6 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
   neither belongs only in `docs/HISTORY.md`.
 - Test BEFORE commit, via placed scripts under `tests/` only (no /tmp, no
   `python -c` one-liners), under timeout:
-  - `python3 -m tests.probes.bls.test_kr_r4_audit` → must stay CLEAN
   - `python3 -m survey --folder samples/validation` → must end **SUCCESS** (no
     verified non-equivalent answer; spot timeouts / size explosions are not failures)
 - When comparing languages, report containment direction + witness word

@@ -6,7 +6,7 @@ the live source tree, including modules not yet declared/exported.
 
 ## Run them from the repo root, as modules
 
-    python -m tests.probes.bls.test_kr_r4_audit
+    python -m tests.probes.bls.test_r4_audit
     python -m tests.probes.heur.test_fuse2
 
 Running from the root puts the working tree on `sys.path`, so `import aut2ltl`
@@ -18,13 +18,12 @@ in any probe; the runner convention above replaces it.
 
 ## Layout
 
-One subfolder per module under test (`bls/`, `daisy2/`, `language/`, `partscc/`,
-`sccdecomp/`, …), plus a few flat `test_*.py` at this level for the
-portfolio/contract floor. `smoke/` is a throwaway scratchpad for short-lived
-probes (its run artifacts are gitignored).
+One subfolder per module under test (`bls/`, `daisy2/`, `decomp/`, `language/`,
+`partscc/`, `sccdecomp/`, …), plus a few flat `test_*.py` at this level for the
+portfolio/contract floor. Scratch run output goes to `tests/logs/` (gitignored).
 
 ## Gate
 
-The correctness gate that must pass before committing engine changes:
-
-    python -m tests.probes.bls.test_kr_r4_audit     # must report CLEAN
+The correctness gate and the reference-refresh procedure are documented in
+[`results/README.md`](../../results/README.md): the survey over
+`samples/validation` must end `SUCCESS`.

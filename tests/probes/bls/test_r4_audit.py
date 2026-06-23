@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-bls/testing/test_kr_r4_audit.py
+tests/probes/bls/test_r4_audit.py
 
 Placed audit script (per rules) for P0 R4/Rws correctness items.
 The 5-point checklist below is the authoritative encoding of the R4/Rws0 + R5
@@ -15,7 +15,7 @@ behaviorally + via source for the checklist. Uses Spot for semantics checks
 on crafted words/configs for 1L reset cascades.
 
 Run (always):
-  timeout 5 python3 bls/testing/test_kr_r4_audit.py
+  python3 -m tests.probes.bls.test_r4_audit
 
 All inside work folder, no /tmp, no inline long python.
 """

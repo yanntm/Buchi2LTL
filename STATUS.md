@@ -65,7 +65,6 @@ client cost):
   fault). Corpora live in `samples/` (`validation` is the gate corpus). Sub-tools:
   `survey.diff.ltl_diff` (containment + witness), `survey.diff.results` (CSV diff),
   `survey.ltl2hoa` (generate HOA from an LTL folder).
-- `tests/probes/bls/test_kr_r4_audit.py` — structural audit gate (must stay CLEAN).
 - Committed release baselines: `results/reference/{validation,benchmark,kinska}/`
   (per-corpus `*.csv` + `SUMMARY.txt`). The benchmark corpus (`samples/benchmark`)
   is the survey set + scalable W/U/R chains + the Kinská automata.
