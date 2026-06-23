@@ -78,19 +78,20 @@ Fine-tune any declared option with `-O key=value` (see `--list-options`).
 ## Evaluation
 
 Reference runs of the **default** portfolio are committed as per-formula CSVs —
-which GitHub renders as readable tables — one per corpus:
+which GitHub renders as readable tables — one per corpus, under `results/reference/`:
 
-- [`tests/logs/reference/default.csv`](tests/logs/reference/default.csv) — the curated
-  40-formula survey (the correctness gate's corpus).
-- [`tests/benchmark/logs/reference/default.csv`](tests/benchmark/logs/reference/default.csv)
+- [`results/reference/validation/default.csv`](results/reference/validation/default.csv) —
+  the curated 40-formula validation survey (the correctness gate's corpus), run both
+  as LTL and as the equivalent HOA automaton (80 inputs).
+- [`results/reference/benchmark/default.csv`](results/reference/benchmark/default.csv)
   — the larger benchmark corpus (the survey set + scalable W/U/R chains + the Kinská
-  automata, 373 formulas).
-- [`tests/samples/kinska/logs/reference/kinska.csv`](tests/samples/kinska/logs/reference/kinska.csv)
+  automata, 333 inputs).
+- [`results/reference/kinska/kinska.csv`](results/reference/kinska/kinska.csv)
   — the 165 Kinská Büchi automata on their own (many are not LTL-definable); see
-  [`tests/samples/kinska/README.md`](tests/samples/kinska/README.md) for provenance.
+  [`samples/kinska/README.md`](samples/kinska/README.md) for provenance.
 
-Each folder also holds a one-glance **summary** of its CSV — e.g.
-[`tests/benchmark/logs/reference/default.txt`](tests/benchmark/logs/reference/default.txt):
+Each folder also holds a one-glance **summary** of its CSV —
+[`results/reference/benchmark/SUMMARY.txt`](results/reference/benchmark/SUMMARY.txt):
 how many answers were verified equivalent / not-LTL / timed out, and the total
 reconstructed formula size.
 
@@ -111,7 +112,10 @@ aut2ltl/
   partscc/        the single-terminal-SCC leaf translator
   ltl/            LTL primitives, metrics, printers, simplifiers
   portfolio/      the combinators that assemble the translators
-tests/            survey (the correctness gate), fixtures, per-engine tests
+survey/           the survey harness (the correctness gate) + diff / ltl2hoa tools
+samples/          input corpora (validation = the gate, benchmark, kinska, fixtures)
+results/          committed reference survey runs (results/reference/<corpus>/)
+tests/            probes and per-engine unit tests
 docs/             algorithm notes, the construction log, figures
 ```
 
