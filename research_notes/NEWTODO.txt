@@ -1,0 +1,29 @@
+=== SESSION TRACE 2026-06-19 (prepend) ===
+
+NEXT NUT: position-0-anchored Phi_stay fixpoint (daisy2 Target B / the hub anchor).
+Generalize partscc's per-LETTER anchor to a per-MOVE anchor (the strong-U
+self-delimits each move). Closes the 3 m=0 safety rejects + the GF(a&Xb)
+acceptance-phase case; turns daisy2 from heuristic -> construction.
+Read first: aut2ltl/daisy2/algorithm.md "Working notes — findings & direction (keep)"
+and Target B's partscc anchor lead.
+
+LANDED THIS SESSION (master):
+- daisy2 (length-1 star peel), S3 (marks-only-on-links) + per-edge GF anchor
+  => acceptance half sound by construction; safety half still gate-rescued.
+- default is now best_daisy2; --use variants: best (daisy-only), best_inv (inv
+  top-only, neutral), best_inv_loop (inv per-descent, NEW, A/B pending).
+- recurse brick (aut2ltl/recurse/) complements first_success; daisy/daisy_pair/
+  daisy_pair_inv are one-liners over it.
+- 3 reference baselines regenerated under new default (survey/benchmark/kinska);
+  benchmark -3.6% DAG, 1 verified fix (3804->16 nodes), 0 regressions.
+
+OPEN TODOs (see TODO.md top): benchmark best_inv_loop (does per-descent inv speed
+NOT_LTL on kinska counting/?); split builder.py recipes -> portfolio/recipes/;
+best_of combinator (size objective).
+
+NEWTODO — braindump, distilled 2026-06-17.
+
+All items actioned. The README rewrite, the aut2ltl/ and bls/ source maps, the
+contract / combinators / result.md refactors, and the decomp/ + kr->bls reorg all
+landed (see docs/HISTORY.md). The two ideas that remained open — the flags manual and
+the Simplify decorator — are now tracked in TODO.md. Nothing outstanding here.
