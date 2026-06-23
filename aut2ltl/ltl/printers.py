@@ -30,6 +30,14 @@ def to_dot(f: Optional["spot.formula"], max_label: int = 60) -> str:
     """Graphviz dot of the hash-consed formula DAG — O(distinct nodes), never the
     unfolded O(tree), so it does not explode where the flat string would.
 
+    Nodes are numbered by **memoized depth-first discovery order** (`n0` = root,
+    then left-first descent, each shared node numbered once on first encounter),
+    NOT by the per-process `spot.formula.id()`. Over a maximally hash-consed,
+    child-ordered DAG that numbering is a function of structure alone, so the dot
+    is **stable across processes/runs** — isomorphic DAGs serialize identically.
+    (Spot interns identical subformulas and orders commutative operands, so the
+    shared shape and child order are themselves canonical.)
+
     Sharing is visible directly: a subformula reused N times is ONE node with N
     in-edges (the structure the flat string hides). PURE-BOOLEAN subformulas
     (`f.is_boolean()` — no temporal operator inside) are collapsed into a single
@@ -44,7 +52,7 @@ def to_dot(f: Optional["spot.formula"], max_label: int = 60) -> str:
         "digraph formula {",
         '  node [shape=box, fontname="monospace"];',
     ]
-    seen: set = set()
+    num: dict = {}  # spot id -> DFS-discovery index (transient id, never emitted)
 
     def label_of(g: "spot.formula", boolean: bool) -> str:
         s = str(g) if boolean else g.kindstr()
@@ -52,22 +60,24 @@ def to_dot(f: Optional["spot.formula"], max_label: int = 60) -> str:
             s = s[: max_label - 3] + "..."
         return _dot_escape(s)
 
-    def visit(g: "spot.formula") -> None:
+    def visit(g: "spot.formula") -> int:
         gid = g.id()
-        if gid in seen:
-            return
-        seen.add(gid)
+        if gid in num:
+            return num[gid]
+        n = len(num)
+        num[gid] = n  # number on first visit, before descending (pre-order)
         boolean = g.is_boolean()
         fill = ", style=filled, fillcolor=lightgrey" if boolean else ""
-        lines.append(f'  n{gid} [label="{label_of(g, boolean)}"{fill}];')
+        lines.append(f'  n{n} [label="{label_of(g, boolean)}"{fill}];')
         if boolean:
-            return  # collapse: a single node, do not expand the boolean tree
+            return n  # collapse: a single node, do not expand the boolean tree
         children = list(g)
         multi = len(children) >= 2
         for i, c in enumerate(children):
-            visit(c)
+            cn = visit(c)
             elabel = f' [label="{i}"]' if multi else ""
-            lines.append(f"  n{gid} -> n{c.id()}{elabel};")
+            lines.append(f"  n{n} -> n{cn}{elabel};")
+        return n
 
     visit(f)
     lines.append("}")
