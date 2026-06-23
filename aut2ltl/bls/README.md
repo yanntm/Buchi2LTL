@@ -50,6 +50,5 @@ lives in `aut2ltl/ltl/`, shared across engines.
 
 - Construction reference: `paper/automata-to-ltl-construction.md`; ground truth for
   fidelity questions: `paper/Automata2LTL.txt`. Scope/policy: `docs/algorithm.md`.
-- Engine state: `docs/kr_STATUS.md`. Size-explosion research: `docs/dag_folding.md`.
-- Tests: `tests/bls/` (cascade unit tests + the `test_kr_r4_audit.py` structural gate);
-  the correctness gate is the front-end survey `tests/survey.py`.
+- Engine state: `aut2ltl/bls/STATUS.md`. Size-explosion research: `docs/dag_folding.md`.
+- Tests: `tests/probes/bls/` (cascade unit tests + probes).
