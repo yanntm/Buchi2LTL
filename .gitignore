@@ -7,6 +7,11 @@ __pycache__/
 .idea/
 .vscode/
 
+# Build artifacts (editable install / sdist / wheel)
+*.egg-info/
+build/
+dist/
+
 # Scratch survey/test output. Persisted reference runs live in results/ and are
 # committed; throwaway runs go to the root logs/ dir, which is the only ignored
 # folder (no blanket *.csv ignore — committed CSVs need no re-include dance).
