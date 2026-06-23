@@ -1,31 +1,38 @@
 # tests/
 
-Engine probes and unit tests for aut2ltl. Everything runs from the repo root via
-`python3 -m tests.probes.<…>` (editable layout — no `sys.path` bootstraps).
+The home for **aut2ltl engine probes and unit tests** — everything that exercises
+the `aut2ltl/` sources directly. (The corpora, the survey harness and the
+committed reference runs live elsewhere: `samples/`, the `survey` package,
+`results/`.)
 
-The corpora and the evaluation harness have moved out: datasets live under
-`samples/`, the survey harness is the `survey` package, and committed reference
-runs are in `results/`. What remains here is purely *tests of the engine*.
+## Discipline
 
-## Layout
+- **Every probe is a placed script.** No `/tmp`, no `python -c` one-liners — a
+  diagnostic worth running is worth committing (see `CLAUDE.md`).
+- **Put it in a folder congruent to the module it tests:** a probe for
+  `aut2ltl/<mod>` lives in `tests/probes/<mod>/`. See `probes/README.md` for the
+  running convention in detail.
+- **Run it from the repo root, as a module:**
 
-- `probes/` — engine probes + fast unit tests, grouped by area (`bls/`, `daisy2/`,
-  `daisychain/`, `partscc/`, `heur/`, `inv/`, `language/`, `sccdecomp/`, …) plus
-  the unit tests (`test_language.py`, `test_options.py`, `test_ltl_metrics.py`,
-  `test_combinators.py`, `test_build_portfolio.py`, `test_best_of.py`). See
-  `probes/README.md`.
-- `logs/` — scratch run output; **gitignored**, never committed.
+      python3 -m tests.probes.<module>.<probe>
 
-## Gates (before committing engine changes)
+  e.g. `python3 -m tests.probes.heur.test_fuse2`. Running from root puts the
+  working tree on `sys.path` (live sources, no `pip install`); there is no
+  `sys.path` bootstrap in any probe, and a probe run by file path will fail to
+  import.
+- **Diagnostics are self-bound** (≤15s per example); a blown budget is a finding,
+  not something to wait on.
 
-    python3 -m tests.probes.bls.test_kr_r4_audit      # must report CLEAN
+## logs/
+
+`tests/logs/` is a scratch area — write smoke output here freely. It is
+**gitignored and never committed** (see `tests/.gitignore`).
+
+## Gate
+
+The correctness gate and the procedure to refresh the committed reference runs
+are documented in **[`results/README.md`](../results/README.md)**: the survey over
+`samples/validation` must end `SUCCESS`, and a reference refresh is rerun → diff →
+overwrite. Run it from the root:
+
     python3 -m survey --folder samples/validation      # must end SUCCESS
-
-## Ground rules
-
-- Run from the project root; placed scripts only — no `/tmp`, no `python -c`
-  one-liners (see `CLAUDE.md`).
-- Diagnostics are self-bound (≤15s per example); a blown budget is a finding,
-  not something to wait on. Redirect long output to `logs/`, never `/tmp`.
-- When comparing languages, report containment direction + a witness word
-  (`python3 -m survey.diff.ltl_diff`), not just equivalence.
