@@ -3,7 +3,7 @@
 Smoke test for aut2ltl.ltl.metrics + aut2ltl.ltl.printers (GAP-free; bare
 spot.formula DAGs in, no engine).
 
-    python3 tests/test_ltl_metrics.py
+    python3 tests/probes/ltl/test_ltl_metrics.py
 """
 import sys
 
@@ -55,6 +55,14 @@ check('label="a | b"' in dot or 'label="b | a"' in dot, "boolean leaf labelled b
 _bool_nodes = sum(1 for ln in to_dot(spot.formula("a & b")).splitlines()
                   if "[label=" in ln and "->" not in ln)
 check(_bool_nodes == 1, "pure-boolean formula -> single node")
+# Stable numbering: nodes are the contiguous DFS-discovery set n0..n{k-1} (NOT
+# per-process spot ids), so the dot is reproducible across processes/runs.
+import re
+node_ids = sorted(int(m.group(1)) for ln in dot.splitlines()
+                  if (m := re.match(r"\s*n(\d+) \[label=", ln)))
+check(node_ids == list(range(len(node_ids))),
+      f"node names are contiguous DFS indices n0..n{len(node_ids)-1} (got {node_ids})")
+check("n0 [label=" in dot, "root is numbered n0")
 print("--- sample to_dot('G(a|b) & X(a|b)') ---")
 print(dot)
 
