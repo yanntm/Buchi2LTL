@@ -18,8 +18,8 @@ from survey.run import run
 
 
 def _gather(ltls: List[str], hoas: List[str], folders: List[str]) -> Iterator[Example]:
-    for formula in ltls:
-        yield Example("ltl", formula, formula, source="--ltl")
+    for k, formula in enumerate(ltls, start=1):
+        yield Example("ltl", formula, formula, source=f"--ltl:{k}")
     for h in hoas:
         p = Path(h)
         yield Example("hoa", str(p), p.name, source=str(p))

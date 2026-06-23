@@ -15,7 +15,7 @@ from typing import Dict, List, Sequence, TextIO
 from survey.build import BuildResult
 
 COLS: List[str] = ["input", "result", "technique", "build_s", "formula",
-                   "dag", "temporals", "tree", "sharing", "validation"]
+                   "dag", "temporals", "tree", "sharing", "validation", "source"]
 FORMULA_SHOWN = 80
 
 
@@ -30,11 +30,15 @@ def _result_token(status: str) -> str:
     return status            # DECLINED / NOT_LTL / PROBABLY_NOT_LTL
 
 
-def row(display: str, br: BuildResult, validation: str) -> Dict[str, object]:
+def row(display: str, br: BuildResult, validation: str,
+        source: str = "") -> Dict[str, object]:
     """Merge the aut2ltl result block (from a BuildResult) with the validation
-    token into one CSV row. Non-LTL rows leave the formula/size cells empty."""
+    token into one CSV row. Non-LTL rows leave the formula/size cells empty.
+    `display` is the readable label (basename / formula text, may collide);
+    `source` is the unique provenance key (relative path, file:line, --ltl:k)."""
     r: Dict[str, object] = {c: "" for c in COLS}
     r["input"] = display
+    r["source"] = source
     r["result"] = _result_token(br.status)
     r["technique"] = br.technique or ""
     r["build_s"] = br.build_s or ""

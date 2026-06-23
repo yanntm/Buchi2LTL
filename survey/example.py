@@ -15,7 +15,8 @@ class Example:
     kind: str            # "ltl" | "hoa"
     value: str           # formula text (ltl) or HOA file path (hoa)
     display: str         # the input column in the CSV / trace
-    source: str = ""     # provenance; CSV use deferred (keying is a tomorrow issue)
+    source: str = ""     # unique provenance key, emitted as the CSV `source` column
+                         # (relative path | file:line | --ltl:k)
 
     @property
     def is_hoa(self) -> bool:

@@ -48,7 +48,7 @@ def _record(ex: Example, technique: Optional[str], *, verify: bool,
     br = _build.build(ex.value, is_hoa=ex.is_hoa, technique=technique,
                       timeout=build_timeout)
     validation = _validation(ex, br, verify=verify, equiv_timeout=equiv_timeout)
-    return report.row(ex.display, br, validation)
+    return report.row(ex.display, br, validation, ex.source)
 
 
 def _trace_header() -> None:
