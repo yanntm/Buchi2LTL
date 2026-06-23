@@ -59,18 +59,19 @@ short-circuits — once a stage stops, the later cells stay empty:
 
 | column | meaning |
 |---|---|
-| `input` | the example's display id — formula text (LTL) or file basename (HOA) |
+| `input` | the example's display id — formula text (LTL) or file basename (HOA); **readable, may collide** |
 | `result` | `LTL` / `NOT_LTL` / `PROBABLY_NOT_LTL` / `DECLINED` / `TIMEOUT` / `CRASH` |
 | `technique` | the recipe that produced the answer |
 | `build_s` | front-end wall time |
 | `formula` | the reconstructed LTL (truncated), on `LTL` rows |
 | `dag` `temporals` `tree` `sharing` | size metrics of that formula |
 | `validation` | spot-oracle verdict — `TRUE` / `FAIL` / `SIZE` / `TIMEOUT` / `ERROR` / `OFF` |
+| `source` | **unique** provenance key — relative path (HOA) / `file:line` (LTL list) / `--ltl:k` (inline) |
 
 The run is FAIL iff any row is verified non-equivalent (`validation == FAIL`);
-otherwise SUCCESS (size/timeout/error are *not* failures). Each `Example` already
-carries its `source` provenance (the originating `file[:line]`); emitting it as a
-column is the CSV-provenance TODO below.
+otherwise SUCCESS (size/timeout/error are *not* failures). `input` is
+human-readable and may repeat; `source` is the unique key for dedup, joins, and
+per-folder breakdowns.
 
 ## Module map
 
@@ -89,19 +90,11 @@ column is the CSV-provenance TODO below.
 | `normalize/` | shared AP-normalization + dedup-key (its own [README](normalize/README.md)) |
 | `diff/` | comparison tooling: **language** diff (`ltl_diff`/`diff_hoa`) + **result** CSV diff (`results`) — its own [README](diff/README.md) |
 
-Old → new: `survey.py` splits into `discovery` + `build` + `verify`;
-`survey_diff.py` → `survey.diff.results`; `survey_summary.sh` → `report`; the
-`*_sweep.sh` shells dissolve into `__main__`'s multi-`--use` loop;
-`kinska_breakdown.py` is retired in favour of CSV-native provenance (see TODO).
-
 ## TODO
 
 - **`--use all` → technique discovery.** survey must enumerate the available
   techniques from the portfolio registry **at runtime** (no hardcoded list) and
   run them all for soundness. Until that lands, `all` is unsupported.
-- **CSV provenance.** Carry each example's source subfolder in the CSV natively,
-  so per-folder breakdowns need no input-order replay (this is the whole reason
-  `kinska_breakdown.py` existed).
 
 ## Running
 
