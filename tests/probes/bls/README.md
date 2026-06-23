@@ -5,8 +5,6 @@ structured like the source it exercises (e.g. `simplify/` for the simplify
 pipeline) — look around; each probe is self-describing.
 
 For the running convention and discipline (placed scripts, run from the repo root
-as `python3 -m tests.probes.bls.<probe>`), see [`../README.md`](../README.md) and
-the top-level [`tests/README.md`](../../README.md).
-
-One bls-specific note: Spot/buddy can segfault on accumulated state (rc 139), so
-isolate each case in its own subprocess — follow the existing scripts.
+as `python3 -m tests.probes.bls.<probe>`, and the budget/isolation harness to
+reuse instead of hand-rolling subprocess handling), see
+[`../README.md`](../README.md) and the top-level [`tests/README.md`](../../README.md).

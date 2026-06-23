@@ -23,6 +23,17 @@ committed reference runs live elsewhere: `samples/`, the `survey` package,
 - **Diagnostics are self-bound** (≤15s per example); a blown budget is a finding,
   not something to wait on.
 
+## Running under a budget — reuse the harness, don't reinvent
+
+Never hand-roll `subprocess`/`timeout` handling: the survey harness already runs a
+child under a strict, reapable budget and stays clean even when Spot/buddy/GAP
+segfault (it reaps the whole process group via `aut2ltl/proc.py`). Reuse it:
+
+- `survey.bounded.run(argv, timeout)` → `BoundedResult(rc, out, err, wall_s,
+  timed_out)` — run any command under budget, output captured.
+- `survey.build.build(value, is_hoa=…, technique=…, timeout=…)` → `BuildResult` —
+  run the aut2ltl front end on one input (exactly what a user runs), report parsed.
+
 ## logs/
 
 `tests/logs/` is a scratch area — write smoke output here freely. It is
