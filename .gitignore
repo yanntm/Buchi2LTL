@@ -1,42 +1,17 @@
+# Caches (match at any depth)
 __pycache__/
 *.pyc
 *.pyo
-*.csv
-*.log
+
+# Editors
 .idea/
 .vscode/
 
-# Transient scratch / debug output goes in tests/smoke/ (committed images such as
-# docs/img/*.png are kept — we no longer blanket-ignore *.png / *.dot).
+# Scratch survey/test output. Persisted reference runs live in results/ and are
+# committed; throwaway runs go to the root logs/ dir, which is the only ignored
+# folder (no blanket *.csv ignore — committed CSVs need no re-include dance).
+/logs/
+*.log
 
 # Local-only dev tool (parses session transcripts; not part of the project)
 /parse_last_session.py
-
-# generated outputs and caches
-tests/smoke/
-# Bench logs are throwaway EXCEPT the committed reference runs. Ignore the
-# contents of logs/ but keep logs/reference/ (can't re-include inside a fully
-# excluded dir, so exclude the contents, not the dir).
-tests/benchmark/logs/*
-!tests/benchmark/logs/reference/
-!tests/benchmark/logs/reference/**
-tests/kr/examples/generated/
-aut2ltl/**/__pycache__/
-aut2ltl/**/*.pyc
-tests/**/__pycache__/
-tests/**/*.pyc
-
-# Reference survey sweeps are committed per release (re-include despite *.csv).
-# Dated subfolders (tests/logs/reference/<YYYYMMDD>/) -> recurse with **/*.csv.
-# Also keep the token-compact summaries: the cross-config SUMMARY.txt and the
-# per-config .txt stdout reports (sweep.log stays gitignored — it is the bulky
-# per-formula stderr trace).
-!tests/logs/reference/
-!tests/logs/reference/**/*.csv
-!tests/logs/reference/**/SUMMARY.txt
-!tests/logs/reference/**/*.txt
-!tests/samples/kinska/logs/reference/
-!tests/samples/kinska/logs/reference/*.csv
-!tests/samples/kinska/logs/reference/SUMMARY.txt
-!tests/samples/kinska/logs/reference/*.txt
-
