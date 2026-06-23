@@ -28,16 +28,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import spot
 
 from aut2ltl.proc import setup_signals
-from aut2ltl.options import Options, OptionSpec
+from aut2ltl.options import Options, OptionSpec, MD5_LENGTH, ROOT_OPTIONS
 from aut2ltl.language import Language, LANGUAGE_OPTIONS, UntranslatableLanguage
 from aut2ltl.result import LTLResult
 from aut2ltl.portfolio import build_portfolio, TECHNIQUES
 from aut2ltl.bls.options import KR_OPTIONS, FLATTEN_TREE_LIMIT
 from aut2ltl.ltl.metrics import dag_metrics
-from aut2ltl.ltl.printers import format_gated, to_dot
+from aut2ltl.ltl.printers import format_gated, to_dot, dag_md5
 
 # The full declared option contract (every -O key, every --list-options row).
-ALL_SPECS: List[OptionSpec] = list(KR_OPTIONS) + list(LANGUAGE_OPTIONS)
+ALL_SPECS: List[OptionSpec] = (list(KR_OPTIONS) + list(LANGUAGE_OPTIONS)
+                               + list(ROOT_OPTIONS))
 _SPEC_BY_KEY = {s.key: s for s in ALL_SPECS}
 
 _FILE_EXTS = (".hoa", ".aut", ".hoaf")
@@ -106,6 +107,11 @@ def build_parser() -> argparse.ArgumentParser:
                        help="emit the formula as a graphviz dot DAG instead of LTL text "
                             "(O(distinct nodes); pure-boolean subformulas collapse to one "
                             "node) — does not explode where the flat string would")
+    g_out.add_argument("--dagmd5", action="store_true",
+                       help="add a 'dag md5' line to the report: the md5 of the canonical "
+                            "DAG serialization (a structure fingerprint that discriminates "
+                            "even gated formulas), truncated to aut2ltl.md5_length hex chars "
+                            f"(default {MD5_LENGTH.default}; -O / AUT2LTL_MD5_LENGTH)")
     g_out.add_argument("-q", "--quiet", action="store_true",
                        help="print only the formula on stdout (silence the stderr report)")
     g_out.add_argument("-o", "--output", metavar="FILE",
@@ -242,6 +248,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             f"sharing   : {m.sharing:.1f}x\n"
             f"build time: {dt:.3f}s"
         )
+        if args.dagmd5:
+            report += f"\ndag md5   : {dag_md5(res.formula, options.get(MD5_LENGTH))}"
         if args.output:
             report += f"\nwritten   : {args.output}"
         print(report, file=sys.stderr)
