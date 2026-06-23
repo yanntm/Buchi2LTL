@@ -32,7 +32,7 @@ from __future__ import annotations
 import argparse
 import os
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import matplotlib
 
@@ -116,45 +116,64 @@ def report_overview(df: pd.DataFrame, top: int) -> Section:
     return s
 
 
+def _abbrev(text: str, n: int) -> str:
+    return text if len(text) <= n else text[: n - 3] + "..."
+
+
 def report_collapse(df: pd.DataFrame, top: int) -> Section:
-    s = Section("Formula collapse — idiom concentration")
-    built = df[df["result"] == ANSWERED]
+    # Group answers by the md5 STRUCTURE key (the canonical-DAG fingerprint), not
+    # the printed string: this folds the gated/unprintable formulas too — two
+    # answers with the same DAG share a key even when the flat string is gated.
+    s = Section("Formula collapse — structural (md5) concentration")
+    built = df[df["result"] == ANSWERED].copy()
     n_built = len(built)
+    if not n_built:
+        s.lines.append("no LTL answers.")
+        s.terse = ["no LTL answers"]
+        return s
+
     forms = built["formula"].fillna("").astype(str)
-    gated = forms.str.startswith("<unflattened").sum()
-    readable = forms[~forms.str.startswith("<unflattened")]
-    counts = readable.value_counts()
-    s.lines.append(f"LTL answers: {n_built}   ({gated} gated/unflattened strings)")
-    s.lines.append(f"distinct readable formulas: {len(counts)}")
-    if len(counts):
-        # how few idioms cover 80% / 90% of the readable answers
-        n_readable = int(counts.sum())
-        cum = counts.cumsum()
-        for frac in (0.80, 0.90):
-            need = min(int((cum < frac * n_readable).sum()) + 1, len(counts))
-            s.lines.append(f"  {int(frac*100)}% of readable answers covered by the "
-                           f"top {need} idiom(s)")
-    s.lines.append(f"top {top} idioms:")
-    for form, n in counts.head(top).items():
-        label = form if len(form) <= 48 else form[:45] + "..."
-        s.lines.append(f"  {n:5d}  ({_pct(int(n), n_built)})  {label}")
+    built["_gated"] = forms.str.startswith("<unflattened")
+    n_gated = int(built["_gated"].sum())
 
-    top5 = "; ".join(f"{f!r}x{int(n)}" for f, n in counts.head(5).items())
-    s.terse = [f"{n_built} LTL answers -> {len(counts)} distinct idioms "
-               f"({gated} gated). top5: {top5}"]
+    has_md5 = "md5" in built.columns and built["md5"].fillna("").astype(str).ne("").any()
+    if has_md5:
+        key, keyname = built["md5"].fillna("").astype(str), "structures (md5)"
+    else:  # fallback: pre-md5 CSV -> group by the (gated-or-not) string
+        key, keyname = forms, "readable formulas"
+    counts = key.value_counts()
+    n_keys = len(counts)
 
-    if len(counts):
-        head = counts.head(top)[::-1]
-        fig, ax = plt.subplots(figsize=(8, max(3, 0.35 * len(head) + 1)))
-        labels = [f if len(f) <= 36 else f[:33] + "..." for f in head.index]
-        ax.barh(labels, head.values, color="#55a868")
-        for i, v in enumerate(head.values):
-            ax.text(v, i, f" {v}", va="center", fontsize=8)
-        ax.set_title(f"Top {len(head)} reconstructed idioms")
-        ax.set_xlabel("inputs (log)")
-        ax.set_xscale("log")
-        fig.tight_layout()
-        s.figures.append(fig)
+    # one readable representative per key: prefer a non-gated formula in the group.
+    label: Dict[str, str] = {}
+    for k, grp in built.groupby(key):
+        nong = grp.loc[~grp["_gated"], "formula"]
+        label[str(k)] = str(nong.iloc[0] if len(nong) else grp["formula"].iloc[0])
+
+    s.lines.append(f"LTL answers: {n_built}  ({n_gated} with a gated/unprintable string)")
+    s.lines.append(f"distinct {keyname}: {n_keys}")
+    cum = counts.cumsum()
+    for frac in (0.80, 0.90):
+        need = min(int((cum < frac * n_built).sum()) + 1, n_keys)
+        s.lines.append(f"  {int(frac*100)}% of answers covered by the top {need} structure(s)")
+    s.lines.append(f"top {top} structures:")
+    for k, n in counts.head(top).items():
+        s.lines.append(f"  {n:5d}  ({_pct(int(n), n_built)})  {_abbrev(label[str(k)], 48)}")
+
+    top5 = "; ".join(f"{label[str(k)]!r}x{int(n)}" for k, n in counts.head(5).items())
+    s.terse = [f"{n_built} LTL answers -> {n_keys} distinct {keyname} "
+               f"({n_gated} gated, folded by key). top5: {top5}"]
+
+    head = counts.head(top)[::-1]
+    fig, ax = plt.subplots(figsize=(8, max(3, 0.35 * len(head) + 1)))
+    ax.barh([_abbrev(label[str(k)], 36) for k in head.index], head.values, color="#55a868")
+    for i, v in enumerate(head.values):
+        ax.text(v, i, f" {v}", va="center", fontsize=8)
+    ax.set_title(f"Top {len(head)} reconstructed structures")
+    ax.set_xlabel("inputs (log)")
+    ax.set_xscale("log")
+    fig.tight_layout()
+    s.figures.append(fig)
     return s
 
 
