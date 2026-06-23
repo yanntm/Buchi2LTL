@@ -31,9 +31,13 @@ as LTL, so a file path needs this wrapper):
 ## Result diff (CSV)
 
 Comparing two survey *runs* (not languages) lives here too: `survey.diff.results`
-keys two result CSVs on the input and reports key-set differences plus
-equivalence regressions/fixes, technique changes and size movers on the common
-inputs.
+keys two result CSVs on `source` and reports in two tiers — a **consistency gate**
+(symmetric, the only thing that sets a non-zero exit): a `FAIL` (formula verified
+non-equivalent) on either side, or a `CLASH` (one run LTL, the other NOT_LTL on the
+same input — one is unsound); and a **quantitative** readout that never gates:
+answered/validated counts, validation moves, technique changes and size movers on
+the common inputs. A bigger formula or a `TRUE -> TIMEOUT` move is an assay, not a
+regression.
 
     python3 -m survey.diff.results A.csv B.csv
 
