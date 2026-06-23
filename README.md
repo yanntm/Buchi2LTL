@@ -24,23 +24,48 @@ pip install -e .          # provides `python3 -m aut2ltl` and the `aut2ltl` cons
 
 ### Example
 
-Here is a small automaton from the test fixtures
-([`tests/fixtures/motivating_example.hoa`](tests/fixtures/motivating_example.hoa)) —
-the language *"`p` until `q`, and `r` infinitely often"*:
+A **round trip**, LTL → automaton → LTL. Take `F(X!a & ((b R a) W b))` and let Spot
+build its TGBA
+([`samples/fixtures/hoa/various/collapse_example.hoa`](samples/fixtures/hoa/various/collapse_example.hoa)):
 
-<p align="center"><img src="docs/img/motivating_example.png" alt="the example automaton" width="240"></p>
+<p align="center"><img src="docs/img/collapse_example.png" alt="the TGBA of F(X!a & ((b R a) W b))" width="320"></p>
 
-Run `aut2ltl` on it:
+`aut2ltl` reads a defining formula back off the automaton:
 
 ```console
-$ python3 -m aut2ltl tests/fixtures/motivating_example.hoa
-technique : daisy
-DAG nodes : 9
-temporals : 3
-tree nodes: 10
-sharing   : 1.1x
+$ python3 -m aut2ltl samples/fixtures/hoa/various/collapse_example.hoa
+technique : daisy+daisystardet
+DAG nodes : 6
+temporals : 1
+tree nodes: 6
+sharing   : 1.0x
 build time: 0.002s
-(p & !q) U (q & GFr)
+F(b & X!a)
+```
+
+`F(b & X!a)` is far smaller than the formula we started from — and no LTL
+*simplifier* closes that gap: `ltlfilt` leaves `F(X!a & ((b R a) W b))` untouched at
+every level, up to its strongest `-r3`. Minimal LTL simplification is as hard as LTL
+equivalence (PSPACE-complete), so syntactic rewriters are necessarily incomplete;
+`aut2ltl` reaches the simpler form by passing through the automaton — the semantic
+object — and reconstructing LTL from it.
+
+A second round trip, `GFa & FGb`
+([`samples/fixtures/hoa/various/fairness_example.hoa`](samples/fixtures/hoa/various/fairness_example.hoa)),
+exercises the **acceptance handling**: recovering this fairness pattern means reading
+the Büchi acceptance back as `GF`/`FG`, not just the transition structure.
+
+<p align="center"><img src="docs/img/fairness_example.png" alt="the TGBA of GFa & FGb" width="240"></p>
+
+```console
+$ python3 -m aut2ltl samples/fixtures/hoa/various/fairness_example.hoa
+technique : acc2+daisy
+DAG nodes : 7
+temporals : 4
+tree nodes: 7
+sharing   : 1.0x
+build time: 0.002s
+G(Fa & FGb)
 ```
 
 The **formula** is printed on stdout; the **report** above it (the methods used, the
@@ -48,7 +73,7 @@ formula's size, build time) goes to stderr. In a pipeline you therefore receive 
 the formula:
 
 ```bash
-python3 -m aut2ltl tests/fixtures/motivating_example.hoa -q | ltlfilt --simplify
+python3 -m aut2ltl samples/fixtures/hoa/various/collapse_example.hoa -q | ltlfilt --simplify
 ```
 
 ## Using it
