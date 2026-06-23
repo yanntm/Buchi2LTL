@@ -40,11 +40,25 @@ dedup cannot accidentally miss a language.
    round-trip through `aut2ltl` *should* recover the same formula, but that is the
    thing we want to measure, not assume). The AP-canonical key is reused verbatim
    from the shared tool, so this pre-process carries to any future family regen.
-3. **Survey** the survivors through the real front end with the repo's
-   `tests/survey.py` (per-case 15s build + 15s verify budgets, spot
-   `are_equivalent` oracle):
+3. **Survey** the survivors with the repo harness — genaut's corpus is just
+   another reference corpus, run and refreshed exactly like the ones in
+   [`../results/README.md`](../results/README.md) (the authoritative workflow:
+   rerun into scratch, diff, overwrite only when clean). The corpus folder is
+   `corpus/2state1ap1acc/`:
 
-       python3 tests/survey.py genaut/raw/*.hoa
+       python3 -m survey --folder genaut/corpus/2state1ap1acc \
+           --logs logs/rerun/genaut > logs/rerun/genaut/SUMMARY.txt
+
+   The committed reference run lives in `logs/` (`default.csv` + `SUMMARY.txt`),
+   same naming as `results/reference/<corpus>/`.
+4. **Analyse** the run into a frontier report (pure CSV post-processing, no tool
+   re-run) — text digest to stdout plus a multi-page PDF with log-scale plots:
+
+       python3 genaut/analyze_frontier.py logs/rerun/genaut/survey_*.csv \
+           --out logs/frontier.pdf
+
+   The committed `logs/frontier.pdf` is part of the experiment: regenerate it
+   whenever the survey is refreshed.
 
 Each survivor keeps its **generator id** in its filename (`aut_<index>.hoa`), so
 the exact raw automaton is reproducible from the index alone (`aut_at(index)`).
@@ -53,10 +67,15 @@ the exact raw automaton is reproducible from the index alone (`aut_at(index)`).
 
 - 65536 combos → **1845** byte-distinct → **929** AP-canonical survivors (the
   `a ↔ !a` polarity / AP-rename twins folded pre-write).
-- `aut2ltl` answered **922 / 929**: **799 LTL formulas built** + **123 decided
-  not-LTL**; **7 build-timeouts**; **0 crashes, 0 declines**.
+- The corpus **ventilates** into **799 LTL-definable** (a formula was built) +
+  **123 decided not-LTL** + **7 ambiguous** (build-timeouts — the only inputs
+  whose LTL-ness is undecided); **0 crashes, 0 declines**.
 - Spot verification of the 799: **745 equivalent, 0 NOT-equivalent**, 54 too
-  large to flatten/check. **Clean.** Total build 516.5s.
+  large to flatten/check. **Clean.**
+- The 799 answers **collapse onto a tiny idiom vocabulary**: **87 distinct
+  formulas**, with `1` (true) alone covering **331 (41%)** and the **top-5 idioms
+  ~64%**; the flattened size is **median 2 nodes, 80% under 20** — a thin
+  exponential tail. See `logs/frontier.pdf` (regenerate with `analyze_frontier.py`).
 
 > **Note — the analysis below predates AP-canonical dedup.** The "true finding"
 > and determinization sections were computed on the *pre-dedup 1845* corpus via
@@ -117,6 +136,12 @@ canonicalization we never asked for.
                      pre-write dedup (md5, then AP-canonical polarity∘names), and
                      per-index helpers combo_at(i) / aut_at(i, bdict).
                      `python3 genaut/enumerate.py [LIMIT]`  -> genaut/raw/*.hoa
+    analyze_frontier.py
+                     the analysis: one frontier report from a survey CSV (pure CSV,
+                     no tool re-run) — ventilation (LTL/not-LTL/ambiguous), idiom
+                     collapse, size frontier, routes-to-true, build/verify. Terse
+                     digest to stdout + a multi-page PDF with log-scale plots.
+                     `python3 genaut/analyze_frontier.py [CSV] [--out PDF] [--top N]`
     probe_post.py    diagnostic: rebuild a raw automaton from its generator id and
                      run a spot postprocess type×pref×level matrix on it.
                      `python3 genaut/probe_post.py [INDEX]`   (default 51142)
@@ -129,6 +154,7 @@ canonicalization we never asked for.
     corpus/          the canonical automata, one subfolder per shape (git-tracked):
                      corpus/2state1ap1acc/ = the 929 AP-canonical survivors. The
                      specimens exist independently of aut2ltl; index naming stable.
-    logs/            the committed survey results for the census above:
-                     genaut.csv (per-automaton), genaut.summary.txt (the SUCCESS
-                     report), genaut.run.log (per-case stderr trace).
+    logs/            the committed reference run for the census above (new-schema,
+                     same naming as results/reference/<corpus>/): default.csv
+                     (per-automaton survey), SUMMARY.txt (the SUCCESS report),
+                     frontier.pdf (analyze_frontier.py's report).
