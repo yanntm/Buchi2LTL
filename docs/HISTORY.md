@@ -1654,3 +1654,16 @@ front, writes the header, and flushes one row per record; `run.py` opens the
 stream before the loop (file under `--logs`, else stdout) and writes each row as
 it is produced. Summary stays end-of-run. Removed the batch `report.write_csv`
 (its only caller was `run.py`).
+
+## 2026-06-23 — survey.diff.results: consistency gate vs quantitative assay
+
+Split the result-CSV diff into two tiers. The CONSISTENCY gate (symmetric, the
+only non-zero exit): a FAIL (formula verified non-equivalent) on either side, or
+a CLASH (one run LTL, the other NOT_LTL on the same input — one is unsound).
+Everything else is a QUANTITATIVE readout that never gates: answered/validated
+counts, validation moves, result/technique changes, size movers, totals. The
+prior code bucketed every TRUE->not-TRUE (incl. TIMEOUT/SIZE/ERROR) as a
+"VALIDATION REGRESSION" and exited 1 — conflating "oracle couldn't verify a huge
+but still-correct formula" with "formula was wrong". A bigger tree or a
+TRUE->TIMEOUT move is now an assay, not a regression. Gate test:
+tests/probes/test_diff_results.py.
