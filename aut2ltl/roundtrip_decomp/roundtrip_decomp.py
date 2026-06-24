@@ -9,7 +9,7 @@ hash-cons identity is invalidated in flight.
 """
 from __future__ import annotations
 
-from typing import Dict, List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 from aut2ltl.result import LTLResult
 from aut2ltl.roundtrip.subst import substitute
@@ -35,7 +35,7 @@ def roundtrip_decomp(rewrite: "Rewriter", finder: "Finder", *, name: str = _NAME
         if node is None:
             return res                                   # finder declines → identity
 
-        operands: List["spot.formula"] = list(dict.fromkeys(node))   # distinct children, in order
+        operands: List["spot.formula"] = list(node)   # children, in order (duplicates kept)
         results = rewrite_each(operands, rewrite)
 
         out = LTLResult.start(name)
@@ -45,10 +45,14 @@ def roundtrip_decomp(rewrite: "Rewriter", finder: "Finder", *, name: str = _NAME
             if out.nok:
                 return out                               # a declined operand declines the whole
 
-        mapping: Dict["spot.formula", "spot.formula"] = {
-            op: r.formula for op, r in zip(operands, results)
-        }
-        rebuilt = node.map(lambda c: mapping[c])
+        # Rebuild N from the re-presented operands, fed back in order. We must NOT
+        # look the children up by value: rewriting an operand can drift the child
+        # instance held inside `node` out from under a value-keyed map (spot
+        # re-presents shared sub-structure in place). `operands` was snapshotted
+        # from `node` in order and `results` is parallel to it, so a positional
+        # feed — ignoring the live child `node.map` hands us — is identity-safe.
+        rebuilt_operands = iter(r.formula for r in results)
+        rebuilt = node.map(lambda _c: next(rebuilt_operands))
         if rebuilt == node:
             return res                                   # nothing improved → no-op, no self-credit
 
