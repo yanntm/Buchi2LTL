@@ -67,45 +67,36 @@ The consumer (`aut2cas.py`) emits the non-definable reading as a `NOT_LTL`
 `LTLResult` **before** the holonomy build is ever called — a flat NOT_LTL when
 conclusive, a hedged "strong hint, may be non-minimal" otherwise.
 
-## The verdict is absorbing — it wires the whole portfolio
+## The verdict is absorbing
 
-`NOT_LTL` is not a private decline: it **dominates** in both result algebras
-(`aut2ltl/result.py`), so a non-LTL reading routes *every* member to hell, not just
-the cascade.
+`NOT_LTL` is not a recoverable decline: it dominates both result algebras
+(`aut2ltl/result.py`), so it governs the whole portfolio, not only the cascade.
 
 - **Choice (`first_success`).** `NOT_LTL ≻ DECLINED`: a `DECLINED` falls through to
-  the next translator, but a `NOT_LTL` **short-circuits** — `first` returns it
-  as-is and no later member is even tried. One member proving non-definability
-  decides the whole portfolio.
-- **Composition (`credit`/`fuse`).** Dominance `NOT_LTL ≻ DECLINED ≻ OK`: a
-  `NOT_LTL` child flips its parent to `NOT_LTL` and clears the formula, carrying the
-  verdict up.
+  the next translator, but a `NOT_LTL` short-circuits — `first` returns it as-is and
+  no later member runs.
+- **Composition (`credit`/`fuse`).** `NOT_LTL ≻ DECLINED ≻ OK`: a `NOT_LTL` child
+  raises its parent to `NOT_LTL` and clears the formula.
 
-So a genuinely non-LTL language routes straight to the reported impossibility and
-nothing downstream can override it. **non-LTL is a hard fail** — this gate is the
-opposite of lenient.
+Hence one member's non-definability verdict is final: no downstream translator can
+override it.
 
-## When the oracle can't run (the gate abstains)
+## When the oracle cannot run (the gate abstains)
 
-The one place the gate is permissive is **not** the verdict — it is when the oracle
-*physically cannot run*: too many APs to extract a tractable letter set, or a GAP
-error/timeout. There the gate **abstains**: it does *not* fabricate a `NOT_LTL`
-(that would falsely reject a definable language over a mere extraction limit), and
-it does *not* assert definability as fact — it returns `(definable=True,
-conclusive=False)` so the cascade is *attempted* rather than the language rejected
-unseen. The asymmetry is conservative toward **completeness**: an abstention costs
-at worst a later cascade decline; a fabricated rejection would lose a definable
-answer outright. It never touches the verdict path above — a real `not-aperiodic`
-reading is still emitted as the absorbing `NOT_LTL`.
+The gate is permissive in one case, and it is not the verdict: when the oracle
+cannot run at all — too many APs to extract a tractable letter set, or a GAP
+error/timeout. It then abstains, returning `(definable=True, conclusive=False)`: it
+neither emits `NOT_LTL` (which would reject a possibly definable language over an
+extraction limit) nor asserts definability as fact, so the cascade is attempted
+rather than the language rejected unseen. The asymmetry favours completeness: an
+abstention costs at most a later cascade decline, whereas a spurious rejection would
+discard a definable answer.
 
-**Soundness is preserved — abstaining cannot leak a wrong formula.** The gate and
-the cascade share the *same* machinery: `extract_generators` and GAP. Whatever stops
-the cheap aperiodicity check (too many APs to extract, a GAP error/timeout) also
-stops the cascade's heavier holonomy — it runs the *same* extraction and a *larger*
-GAP job — so on exactly those inputs the cascade is doomed to **decline**, not to
-build a formula. Abstaining attempts a construction that in all reasonable
-probability fails cleanly, rather than rejecting a language we could not read. The
-tool stays **sound** either way: it never returns a non-equivalent formula.
+Abstaining preserves soundness. The gate and the cascade share the same machinery
+(`extract_generators` and GAP); a failure that blocks the cheap aperiodicity check
+also blocks the cascade's holonomy, which runs the same extraction and a larger GAP
+job. On such inputs the cascade therefore declines rather than building a formula,
+so the tool never returns a non-equivalent formula.
 
 ## Caching
 
