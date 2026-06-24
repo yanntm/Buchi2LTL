@@ -1,15 +1,14 @@
 """
-aut2ltl.roundtrip — the `Roundtrip` combinator Translator and its `Finder` contract.
+aut2ltl.roundtrip — the `roundtrip` Rewriter and its `Finder` contract.
 
-`Roundtrip(labeler, finder)` labels a Language with `labeler`, lets `finder` pick a
-node of the resulting formula, relabels that node's language with `labeler`, and
-relinks the result in place. See algorithm.md; the concrete finders live in
-`cutpoints/`.
+`roundtrip(R, Φ)` is a Rewriter (`LTLResult → LTLResult`): locate one node via the
+finder `Φ`, re-present the subformula there with the Rewriter `R`, relink in place.
+See algorithm.md; the finder strategies live in `cutpoints/`.
 
-Public entries: `Roundtrip`, `Finder`.
+Public entries: `roundtrip`, `Finder`.
 """
 
 from .finder import Finder
-from .roundtrip import Roundtrip
+from .roundtrip import roundtrip
 
-__all__ = ["Roundtrip", "Finder"]
+__all__ = ["roundtrip", "Finder"]
