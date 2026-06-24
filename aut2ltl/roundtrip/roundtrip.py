@@ -1,61 +1,41 @@
-"""The `Roundtrip` combinator Translator (see algorithm.md).
+"""The `roundtrip` Rewriter (see algorithm.md).
 
-`Roundtrip(labeler, finder)` labels a Language with `labeler`, lets `finder` pick a
-node of the resulting formula, relabels that node's language with `labeler`, and
-relinks the result in place. The whole-formula relabel is the special case of a
-finder that returns the root. Constructed with the child `labeler` it applies on
-both ends and the `finder`; holds no other state.
+`roundtrip(R, Φ)` locates one node of the input formula via the finder `Φ`,
+re-presents the subformula there with the Rewriter `R`, and relinks the result in
+place. No seed — seeding is `as_translator`'s concern (see `ltl_rewriter`). With
+`R = relabel(Λ)` the re-presentation is the language round trip; with `R` tied to a
+decomposer the re-derivation recurses.
 """
+from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from aut2ltl.language import Language, UntranslatableLanguage
 from aut2ltl.result import LTLResult
 from .subst import substitute
 
 if TYPE_CHECKING:
-    import spot
-    from aut2ltl.translator import Translator
+    from aut2ltl.ltl_rewriter import Rewriter
     from .finder import Finder
 
 _NAME = "roundtrip"
 
 
-class Roundtrip:
-    """A `Translator` (`Language → LTLResult`): `roundtrip(Λ, Φ)` of algorithm.md.
-
-    `Λ` = `labeler` (applied on both ends), `Φ` = `finder`. Holds no other state."""
-
-    name = _NAME
-
-    def __init__(self, labeler: "Translator", finder: "Finder") -> None:
-        self._labeler = labeler
-        self._finder = finder
-
-    def __call__(self, lang: "Language") -> "LTLResult":
-        # Λ(L): a declined label has no formula to cut — propagate it (⊥ → ⊥).
-        seed = self._labeler(lang)
-        if seed.nok:
-            return seed
-
-        # Φ(φ): a declined finder returns the label verbatim, uncredited (Some φ).
-        node: "Optional[spot.formula]" = self._finder(seed.formula)
+def roundtrip(rewrite: Rewriter, finder: Finder, *, name: str = _NAME) -> Rewriter:
+    """Build a Rewriter re-presenting one located node: `n = finder(res.formula)`,
+    re-present `res.formula↓n` (= `n`) with `rewrite`, relink. A declined finder
+    returns the input verbatim (no self-credit); a declined re-presentation
+    propagates (unmasked)."""
+    def run(res: LTLResult) -> LTLResult:
+        formula = res.formula
+        node = finder(formula)
         if node is None:
-            return seed
-
-        # Λ(lang(φ↓n)): relabel the node's language (φ↓n is the node itself). When the
-        # subformula is too large for ltl2tgba the labeler raises rather than blow Spot
-        # up — the relabel is then unavailable: decline.
-        try:
-            relabel = self._labeler(Language.of_ltl(node))
-        except UntranslatableLanguage:
-            return LTLResult.decline()
-        if relabel.nok:
-            return relabel        # a declined relabel is our decline; we do not mask it
-
-        # φ[n ↦ ψ]: relink, crediting the round trip and both labelings (Some φ[n↦ψ]).
-        res = LTLResult.start(_NAME)
-        res.credit(seed)
-        res.credit(relabel)
-        res.formula = substitute(seed.formula, node, relabel.formula)
-        return res
+            return res                              # finder declines → identity
+        inner = rewrite(LTLResult.success(node))    # re-present the located node
+        if inner.nok:
+            return inner                            # decline propagates; not masked
+        out = LTLResult.start(name)
+        out.credit(res)
+        out.credit(inner)
+        out.formula = substitute(formula, node, inner.formula)
+        return out
+    return run
