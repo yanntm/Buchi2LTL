@@ -1,75 +1,43 @@
 # The roundtrip algorithm
 
-A translator combinator `roundtrip(Λ, Φ)`, parameterized by a child labeler `Λ` and
-a node finder `Φ`. On a language it labels with `Λ`, then replaces the subformula at
-one node chosen by `Φ` with an `Λ`-relabeling of that subformula's language.
+A `Rewriter` that **re-presents one located node**. `roundtrip(R, Φ)` locates a node
+`n = Φ(φ)` of the input formula, re-presents the subformula at `n` with the Rewriter
+`R`, and relinks the result in place. It carries no seed — seeding (automaton →
+formula) is `as_translator`'s, see `ltl_rewriter`.
 
 ## Setting
 
 ```
-Label       =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ = decline
-Translator  =  Language → Label
-Λ           :  Translator                    -- the child labeler
-Φ           :  Formula → (Node | ⊥)          -- the node finder
+Rewriter  =  LTLResult → LTLResult
+R         :  Rewriter               -- the node's re-presentation (e.g. relabel(Λ))
+Φ         :  Formula → (Node | ⊥)   -- the node finder
 ```
 
-An LTL formula `φ` is a hash-consed DAG; its **nodes** are its subformula
-occurrences. For a node `n` of `φ`:
-
-```
-φ↓n         =  the subformula rooted at n
-φ[n ↦ ψ]    =  φ with the subformula at n replaced by ψ
-               (at every occurrence of the shared node n)
-lang(φ)     =  the Language whose ω-language is L(φ)
-```
-
-Write `α ≡ β` for ω-equivalence (`L(α) = L(β)`).
-
-## The finder
-
-`Φ` maps a formula to one of its nodes, or declines. Its sole obligation:
-
-```
-Φ(φ) = n ≠ ⊥   ⇒   n is a node of φ
-```
-
-Nothing further is required of `Φ`.
+A node `n` is a subformula occurrence, so `φ↓n = n`; `φ[n ↦ ψ]` substitutes by
+hash-consed identity (`subst`).
 
 ## The construction
 
 ```
-roundtrip(Λ, Φ) : Translator
-roundtrip(Λ, Φ)(L) =
-    case Λ(L) of
-      ⊥        →  ⊥
-      Some φ   →  case Φ(φ) of
-                    ⊥  →  Some φ
-                    n  →  case Λ(lang(φ↓n)) of
-                            ⊥        →  ⊥
-                            Some ψ   →  Some (φ[n ↦ ψ])
+roundtrip(R, Φ) : Rewriter
+roundtrip(R, Φ)(r) =
+    let φ = r.formula; n = Φ(φ) in
+    if n = ⊥ then r                              -- finder declines → identity (no self-credit)
+    else case R( success(φ↓n) ) of
+           ⊥        →  that decline              -- not masked
+           Some p   →  start(tag).credit(r).credit(p)  with formula  φ[n ↦ p.formula]
 ```
 
-`Φ` may return any node, including the root (`φ↓n = φ`, the whole formula is
-relabeled) or a leaf (`φ↓n` an atom or constant, relabeled to itself); the
-construction treats every node uniformly.
+## Faithfulness
 
-## Soundness
+`R` is a Rewriter, so `R(success(φ↓n)) ≡ φ↓n` (or declines). By congruence
+(`w,i ⊨ φ ⇔ w[i:] ∈ L(φ)`), replacing `n` with an ω-equivalent subformula preserves
+`L(φ)` under any context. A finder decline returns `r` unchanged; a declined
+re-presentation propagates. Faithful-or-`⊥`.
 
-`roundtrip(Λ, Φ)` is **faithful-or-`⊥`**: whenever it returns `Some χ`, `χ ≡ L`.
+## Relation to roundtrip_decomp
 
-ω-equivalence is a **congruence** for LTL: `w, i ⊨ φ ⇔ w[i:] ∈ L(φ)`, so every
-operator depends on its operands only through their ω-languages, and hence
-`α ≡ β ⇒ C[α] ≡ C[β]` for every one-hole context `C`. Write `φ = C[φ↓n]` for the
-context of the chosen node.
-
-The two formula-emitting exits preserve the language:
-
-- **finder declines** (`Φ(φ) = ⊥`). `Λ` faithful ⇒ `φ ≡ L`; the result is `φ`.
-- **relabel succeeds** (`Λ(lang(φ↓n)) = Some ψ`). `Λ` faithful ⇒ `φ ≡ L` and
-  `ψ ≡ lang(φ↓n) ≡ φ↓n`. By congruence
-  `φ[n ↦ ψ] = C[ψ] ≡ C[φ↓n] = φ ≡ L`.
-
-The two remaining exits — a declined label `Λ(L) = ⊥` and a declined relabel
-`Λ(lang(φ↓n)) = ⊥` — return `⊥`. So the only formulas emitted are `Λ`'s own faithful
-labels with at most one subformula replaced by an ω-equivalent one; never a
-non-faithful formula.
+`roundtrip` re-presents the located node itself; `roundtrip_decomp` re-presents that
+node's *operands*, and is a fold of `roundtrip` over them. With `R = relabel(Λ)` the
+re-presentation is the language round trip; with `R = roundtrip_decomp` (tied via
+`recurse`) the re-derivation compounds bottom-up.
