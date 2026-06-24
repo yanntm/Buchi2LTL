@@ -24,6 +24,7 @@ from .best_inv_all import best_inv_all
 from .cake import cake
 from .cakeds import cakeds
 from .cakedsdet import cakedsdet
+from .nobls import nobls
 from .roundtrip import roundtrip
 from .roundtrip_best import roundtrip_best_recipe
 from .roundtrip_decomp import roundtrip_decomp_recipe
@@ -38,6 +39,7 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
     "cake": cake,
     "cakeds": cakeds,
     "cakedsdet": cakedsdet,
+    "nobls": nobls,
     "roundtrip": roundtrip,
     "roundtrip_best": roundtrip_best_recipe,
     "roundtrip_decomp": roundtrip_decomp_recipe,
@@ -51,5 +53,5 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
 RECIPES["default"] = RECIPES["cakedsdet"]
 
 __all__ = ["RECIPES", "best", "best_daisy2", "best_inv", "best_inv_loop",
-           "best_inv_all", "cake", "cakeds", "cakedsdet", "roundtrip",
+           "best_inv_all", "cake", "cakeds", "cakedsdet", "nobls", "roundtrip",
            "roundtrip_best_recipe", "roundtrip_decomp_recipe"]
