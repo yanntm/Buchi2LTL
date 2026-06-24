@@ -1688,3 +1688,24 @@ Reframed the round-trip family around a formula-space contract.
 - `--use roundtrip_decomp` recipe: `Simplify(as_translator(cakedsdet,
   roundtrip_decomp(best_of(identity, relabel(cakedsdet)), toplevel(And))), "hi")`.
   NOT yet exercised — first run / survey deferred to next session (see TODO).
+
+## 2026-06-24 — roundtrip_decomp rebuild fix + Rewriter attribution rule
+
+DONE. Exercising `--use roundtrip_decomp` over the four corpora (validation/kinska/
+benchmark/genaut) surfaced a `KeyError` crash on `GF(a & Xa)` (benchmark): the recipe's
+rebuild deduped operands via `dict.fromkeys(node)` (idempotency only safe for ∧/∨) and
+then `node.map`'d back by child VALUE — but a re-presentation can drift a shared child
+instance out from under a value-keyed map. Fixed by snapshotting operands in order
+(repeats kept) and feeding the re-presented results back POSITIONALLY
+(`roundtrip_decomp.py`); algorithm.md aligned. Crash gone; benchmark back to green
+(crash 1→0, validated 255→255), the 3 roundtrip_decomp size wins (−54/−50/−44%) intact,
+`GF(a & Xa)` now LTL at +1 DAG node (margin noise). validation/kinska stayed clean+neutral.
+
+LANDED. Promoted the "no-op ⇒ no credit" attribution rule from an ad-hoc per-rewriter
+habit to the `ltl_rewriter` CONTRACT (Rewriter Protocol docstring + algorithm.md): a
+Rewriter whose output formula is hash-cons-identical to its input MUST return the input
+verbatim, crediting neither itself nor a delegate. `simplify`/`roundtrip_decomp`/`identity`
+already honored it; brought `roundtrip` (added the `inner.formula == node` guard) and
+`relabel` (added the `out.formula == res.formula` guard) into line. Tag-only change — no
+chosen formula's size or equivalence moves — so the adoption comparison is unaffected.
+Adoption decision (promote roundtrip_decomp to default) pending the genaut result.
