@@ -185,7 +185,7 @@ over your signals, but LTL over the enriched alphabet if you add a bit tracking
 | `sbacc`-free oracle form; fail-open on >5 AP / GAP error | **built** |
 | `conclusive` gated on state-minimality | **built** |
 | Diagnosis | **prose string today** (not yet a checkable object) |
-| Witness `(u, v, x)` extraction (group H-class + factorization → word; complete the family) | `v`, `p` **stage-1 built**; `u`/`x` completion proposed |
+| Witness `(u, v, x)` extraction (group H-class + factorization → word; complete the family) | **built** (`v`,`p` + `u`,`x`); minimality & `p ≥ 3` order-pin open |
 | Promotion of non-conclusive → proof via a completed witness | **proposed** |
 | Multi-factor witness sets from the holonomy decomposition | **proposed** |
 | Census-scale "field guide" / definability atlas | **proposed** |
@@ -215,15 +215,18 @@ The pipeline is being built bottom-up; this maps the code to the design above.
 - **Definability gate (the verdict).** `aut2ltl/bls/definability/` — `tester.py`
   (`label_ltl_definable` → `(definable, conclusive)`) + `algorithm.md`. The boolean
   gate of §5/§8 on the sbacc-free minimal form. Built.
-- **Witness extraction — stage 1 (`v`, `p`).**
+- **Witness extraction — stages 1–2 (`v`, `p`, then `u`, `x`).**
   `aut2ltl/bls/definability/witness/` — `witness.py`
-  (`extract_witness(lang)` → `Witness(p, v, factor)` or `None`) + `algorithm.md`.
-  Reads the same form as the gate, keeps the letter valuations, and on the
-  non-aperiodic branch lifts a group element to the period word `v`. The GAP script
-  is `aut2ltl/bls/gap/witness_group.py`: build the transition semigroup, find a
-  non-trivial group H-class, take a non-identity element `g`, compute its order `p`,
-  and `Factorization(g)` over the generators → `RawWitness(period, factor)`. Built,
-  unit-tested.
+  (`extract_witness(lang, complete=…)` → `Witness(p, v, factor, u, x_*)` or `None`)
+  + `algorithm.md`. Reads the same form as the gate, keeps the letter valuations,
+  and on the non-aperiodic branch lifts a group element to the period word `v`. The
+  GAP script is `aut2ltl/bls/gap/witness_group.py`: build the transition semigroup,
+  find a non-trivial group H-class, take a non-identity element `g`, compute its
+  order `p`, and `Factorization(g)` over the generators → `RawWitness(period,
+  factor)`. With `complete=True` it also synthesises `u` (BFS to a state on the
+  `v`-orbit) and `x` (a phase-discriminating lasso from
+  `product(L_q, complement(L_q'))`). Built, unit-tested, and validated on real
+  kinska non-LTL inputs (see `research_notes/witness_log.md`).
 - **Membership certificate checker (suggestive tier).**
   `tests/probes/certificate/verify_smoke.py` — `member(aut, word)` (Spot
   `intersects`, every acceptance type, on the **input** automaton) and
@@ -237,13 +240,14 @@ The pipeline is being built bottom-up; this maps the code to the design above.
   `(v, p)` from GAP, lift to letters, replay `u·vⁿ·x` membership on the input
   automaton (toggles `10101` on the counter).
 
-**What remains.**
+**What remains.** (Experiment log: `research_notes/witness_log.md`.)
 
-- **Stage 2 — complete `(u, x)`** from the automaton (§4.4): `u` reaching a
-  non-trivial `v`-orbit, `x` a phase-discriminating tail that is not a power of `v`
-  (§3.3). Today `x` is hand-supplied in the replay.
 - **Pin the GAP right-action order** (§4 gotcha) on a `p ≥ 3` case — `p = 2` hides a
-  reversal (a 2-cycle equals its inverse).
+  reversal (a 2-cycle equals its inverse). All kinska `1ap` counting witnesses so
+  far are `p = 2`; a `p ≥ 3` input (higher-AP counting, or a mod-3 fixture) is
+  needed.
+- **Minimise `u` / `x`** — the synthesised completion is correct but not minimal
+  (§6 optimisation, not correctness).
 - **Periodicity-proof tier** — the residual-equivalence query upgrading the
   suggestive replay to a proof (§3.2 / §5).
 - **Wire the witness into the result** — carry `Witness` alongside `NOT_LTL` as a
