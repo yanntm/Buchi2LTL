@@ -1753,3 +1753,14 @@ time (13s vs 72s). Confirms: the bls cascade (buchi) is the sole source of the s
 round-trip blowups; nobls trades "blob answer" for "clean decline", leaving such
 sub-languages for a round trip. roundtrip_decomp NOT adopted as default (still
 maturing); nobls is a building block toward a roundtrip-floored-on-nobls assembly.
+
+## 2026-06-24 — deep_roundtrip / deep_nobls
+
+Deep bottom-up round trip lands. Probe (tests/probes/roundtrip/probe_shared_nodes.py)
+showed buchi is the sole round-trip blob factory; nobls declines instead. deep_roundtrip
+(roundtrip_deep/) re-presents every DAG node bottom-up, memoized on hash-consed identity.
+deep_nobls = cakedsdet seed + deep_roundtrip(best_of([identity, relabel(nobls)])).
+aut_10380: 1704 -> 1470 (@tree100) -> 1189 (@tree1000, -30%). Raising tree safe; temporal>32
+is not (spot runs wild). In-process ceiling ~tree=1000; past it a signal-deaf translate hangs
+the fold (probe survives via per-node subprocess SIGKILL). Next: per-translate external
+timeout. See research_notes/deep_roundtrip.md.
