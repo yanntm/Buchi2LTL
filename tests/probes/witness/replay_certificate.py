@@ -19,14 +19,20 @@ PARITY = "samples/fixtures/hoa/various/parity_a.hoa"
 
 def main() -> int:
     aut = spot.automaton(PARITY)
-    w = extract_witness(Language.of(aut))
+    w = extract_witness(Language.of(aut), complete=True)
     if w is None:
         print("no witness extracted")
         return 1
-    print(f"witness   : p={w.p}  v={w.v_str()}")
+    u = w.u if w.u is not None else []
+    xp = w.x_prefix if w.x_prefix is not None else []
+    xc = w.x_cycle if w.x_cycle is not None else []
+    x = (("; ".join(xp) + "; ") if xp else "") + "cycle{" + "; ".join(xc) + "}"
+    print(f"witness   : p={w.p}")
+    print(f"  u = {u}")
+    print(f"  v = {w.v_str()}")
+    print(f"  x = {x}")
 
-    # x is the canonical phase-discriminating tail until stage 2 synthesises it.
-    ok, pattern = verify_suggestive(aut, u=[], v=w.v, x_prefix=[], x_cycle=["!a"], p=w.p)
+    ok, pattern = verify_suggestive(aut, u=u, v=w.v, x_prefix=xp, x_cycle=xc, p=w.p)
     marks = "".join("1" if b else "0" for b in pattern)
     print(f"u.v^n.x   : pattern={marks} (n=0..2p)  -> {'ACCEPT' if ok else 'REJECT'}")
     return 0 if ok else 1

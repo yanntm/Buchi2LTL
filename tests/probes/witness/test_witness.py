@@ -25,6 +25,7 @@ import spot
 from aut2ltl.language import Language
 from aut2ltl.bls.extract import extract_generators
 from aut2ltl.bls.definability.witness import extract_witness
+from tests.probes.certificate.verify_smoke import verify_suggestive
 
 PARITY = "samples/fixtures/hoa/various/parity_a.hoa"
 CONTROL = "GFa"
@@ -80,11 +81,25 @@ def test_ltl_control_has_no_witness() -> None:
     assert w is None, f"LTL control {CONTROL!r} should yield no witness, got {w}"
 
 
+def test_completed_family_toggles() -> None:
+    """Stage 2: u, x synthesised from the automaton; the fully self-generated
+    u.v^n.x toggles membership on the INPUT automaton."""
+    w = extract_witness(_counter_lang(), complete=True)
+    assert w is not None and w.complete, f"expected a completed family, got {w}"
+    aut = spot.automaton(PARITY)
+    ok, pattern = verify_suggestive(
+        aut, u=w.u, v=w.v, x_prefix=w.x_prefix, x_cycle=w.x_cycle, p=w.p
+    )
+    marks = "".join("1" if b else "0" for b in pattern)
+    assert ok, f"completed family did not toggle (pattern {marks})"
+
+
 def main() -> int:
     tests = [
         test_counter_example_has_witness,
         test_lift_is_faithful,
         test_ltl_control_has_no_witness,
+        test_completed_family_toggles,
     ]
     failed = 0
     for t in tests:
