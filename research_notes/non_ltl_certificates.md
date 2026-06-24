@@ -185,7 +185,7 @@ over your signals, but LTL over the enriched alphabet if you add a bit tracking
 | `sbacc`-free oracle form; fail-open on >5 AP / GAP error | **built** |
 | `conclusive` gated on state-minimality | **built** |
 | Diagnosis | **prose string today** (not yet a checkable object) |
-| Witness `(u, v, x)` extraction (group H-class + factorization → word; complete the family) | **proposed** |
+| Witness `(u, v, x)` extraction (group H-class + factorization → word; complete the family) | `v`, `p` **stage-1 built**; `u`/`x` completion proposed |
 | Promotion of non-conclusive → proof via a completed witness | **proposed** |
 | Multi-factor witness sets from the holonomy decomposition | **proposed** |
 | Census-scale "field guide" / definability atlas | **proposed** |
@@ -207,6 +207,50 @@ over your signals, but LTL over the enriched alphabet if you add a bit tracking
    factorizing it over the generators is a second, opt-in GAP call on the false
    branch only — its cost relative to the cheap boolean gate needs measuring on
    the larger census cases.
+
+## 10. Implementation: where the parts live, and what remains
+
+The pipeline is being built bottom-up; this maps the code to the design above.
+
+- **Definability gate (the verdict).** `aut2ltl/bls/definability/` — `tester.py`
+  (`label_ltl_definable` → `(definable, conclusive)`) + `algorithm.md`. The boolean
+  gate of §5/§8 on the sbacc-free minimal form. Built.
+- **Witness extraction — stage 1 (`v`, `p`).**
+  `aut2ltl/bls/definability/witness/` — `witness.py`
+  (`extract_witness(lang)` → `Witness(p, v, factor)` or `None`) + `algorithm.md`.
+  Reads the same form as the gate, keeps the letter valuations, and on the
+  non-aperiodic branch lifts a group element to the period word `v`. The GAP script
+  is `aut2ltl/bls/gap/witness_group.py`: build the transition semigroup, find a
+  non-trivial group H-class, take a non-identity element `g`, compute its order `p`,
+  and `Factorization(g)` over the generators → `RawWitness(period, factor)`. Built,
+  unit-tested.
+- **Membership certificate checker (suggestive tier).**
+  `tests/probes/certificate/verify_smoke.py` — `member(aut, word)` (Spot
+  `intersects`, every acceptance type, on the **input** automaton) and
+  `verify_suggestive` (sample `u·vⁿ·x` for `n = 0…2p`, check the toggle). The
+  verifier of §3.2 at the distinguishability tier: phase-sensitivity, not yet
+  periodicity.
+- **Tests / fixtures.** `tests/probes/witness/test_witness.py` — counter example
+  `samples/fixtures/hoa/various/parity_a.hoa` (`L = a^{2k}(¬a)ᵒ`, period 2) yields a
+  witness; LTL control `GFa` yields `None`.
+  `tests/probes/witness/replay_certificate.py` — the end-to-end loop: extract
+  `(v, p)` from GAP, lift to letters, replay `u·vⁿ·x` membership on the input
+  automaton (toggles `10101` on the counter).
+
+**What remains.**
+
+- **Stage 2 — complete `(u, x)`** from the automaton (§4.4): `u` reaching a
+  non-trivial `v`-orbit, `x` a phase-discriminating tail that is not a power of `v`
+  (§3.3). Today `x` is hand-supplied in the replay.
+- **Pin the GAP right-action order** (§4 gotcha) on a `p ≥ 3` case — `p = 2` hides a
+  reversal (a 2-cycle equals its inverse).
+- **Periodicity-proof tier** — the residual-equivalence query upgrading the
+  suggestive replay to a proof (§3.2 / §5).
+- **Wire the witness into the result** — carry `Witness` alongside `NOT_LTL` as a
+  diagnosis complement in `aut2cas` (deferred; the gate path stays unmodified).
+- **Refactor-to-share** the form-prep / GAP helpers once both paths are stable.
+- The further reaches of §6/§7 — multi-factor witness sets, the field-guide atlas,
+  the witness ⇄ abstraction collapse — remain as in §8.
 
 ---
 
