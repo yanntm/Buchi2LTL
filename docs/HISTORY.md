@@ -1764,3 +1764,44 @@ aut_10380: 1704 -> 1470 (@tree100) -> 1189 (@tree1000, -30%). Raising tree safe;
 is not (spot runs wild). In-process ceiling ~tree=1000; past it a signal-deaf translate hangs
 the fold (probe survives via per-node subprocess SIGKILL). Next: per-translate external
 timeout. See research_notes/deep_roundtrip.md.
+
+## 2026-06-25 — definability gate isolated; non-LTL witness module begun (in the making)
+
+ISOLATED the LTL-definability gate into its own package `bls/definability/`
+(`git mv bls/ltl_tester.py -> bls/definability/tester.py`, package `__init__`,
+rewired the sole consumer `aut2cas` and the stale path refs in `gap/aperiodic`).
+The GAP scripts stay in `bls/gap/` and the Spot->generators extraction stays in
+`bls/extract.py` (both shared with the cascade holonomy). Gate-green on validation
+(80/80) and kinska (165, no regression).
+
+WROTE `bls/definability/algorithm.md` (daisy/inv register), then revised it twice
+per review: (1) sober/factual register — non-LTL is a hard fail (NOT_LTL ≻ DECLINED
+short-circuits first_success and dominates composition), and the former "fail-open"
+is reframed as the gate ABSTAINING only when the oracle physically cannot run
+(returns (True,False) so the cascade is attempted, never a fabricated verdict); it
+stays sound because gate and cascade share extract+GAP, so whatever stops the gate
+dooms the cascade to decline. (2) contract-first structure grounded against the
+actual code (det_generic_minimal = postprocess deterministic generic + sat_minimize
+when small + complete in the gate), with "why not the cascade's sbacc form" split
+into its own section.
+
+BEGAN the non-LTL WITNESS module `bls/definability/witness/` (the "name the kernel"
+work; see research_notes/non_ltl_certificates.md). algorithm.md + stage-1 source:
+`extract_witness(lang)` reads the same form as the gate, and on the non-aperiodic
+branch drives a NEW witness-only GAP script `bls/gap/witness_group.py` (find a
+non-trivial group H-class, take a non-identity element g, its order p = period,
+factorize g over the generators) and lifts the factorization back to the period
+word v over concrete letters. Returns Witness(p, v, factor); None when no group.
+Additive only: nothing existing modified, the gate (tester.py) untouched, helpers
+reused read-only / orchestration cloned (refactor-to-share deferred until both work).
+u/x family completion and witness verification are still to come.
+
+UNIT TEST `tests/probes/witness/test_witness.py` (counter example parity_a.hoa ->
+witness p=2, lifted v induces a 2-orbit; LTL control GFa -> no witness). Fixed one
+GAP syntax bug found via direct-stderr replay: `QUIT;` cannot sit inside an if/fi
+block — moved to top level (the aperiodic.py pattern).
+
+ALSO present (uncommitted, earlier in session): a membership-tier certificate
+verifier prototype under `tests/probes/certificate/` — replays u.v^n.x membership
+on the INPUT automaton via Spot, the "suggestive" tier (distinguishability, not yet
+periodicity).
