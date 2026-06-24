@@ -11,7 +11,7 @@ from typing import Optional
 
 from aut2ltl.translator import Translator
 from aut2ltl.options import Options
-from aut2ltl.roundtrip import Roundtrip
+from aut2ltl.roundtrip_top import Roundtrip
 from aut2ltl.simplify_ltl import Simplify
 from .cakedsdet import cakedsdet
 

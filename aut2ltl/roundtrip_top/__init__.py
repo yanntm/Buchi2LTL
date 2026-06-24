@@ -1,5 +1,5 @@
 """
-aut2ltl.roundtrip — the `Roundtrip` combinator Translator.
+aut2ltl.roundtrip_top — the `Roundtrip` combinator Translator.
 
 `Roundtrip(labeler)` labels a Language with `labeler`, re-describes the language by
 the resulting formula, and labels that re-description with `labeler` again, returning

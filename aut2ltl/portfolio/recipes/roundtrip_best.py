@@ -27,7 +27,7 @@ from aut2ltl.translator import Translator
 from aut2ltl.options import Options
 from aut2ltl.best_of import best_of
 from aut2ltl.memo import Memo
-from aut2ltl.roundtrip import Roundtrip
+from aut2ltl.roundtrip_top import Roundtrip
 from .cakedsdet import cakedsdet
 
 
