@@ -8,7 +8,7 @@ call `IsAperiodicSemigroup` — NO holonomy decomposition (that lives in
 `gap/bridge.py` + `gap/export.py` and is the explosive step we want to AVOID when
 the language is not LTL-definable in the first place).
 
-It is the oracle the kr LtlTester (`bls/ltl_tester.py`) runs to GATE the cascade
+It is the oracle the kr LtlTester (`bls/definability/tester.py`) runs to GATE the cascade
 build. Kept separate from the decomposition bridge on purpose: a different,
 cheaper GAP script and a single boolean answer, no Cascade machinery.
 

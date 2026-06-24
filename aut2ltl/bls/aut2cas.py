@@ -8,7 +8,7 @@ with `decompose_lang` (pulls `Language.det_parity_sbacc()` -> GAP SgpDec holonom
 and runs the cascade-translator on it. The result `LTLResult` (formula +
 technique) is forwarded unchanged.
 
-Before building, it runs the LTL-definability gate (`bls/ltl_tester`): the cascade
+Before building, it runs the LTL-definability gate (`bls/definability`): the cascade
 is unsound on a non-aperiodic language, so a non-definable Language is reported as
 NOT_LTL (cached on the Language) instead of built — skipping the explosive
 holonomy step entirely on the non-LTL case.
@@ -29,7 +29,7 @@ from aut2ltl.result import LTLResult
 from .gap import decompose_lang
 from .cascade import CascadeHolder
 from .hierarchy_class import hierarchy_class
-from .ltl_tester import label_ltl_definable
+from .definability import label_ltl_definable
 
 if TYPE_CHECKING:
     from aut2ltl.language import Language
@@ -51,7 +51,7 @@ def as_translator(
         # is UNSOUND on a non-aperiodic language: the holonomy decomposition still
         # succeeds, but it emits a GROUP component the parser labels a reset, from
         # which the members build a WRONG formula (the kinská counting cases). The
-        # oracle runs on a sbacc-FREE form (bls/ltl_tester.py — the cascade's own
+        # oracle runs on a sbacc-FREE form (bls/definability — the cascade's own
         # parity+sbacc D degeneralizes generalized-Büchi acceptance into a spurious
         # counter that reads as non-aperiodic even for LTL languages), is cached on
         # the Language, and is the one choke point for ALL cascade members (they
