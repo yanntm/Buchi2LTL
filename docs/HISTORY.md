@@ -1709,3 +1709,26 @@ already honored it; brought `roundtrip` (added the `inner.formula == node` guard
 `relabel` (added the `out.formula == res.formula` guard) into line. Tag-only change — no
 chosen formula's size or equivalence moves — so the adoption comparison is unaffected.
 Adoption decision (promote roundtrip_decomp to default) pending the genaut result.
+
+## 2026-06-24 — root cause of the genaut LTL->TIMEOUT: str(f) intern key
+
+DONE. The 5 genaut `LTL -> TIMEOUT` regressions under `--use roundtrip_decomp` were
+NOT ltl2tgba blowups. Instrumenting `Language.of_ltl` (a temporary
+`AUT2LTL_LANG_TRACE_DIR` dump + per-line wall deltas) showed the hang was in
+`of_ltl` BEFORE any translate: the intern key was `str(f)`, which flattens the
+hash-consed formula — O(unfolded tree), exponential on a shared DAG. A
+roundtrip_decomp-re-presented operand had a tiny DAG but a 37 MB (and growing) flat
+string; building that string for the cache key was the multi-minute hang. ltl2tgba
+never ran (the temporal>32 / tree>100 guard refuses these). Fixed by keying on the
+O(DAG) `dag_md5(f)` (full 32-hex; the same fingerprint `--dagmd5` / the survey use)
+— identity-preserving (equal formula <=> equal str <=> equal dag_md5), so results are
+unchanged, only the flatten is gone. All 5 inputs now complete (buchi answers, large
+but finite); default validation gate stayed SUCCESS (DAG 472, unchanged).
+
+LANDED. The heavy diagnostic trace was lightened to one opt-in knob
+`AUT2LTL_LANG_TRACE`: a single stderr line per `formula.translate()` with wall time
+and DAG-only sizes (never a flatten) — the runtime probe kept, the file-dump
+scaffolding dropped. Principle recorded at the key site: str/flatten is print-only
+and size-gated (`ltl/printers.format_gated`); a Language's identity is the O(DAG)
+dag_md5. Genaut roundtrip_decomp re-run (to confirm the 5 resolved + no new moves)
+and the adoption decision are pending.
