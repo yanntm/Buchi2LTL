@@ -1805,3 +1805,30 @@ ALSO present (uncommitted, earlier in session): a membership-tier certificate
 verifier prototype under `tests/probes/certificate/` — replays u.v^n.x membership
 on the INPUT automaton via Spot, the "suggestive" tier (distinguishability, not yet
 periodicity).
+
+## 2026-06-25 (cont.) — witness stage 2 (u/x) + first corpus witnesses
+
+STAGE 2 of the non-LTL witness: `extract_witness(lang, complete=True)` now
+synthesises the family completion from the automaton. `u` is a BFS letter-word to a
+state on a non-trivial `v`-orbit; `x` is a phase-discriminating lasso between
+adjacent orbit phases, taken from `product(L_q, complement(L_q')).accepting_word()`
+and rendered to dict-independent letter strings so it replays on the INPUT
+automaton. `Witness` gained `u` / `x_prefix` / `x_cycle` and a `complete` flag. On
+the counter example the fully self-generated family is u='a', v='a', x='a;(!a)^w',
+p=2, toggling 10101.
+
+VALIDATED on real corpus inputs: four kinska `1ap` counting automata known NOT_LTL
+and fast (~0.62s) from `samples/benchmark/inputs/kinska/` — all p=2 / v=a, each
+synthesised family verified to toggle on the input automaton. Single-input probe
+`tests/probes/witness/witness_on_hoa.py`. Logged in `research_notes/witness_log.md`
+(new running lab log) with repro commands and a results table; `non_ltl_certificates.md`
+status table + §10 updated (witness extraction now built).
+
+OPEN / NEXT (for a fresh session): (1) pin the GAP right-action order on a p>=3 case
+— all 1ap counting are p=2, which hides a reversal; need higher-AP counting or a
+mod-3 fixture. (2) minimise u/x. (3) the periodicity-proof tier (residual-equivalence
+query) to upgrade the suggestive membership replay to a proof. (4) wire the Witness
+onto the NOT_LTL result as a diagnosis complement in aut2cas (gate path untouched).
+(5) DEFERRED ADMIN the user asked to delay: move the witness probes under
+`tests/probes/bls/definability/witness/` (mirror the source tree), give the verifier
+its own folder, and drop the "certificate" naming (the object is a *witness*).
