@@ -26,6 +26,7 @@ from .cakeds import cakeds
 from .cakedsdet import cakedsdet
 from .roundtrip import roundtrip
 from .roundtrip_best import roundtrip_best_recipe
+from .roundtrip_decomp import roundtrip_decomp_recipe
 
 # Public recipe names → builders. `build_portfolio` resolves `--use <name>` here.
 RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
@@ -39,6 +40,7 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
     "cakedsdet": cakedsdet,
     "roundtrip": roundtrip,
     "roundtrip_best": roundtrip_best_recipe,
+    "roundtrip_decomp": roundtrip_decomp_recipe,
 }
 
 # The shipped default — the assembly used when no `--use` is given (the CLI/build
@@ -50,4 +52,4 @@ RECIPES["default"] = RECIPES["cakedsdet"]
 
 __all__ = ["RECIPES", "best", "best_daisy2", "best_inv", "best_inv_loop",
            "best_inv_all", "cake", "cakeds", "cakedsdet", "roundtrip",
-           "roundtrip_best_recipe"]
+           "roundtrip_best_recipe", "roundtrip_decomp_recipe"]
