@@ -22,9 +22,10 @@ _NAME = "roundtrip"
 
 def roundtrip(rewrite: Rewriter, finder: Finder, *, name: str = _NAME) -> Rewriter:
     """Build a Rewriter re-presenting one located node: `n = finder(res.formula)`,
-    re-present `res.formula↓n` (= `n`) with `rewrite`, relink. A declined finder
-    returns the input verbatim (no self-credit); a declined re-presentation
-    propagates (unmasked)."""
+    re-present `res.formula↓n` (= `n`) with `rewrite`, relink. A declined finder, or a
+    re-presentation that reproduces `n`, returns the input verbatim (no self-credit, per
+    the ltl_rewriter attribution rule); a declined re-presentation propagates
+    (unmasked)."""
     def run(res: LTLResult) -> LTLResult:
         formula = res.formula
         node = finder(formula)
@@ -33,6 +34,8 @@ def roundtrip(rewrite: Rewriter, finder: Finder, *, name: str = _NAME) -> Rewrit
         inner = rewrite(LTLResult.success(node))    # re-present the located node
         if inner.nok:
             return inner                            # decline propagates; not masked
+        if inner.formula == node:
+            return res                              # no-op re-presentation → no self-credit
         out = LTLResult.start(name)
         out.credit(res)
         out.credit(inner)
