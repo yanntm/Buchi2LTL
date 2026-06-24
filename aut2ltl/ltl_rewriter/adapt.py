@@ -23,12 +23,16 @@ def relabel(labeler: "Translator") -> "Rewriter":
     """Lift a `Translator` into a `Rewriter`: re-describe `res.formula`'s language and
     re-label it with `labeler`, folding in `res`'s provenance. Declines when the
     labeler declines, or when the formula is too large for ltl2tgba
-    (`UntranslatableLanguage`) — the one place a Rewriter decline originates."""
+    (`UntranslatableLanguage`) — the one place a Rewriter decline originates. When the
+    round trip reproduces the input formula it returns `res` verbatim, uncredited (the
+    ltl_rewriter attribution rule: no-op ⇒ no credit)."""
     def rewrite(res: "LTLResult") -> "LTLResult":
         try:
             out = labeler(Language.of_ltl(res.formula))
         except UntranslatableLanguage:
             return LTLResult.decline("relabel: untranslatable by ltl2tgba")
+        if out.ok and out.formula == res.formula:
+            return res                  # round trip reproduced the formula → no-op, no credit
         return out.credit(res)
     return rewrite
 
