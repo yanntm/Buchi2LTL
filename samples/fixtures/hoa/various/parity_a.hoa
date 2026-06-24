@@ -1,0 +1,24 @@
+/* L = { a^{2k} (!a)^omega : k >= 0 }  -- "the first !a sits at an even position".
+   Counts the parity of the a-prefix, so it is NOT FO/LTL-definable (period 2).
+   Deterministic, complete Buchi automaton.
+   States: 0=E (even a-count), 1=O (odd a-count), 2=Acc (!a-tail), 3=Rej (sink). */
+HOA: v1
+States: 4
+Start: 0
+AP: 1 "a"
+acc-name: Buchi
+Acceptance: 1 Inf(0)
+properties: trans-labels explicit-labels deterministic complete
+--BODY--
+State: 0
+[0] 1
+[!0] 2
+State: 1
+[0] 0
+[!0] 3
+State: 2
+[!0] 2 {0}
+[0] 3
+State: 3
+[t] 3
+--END--
