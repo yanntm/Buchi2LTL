@@ -39,6 +39,8 @@ carries, which would invert the floor -> kr layering.
 from __future__ import annotations
 
 import os
+import sys
+import time
 from collections import OrderedDict
 from typing import Callable, Optional, Tuple, Union
 
@@ -115,8 +117,21 @@ TRANSLATE_TEMPORAL_LIMIT = OptionSpec(
     "refuse ltl2tgba on a formula whose temporal-operator count exceeds this; 0 disables",
     env="KR_TRANSLATE_TEMPORAL_LIMIT")
 
+# Translate tracing (diagnostic, opt-in). When AUT2LTL_LANG_TRACE is set, each
+# `formula.translate()` — the one heavy, sometimes-erratic spot call on this floor —
+# is timed and reported to stderr: DAG sizes in, wall time, automaton size out. All
+# metrics are O(DAG); we NEVER flatten (str / tree_node_count) a formula to trace it.
+# Off by default, zero overhead. Bucket 3 (env-read; OptionSpec is discoverability).
+_TRACE = os.environ.get("AUT2LTL_LANG_TRACE", "") not in ("", "0")
+
+TRACE = OptionSpec(
+    "language.trace", False,
+    "trace each formula->automaton translate to stderr with its wall time and DAG "
+    "sizes (in/out); off by default",
+    env="AUT2LTL_LANG_TRACE")
+
 LANGUAGE_OPTIONS = [SAT_MIN_STATES, CLEAN_LEVEL, CACHE_SIZE,
-                    TRANSLATE_TREE_LIMIT, TRANSLATE_TEMPORAL_LIMIT]
+                    TRANSLATE_TREE_LIMIT, TRANSLATE_TEMPORAL_LIMIT, TRACE]
 
 
 def _clean(aut: "spot.twa_graph") -> "spot.twa_graph":
@@ -207,7 +222,16 @@ class Language:
         (we hold a defining formula), so the verdict is recorded as a proof —
         `(definable=True, conclusive=True)` — sparing the kr aperiodicity oracle. A
         PSL/SERE `f` is left undecided: its language may lie outside LTL, so the
-        oracle must still rule."""
+        oracle must still rule.
+
+        The intern key is the DAG-structural fingerprint `dag_md5(f)`, NOT `str(f)`:
+        flattening a hash-consed formula is O(unfolded tree) — exponential on a shared
+        DAG (a re-presented operand can have a tiny DAG but a multi-MB flat string), so
+        keying on the flat string blows the bank just to make a cache key. `str` /
+        flatten is print-only and size-gated (`ltl/printers.format_gated`); identity is
+        the O(DAG) `dag_md5` (the full 32-hex digest — a key collision would mis-identify
+        a language, so we do NOT truncate to the cosmetic `MD5_LENGTH`)."""
+        from aut2ltl.ltl.printers import dag_md5      # deferred: keep the floor import-acyclic
         if isinstance(f, str):
             f = spot.formula(f)
 
@@ -217,7 +241,7 @@ class Language:
                 lang.set_ltl_definable(True, conclusive=True)
             return lang
 
-        return _intern("L\n" + str(f), build)
+        return _intern("L\n" + dag_md5(f, 32), build)
 
     # --- base automaton (source as given, or the formula translated) ---
 
@@ -233,10 +257,25 @@ class Language:
                 raw = self._source_aut
             else:
                 _guard_translation(self._source_formula)
-                raw = self._source_formula.translate()
+                raw = (self._translate_traced(self._source_formula) if _TRACE
+                       else self._source_formula.translate())
             a = _clean(raw)
             self._cache["base"] = a
         return a
+
+    def _translate_traced(self, f: "spot.formula") -> "spot.twa_graph":
+        """`f.translate()` timed for `AUT2LTL_LANG_TRACE`: one stderr line with the
+        wall time, the input formula's DAG sizes (O(DAG) — never a flatten), and the
+        resulting automaton's size. The reporting line, not the construction."""
+        from aut2ltl.ltl.metrics import dag_node_count, temporal_node_count
+        from aut2ltl.ltl.printers import dag_md5
+        t0 = time.monotonic()
+        aut = f.translate()
+        wall = time.monotonic() - t0
+        print(f"[lang.translate] dag={dag_node_count(f)} temporal={temporal_node_count(f)} "
+              f"wall={wall:.3f}s -> states={aut.num_states()} edges={aut.num_edges()} "
+              f"id={dag_md5(f)}", file=sys.stderr, flush=True)
+        return aut
 
     # --- representations (lazy + cached, named by representation) ---
 
