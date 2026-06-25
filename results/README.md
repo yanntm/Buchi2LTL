@@ -19,6 +19,10 @@ label and may repeat.
 Never overwrite a committed CSV blind. Rerun into the gitignored scratch `logs/`,
 diff against the committed reference, and only overwrite when the diff is clean.
 
+**Run every command below from the repo root, using the relative paths as written**
+(`cd` to the root once, then never `cd` again — in particular do not `cd results/`,
+or the relative `logs/...` paths drift and later steps fail).
+
 ```bash
 # 1. rerun into a FRESH scratch (logs/ is gitignored; --logs writes a NEW
 #    survey_<ts>.csv each run — wipe first so the survey_*.csv glob in steps 2-3
@@ -30,9 +34,9 @@ python3 -m survey --folder samples/kinska     --logs logs/rerun/kinska     > log
 python3 -m survey --folder samples/benchmark  --logs logs/rerun/benchmark  > logs/rerun/benchmark/SUMMARY.txt
 
 # 2. diff each new run against its committed reference (keyed on source; exits 1 on a regression)
-python3 -m survey.diff.results reference/validation/default.csv logs/rerun/validation/survey_*.csv
-python3 -m survey.diff.results reference/kinska/kinska.csv      logs/rerun/kinska/survey_*.csv
-python3 -m survey.diff.results reference/benchmark/default.csv  logs/rerun/benchmark/survey_*.csv
+python3 -m survey.diff.results results/reference/validation/default.csv logs/rerun/validation/survey_*.csv
+python3 -m survey.diff.results results/reference/kinska/kinska.csv      logs/rerun/kinska/survey_*.csv
+python3 -m survey.diff.results results/reference/benchmark/default.csv  logs/rerun/benchmark/survey_*.csv
 ```
 
 **Clean** = each diff reports `0 regression(s)` and each `SUMMARY.txt` ends
@@ -42,14 +46,14 @@ Size / technique movements are informational, a human judgement call.
 
 ```bash
 # 3. only when clean: overwrite the committed CSV + summary, then commit
-cp logs/rerun/validation/survey_*.csv reference/validation/default.csv
-cp logs/rerun/validation/SUMMARY.txt  reference/validation/SUMMARY.txt
+cp logs/rerun/validation/survey_*.csv results/reference/validation/default.csv
+cp logs/rerun/validation/SUMMARY.txt  results/reference/validation/SUMMARY.txt
 # …same for kinska/ and benchmark/…
 
 # 4. clean up behind yourself so the next refresh starts from an empty scratch
 rm -rf logs/rerun
 ```
 
-Run step 1 from the repo root; run the step-2 diffs from `results/` (the
-`reference/...` paths are relative to it, the `logs/...` paths to the repo root —
-so pass the rerun CSV by an absolute path if you run the diff from elsewhere).
+Every step runs from the repo root with the relative paths exactly as written above —
+do not `cd` into `results/` between steps (that drifts the `logs/...` paths and breaks
+the diff/copy commands).
