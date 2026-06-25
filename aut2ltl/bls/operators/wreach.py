@@ -31,9 +31,6 @@ def wreach(
 
     With no bad config the release antecedent never fires: vacuously true.
     The dual automatically yields the correct base case ¬((¬τ) U β).
-    (The previous bespoke G(τ | ¬β) base was wrong — Table 1 formula 2 at
-    level 0 is exactly τ R ¬β — and the bespoke solid_w ∨ dashed_w
-    construction was not the paper's Formula 2.)
     """
     if B is None:
         return _tt()
