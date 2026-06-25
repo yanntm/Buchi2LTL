@@ -172,9 +172,11 @@ class Language:
     @classmethod
     def of(cls, aut: "spot.twa_graph") -> "Language":
         """A Language from an arbitrary HOA automaton (its language is L(aut)).
-        Interned on the automaton's literal HOA serialization, so repeated calls
-        with the same input reuse one Language (and its cached representations)."""
-        return _intern("A\n" + aut.to_str("hoa"), lambda: cls(aut=aut))
+        Interned on its `canon.normalize`d HOA, so the key is a function of the
+        automaton, not of its (transport-dependent) state numbering."""
+        from aut2ltl.ltl import canon                  # deferred: keep the floor import-acyclic
+        na = canon.normalize(aut)
+        return _intern("A\n" + na.to_str("hoa"), lambda: cls(aut=na))
 
     @classmethod
     def of_ltl(cls, f: Union[str, "spot.formula"]) -> "Language":
@@ -222,7 +224,8 @@ class Language:
             else:
                 raw = (self._translate_traced(self._source_formula) if _TRACE
                        else spotrun.translate(self._source_formula))
-            a = _clean(raw)
+            from aut2ltl.ltl import canon  # EXPERIMENT: canonicalize the base numbering
+            a = canon.normalize(_clean(raw))
             self._cache["base"] = a
         return a
 
