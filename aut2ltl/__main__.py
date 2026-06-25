@@ -33,12 +33,13 @@ from aut2ltl.language import Language, LANGUAGE_OPTIONS, UntranslatableLanguage
 from aut2ltl.result import LTLResult
 from aut2ltl.portfolio import build_portfolio, TECHNIQUES
 from aut2ltl.bls.options import KR_OPTIONS, FLATTEN_TREE_LIMIT
+from aut2ltl.spotrun import SPOTRUN_OPTIONS
 from aut2ltl.ltl.metrics import dag_metrics
 from aut2ltl.ltl.printers import format_gated, to_dot, dag_md5
 
 # The full declared option contract (every -O key, every --list-options row).
 ALL_SPECS: List[OptionSpec] = (list(KR_OPTIONS) + list(LANGUAGE_OPTIONS)
-                               + list(ROOT_OPTIONS))
+                               + list(SPOTRUN_OPTIONS) + list(ROOT_OPTIONS))
 _SPEC_BY_KEY = {s.key: s for s in ALL_SPECS}
 
 _FILE_EXTS = (".hoa", ".aut", ".hoaf")

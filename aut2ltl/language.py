@@ -52,8 +52,8 @@ from aut2ltl import spotrun
 
 class UntranslatableLanguage(Exception):
     """A formula too large to hand ltl2tgba safely — its unfolded (flat) size or
-    temporal-operator count exceeds the configured bound (`TRANSLATE_TREE_LIMIT` /
-    `TRANSLATE_TEMPORAL_LIMIT`). Spot's `translate` has no graceful failure on an
+    temporal-operator count exceeds the bound (`spotrun.translate_tree_limit` /
+    `translate_temporal_limit`). Spot's `translate` has no graceful failure on an
     exp-sized formula, so the floor REFUSES rather than dying. Unchecked, in the
     Java-`RuntimeException` sense: most call sites trust and never catch it; only
     the round trip — which deliberately re-translates a derived formula — catches
@@ -99,25 +99,6 @@ CACHE_SIZE = OptionSpec(
     "0 disables interning",
     env="AUT2LTL_LANG_CACHE_SIZE")
 
-# Bound on what we hand ltl2tgba (`formula.translate()` in `_base`). Spot's
-# translate has no graceful failure on an exponentially large formula — it blows
-# up — so we refuse one whose unfolded (flat) size or temporal-operator count is
-# over budget, raising `UntranslatableLanguage` BEFORE the call. Only a
-# re-presentation (the round trip) ever feeds a formula this large here; real
-# inputs are tiny and never trip it. 0 disables a bound. (Bucket 3, like
-# SAT_MIN_STATES: a process-wide gate, env-read; the OptionSpec is discoverability.)
-_TRANSLATE_TREE_LIMIT = int(os.environ.get("KR_TRANSLATE_TREE_LIMIT", "1000"))
-_TRANSLATE_TEMPORAL_LIMIT = int(os.environ.get("KR_TRANSLATE_TEMPORAL_LIMIT", "32"))
-
-TRANSLATE_TREE_LIMIT = OptionSpec(
-    "language.translate_tree_limit", 1000,
-    "refuse ltl2tgba on a formula whose unfolded (flat) size exceeds this; 0 disables",
-    env="KR_TRANSLATE_TREE_LIMIT")
-TRANSLATE_TEMPORAL_LIMIT = OptionSpec(
-    "language.translate_temporal_limit", 32,
-    "refuse ltl2tgba on a formula whose temporal-operator count exceeds this; 0 disables",
-    env="KR_TRANSLATE_TEMPORAL_LIMIT")
-
 # Translate tracing (diagnostic, opt-in). When AUT2LTL_LANG_TRACE is set, each
 # `formula.translate()` — the one heavy, sometimes-erratic spot call on this floor —
 # is timed and reported to stderr: DAG sizes in, wall time, automaton size out. All
@@ -131,8 +112,7 @@ TRACE = OptionSpec(
     "sizes (in/out); off by default",
     env="AUT2LTL_LANG_TRACE")
 
-LANGUAGE_OPTIONS = [SAT_MIN_STATES, CLEAN_LEVEL, CACHE_SIZE,
-                    TRANSLATE_TREE_LIMIT, TRANSLATE_TEMPORAL_LIMIT, TRACE]
+LANGUAGE_OPTIONS = [SAT_MIN_STATES, CLEAN_LEVEL, CACHE_SIZE, TRACE]
 
 
 def _clean(aut: "spot.twa_graph") -> "spot.twa_graph":
@@ -142,23 +122,6 @@ def _clean(aut: "spot.twa_graph") -> "spot.twa_graph":
     a = spot.postprocess(aut, "generic", _CLEAN_LEVEL, "any")
     a.remove_unused_ap()
     return a
-
-
-def _guard_translation(f: "spot.formula") -> None:
-    """Refuse to hand ltl2tgba a formula too large to translate safely — raise
-    `UntranslatableLanguage` BEFORE the call. The temporal-operator count walks the
-    DAG (cheap); the unfolded (flat) size is measured with a CAP so we never unfold
-    an exp tree merely to reject it — `tree_node_count` SATURATES at its `limit`, so
-    we cap at limit+1 and test `> limit` to catch strict overflow. 0 disables a
-    bound. The metrics import is deferred to keep the floor import-acyclic."""
-    from aut2ltl.ltl.metrics import temporal_node_count, tree_node_count
-    if _TRANSLATE_TEMPORAL_LIMIT and temporal_node_count(f) > _TRANSLATE_TEMPORAL_LIMIT:
-        raise UntranslatableLanguage(
-            f"temporal-operator count over budget (> {_TRANSLATE_TEMPORAL_LIMIT})")
-    if _TRANSLATE_TREE_LIMIT and \
-            tree_node_count(f, limit=_TRANSLATE_TREE_LIMIT + 1) > _TRANSLATE_TREE_LIMIT:
-        raise UntranslatableLanguage(
-            f"unfolded (flat) size over budget (> {_TRANSLATE_TREE_LIMIT})")
 
 
 # The intern table: literal-arg key -> shared Language. Bounded LRU (insertion
@@ -249,15 +212,14 @@ class Language:
     def _base(self) -> "spot.twa_graph":
         """The source automaton — the HOA as given, or `formula.translate()` —
         after a language-preserving `_clean` (state purge, redundant-acc-set merge,
-        unused-AP drop). Cleaned once, lazily, then cached. Translating a formula is
-        gated by `_guard_translation`: an over-budget formula raises
-        `UntranslatableLanguage` rather than blowing ltl2tgba up."""
+        unused-AP drop). Cleaned once, lazily, then cached. The formula is
+        translated via `spotrun.translate`, which guards an over-budget formula
+        (raising `UntranslatableLanguage`) rather than blowing ltl2tgba up."""
         a = self._cache.get("base")
         if a is None:
             if self._source_aut is not None:
                 raw = self._source_aut
             else:
-                _guard_translation(self._source_formula)
                 raw = (self._translate_traced(self._source_formula) if _TRACE
                        else spotrun.translate(self._source_formula))
             a = _clean(raw)
@@ -265,13 +227,14 @@ class Language:
         return a
 
     def _translate_traced(self, f: "spot.formula") -> "spot.twa_graph":
-        """`f.translate()` timed for `AUT2LTL_LANG_TRACE`: one stderr line with the
-        wall time, the input formula's DAG sizes (O(DAG) — never a flatten), and the
-        resulting automaton's size. The reporting line, not the construction."""
+        """`spotrun.translate(f)` timed for `AUT2LTL_LANG_TRACE`: one stderr line
+        with the wall time, the input formula's DAG sizes (O(DAG) — never a flatten),
+        and the resulting automaton's size. The reporting line, not the construction.
+        Routes through the seam so the size guard covers the traced path too."""
         from aut2ltl.ltl.metrics import dag_node_count, temporal_node_count
         from aut2ltl.ltl.printers import dag_md5
         t0 = time.monotonic()
-        aut = f.translate()
+        aut = spotrun.translate(f)
         wall = time.monotonic() - t0
         print(f"[lang.translate] dag={dag_node_count(f)} temporal={temporal_node_count(f)} "
               f"wall={wall:.3f}s -> states={aut.num_states()} edges={aut.num_edges()} "

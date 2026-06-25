@@ -30,7 +30,8 @@ from typing import Dict, List, Optional, Set, Tuple
 
 import spot
 
-from aut2ltl.language import Language, UntranslatableLanguage, _guard_translation
+from aut2ltl.language import Language, UntranslatableLanguage
+from aut2ltl.spotrun import _guard_translation
 from aut2ltl.options import Options
 from aut2ltl.bls.options import KR_OPTIONS
 from aut2ltl.portfolio import build_portfolio
