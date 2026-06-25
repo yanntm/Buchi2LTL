@@ -633,12 +633,6 @@ def dashed(
     return _simp_f(_And(lines12_f, line3_f))
 
 
-# (No weak dashed: the paper has exactly five formulas — weak main (Formula 2)
-# is the literal dual of strong main, and Formula 4 (wsolid) is the only other
-# weak form. The former bespoke _dashed_change_weak was a non-paper invention
-# and was removed when wreach became the literal dual.)
-
-
 # Public API for the operators (reach is primary; weak is its dual or mirror).
 # Note: all 1L special case code (one_level_* etc.) has been deleted; only the pure
 # generalized inductive implementation remains.
