@@ -28,8 +28,8 @@ set of configurations it visits infinitely often is *exactly* some good `M`:
 ```
 
 with `Fin(C)` the "only finitely often in configuration `C`" formula (Lemma 7;
-[`bls/fin.py`](../fin.py), built on the five inductive reachability operators in
-[`bls/reachability_operators.py`](../reachability_operators.py)). Each disjunct pins
+[`bls/operators/fin.py`](../operators/fin.py), built on the five inductive reachability
+operators in [`bls/operators/`](../operators)). Each disjunct pins
 the infinity-set to one good `M`; the disjunction covers all of them.
 
 **Fin-reach fold** (default; `KR_FOLD_FIN_REACH=0` restores the full term): for a good
