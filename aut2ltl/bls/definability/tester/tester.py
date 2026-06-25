@@ -1,5 +1,5 @@
 """
-bls/definability/tester.py — the Language LTL-definability labeler (the "LtlTester").
+bls/definability/tester/tester.py — the Language LTL-definability labeler ("LtlTester").
 
 A Translator that is *unsound when its input is not LTL-definable* — the kr
 cascade — must check definability before it builds, and report the impossibility
@@ -31,8 +31,8 @@ from typing import Tuple, TYPE_CHECKING
 import spot
 
 from aut2ltl.language import SAT_MIN_STATES
-from ..extract import extract_generators
-from ..gap.aperiodic import is_aperiodic_gens
+from ...extract import extract_generators
+from ...gap.aperiodic import is_aperiodic_gens
 
 if TYPE_CHECKING:
     from aut2ltl.language import Language
