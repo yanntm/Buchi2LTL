@@ -199,3 +199,76 @@ the construction's semantic work, not a spot canonicalization we rode on.
 - **conclusions**: every measured structure (idiom concentration, the 3 canonical
   trues, the two-route split, zero wrong answers) survives the dedup; only the
   absolute counts halve — exactly as the polarity-class partition predicts.
+
+---
+
+## 2026-06-25 — moved verbatim from genaut/README.md (former §Headline results + §The "true" finding)
+
+The README no longer carries headline numbers — we do not want to maintain them
+there; it now points at the logs/ folder instead. The text below is that former
+README section, moved here without curation.
+
+## Headline results (2-state / 1-AP / 1-acc census)
+
+- 65536 combos → **1845** byte-distinct → **929** AP-canonical survivors (the
+  `a ↔ !a` polarity / AP-rename twins folded pre-write).
+- The corpus **ventilates** into **799 LTL-definable** (a formula was built) +
+  **123 decided not-LTL** + **7 ambiguous** (build-timeouts — the only inputs
+  whose LTL-ness is undecided); **0 crashes, 0 declines**.
+- Spot verification of the 799: **745 equivalent, 0 NOT-equivalent**, 54 too
+  large to flatten/check. **Clean.**
+- The 799 answers **collapse onto a tiny idiom vocabulary**: **87 distinct
+  formulas**, with `1` (true) alone covering **331 (41%)** and the **top-5 idioms
+  ~64%**; the flattened size is **median 2 nodes, 80% under 20** — a thin
+  exponential tail. See `logs/frontier.pdf` (regenerate with `analyze_frontier.py`).
+
+> **Note — the analysis below predates AP-canonical dedup.** The "true finding"
+> and determinization sections were computed on the *pre-dedup 1845* corpus via
+> the probe scripts (`probe_post.py`, `probe_true_collapse.py`), which still
+> reference the original generator-ids. AP-canonical dedup folds away exactly the
+> polarity twins they count (e.g. the `1` ×654 universal class roughly halves),
+> so those absolute counts no longer match the 929-file `raw/`. The *structure*
+> they describe is unchanged; the numbers are anchored to 1845 until the probes
+> are re-run over the pruned corpus.
+
+### The "true" finding
+
+**654** automata have language `true` (all verified). Of these, only **3** were
+reduced to the 1-state canonical form by Spot; **651 survived as 2-state
+nondeterministic `Inf(0)` automata** that accept every word but were left at full
+size. This is *not* a Spot bug: `postprocess(Small)` is a structural reducer, and
+recognizing that a *nondeterministic* Büchi automaton is universal is the
+PSPACE-complete universality problem — Small deliberately won't pay for it.
+
+`probe_post.py` pins down the lever: across a `type × pref × level` matrix on such
+an automaton, only **`generic` + `deterministic` at Medium/High** reaches the
+canonical 1-state `t`:
+
+- `deterministic` pref is required — it *determinizes*, so universality becomes
+  visible. `small` never does it, at any level (the level is irrelevant here).
+- the `generic` type is also required — once determinized, the `Inf(0)` set is
+  always satisfied and `generic` lets it be **dropped to `t`** (this is the
+  "merges redundant acceptance sets (Medium+)" behavior documented on
+  `aut2ltl/language.py::_clean`). Forcing `ba`/`tgba` output keeps a Büchi set, so
+  those stay at 2 states `Inf(0)` even with `deterministic`.
+
+And it is a *complete* remedy: `probe_true_collapse.py` runs that strong setting
+over all **654** universal survivors and **every one** collapses to the canonical
+1-state `t` (state-count histogram `{1: 654}`). So the 651 that `Small` left at 2
+states were never "hard" — they were one determinization step from canonical; the
+cheap path simply refuses that step.
+
+That redundant-acc drop is exactly why the three 1-state `true` survivors differ:
+`aut_00257` had its `Inf(0)` dropped (`Acceptance: 0 t`), while `aut_00265`
+reached the same 1-state shape on a path that kept `Inf(0)` (state colored) — the
+acc-merge is path-dependent, matching the original "sometimes forgot to drop
+redundant acc" hunch.
+
+Why this validates `aut2ltl`: its own input cleanup (`_clean`) is
+`postprocess(generic, <level>, **any**)` — pref `any`, never `deterministic`. So
+the tool sees the same non-canonical 2-state `Inf(0)` form and *still* produces
+`1` — the construction is doing real semantic work, not riding on a Spot
+canonicalization we never asked for.
+
+(Aside: `spot.is_universal` is the *structural* HOA property about branching, not
+"accepts every word"; test language-universality with `complement(a).is_empty()`.)
