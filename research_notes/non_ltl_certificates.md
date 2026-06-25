@@ -184,8 +184,9 @@ over your signals, but LTL over the enriched alphabet if you add a bit tracking
 | Boolean definability gate (`IsAperiodicSemigroup` on `sbacc`-free minimal form) | **built** |
 | `sbacc`-free oracle form; fail-open on >5 AP / GAP error | **built** |
 | `conclusive` gated on state-minimality | **built** |
-| Diagnosis | **prose string today** (not yet a checkable object) |
+| Diagnosis | prose string **plus** a structured `Witness` carried on the verdict |
 | Witness `(u, v, x)` extraction (group H-class + factorization → word; complete the family) | **built** (`v`,`p` + `u`,`x`); GAP right-action order **pinned** (incl. `p ≥ 3`); minimality open |
+| Witness wired into the `NOT_LTL` result + CLI (gate decorator; knob `kr.produce_witness`, default on) | **built** |
 | Promotion of non-conclusive → proof via a completed witness | **proposed** |
 | Multi-factor witness sets from the holonomy decomposition | **proposed** |
 | Census-scale "field guide" / definability atlas | **proposed** |
@@ -212,9 +213,15 @@ over your signals, but LTL over the enriched alphabet if you add a bit tracking
 
 The pipeline is being built bottom-up; this maps the code to the design above.
 
-- **Definability gate (the verdict).** `aut2ltl/bls/definability/` — `tester.py`
+- **Definability gate (the verdict).** `aut2ltl/bls/definability/tester/`
   (`label_ltl_definable` → `(definable, conclusive)`) + `algorithm.md`. The boolean
-  gate of §5/§8 on the sbacc-free minimal form. Built.
+  gate of §5/§8 on the sbacc-free minimal form — a pure oracle peer to `witness/`.
+  Built.
+- **The gate decorator (the NOT_LTL border).** `aut2ltl/bls/definability/gate.py` —
+  `definability_gate(inner)` wraps a translator: on the non-definable branch it builds
+  the `NOT_LTL` `LTLResult` (prose diagnosis + knob-guarded `Witness`), else delegates.
+  Orchestrates the `tester/` and `witness/` peers (so neither depends on the other) and
+  keeps `aut2cas` a pure cascade adapter. Built.
 - **Witness extraction — stages 1–2 (`v`, `p`, then `u`, `x`).**
   `aut2ltl/bls/definability/witness/` — `witness.py`
   (`extract_witness(lang, complete=…)` → `Witness(p, v, factor, u, x_*)` or `None`)
@@ -261,8 +268,13 @@ The pipeline is being built bottom-up; this maps the code to the design above.
   (§6 optimisation, not correctness).
 - **Periodicity-proof tier** — the residual-equivalence query upgrading the
   suggestive replay to a proof (§3.2 / §5).
-- **Wire the witness into the result** — carry `Witness` alongside `NOT_LTL` as a
-  diagnosis complement in `aut2cas` (deferred; the gate path stays unmodified).
+- **Wire the witness into the result** — **done.** The gate was extracted from
+  `aut2cas` into a decorator (`bls/definability/gate.py`, `definability_gate`); on the
+  non-definable branch it builds the `NOT_LTL` `LTLResult` with the prose diagnosis and,
+  knob-guarded (`kr.produce_witness`, default on), a `Witness`. The witness is a floor
+  value type (`aut2ltl/witness.py`), rides `LTLResult.witness` beside the diagnosis
+  (propagated by `credit`), and `main` prints it (`Witness.summary()`). `aut2cas` is now
+  a pure cascade adapter; the portfolio composes `definability_gate(as_translator(…))`.
 - **Refactor-to-share** the form-prep / GAP helpers once both paths are stable.
 - The further reaches of §6/§7 — multi-factor witness sets, the field-guide atlas,
   the witness ⇄ abstraction collapse — remain as in §8.
