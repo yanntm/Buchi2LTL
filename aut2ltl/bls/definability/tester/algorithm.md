@@ -124,5 +124,5 @@ Sits above the floor (reads `Language`, `SAT_MIN_STATES`) and above the GAP orac
 
 > Forward note: on the non-definable branch the same transition-monoid group that
 > fails aperiodicity is the carrier of a witness that demonstrates non-LTL-ness (a
-> counting family `(u, v, x, p)`). Extracting and checking it is a separate,
-> not-yet-built concern; see `research_notes/non_ltl_certificates.md`.
+> counting family `(u, v, x, p)`). Extracting and checking it is a separate
+> concern, owned by the sibling `witness/` package; see `witness/algorithm.md`.
