@@ -10,41 +10,16 @@ element lifted to concrete letters, and its order. Stage 1 produces `(v, p)`;
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Dict, List, Optional, TYPE_CHECKING
 
 import spot
 
+from aut2ltl.witness import Witness
 from aut2ltl.bls.extract import extract_generators
 from aut2ltl.bls.gap.witness_group import witness_group
 
 if TYPE_CHECKING:
     from aut2ltl.language import Language
-
-
-@dataclass
-class Witness:
-    """Non-LTL witness material — the counting family `(u, v, x, p)`.
-
-    `p` is the period (> 1); `v` is the period word (one concrete-letter string per
-    step); `factor` is the 1-based generator-index word `v` lifts from (kept for
-    checking the lift). `u` and the lasso tail `x = x_prefix . (x_cycle)^w` are the
-    family completion (stage 2): membership of `u . v^n . x` toggles with `n mod p`.
-    `u` / `x_*` are `None` until completed."""
-
-    p: int
-    v: List[str]
-    factor: List[int]
-    u: Optional[List[str]] = None
-    x_prefix: Optional[List[str]] = None
-    x_cycle: Optional[List[str]] = None
-
-    def v_str(self) -> str:
-        return " ; ".join(self.v)
-
-    @property
-    def complete(self) -> bool:
-        return self.u is not None and self.x_cycle is not None
 
 
 def _valuation_to_letter(val: Dict[str, bool]) -> str:
@@ -180,4 +155,4 @@ def extract_witness(
     return w
 
 
-__all__ = ["Witness", "extract_witness"]
+__all__ = ["extract_witness"]
