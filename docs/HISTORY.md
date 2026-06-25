@@ -1996,3 +1996,16 @@ Deleted as obsolete (no flush; git retains): the tests/benchmark/ "benchmark sub
 item (that tree is gone — benchmark lives in samples/benchmark + results/reference) and
 the two stale bls probes (tests/bls/test_kr_zoom.py, measure_formula_dag.py — files
 already removed).
+
+## 2026-06-25 — STATUS.md reborn as an orientation map (prior snapshot flushed)
+
+STATUS.md served long as the project snapshot, but its content had become duplicated by
+the now-mature docs (root README, recipes/README, combinators/README, survey/README,
+results/README, aut2ltl/README, bls/STATUS) and prone to rot — it carried stale numbers
+(DAG=414, "373-case", "five recipes", best_of "unwired"), named the default, and listed a
+gone tests/benchmark tree. Flushed: the prior What-works/default essay, combinator-algebra,
+CLI, testing and layout sections live in those docs + git history. STATUS is rewritten in
+its final form — a thin, non-rotting session-orientation map: the project works per the
+root README; it is large (be guided to the part in play); don't read source unless asked;
+the markdown orients; the four parts (aut2ltl/ survey/ results/ genaut/) each carry a
+README. No numbers, no named default, nothing to drift.
