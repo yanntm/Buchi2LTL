@@ -1,7 +1,0 @@
-input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,source
-2state0ap1acc_000.hoa,LTL,daisy,0.069,0,1,0,1,1.0,256b0f7a8d39,TRUE,genaut/corpus/2state0ap1acc/2state0ap1acc_000.hoa
-2state0ap1acc_017.hoa,LTL,daisy,0.069,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state0ap1acc/2state0ap1acc_017.hoa
-2state0ap1acc_019.hoa,LTL,daisy,0.068,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state0ap1acc/2state0ap1acc_019.hoa
-2state0ap1acc_022.hoa,LTL,daisy,0.068,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state0ap1acc/2state0ap1acc_022.hoa
-2state0ap1acc_026.hoa,LTL,daisy2,0.069,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state0ap1acc/2state0ap1acc_026.hoa
-2state0ap1acc_152.hoa,LTL,daisy2,0.069,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state0ap1acc/2state0ap1acc_152.hoa

@@ -76,11 +76,13 @@ PROSE_TAIL = """
 
 ## Reading the numbers
 
-- **0-AP shapes never fold by polarity** (no literals to flip) and collapse hardest:
-  over a one-letter alphabet a language is fixed by its accepting structure alone, so
-  `2state0ap0acc`, `3state0ap0acc`, `4state0ap0acc` all keep just 3.
+- **`k >= 1` only.** 0-AP shapes are excluded: a one-letter alphabet has a single
+  ω-word, so the only languages are `0` and `1` — no linguistic content to census.
 - **`k` drives the polarity fold**: the relabel group is `2^k * k!`, so the fold grows
   fast with APs.
+- **The LTL frontier is `n >= 2` AND `k >= 1`**: counting needs a multi-state cycle
+  over a real alphabet (a non-aperiodic monoid). 1-state shapes stay all-LTL; not-LTL
+  first appears at `2state1ap0acc`.
 - **Generation is cheap; surveying is not** — running `aut2ltl` over a shape's `kept`
   automata scales with `kept`, so the high-`kept` shapes are surveyed separately.
 """

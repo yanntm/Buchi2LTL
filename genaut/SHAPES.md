@@ -22,26 +22,18 @@ into `logs/<tag>/`; the high-`kept` ones (**deferred**) are heavy and run separa
 
 | shape | n | k | c | slots | N (combos) | byte-distinct | polarity | **kept** | survey |
 |---|---|---|---|---|---|---|---|---|---|
-| `1state0ap0acc` | 1 | 0 | 0 | 1 | 2 | 2 | 0 | **2** |  |
-| `1state0ap1acc` | 1 | 0 | 1 | 2 | 4 | 2 | 0 | **2** |  |
 | `1state1ap0acc` | 1 | 1 | 0 | 1 | 4 | 4 | 1 | **3** |  |
 | `1state1ap1acc` | 1 | 1 | 1 | 2 | 16 | 7 | 2 | **5** |  |
 | `1state2ap0acc` | 1 | 2 | 0 | 1 | 16 | 16 | 10 | **6** |  |
-| `2state0ap0acc` | 2 | 0 | 0 | 4 | 16 | 3 | 0 | **3** |  |
 | `1state1ap2acc` | 1 | 1 | 2 | 4 | 256 | 10 | 3 | **7** |  |
 | `1state2ap1acc` | 1 | 2 | 1 | 2 | 256 | 77 | 52 | **25** |  |
 | `1state3ap0acc` | 1 | 3 | 0 | 1 | 256 | 256 | 204 | **52** |  |
-| `2state0ap1acc` | 2 | 0 | 1 | 8 | 256 | 6 | 0 | **6** |  |
 | `2state1ap0acc` | 2 | 1 | 0 | 4 | 256 | 53 | 23 | **30** |  |
-| `3state0ap0acc` | 3 | 0 | 0 | 9 | 512 | 3 | 0 | **3** |  |
 | `1state1ap3acc` | 1 | 1 | 3 | 8 | 65536 | 10 | 3 | **7** |  |
 | `1state2ap2acc` | 1 | 2 | 2 | 4 | 65536 | 272 | 189 | **83** |  |
 | `1state3ap1acc` | 1 | 3 | 1 | 2 | 65536 | 6553 | 5041 | **1512** | deferred |
-| `2state0ap2acc` | 2 | 0 | 2 | 16 | 65536 | 91 | 0 | **91** |  |
 | `2state1ap1acc` | 2 | 1 | 1 | 8 | 65536 | 1845 | 916 | **929** |  |
 | `2state2ap0acc` | 2 | 2 | 0 | 4 | 65536 | 30613 | 19071 | **11542** | deferred |
-| `4state0ap0acc` | 4 | 0 | 0 | 16 | 65536 | 3 | 0 | **3** |  |
-| `3state0ap1acc` | 3 | 0 | 1 | 18 | 262144 | 281 | 0 | **281** |  |
 | `3state1ap0acc` | 3 | 1 | 0 | 9 | 262144 | 7908 | 3875 | **4033** | deferred |
 
 ## Beyond the wall (first intractable)
@@ -56,10 +48,12 @@ into `logs/<tag>/`; the high-`kept` ones (**deferred**) are heavy and run separa
 
 ## Reading the numbers
 
-- **0-AP shapes never fold by polarity** (no literals to flip) and collapse hardest:
-  over a one-letter alphabet a language is fixed by its accepting structure alone, so
-  `2state0ap0acc`, `3state0ap0acc`, `4state0ap0acc` all keep just 3.
+- **`k >= 1` only.** 0-AP shapes are excluded: a one-letter alphabet has a single
+  ω-word, so the only languages are `0` and `1` — no linguistic content to census.
 - **`k` drives the polarity fold**: the relabel group is `2^k * k!`, so the fold grows
   fast with APs.
+- **The LTL frontier is `n >= 2` AND `k >= 1`**: counting needs a multi-state cycle
+  over a real alphabet (a non-aperiodic monoid). 1-state shapes stay all-LTL; not-LTL
+  first appears at `2state1ap0acc`.
 - **Generation is cheap; surveying is not** — running `aut2ltl` over a shape's `kept`
   automata scales with `kept`, so the high-`kept` shapes are surveyed separately.

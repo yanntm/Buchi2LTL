@@ -1,4 +1,0 @@
-input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,source
-2state0ap0acc_00.hoa,LTL,daisy,0.070,0,1,0,1,1.0,256b0f7a8d39,TRUE,genaut/corpus/2state0ap0acc/2state0ap0acc_00.hoa
-2state0ap0acc_05.hoa,LTL,daisy,0.071,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state0ap0acc/2state0ap0acc_05.hoa
-2state0ap0acc_08.hoa,LTL,daisy,0.070,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state0ap0acc/2state0ap0acc_08.hoa

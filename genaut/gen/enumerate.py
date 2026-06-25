@@ -53,6 +53,9 @@ def parse_shape(token: str) -> Shape:
 
 
 def main(shape: Shape, limit: Optional[int]) -> None:
+    if shape.naps < 1:                  # 0-AP = one-letter alphabet: only 0/1, no content
+        raise SystemExit(f"{shape.tag}: 0-AP shapes are linguistically empty "
+                         "(the only languages are 0 and 1) — not censused.")
     out_dir = os.path.join(RAW_ROOT, shape.tag)
     shutil.rmtree(out_dir, ignore_errors=True)   # start clean: no stale survivors
     os.makedirs(out_dir, exist_ok=True)
