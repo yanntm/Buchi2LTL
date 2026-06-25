@@ -126,12 +126,7 @@ def translate(f: "spot.formula", *, timeout: Optional[int] = None) -> "spot.twa_
     _guard_translation(f)
     eff = _TRANSLATE_TIMEOUT if timeout is None else timeout
     if not eff or eff <= 0 or _within_inproc(f):
-        _fresh = os.environ.get("KR_SPOTRUN_FRESHDICT")   # debug: translate vs a fresh bdd_dict
-        _g = spot.formula(str(f)) if os.environ.get("KR_SPOTRUN_REPARSE") else f
-        a = _g.translate(dict=spot.make_bdd_dict()) if _fresh else _g.translate()
-        if os.environ.get("KR_SPOTRUN_INPROC_RT"):    # debug: in-process HOA round-trip
-            a = spot.automaton(a.to_str("hoa"))
-        return a
+        return f.translate()
     # Safe to flatten: the size guard proved the unfolded form is <= the tree limit,
     # so `str(f)` is a small string; the exp work (the translate) runs in the child.
     res = bounded.run([sys.executable, _CHILD, str(f)], timeout=eff)
@@ -151,34 +146,4 @@ def translate(f: "spot.formula", *, timeout: Optional[int] = None) -> "spot.twa_
     except Exception as exc:
         raise UntranslatableLanguage(
             f"bounded-translate output not parseable as an automaton: {exc}") from exc
-    if os.environ.get("KR_SPOTRUN_CMP"):
-        _debug_compare(f, aut)
-    _warm = os.environ.get("KR_SPOTRUN_WARM")          # experiment: which throwaway translate "fixes" it
-    if _warm == "f":            # the ORIGINAL hash-consed formula (the known fix)
-        f.translate()
-    elif _warm == "reparse":    # the SAME formula, flattened to str then reparsed (loses the DAG)
-        spot.formula(str(f)).translate()
-    elif _warm == "const":      # a content-independent formula (generic global-state warming)
-        spot.formula("G(a | b)").translate()
-    elif _warm == "aut":        # touch the returned automaton, no formula translate at all
-        aut.num_states()
     return aut
-
-
-def _debug_compare(f: "spot.formula", child: "spot.twa_graph") -> None:
-    """Temporary instrument (KR_SPOTRUN_CMP): for the SAME formula, compare the plain
-    binding vs the reparse-of-str(f) binding — is the difference a pure state
-    permutation (isomorphic), and did str(f) round-trip change the formula?"""
-    ref = f.translate()                                # good order (reconstructs small)
-    if ref.to_str("hoa") == child.to_str("hoa"):
-        return
-    n = getattr(_debug_compare, "_n", 0)               # dump divergent node pairs
-    if n < 8:
-        os.makedirs("logs/nodes", exist_ok=True)
-        with open(f"logs/nodes/good_{n}.hoa", "w") as fh:
-            fh.write(ref.to_str("hoa"))
-        with open(f"logs/nodes/perm_{n}.hoa", "w") as fh:
-            fh.write(child.to_str("hoa"))
-        _debug_compare._n = n + 1
-        sys.stderr.write(f"[cmp] DIFFER#{n} ref={ref.num_states()}st child={child.num_states()}st\n")
-        sys.stderr.flush()
