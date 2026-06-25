@@ -2,10 +2,11 @@
 
 A Translator yields more than a formula: which method produced it, and whether it
 succeeded, declined, or proved the language non-LTL. `LTLResult` carries all of it —
-a `Status`, the `formula` (only when OK), the contributing `technique` tags, and an
-optional `diagnosis` — so composition stays sound and self-reporting (a bare
-`spot.formula` hid which method fired, and could not distinguish "not my case" from
-"impossible").
+a `Status`, the `formula` (only when OK), the contributing `technique` tags, an
+optional `diagnosis`, and — on a NOT_LTL verdict — an optional `witness` (the counting
+family certifying non-definability) — so composition stays sound and self-reporting (a
+bare `spot.formula` hid which method fired, and could not distinguish "not my case"
+from "impossible").
 
 `Status` is closed and three-valued:
   * OK       — success; `.formula` is language-equivalent to the input.
@@ -14,7 +15,8 @@ optional `diagnosis` — so composition stays sound and self-reporting (a bare
 
 Results combine by two monoids:
   * composition — `credit` / `fuse`: fold a child's work in; the worst status wins
-    (NOT_LTL ≻ DECLINED ≻ OK), techniques union, diagnoses accumulate; OK is the unit.
+    (NOT_LTL ≻ DECLINED ≻ OK), techniques union, diagnoses accumulate, a NOT_LTL
+    child's witness rides up; OK is the unit.
   * choice — `first` / `decline`: try translators in order, take the first non-declined
     result (NOT_LTL short-circuits); DECLINED falls through; `decline` is the unit.
 
@@ -46,6 +48,7 @@ from typing import Callable, FrozenSet, List, Optional, Set, TYPE_CHECKING
 if TYPE_CHECKING:
     import spot
     from aut2ltl.language import Language
+    from aut2ltl.witness import Witness
 
 
 class Status(Enum):
@@ -75,7 +78,7 @@ class LTLResult:
     fill the `formula` and return. The accumulator is never shared, so mutation is safe.
     """
 
-    __slots__ = ("_status", "_formula", "_technique", "_diagnosis")
+    __slots__ = ("_status", "_formula", "_technique", "_diagnosis", "_witness")
 
     def __init__(
         self,
@@ -83,11 +86,13 @@ class LTLResult:
         formula: Optional["spot.formula"] = None,
         technique: Optional[Set[str]] = None,
         diagnosis: Optional[str] = None,
+        witness: Optional["Witness"] = None,
     ) -> None:
         self._status = status
         self._formula = formula
         self._technique: Set[str] = set(technique) if technique else set()
         self._diagnosis = diagnosis
+        self._witness = witness
 
     # --- factories -------------------------------------------------------------
     @classmethod
@@ -107,9 +112,18 @@ class LTLResult:
         return cls(Status.DECLINED, technique=set(techniques), diagnosis=diagnosis)
 
     @classmethod
-    def not_definable(cls, diagnosis: Optional[str] = None, *techniques: str) -> "LTLResult":
-        """A NOT_LTL verdict (absorbing). The diagnosis may note proof vs hint."""
-        return cls(Status.NOT_LTL, technique=set(techniques), diagnosis=diagnosis)
+    def not_definable(
+        cls,
+        diagnosis: Optional[str] = None,
+        *techniques: str,
+        witness: Optional["Witness"] = None,
+    ) -> "LTLResult":
+        """A NOT_LTL verdict (absorbing). The diagnosis may note proof vs hint; the
+        optional `witness` is the counting family certifying non-definability. This is
+        the sole place a witness enters a result — `credit` only propagates it."""
+        return cls(
+            Status.NOT_LTL, technique=set(techniques), diagnosis=diagnosis, witness=witness
+        )
 
     # --- queries ---------------------------------------------------------------
     @property
@@ -141,6 +155,12 @@ class LTLResult:
         return self._diagnosis
 
     @property
+    def witness(self) -> Optional["Witness"]:
+        """The non-LTL counting family, when this verdict carries one (set only via
+        the `not_definable` factory; `credit` carries a child's up)."""
+        return self._witness
+
+    @property
     def formula(self) -> Optional["spot.formula"]:
         return self._formula
 
@@ -167,6 +187,9 @@ class LTLResult:
             self._status = other_status
             self._formula = None
         self._add_diagnosis(other.diagnosis)
+        # a NOT_LTL child's witness rides up (first one wins; never clobbered)
+        if self._witness is None and other.witness is not None:
+            self._witness = other.witness
         return self
 
     def fail(self, status: "Status", diagnosis: Optional[str] = None) -> "LTLResult":
@@ -184,7 +207,8 @@ class LTLResult:
 
     def __repr__(self) -> str:
         return (f"LTLResult({self._status.value}, formula={self._formula}, "
-                f"technique={sorted(self._technique)}, diagnosis={self._diagnosis!r})")
+                f"technique={sorted(self._technique)}, diagnosis={self._diagnosis!r}, "
+                f"witness={self._witness!r})")
 
 
 def fuse(primary: "LTLResult", *others: "LTLResult") -> "LTLResult":
