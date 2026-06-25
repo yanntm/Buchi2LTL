@@ -185,7 +185,7 @@ over your signals, but LTL over the enriched alphabet if you add a bit tracking
 | `sbacc`-free oracle form; fail-open on >5 AP / GAP error | **built** |
 | `conclusive` gated on state-minimality | **built** |
 | Diagnosis | **prose string today** (not yet a checkable object) |
-| Witness `(u, v, x)` extraction (group H-class + factorization → word; complete the family) | **built** (`v`,`p` + `u`,`x`); minimality & `p ≥ 3` order-pin open |
+| Witness `(u, v, x)` extraction (group H-class + factorization → word; complete the family) | **built** (`v`,`p` + `u`,`x`); GAP right-action order **pinned** (incl. `p ≥ 3`); minimality open |
 | Promotion of non-conclusive → proof via a completed witness | **proposed** |
 | Multi-factor witness sets from the holonomy decomposition | **proposed** |
 | Census-scale "field guide" / definability atlas | **proposed** |
@@ -227,6 +227,11 @@ The pipeline is being built bottom-up; this maps the code to the design above.
   `v`-orbit) and `x` (a phase-discriminating lasso from
   `product(L_q, complement(L_q'))`). Built, unit-tested, and validated on real
   kinska non-LTL inputs (see `research_notes/witness_log.md`).
+- **Right-action order pin (§4 gotcha).** `aut2ltl/bls/definability/witness/pin.py` —
+  `check_action_order(lang)` → `PinResult`, driven by `aut2ltl/bls/gap/witness_eval.py`
+  (`eval_word`, GAP's right-action product as an independent oracle). Confirms the
+  lift composes left-to-right against GAP, on the real factor and a constructed
+  direction-sensitive word. Built and pinned on the `p = 3` mod-3 fixture.
 - **Membership certificate checker (suggestive tier).**
   `tests/probes/verifier/verify_smoke.py` — `member(aut, word)` (Spot
   `intersects`, every acceptance type, on the **input** automaton) and
@@ -242,10 +247,16 @@ The pipeline is being built bottom-up; this maps the code to the design above.
 
 **What remains.** (Experiment log: `research_notes/witness_log.md`.)
 
-- **Pin the GAP right-action order** (§4 gotcha) on a `p ≥ 3` case — `p = 2` hides a
-  reversal (a 2-cycle equals its inverse). All kinska `1ap` counting witnesses so
-  far are `p = 2`; a `p ≥ 3` input (higher-AP counting, or a mod-3 fixture) is
-  needed.
+- **Pin the GAP right-action order** (§4 gotcha) — **done.** A mod-3 fixture
+  (`samples/fixtures/hoa/various/mod3_a.hoa`, `L = a^{3k}(!a)ᵒ`) yields a genuine
+  `p = 3` witness, so the group element is no longer self-inverse. The convention is
+  pinned against GAP as an independent oracle (`gap/witness_eval.eval_word`, the
+  right-action product) by `witness/pin.check_action_order`: the lift's left-to-right
+  `_induced_transform` is compared on the real factor *and* on a constructed
+  direction-sensitive word (one whose reversal induces a different transform), which
+  a palindromic factor / `p = 2` cycle cannot exercise. Forward matches GAP, the
+  reversal differs — the lift composes left-to-right, no reversal bug. Probe:
+  `tests/probes/bls/definability/witness/pin_order.py`.
 - **Minimise `u` / `x`** — the synthesised completion is correct but not minimal
   (§6 optimisation, not correctness).
 - **Periodicity-proof tier** — the residual-equivalence query upgrading the
