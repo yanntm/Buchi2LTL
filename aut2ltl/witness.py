@@ -44,5 +44,17 @@ class Witness:
     def complete(self) -> bool:
         return self.u is not None and self.x_cycle is not None
 
+    def summary(self) -> str:
+        """A human rendering of the counting family for a NOT_LTL diagnosis: the
+        period, the toggling claim, and (when completed) the words `u`, `v`, `x`."""
+        head = (f"witness: counting family, period p={self.p} — "
+                f"u·vⁿ·x flips membership with n mod {self.p}")
+        if not self.complete:
+            return f"{head}\n    v = {self.v_str()}   (u, x not synthesised)"
+        u = " ; ".join(self.u) if self.u else "ε"
+        prefix = (" ; ".join(self.x_prefix) + " ; ") if self.x_prefix else ""
+        x = f"{prefix}({' ; '.join(self.x_cycle or [])})ω"
+        return f"{head}\n    u = {u} ;  v = {self.v_str()} ;  x = {x}"
+
 
 __all__ = ["Witness"]
