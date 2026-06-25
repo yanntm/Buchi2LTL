@@ -1,6 +1,6 @@
 # aut2ltl.combinators — the Translator-algebra bricks
 
-Five general-purpose combinators for building translators out of translators. Each
+Six general-purpose combinators for building translators out of translators. Each
 depends on nothing but the **contract floor** (`aut2ltl.translator.Translator` /
 `aut2ltl.result.LTLResult`) — and, where a size objective is needed (`best_of`), the
 engine-agnostic `aut2ltl.ltl` metrics, itself dependency-free but for Spot. **None
@@ -34,6 +34,7 @@ sound by construction — this is what lets recipes be written freely.
 | `compose` | decorator monoid | ∘ | `d₁∘…∘dₙ`, unit `identity` | [compose/algorithm.md](compose/algorithm.md) |
 | `recurse` | fixpoint | fix | `leaf = step(leaf)` | [recurse/algorithm.md](recurse/algorithm.md) |
 | `memo` | decorator | — | transparent per-`Language` sharing | [memo/algorithm.md](memo/algorithm.md) |
+| `decompose` | combine | ∧/∨ | split, label parts, recombine | [decompose/algorithm.md](decompose/algorithm.md) |
 
 ## Laws
 
@@ -49,14 +50,19 @@ sound by construction — this is what lets recipes be written freely.
   `leaf = step(leaf)`; it adds no behaviour of its own (termination and the floor are
   `step`'s).
 - **`memo`** — identity on results (same formula/status/tags); purely operational.
+- **∧/∨ `decompose`** — `decompose(split, connective, tag)(child)` splits the language,
+  labels each part with `child`, and recombines under `∧`/`∨`; a declined part declines
+  the whole. Faithful iff `split` is a genuine language (de)composition for the
+  connective.
 
 `first_success` and `best_of` are the two *choice* combinators (differing only in the
 selection rule); `recurse` is their *self-reference* complement; `compose` and `memo`
-are *decorators*. The `∧/∨` language **combine** used by the decomposers is a separate
-operator and lives with them (`aut2ltl/decomp/decompose.py`).
+are *decorators*; `decompose` is the *combine* operator. The concrete splits that feed
+`decompose` (strength / acceptance / scc) are domain code and stay in
+`aut2ltl/decomp/`.
 
 ## Index
 
 The package `__init__` re-exports the public surface as a one-stop facade —
-`from aut2ltl.combinators import first_success, best_of, compose, identity, recurse, Memo`
+`from aut2ltl.combinators import first_success, best_of, compose, identity, recurse, Memo, decompose`
 — while the submodule paths (`aut2ltl.combinators.<brick>`) remain importable.
