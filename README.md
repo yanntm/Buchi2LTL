@@ -76,6 +76,27 @@ the formula:
 python3 -m aut2ltl samples/fixtures/hoa/various/collapse_example.hoa -q | ltlfilt --simplify
 ```
 
+A **third kind of answer.** Not every ω-automaton has an LTL formula — ω-automata are
+strictly more expressive — and when the language lies outside LTL, `aut2ltl` **decides**
+so and returns a **checkable witness** of why. Take the mod-3 counter `L = a^{3k}·(!a)^ω`
+([`samples/fixtures/hoa/various/mod3_a.hoa`](samples/fixtures/hoa/various/mod3_a.hoa)) —
+"an `a`-block whose length is a multiple of 3, then `!a` forever":
+
+<p align="center"><img src="docs/img/mod3_a.png" alt="the mod-3 counter automaton for a^{3k}(!a)^ω" width="360"></p>
+
+```console
+$ python3 -m aut2ltl samples/fixtures/hoa/various/mod3_a.hoa
+aut2ltl: NOT_LTL — the language is not LTL-definable
+  (the deterministic transition monoid is non-aperiodic (carries a non-trivial
+   group), so the language is not star-free / counter-free and no LTL formula exists)
+  witness: counting family, period p=3 — u·vⁿ·x flips membership with n mod 3
+    u = ε ;  v = a ; a ;  x = (!a)ω
+```
+
+The witness is a **counting family**: `u·vⁿ·x = a^{2n}·(!a)^ω` is in `L` exactly when
+`n ≡ 0 (mod 3)`, so its membership toggles with period 3 — the modular counting no
+counter-free LTL formula can express, checkable against the automaton by hand.
+
 `aut2ltl` is also run over an exhaustive census of small ω-automata of a fixed
 shape, as a broad coverage and correctness check. The committed results are in
 [`genaut/logs/`](genaut/logs/).
@@ -155,9 +176,9 @@ several directions — and not always possible, since ω-automata are strictly m
 expressive than LTL. `aut2ltl` is **sound** (it never returns a non-equivalent
 formula) and **complete** on the LTL-definable fragment (it reconstructs a defining
 formula whenever one exists), at the cost of a possibly exponential blow-up in formula
-size. When the input language lies outside LTL it **decides** so and reports it — to
-our knowledge, `aut2ltl` is among the first tools to actually decide LTL-definability
-in practice.
+size. When the input language lies outside LTL it **decides** so and returns a
+**checkable witness** (a counting family) of why no formula exists — to our knowledge,
+`aut2ltl` is among the first tools to actually decide LTL-definability in practice.
 
 ## Algorithms
 
