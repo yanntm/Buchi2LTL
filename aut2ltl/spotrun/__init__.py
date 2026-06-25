@@ -126,9 +126,9 @@ def translate(f: "spot.formula", *, timeout: Optional[int] = None) -> "spot.twa_
     _guard_translation(f)
     eff = _TRANSLATE_TIMEOUT if timeout is None else timeout
     if not eff or eff <= 0 or _within_inproc(f):
-        if os.environ.get("KR_SPOTRUN_REPARSE"):      # debug: reparse str(f) in-process
-            return spot.formula(str(f)).translate()
-        a = f.translate()
+        _fresh = os.environ.get("KR_SPOTRUN_FRESHDICT")   # debug: translate vs a fresh bdd_dict
+        _g = spot.formula(str(f)) if os.environ.get("KR_SPOTRUN_REPARSE") else f
+        a = _g.translate(dict=spot.make_bdd_dict()) if _fresh else _g.translate()
         if os.environ.get("KR_SPOTRUN_INPROC_RT"):    # debug: in-process HOA round-trip
             a = spot.automaton(a.to_str("hoa"))
         return a
@@ -153,6 +153,15 @@ def translate(f: "spot.formula", *, timeout: Optional[int] = None) -> "spot.twa_
             f"bounded-translate output not parseable as an automaton: {exc}") from exc
     if os.environ.get("KR_SPOTRUN_CMP"):
         _debug_compare(f, aut)
+    _warm = os.environ.get("KR_SPOTRUN_WARM")          # experiment: which throwaway translate "fixes" it
+    if _warm == "f":            # the ORIGINAL hash-consed formula (the known fix)
+        f.translate()
+    elif _warm == "reparse":    # the SAME formula, flattened to str then reparsed (loses the DAG)
+        spot.formula(str(f)).translate()
+    elif _warm == "const":      # a content-independent formula (generic global-state warming)
+        spot.formula("G(a | b)").translate()
+    elif _warm == "aut":        # touch the returned automaton, no formula translate at all
+        aut.num_states()
     return aut
 
 
