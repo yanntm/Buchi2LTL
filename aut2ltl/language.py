@@ -47,6 +47,7 @@ from typing import Callable, Optional, Tuple, Union
 import spot
 
 from aut2ltl.options import OptionSpec
+from aut2ltl import spotrun
 
 
 class UntranslatableLanguage(Exception):
@@ -258,7 +259,7 @@ class Language:
             else:
                 _guard_translation(self._source_formula)
                 raw = (self._translate_traced(self._source_formula) if _TRACE
-                       else self._source_formula.translate())
+                       else spotrun.translate(self._source_formula))
             a = _clean(raw)
             self._cache["base"] = a
         return a
