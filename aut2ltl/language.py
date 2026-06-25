@@ -105,11 +105,11 @@ CACHE_SIZE = OptionSpec(
 # re-presentation (the round trip) ever feeds a formula this large here; real
 # inputs are tiny and never trip it. 0 disables a bound. (Bucket 3, like
 # SAT_MIN_STATES: a process-wide gate, env-read; the OptionSpec is discoverability.)
-_TRANSLATE_TREE_LIMIT = int(os.environ.get("KR_TRANSLATE_TREE_LIMIT", "100"))
+_TRANSLATE_TREE_LIMIT = int(os.environ.get("KR_TRANSLATE_TREE_LIMIT", "1000"))
 _TRANSLATE_TEMPORAL_LIMIT = int(os.environ.get("KR_TRANSLATE_TEMPORAL_LIMIT", "32"))
 
 TRANSLATE_TREE_LIMIT = OptionSpec(
-    "language.translate_tree_limit", 100,
+    "language.translate_tree_limit", 1000,
     "refuse ltl2tgba on a formula whose unfolded (flat) size exceeds this; 0 disables",
     env="KR_TRANSLATE_TREE_LIMIT")
 TRANSLATE_TEMPORAL_LIMIT = OptionSpec(
