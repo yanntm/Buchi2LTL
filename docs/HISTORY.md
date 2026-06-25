@@ -1950,3 +1950,32 @@ over: solid (the '2L breaker' from-S note, the stale `_stay_gt0` trace label, th
 `Rws`/`Rws0` names, 'corrected paper', `p.12`, 2L-breaker); dashed (`p.13`, 2L-breaker
 framing kept-the-illustration, the heisenbug/bare-except narration). reach/wreach/support
 done earlier; fin.py reviewed clean. All comment-only here (no survey needed).
+
+## 2026-06-25 — deep_nobls default + retranslate budget 1000; combinators/ regroup
+
+LANDED (round trip / default). Shipped `deep_nobls` as `RECIPES["default"]` (was
+`cakedsdet`) and raised the language retranslate budget 100 -> 1000
+(`language.translate_tree_limit`, env `KR_TRANSLATE_TREE_LIMIT`). deep_nobls seeds
+with cakedsdet, then runs a deep bottom-up `deep_roundtrip` re-presenting every DAG
+node via the cascade-free `nobls` labeler (never-regress per node,
+`best_of([identity, relabel(nobls)])`) + a final `hi` simplify — collapsing the buchi
+towers from the leaves up. Sound throughout (0 FAIL). Size vs the prior default:
+kinska DAG -94.9% (validated 89->99), benchmark -82.5% (255->266), genaut -97.5%
+(745->750), validation -3.0%. The budget is a genuine tradeoff: on the genaut census
+@1000 ~= @500 and costs ~12 verified answers vs @100 — pathological tiny automata
+whose de-blobbing overruns the survey's 15s build budget and times out (blobs DOWN,
+timeouts UP — different things). References refreshed
+(results/reference/{validation,kinska,benchmark}, genaut/logs + frontier.pdf). Full
+experiment log + reproducibility: research_notes/roundtrip_log.md. TODO: finer
+per-Spot-call control (time+size bound each language.translate so a runaway
+construction-translate declines one node instead of blowing the whole build).
+
+LANDED (layout). Regrouped the five general-purpose combinator bricks
+(first_success ⊕, best_of ⊞, compose ∘, recurse fix, memo) out of the cluttered
+aut2ltl/ root into aut2ltl/combinators/ (first_success + compose promoted
+module->package; facade __init__ re-exports the public surface as a one-stop index,
+submodule paths still importable). Pure path-shift sweep across source + tests
+(aut2ltl.<brick> -> aut2ltl.combinators.<brick>); validation gate unchanged (DAG=458,
+80 TRUE). ltl_rewriter (floor contract), the roundtrip* re-presentation algorithms,
+and the daisy* peels deliberately left in place. Each brick gains an algorithm.md +
+the folder a README.
