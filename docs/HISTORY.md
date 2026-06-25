@@ -1979,3 +1979,20 @@ submodule paths still importable). Pure path-shift sweep across source + tests
 80 TRUE). ltl_rewriter (floor contract), the roundtrip* re-presentation algorithms,
 and the daisy* peels deliberately left in place. Each brick gains an algorithm.md +
 the folder a README.
+
+## 2026-06-25 — flushed from TODO (resolved/obsolete)
+
+Carved resolved items out of TODO.md (prior text in git history):
+- **best_of cost policy + wiring** — `significantly_smaller(rel, floor)` switch margin
+  landed; `best_of` is wired as the default's choice combinator (cake/cakeds/cakedsdet/
+  deep_nobls). [was "Refine best_of's cost policy, then wire it in"]
+- **first_success -> peer package** — done by the combinators/ regroup (now
+  aut2ltl/combinators/first_success/).
+- **roundtrip_decomp test plan** — superseded: the round-trip family is validated via the
+  surveys and deep_nobls (deep round trip) shipped as the default; roundtrip_decomp stays
+  available under --use. [was the "NEXT" block]
+
+Deleted as obsolete (no flush; git retains): the tests/benchmark/ "benchmark sub-project"
+item (that tree is gone — benchmark lives in samples/benchmark + results/reference) and
+the two stale bls probes (tests/bls/test_kr_zoom.py, measure_formula_dag.py — files
+already removed).
