@@ -129,6 +129,17 @@ SIMP_OWN_LIMIT = OptionSpec(
     "cap on the own simplify pipeline (skip above this node size)",
     env="KR_SIMP_OWN_LIMIT")
 
+# --- non-LTL diagnosis: witness production ---
+# On a NOT_LTL verdict, the definability gate can extract a checkable witness (the
+# counting family certifying non-definability) as a diagnosis complement. It costs
+# one extra, opt-in GAP call on the non-definable branch only; default ON.
+
+PRODUCE_WITNESS = OptionSpec(
+    "kr.produce_witness", True,
+    "on a NOT_LTL verdict, extract a non-LTL witness (counting family) as a "
+    "diagnosis complement (one extra GAP call on the non-definable branch)",
+    env="KR_PRODUCE_WITNESS")
+
 # --- the package's declared option sets ---
 # The Bucket-1 sub-list the portfolio builder threads now (read via options.get).
 KR_DISPATCH_OPTIONS = [DISPATCH_ACC, DISPATCH_WEAK, DISPATCH_BUCHI, DISPATCH_COBUCHI]
@@ -138,6 +149,7 @@ KR_OPTIONS = KR_DISPATCH_OPTIONS + [
     FOLD_FIN_REACH, FUSE_LETTERS, SIMP_OWN, SIMP_OWN_FOLD, SIMP_OWN_FACTOR,
     TRACE, REACH_GUARD, MAX_LEVELS, FLATTEN_TREE_LIMIT,
     SIMP_NODE, SIMP_TREE_LIMIT, SIMP_OPTS, SIMP_FULL_LIMIT, SIMP_OWN_LIMIT,
+    PRODUCE_WITNESS,
 ]
 
 __all__ = [
@@ -145,5 +157,6 @@ __all__ = [
     "FOLD_FIN_REACH", "FUSE_LETTERS", "SIMP_OWN", "SIMP_OWN_FOLD", "SIMP_OWN_FACTOR",
     "TRACE", "REACH_GUARD", "MAX_LEVELS", "FLATTEN_TREE_LIMIT",
     "SIMP_NODE", "SIMP_TREE_LIMIT", "SIMP_OPTS", "SIMP_FULL_LIMIT", "SIMP_OWN_LIMIT",
+    "PRODUCE_WITNESS",
     "KR_DISPATCH_OPTIONS", "KR_OPTIONS",
 ]
