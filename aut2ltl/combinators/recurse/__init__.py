@@ -1,5 +1,5 @@
 """
-aut2ltl.recurse — the recursive-descent combinator brick.
+aut2ltl.combinators.recurse — the recursive-descent combinator brick.
 
 `recurse(step)` is the least fixpoint of a Translator endofunctor: the translator
 `leaf` with `leaf = step(leaf)`, where `step(child)` decomposes the input one

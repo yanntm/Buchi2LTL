@@ -62,7 +62,7 @@ def recurse(step: "Callable[[Translator], Translator]") -> "Translator":
                  {@code child}, returns a one-level decomposing Translator that
                  delegates strictly-smaller sub-problems to {@code child}.
     @return      the fixpoint Translator {@code leaf} with {@code leaf = step(leaf)}.
-    @see aut2ltl.first_success.first_success  the choice brick this completes.
+    @see aut2ltl.combinators.first_success.first_success  the choice brick this completes.
     """
 
     def leaf(lang: "Language") -> "LTLResult":

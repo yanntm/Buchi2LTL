@@ -13,7 +13,7 @@ from aut2ltl.options import Options
 from aut2ltl.decomp.acceptance import AccDecompose
 from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.simplify_ltl import Simplify
-from aut2ltl.compose import compose
+from aut2ltl.combinators.compose import compose
 from ..builder import daisy_pair_inv, core
 
 

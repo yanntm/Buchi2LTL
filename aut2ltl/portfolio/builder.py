@@ -23,8 +23,8 @@ from typing import Optional
 
 from aut2ltl.translator import Translator
 from aut2ltl.options import Options
-from aut2ltl.first_success import first_success
-from aut2ltl.recurse import recurse
+from aut2ltl.combinators.first_success import first_success
+from aut2ltl.combinators.recurse import recurse
 from aut2ltl.bls.aut2cas import as_translator
 from aut2ltl.bls.definability import definability_gate
 from aut2ltl.bls.hierarchy_class import make_hierarchy_class

@@ -16,14 +16,14 @@ from typing import Optional
 
 from aut2ltl.translator import Translator
 from aut2ltl.options import Options
-from aut2ltl.best_of import best_of, significantly_smaller
+from aut2ltl.combinators.best_of import best_of, significantly_smaller
 from aut2ltl.partscc import PartScc
 from aut2ltl.decomp.acceptance import AccDecompose
 from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.decomp.scc import SccDecompose
 from aut2ltl.decomp.inv import Invariant
 from aut2ltl.simplify_ltl import Simplify
-from aut2ltl.compose import compose
+from aut2ltl.combinators.compose import compose
 from ..builder import daisy_trio_det, daisy_trio_det_inv, core
 
 

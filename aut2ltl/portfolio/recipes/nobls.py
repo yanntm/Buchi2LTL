@@ -22,7 +22,7 @@ from aut2ltl.decomp.strength import StrengthDecompose
 from aut2ltl.decomp.scc import SccDecompose
 from aut2ltl.decomp.inv import Invariant
 from aut2ltl.simplify_ltl import Simplify
-from aut2ltl.compose import compose
+from aut2ltl.combinators.compose import compose
 from ..builder import daisy_trio_det_inv
 
 

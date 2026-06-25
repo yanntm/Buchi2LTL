@@ -41,7 +41,7 @@ class Decorator(Protocol):
     A Decorator wraps a child translator into a new one — `StrengthDecompose`,
     `AccDecompose`, `Invariant`, `daisy_pair`, and a `recurse` step are all
     Decorators (each takes its recursion/floor target as its argument). Under
-    composition (`∘`, `aut2ltl.compose.compose`) they form a monoid whose unit is
+    composition (`∘`, `aut2ltl.combinators.compose.compose`) they form a monoid whose unit is
     `identity` — distinct from the `decline` *terminal* of the choice combinators
     (`first_success` / `best_of`); a terminal is an element, an identity is a map.
 

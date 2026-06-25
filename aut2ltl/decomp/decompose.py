@@ -17,7 +17,7 @@ from typing import Callable, List, TYPE_CHECKING
 import spot
 
 from aut2ltl.language import Language
-from aut2ltl.recurse import recurse
+from aut2ltl.combinators.recurse import recurse
 from aut2ltl.result import LTLResult, fuse
 from aut2ltl.ltl.builders import own_simplify
 

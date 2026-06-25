@@ -20,7 +20,7 @@ blocks, and `recipes/` for the named recipes (the `RECIPES` registry).
 """
 from __future__ import annotations
 
-from aut2ltl.first_success import first_success
+from aut2ltl.combinators.first_success import first_success
 from aut2ltl.options import Options
 from aut2ltl.bls.options import KR_OPTIONS
 from .build import build_portfolio, TECHNIQUES

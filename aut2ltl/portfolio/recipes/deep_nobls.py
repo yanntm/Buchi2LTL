@@ -15,7 +15,7 @@ from typing import Optional
 
 from aut2ltl.translator import Translator
 from aut2ltl.options import Options
-from aut2ltl.best_of import best_of
+from aut2ltl.combinators.best_of import best_of
 from aut2ltl.ltl_rewriter import identity, relabel, as_translator
 from aut2ltl.roundtrip_deep import deep_roundtrip
 from aut2ltl.simplify_ltl import Simplify

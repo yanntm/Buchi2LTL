@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Smoke test for aut2ltl.compose (identity + compose) — the decorator-algebra unit
+Smoke test for aut2ltl.combinators.compose (identity + compose) — the decorator-algebra unit
 and composition. GAP-free: real Translator/Decorator types, bare spot formulas, no
 engine. Decorators wrap the result formula with a unary op so order is observable.
 
@@ -11,7 +11,7 @@ import sys
 import spot
 
 from aut2ltl.result import LTLResult
-from aut2ltl.compose import compose, identity
+from aut2ltl.combinators.compose import compose, identity
 
 _fail = []
 

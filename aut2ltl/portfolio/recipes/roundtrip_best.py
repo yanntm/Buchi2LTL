@@ -25,8 +25,8 @@ from typing import Optional
 
 from aut2ltl.translator import Translator
 from aut2ltl.options import Options
-from aut2ltl.best_of import best_of
-from aut2ltl.memo import Memo
+from aut2ltl.combinators.best_of import best_of
+from aut2ltl.combinators.memo import Memo
 from aut2ltl.roundtrip_top import Roundtrip
 from .cakedsdet import cakedsdet
 

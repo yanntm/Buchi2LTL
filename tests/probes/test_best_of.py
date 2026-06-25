@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Smoke test for aut2ltl.best_of (GAP-free; bare spot.formula DAGs in, no engine,
+Smoke test for aut2ltl.combinators.best_of (GAP-free; bare spot.formula DAGs in, no engine,
 stages are plain lambdas ignoring their input). Size is derived by the comparators
 from the result formula — there is no score field on LTLResult.
 
@@ -11,7 +11,7 @@ import sys
 import spot
 
 from aut2ltl.result import LTLResult
-from aut2ltl.best_of import best_of, significantly_smaller
+from aut2ltl.combinators.best_of import best_of, significantly_smaller
 from aut2ltl.ltl.metrics import dag_node_count
 
 _fail = []

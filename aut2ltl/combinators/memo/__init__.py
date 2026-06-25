@@ -1,5 +1,5 @@
 """
-aut2ltl.memo — the memoizing decorator brick.
+aut2ltl.combinators.memo — the memoizing decorator brick.
 
 `Memo(child)` is a transparent performance decorator: a Translator that returns
 exactly what `child(lang)` returns, computed at most once per `Language`. It is
