@@ -72,11 +72,7 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
   wait on completion events, never sleep/poll loops.
 - **Spot is bounded-or-skipped, never waited on** in the construction/test path —
   no unbounded external calls; Spot is for hash-consing (+ the bounded oracles
-  already accepted). A stall is reported, not blocked on. And distrust its
-  *determinism*: `formula.translate()` is not referentially transparent — it
-  depends on process-global formula-construction order, so a `str(f)` reparse or a
-  fresh process can translate the same language to a much larger automaton. Keep
-  translate in-process on the original formula (`research_notes/spot_isolation.md`).
+  already accepted). A stall is reported, not blocked on.
 - **Honest failure attribution.** Distinguish what WE failed at (a crash, a
   construction timeout with no DAG) from what a downstream tool can't handle (Spot
   hitting >32 acceptance sets, the flat form exploding). A DAG we built that Spot
