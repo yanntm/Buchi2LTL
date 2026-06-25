@@ -158,23 +158,21 @@ reconstructed formula size.
 LTL result out) and the portfolio composes them, taking the best answer at each step.
 
 ```
-aut2ltl/
-  language.py     the input wrapper: cached, cleaned, language-equivalent automaton views
-  result.py       LTLResult — a formula (DAG) or a decline, plus which methods contributed
-  __main__.py     the command-line front end  (python3 -m aut2ltl)
-  bls/            the systematic construction (Krohn-Rhodes cascade; see bls/README.md)
-  daisy/          the self-loop "daisy" peel — a pure local translator
-  decomp/         (de)composition approaches, one isolated subpackage each:
-                  scc / strength / acceptance / inv
-  partscc/        the single-terminal-SCC leaf translator
-  ltl/            LTL primitives, metrics, printers, simplifiers
-  portfolio/      the combinators that assemble the translators
-survey/           the survey harness (the correctness gate) + diff / ltl2hoa tools
-samples/          input corpora (validation = the gate, benchmark, kinska, fixtures)
-results/          committed reference survey runs (results/reference/<corpus>/)
-tests/            probes and per-engine unit tests
-docs/             algorithm notes, the construction log, figures
+aut2ltl/   the package: the input wrapper, the result type, the CLI front end, and the
+           translators the portfolio composes (the systematic Krohn-Rhodes cascade is
+           aut2ltl/bls/)
+survey/    the survey harness (the correctness gate) + diff tools
+samples/   input corpora (validation = the gate, benchmark, kinska, fixtures)
+results/   committed reference survey runs (results/reference/<corpus>/)
+tests/     probes and per-engine unit tests
+docs/      algorithm notes, the construction log, figures
 ```
+
+The source is deliberately structured, and most packages carry a `README.md`, an
+`algorithm.md`, or both — the detail lives next to the code. Start with
+[`aut2ltl/README.md`](aut2ltl/README.md), the developer source map; the systematic
+cascade [`aut2ltl/bls/`](aut2ltl/bls/README.md) holds a faithful implementation of the
+Boker–Lehtinen–Sickert paper.
 
 ## Scope
 
