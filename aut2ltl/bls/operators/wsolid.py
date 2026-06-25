@@ -47,13 +47,12 @@ def wsolid(
     if not source_is_bad and not source_is_target:
         return gt0_f
     elif not source_is_bad and source_is_target:
-        # Per ref Rws case (S != B and S == T): exactly Rws0 ∨ τ  (gt0 already carries the full weak line1+line2)
-        # (Removed special stay_prop U path -- was bypassing gt0/line2 and had dead source_is_bad test inside not-bad branch.)
+        # S != B and S == T: gt0 ∨ τ  (gt0 already carries the full weak line1+line2).
         return _simp_f(_Or(gt0_f, tau_f))
     elif source_is_bad and not source_is_target:
         return _simp_f(_And(gt0_f, _Not(beta_f)))
     else:
-        # Case 4 per corrected paper (weak form): (Rws0 ∨ τ) ∧ ¬β
+        # Case 4 (weak form): (gt0 ∨ τ) ∧ ¬β  (differs from solid's (gt0 ∧ ¬β) ∨ τ).
         return _simp_f(_And( _Or(gt0_f, tau_f) , _Not(beta_f) ))
 
 
@@ -62,8 +61,7 @@ def wsolid(
 def wsolid_plus(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
-    """wsolid⁺ (the >0 common subformula of Formula 4), literal per paper p.12 /
-    construction-ref §7:
+    """wsolid⁺ (the >0 common subformula of Formula 4), per construction-ref §7:
 
       -- line (1): eventually reach ⟨T,t⟩, still staying in s
       ⋁ ⟨σ,T'⟩ ∈ Stay(s) with δ(⟨T',s⟩,σ) = ⟨T,t⟩ :
@@ -78,7 +76,7 @@ def wsolid_plus(
     (weak ⇒ reaching is optional); all avoids use wreach. Line (2) uses
     target false: wreach(…, S, false) means "never trigger the avoid", i.e.
     stay forever unblocked. Combined letters enumerated over all h-image
-    configs (the from-S evaluation was the 2L breaker).
+    configs (not just from S).
     """
     n = getattr(casc, "num_levels", 0)
     if level >= n:

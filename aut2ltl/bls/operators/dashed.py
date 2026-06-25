@@ -24,7 +24,7 @@ from aut2ltl.ltl.builders import _ff, _to_f, _And, _Or, _Not, _X, _simp_f, _shor
 def dashed(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
-    """Formula 5 (dashed / change top), literal per paper p.13 / construction-ref §7:
+    """Formula 5 (dashed / change top), per construction-ref §7:
 
       ⋁ over ⟨σ,T'⟩ ∈ Enter(t) :
         (  reach(S, S, false, T', σ ∧ X(solid(δ(⟨T',·⟩,σ), ⟨B,b⟩, β, ⟨T,t⟩, τ)))     -- line (1)
@@ -40,9 +40,9 @@ def dashed(
       with s == t is a legitimate dashed path; Enter(q) ⊆ Stay(q) keeps it
       disjoint from solid via line (3)).
     - Enter(t)/Enter(b)/Leave(s) are combined letters ⟨σ, lower-config⟩
-      enumerated over ALL h-image configs (the from-S evaluation was the 2L
-      breaker: e.g. for G(a->Xb) no letter from the initial config enters the
-      sink's top; entry fires only from the obligation state's lower config).
+      enumerated over ALL h-image configs, not just from S — e.g. for G(a->Xb) no
+      letter from the initial config enters the sink's top; entry fires only from
+      the obligation state's lower config.
     - Lines (1)/(2) carry a lower-level prefix reach to T' (cursor level+1);
       δ(⟨T',·⟩,σ) is the observed arrival config of the entering letter
       (reset cascades: independent of the dropped layer state).
@@ -97,11 +97,8 @@ def dashed(
         # never be about to enter b (η firing) with a weak-stay-at-b that reaches
         # ⟨B,b⟩(β) unreleased by ⟨T,t⟩(τ)  — the SWAPPED wsolid call per the paper.
         for eta_f, preR, arrR in enter_b_fused:
-            # Narrow catch: only the "no valid weak form from this entry"
-            # shapes. A bare `except Exception` here swallowed EVERYTHING
-            # crossing the recursion — including real TypeErrors (heisenbug
-            # masked for runs where this path enclosed it) and test-harness
-            # control exceptions (probe budget alarms silently ignored).
+            # Narrowly skip entries with no valid weak form; a broad `except`
+            # would mask real errors and test-harness control exceptions.
             try:
                 wsolid_sw = wsolid.wsolid(arrR, T, tau_f, B, beta_f, casc, level)
             except (ValueError, IndexError, KeyError):
