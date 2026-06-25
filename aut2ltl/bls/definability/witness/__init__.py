@@ -7,6 +7,6 @@ package makes it concrete. `extract_witness` returns the period word `v` and per
 and the verifier are separate. See algorithm.md.
 """
 
-from .witness import Witness, extract_witness
+from .witness import extract_witness
 
-__all__ = ["Witness", "extract_witness"]
+__all__ = ["extract_witness"]
