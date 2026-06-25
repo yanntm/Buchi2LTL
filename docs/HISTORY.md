@@ -1892,3 +1892,32 @@ Verification: `samples/validation` survey SUCCESS (80/80 TRUE); `test_result_wit
 6/6; `test_witness` 4/4; `pin_order` PINNED. Notes:
 research_notes/non_ltl_certificates.md §8/§10, research_notes/witness_log.md.
 Open: minimise u/x; periodicity-proof tier; multi-factor sets / atlas (§6/§7).
+
+## 2026-06-25 — operators: adopt the reference names, split one file per operator, doc
+
+DONE. Made the cascade's reachability core speak the construction reference's language
+and split the 652-line module into one file per operator, with a proper algorithm.md.
+
+- **Paper relocated.** `paper/` → `aut2ltl/bls/paper/` (mechanical; the cascade's
+  reference now sits next to its code; relative links inside bls/README resolve again).
+- **Rename sweep (behavior-preserving).** reach_strong→reach, reach_weak→wreach,
+  _solid_stay_strong→solid, _stay_gt0_strong→solid_plus, _solid_stay_weak→wsolid,
+  _stay_gt0_weak→wsolid_plus, _dashed_change_strong→dashed (word-boundary sed across 9
+  files incl. the r4 audit probe). Survey SUCCESS, identical totals (DAG=472,
+  temporals=128); r4 audit CLEAN.
+- **One file per operator.** reachability_operators.py → reach.py / wreach.py /
+  solid.py / wsolid.py / dashed.py; non-recursive machinery (memo decorator,
+  combined-letter enumeration, fusion, builder re-exports) in support.py. Mutual
+  recursion carried by module-qualified calls (from . import sibling; sibling.fn()),
+  cycle-safe. operators/__init__ is the facade re-exporting the whole surface so
+  callers don't see the split; fin/weak/muller/probes repointed to it. The r4 audit
+  reads per-operator source via importlib (no function reflection). Survey SUCCESS,
+  identical totals.
+- **operators/algorithm.md** — one section per operator aired from the digest
+  (paper/automata-to-ltl-construction.md), cites Boker–Lehtinen–Sickert FoSSaCS'22,
+  plus a separated "Beyond the paper" section: hash-consing/per-build memo, letter
+  enumeration+fusion (observable h-image, dedupe, Minato-OR), early-outs, and the
+  consumer-side Fin-conjunct fold (pointer to muller).
+- Doc tidy: CLAUDE.md drops the paper pointers; README folder-map slimmed to top level;
+  bls/README refreshed (definability/ replaces ltl_tester.py, docs/ refs dropped);
+  stale reachability_operators references repointed to the operators package.
