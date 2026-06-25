@@ -4,8 +4,9 @@ For a Shape (states/APs/acc sets) this enumerates every combo of the slot model
 (shape.combo_at order), runs one spot.postprocess(Small, Generic) pass on each,
 and applies the two pre-write dedup gates — byte-identical md5, then the shared
 AP-canonical key (polarity o names) from survey.normalize — before writing one HOA
-per survivor to genaut/raw/<shape.tag>/aut_<id>.hoa. A twin is never built into a
-file. See algorithm.md.
+per survivor to genaut/raw/<tag>/<tag>_<id>.hoa (the file carries its own shape, so
+it is self-identifying out of its folder). A twin is never built into a file. See
+algorithm.md.
 
 Usage:
   python3 genaut/gen/enumerate.py [SHAPE] [LIMIT]
@@ -57,6 +58,7 @@ def main(shape: Shape, limit: Optional[int]) -> None:
     ap_key = _ap_canonical_key()
 
     combos = itertools.product(shape.guards, repeat=len(shape.slots))
+    width = shape.id_width                  # zero-pad just enough for the id space
     seen_md5: Set[str] = set()             # byte-identical HOA
     seen_key: Set[str] = set()             # AP-canonical key (polarity o names)
     total = written = folded = 0
@@ -74,7 +76,7 @@ def main(shape: Shape, limit: Optional[int]) -> None:
             folded += 1
             continue
         seen_key.add(key)
-        with open(os.path.join(out_dir, f"aut_{i:05d}.hoa"), "w") as out:
+        with open(os.path.join(out_dir, f"{shape.tag}_{i:0{width}d}.hoa"), "w") as out:
             out.write(content)
         written += 1
         if total % 5000 == 0:
@@ -82,7 +84,7 @@ def main(shape: Shape, limit: Optional[int]) -> None:
 
     print(f"[{shape.tag}] scanned {total} combos, kept {written} AP-canonical "
           f"distinct ({len(seen_md5)} byte-distinct, {folded} polarity/name twins "
-          f"folded pre-write) -> {out_dir}/aut_NNNNN.hoa")
+          f"folded pre-write) -> {out_dir}/{shape.tag}_NNNNN.hoa")
 
 
 if __name__ == "__main__":
