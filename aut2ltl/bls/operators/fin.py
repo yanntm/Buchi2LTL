@@ -17,7 +17,7 @@ from typing import Optional, Tuple
 
 from aut2ltl.ltl.builders import _And, _Or, _Not, _X, _ff, _tt, _letters_to_f, _simp_f, _short_f, _fuse_or
 import aut2ltl.bls.operators.reachability_operators as _ops
-from aut2ltl.bls.operators.reachability_operators import reach_strong, _trace, TRACE_ON
+from aut2ltl.bls.operators.reachability_operators import reach, _trace, TRACE_ON
 
 
 def _uncond_reach_strict(S: Tuple[int, ...], T: Tuple[int, ...], casc: "Cascade") -> "spot.formula":
@@ -47,7 +47,7 @@ def _uncond_reach_strict(S: Tuple[int, ...], T: Tuple[int, ...], casc: "Cascade"
     disjs = []
     for arrived, gs in groups.values():
         # after this letter class, from arrived (0-step ok if arrived==T)
-        sub = reach_strong(arrived, None, _ff(), T, _tt(), casc)
+        sub = reach(arrived, None, _ff(), T, _tt(), casc)
         disjs.append(_And(_fuse_or(gs), _X(sub)))
     res = _simp_f(_Or(*disjs)) if disjs else _ff()
     casc.uncond_memo[key] = res
@@ -75,7 +75,7 @@ def fin_c(C: Tuple[int, ...], casc: "Cascade") -> "spot.formula":
         cs = casc.all_configs()
         init = cs[0] if cs else C
     # ι ↝ C (can be 0-step if init==C)
-    r_to = reach_strong(init, None, _ff(), C, _tt(), casc)
+    r_to = reach(init, None, _ff(), C, _tt(), casc)
     if TRACE_ON:
         _trace(f"  fin_c for C={C}: r_to={_short_f(r_to)}")
     # C>0 ↝ C : strict progress return
@@ -88,7 +88,7 @@ def fin_c(C: Tuple[int, ...], casc: "Cascade") -> "spot.formula":
     no_return_psi = _simp_f(_Not(r_gt0))
     if TRACE_ON:
         _trace(f"  fin_c for C={C}: no_return_psi={_short_f(no_return_psi)}")
-    r_with = reach_strong(init, None, _ff(), C, no_return_psi, casc)
+    r_with = reach(init, None, _ff(), C, no_return_psi, casc)
     if TRACE_ON:
         _trace(f"  fin_c for C={C}: r_with={_short_f(r_with)}")
     fin_expr = _simp_f(_Or(_Not(r_to), r_with))

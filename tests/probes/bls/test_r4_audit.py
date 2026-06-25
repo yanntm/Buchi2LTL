@@ -26,9 +26,9 @@ from pathlib import Path
 import spot
 from aut2ltl.bls import decompose_aut, CascadeHolder
 from aut2ltl.bls.operators.reachability_operators import (
-    reach_strong, reach_weak, simplify_ltl,
-    _solid_stay_weak, _stay_gt0_weak,
-    _dashed_change_strong,
+    reach, wreach, simplify_ltl,
+    wsolid, wsolid_plus,
+    dashed,
 )
 from aut2ltl.bls.operators.fin import fin_c
 from aut2ltl.bls.hierarchy_class import hierarchy_class
@@ -88,16 +88,16 @@ def check_drift_forever_semantics():
     B = diff_top[0]
     beta = "false"  # or a prop that can trigger on B
     tau = "true"
-    # Current weak path for this (via reach_weak or the solid weak)
+    # Current weak path for this (via wreach or the solid weak)
     _reset_counters()
     # Exercise the internal weak solid for stay case (source==target at level 0)
     # This is what would be used in Rws0 for the solid part.
     try:
-        weak_stay = _solid_stay_weak(S, B, beta, T, tau, casc, 0)
+        weak_stay = wsolid(S, B, beta, T, tau, casc, 0)
         weak_stay = simplify_ltl(weak_stay)
-        print("  _solid_stay_weak(S=T, diff B) =", weak_stay)
+        print("  wsolid(S=T, diff B) =", weak_stay)
     except Exception as e:
-        print("  ERROR exercising _solid_stay_weak:", e)
+        print("  ERROR exercising wsolid:", e)
         weak_stay = "ERROR"
     # Now, the "drift" word: a sequence of stay letters only.
     # For audit, construct a word that stays in top of S forever.
@@ -185,16 +185,16 @@ def check_5point_checklist():
     from aut2ltl.bls.operators import reachability_operators as _reachops
     src_path = Path(_reachops.__file__)
     src = src_path.read_text()
-    rws0_body = _get_func_body(src, "_stay_gt0_weak")
-    rs_body = _get_func_body(src, "_solid_stay_weak")
-    dashed_body = _get_func_body(src, "_dashed_change_strong")
+    rws0_body = _get_func_body(src, "wsolid_plus")
+    rs_body = _get_func_body(src, "wsolid")
+    dashed_body = _get_func_body(src, "dashed")
 
     points = {
         "1. Has Line-2 disjunct (stay forever) in weak >0?": ('S, "false"' in rws0_body or "_avoid_conjs(S, _ff())" in rws0_body or ", S, false" in rws0_body),
-        "2. Line-1 omits free-reach R1/strong(S,S,false,...) ?": ("reach_strong(S, S," not in rws0_body and "reach_strong(S,S" not in rws0_body),
-        "3. Bad-predecessor avoids use Rw (weak) not R?": ("reach_weak" in rws0_body),
+        "2. Line-1 omits free-reach R1/strong(S,S,false,...) ?": ("reach(S, S," not in rws0_body and "reach(S,S" not in rws0_body),
+        "3. Bad-predecessor avoids use Rw (weak) not R?": ("wreach" in rws0_body),
         "4. Outer case 4 is (core | tau) & !beta (weak form)?": ("And( _Or(gt0_f, tau_f)" in rs_body or "And( _Or(gt0_f, tau_f) , _Not(beta_f)" in rs_body or "(Rws0 ∨ τ) ∧ ¬β" in rs_body),
-        "5. R5 line(2) Rws call has swapped roles (T,t,tau as 'bad', B,b,beta as target)?": ("_solid_stay_weak(arrR, T," in dashed_body or "_solid_stay_weak(earrived, T," in dashed_body),
+        "5. R5 line(2) Rws call has swapped roles (T,t,tau as 'bad', B,b,beta as target)?": ("wsolid(arrR, T," in dashed_body or "wsolid(earrived, T," in dashed_body),
     }
     all_ok = True
     for desc, ok in points.items():
@@ -217,7 +217,7 @@ def check_5point_checklist():
             tau = "true"
         beta = "false"
         try:
-            res = _solid_stay_weak(S, B, beta, T, tau, casc, 0)
+            res = wsolid(S, B, beta, T, tau, casc, 0)
             res = simplify_ltl(res)
             print("  Behavioral same-top weak with tau=prop:", res[:100])
             # For weak (Rws) when S=T: vacuous "true" (from line2) or containing operators for postpone is OK.

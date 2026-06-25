@@ -5,7 +5,7 @@ Reconstructs the LTL for cascades whose runs reach a ⊤/⊥ sink within a bound
 horizon (the "X-ladder" fragment, e.g. X(a & Xa)). The language from the initial
 config is then a finite unrolling — the literal small formula — so this dispatch
 emits that unrolling directly and bypasses the cascade reach machinery entirely
-(no fin_c, reach_strong, or operator-counter reset), avoiding the reach τ-tail
+(no fin_c, reach, or operator-counter reset), avoiding the reach τ-tail
 blow-up the general Muller form pays on these inputs.
 
 Self-gating: a config re-entered on the unroll path that is not a ⊤/⊥ sink is

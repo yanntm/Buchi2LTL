@@ -91,7 +91,7 @@ TRACE = OptionSpec(
 
 REACH_GUARD = OptionSpec(
     "kr.reach_guard", 5_000_000,
-    "abort after this many DISTINCT reach_strong subproblems (runaway guard)",
+    "abort after this many DISTINCT reach subproblems (runaway guard)",
     env="KR_REACH_GUARD")
 
 MAX_LEVELS = OptionSpec(

@@ -28,8 +28,8 @@ from .extract import extract_generators, ExtractionError, is_deterministic
 from .operators import (
     simplify_ltl,
     normalize_ltl,
-    reach_strong,
-    reach_weak,
+    reach,
+    wreach,
     fin_c,
 )
 from .hierarchy_class import make_hierarchy_class, hierarchy_class
@@ -64,8 +64,8 @@ __all__ = [
     "reconstruct",
     "simplify_ltl",
     "normalize_ltl",
-    "reach_strong",
-    "reach_weak",
+    "reach",
+    "wreach",
     "fin_c",
     "TRACE_ON",
 ]

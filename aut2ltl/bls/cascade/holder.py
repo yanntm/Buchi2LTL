@@ -36,13 +36,13 @@ class CascadeHolder:
 
     def __init__(self, cascade: "Cascade") -> None:
         self.cascade: "Cascade" = cascade
-        # reach_strong memo: key (S, B, beta_f, T, tau_f, level) -> formula.
+        # reach memo: key (S, B, beta_f, T, tau_f, level) -> formula.
         self.reach_memo: Dict[Tuple[Any, ...], "spot.formula"] = {}
         # helper memo (solid/wsolid/dashed + the >0 cores), keyed by the decorator.
         self.helper_memo: Dict[Tuple[Any, ...], "spot.formula"] = {}
         # fin.py _uncond_reach_strict memo.
         self.uncond_memo: Dict[Any, "spot.formula"] = {}
-        # Distinct reach_strong expansions: the runaway-guard counter AND the
+        # Distinct reach expansions: the runaway-guard counter AND the
         # profiling metric. Distinct fin_c calls: a smaller independent guard.
         self.reach_calls: int = 0
         self.fin_calls: int = 0

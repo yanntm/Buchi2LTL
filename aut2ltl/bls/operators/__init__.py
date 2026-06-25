@@ -10,8 +10,8 @@ from .reachability_operators import (
     make_guard,
     simplify_ltl,
     normalize_ltl,
-    reach_strong,
-    reach_weak,
+    reach,
+    wreach,
     TRACE_ON,
 )
 from .fin import fin_c
@@ -21,8 +21,8 @@ __all__ = [
     "make_guard",
     "simplify_ltl",
     "normalize_ltl",
-    "reach_strong",
-    "reach_weak",
+    "reach",
+    "wreach",
     "fin_c",
     "TRACE_ON",
 ]

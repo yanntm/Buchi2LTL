@@ -37,8 +37,8 @@ def is_weak_cascade(casc: Cascade) -> bool:
 
 def _reach_to(S, C, casc) -> "spot.formula":
     """reach_to(S,C) := reach(S, C, false, C, true) — reach config C from S, no
-    real bad (β=false), no Fin. §9.1 shorthand over reach_strong."""
-    return _ops.reach_strong(S, C, _ff(), C, _tt(), casc, 0)
+    real bad (β=false), no Fin. §9.1 shorthand over reach."""
+    return _ops.reach(S, C, _ff(), C, _tt(), casc, 0)
 
 
 def _init_config(casc: Cascade):
