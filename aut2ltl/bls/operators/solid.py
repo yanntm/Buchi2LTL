@@ -24,9 +24,8 @@ from aut2ltl.ltl.builders import _tt, _ff, _to_f, _And, _Or, _Not, _X, _simp_f, 
 def solid(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
-    """Formulas 3 (strong solid/stay top unchanged). Cases on current level's coord.
-    Formula objects in and out (str accepted for probe/test compat).
-    """
+    """Formula 3 (strong solid / stay, top unchanged). Cases on the current level's
+    coord. Formula objects in and out (str accepted for probe/test compat)."""
     n = getattr(casc, "num_levels", 0)
     if level >= n:
         return reach.reach(S, B, beta, T, tau, casc, level)
@@ -66,8 +65,7 @@ def solid(
 def solid_plus(
     S: Tuple[int, ...], B: Optional[Tuple[int, ...]], beta: "str | spot.formula", T: Tuple[int, ...], tau: "str | spot.formula", casc: "Cascade", level: int = 0
 ) -> "spot.formula":
-    """solid⁺ (the >0 common subformula of Formula 3), literal per paper p.11 /
-    construction-ref §7:
+    """solid⁺ (the >0 common subformula of Formula 3), per construction-ref §7:
 
       ⋁ over ⟨σ,T'⟩ ∈ Stay(s) with δ(⟨T',s⟩,σ) = ⟨T,t⟩ :
           reach(S, S, false, T', σ ∧ Xτ)                       -- freely reach the pre-target T'
@@ -78,7 +76,7 @@ def solid_plus(
     Last-step decomposition: the lower level reaches the firing point T', the
     stay-in-s constraint is enforced by the Leave-avoid conjuncts, recursion is
     strictly to level+1. Combined letters are enumerated over all h-image
-    configs (not just from S) — the from-S evaluation was the 2L breaker.
+    configs (not just from S).
     """
     n = getattr(casc, "num_levels", 0)
     if level >= n:
@@ -130,6 +128,6 @@ def solid_plus(
 
     res_f = _simp_f(_Or(*disjs_f)) if disjs_f else _ff()
     if TRACE_ON:
-        _trace(f"    _stay_gt0 result level={level}: {_short_f(res_f, 80)}")
+        _trace(f"    solid_plus result level={level}: {_short_f(res_f, 80)}")
     return res_f
 
