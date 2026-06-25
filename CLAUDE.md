@@ -15,8 +15,7 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
 - `README.md` — repo guide / quick start. `STATUS.md` / `TODO.md` — project
   snapshot / open items.
 - `aut2ltl/bls/README.md` — kr engine entry point: doc map, pipeline, module map,
-  testing tools. `aut2ltl/bls/STATUS.md` — **current** engine state (read to start).
-  `aut2ltl/bls/TODO.md` — engine work items.
+  testing tools.
 - `docs/HISTORY.md` — construction log (the dated DONE/WIRED/LANDED/reverted
   record). Reference for the *why/when*; **do NOT read it to start a session** —
   STATUS.md is the current snapshot.
