@@ -26,6 +26,17 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
 
 ## Corpora / test harness
 
+- **Finer per-Spot-call control (decouple construction-translate from verify).**
+  Surfaced by the `deep_nobls` @1000 genaut run (research_notes/roundtrip_log.md): the
+  round trip's `ltl2tgba` calls are guarded only by a *flat-size* proxy
+  (`language.translate_tree_limit`), never *time*-bounded per call. So one runaway Spot
+  translate inside the round trip blows the whole-survey 15 s build budget and kills an
+  answer that was nearly fully collapsed, instead of declining that *one* node (which
+  `best_of([identity, …])` would absorb). Push a per-call **time + size** bound down into
+  `language.translate` so an overboard call raises `UntranslatableLanguage` for that node
+  only → graceful per-node degradation, not a global timeout. Separately, the construction
+  translate budget and the verification (equiv-oracle) budget are distinct concerns and
+  should stay independently controllable.
 - **Convert the benchmark examples to HOA.** Split `samples/benchmark/inputs/`
   into `ltl/` + `hoa/` like `samples/{validation,fixtures}`, generating the HOA
   with `survey.ltl2hoa` (our inputs are not explosive for Spot). Lets the
@@ -61,6 +72,10 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   descent). The decomposition-unification half of the old `recurse(decompose, combine,
   floor)` idea landed (`aut2ltl/decomp/decompose.py`, all three decomposers); the open
   levers on the `recurse` seam are memoization and a per-descent `best_of`.
+- **Move `first_success` to a peer package.** It lives as a bare `aut2ltl/first_success.py`
+  while its sibling primitives (`recurse/`, `memo/`, `best_of/`) are packages with their
+  own README. Promote it to `aut2ltl/first_success/` (module + README) for parity — the
+  import path is unchanged, so the move is mechanical.
 - **Retire the transitional shim** `aut2ltl/contract.py` once importers repoint.
 - **`fuse2` is unwired** (`heur/fuse2`). Decision: leave it out; let fuzzing measure
   whether its absence costs `best` before deciding to wire it.
