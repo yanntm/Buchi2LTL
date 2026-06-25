@@ -41,14 +41,17 @@ spot automaton ──decompose (gap/)──▶ Cascade ──dispatch chain─�
   accepting configs, good Muller sets) + the build `holder`.
 - **`gap/`** — the GAP / SgpDec holonomy bridge (`decompose_aut`); see `gap/README.md`.
 - **`extract.py`** — transformation-generator extraction for SgpDec.
-- **`ltl_tester.py`** — the LTL-definability labeler. **`options.py`** — engine options.
+- **`definability/`** — the LTL-definability gate: the verdict oracle (`tester/`), the
+  non-LTL witness extractor (`witness/`), and the gate decorator (`gate.py`) that
+  intercepts a non-LTL language as NOT_LTL (with a witness) before the cascade builds;
+  see `definability/algorithm.md`. **`options.py`** — engine options.
 
 Engine-agnostic LTL machinery (builders, simplify, BDD utils, metrics, printers)
 lives in `aut2ltl/ltl/`, shared across engines.
 
 ## More
 
-- Construction reference: `paper/automata-to-ltl-construction.md`; ground truth for
-  fidelity questions: `paper/Automata2LTL.txt`. Scope/policy: `docs/algorithm.md`.
-- Engine state: `aut2ltl/bls/STATUS.md`. Size-explosion research: `docs/dag_folding.md`.
+- Construction reference: `paper/automata-to-ltl-construction.md` (in this package);
+  ground truth for fidelity questions: `paper/Automata2LTL.txt`.
+- Engine state: `STATUS.md`.
 - Tests: `tests/probes/bls/` (cascade unit tests + probes).
