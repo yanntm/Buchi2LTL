@@ -1858,3 +1858,37 @@ RESULT: PINNED on mod3_a (p=3) and parity_a (p=2). Forward matches GAP, reversal
 differs — the lift composes left-to-right, no reversal bug. `test_witness` 4/4.
 Notes: research_notes/non_ltl_certificates.md §8/§10, research_notes/witness_log.md.
 Open: minimise u/x; periodicity-proof tier; wire Witness into the NOT_LTL result.
+
+## 2026-06-25 — non-LTL witness wired into main; gate extracted from aut2cas
+
+DONE. The non-LTL witness now reaches the user: `python3 -m aut2ltl <non-LTL>`
+prints the counting family `(u, v, x, p)` beneath the NOT_LTL diagnosis (exit 3),
+suppressible with `KR_PRODUCE_WITNESS=0`.
+
+Architecture (decorator over a pure adapter):
+- `aut2ltl/witness.py` (NEW, floor) — the `Witness` value type, lifted out of
+  `bls/definability/witness/witness.py` (which keeps only `extract_witness` + helpers).
+  Pure data + `summary()`; the floor can type-mention it without engine deps.
+- `aut2ltl/result.py` — `LTLResult` gains a `witness` slot: set only via the
+  `not_definable` factory (single injection point), propagated by `credit` (first
+  wins), absent on OK/DECLINED, untouched by `fail`. Type-mentioned under TYPE_CHECKING.
+- `bls/definability/tester.py` -> `tester/` package (peer to `witness/`).
+- `bls/definability/gate.py` (NEW) — `definability_gate(inner)`: the NOT_LTL border.
+  On the non-definable branch builds the LTLResult (prose diagnosis + knob-guarded,
+  best-effort witness), else delegates. Orchestrates `tester/` + `witness/` (so
+  neither depends on the other).
+- `bls/aut2cas.py` — now a PURE cascade adapter (gate, NOT_LTL construction, and the
+  reconstruct singleton removed). Portfolio (`build.py`, `builder.py`) and the
+  `reconstruct` endpoint (in `bls/__init__.py`) compose `definability_gate(as_translator(…))`.
+- `bls/options.py` — `kr.produce_witness` knob (default on). `__main__.py` prints
+  `res.witness.summary()`.
+
+Rationale: bricks make no caller assumptions (ungated `as_translator` stays reusable;
+the gate is a separate brick composed at the use site). The witness travels the same
+chain as the diagnosis (LTLResult -> credit -> main); the Language verdict cache stays
+the downstream fail-safe boolean (no witness there).
+
+Verification: `samples/validation` survey SUCCESS (80/80 TRUE); `test_result_witness`
+6/6; `test_witness` 4/4; `pin_order` PINNED. Notes:
+research_notes/non_ltl_certificates.md §8/§10, research_notes/witness_log.md.
+Open: minimise u/x; periodicity-proof tier; multi-factor sets / atlas (§6/§7).
