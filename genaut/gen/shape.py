@@ -2,8 +2,8 @@
 
 A Shape fixes the three axes of the enumeration and derives the slot model from
 them: the generator-id space [0, N), the per-slot guard alphabet, the acceptance
-marksets, and the id<->combo bijection that names each survivor aut_<id>.hoa. Pure
-(stdlib only) — the Spot realisation of a combo lives in build.py.
+marksets, and the id<->combo bijection behind each survivor's name <tag>_<id>.hoa.
+Pure (stdlib only) — the Spot realisation of a combo lives in build.py.
 
 See algorithm.md for the model; the short of it:
   Shape(n, k, c)                 n states, k APs, c acceptance sets
@@ -76,10 +76,17 @@ class Shape:
     def num_combos(self) -> int:
         return len(self.guards) ** len(self.slots)
 
+    @property
+    def id_width(self) -> int:
+        """Zero-pad width for the generator id in filenames: just enough digits for
+        the largest id (num_combos-1), no more — so 1state1ap0acc (N=4) pads to 1
+        digit, 2state1ap1acc (N=65536) to 5."""
+        return len(str(self.num_combos - 1))
+
     def combo_at(self, index: int) -> Tuple[int, ...]:
         """The guard tuple at generator id `index` (one guard code per slot), in the
         same order the driver visits — itertools.product, last slot fastest. The
-        inverse of "which combo produced aut_<index>.hoa"."""
+        inverse of "which combo produced <tag>_<index>.hoa"."""
         n = self.num_combos
         if not 0 <= index < n:
             raise IndexError(f"index {index} out of range [0, {n}) for {self.tag}")
