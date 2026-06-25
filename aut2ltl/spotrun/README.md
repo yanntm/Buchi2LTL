@@ -14,10 +14,11 @@ It declines a translate two ways:
   we decline rather than drive Spot toward an OOM. Knobs
   `spotrun.translate_tree_limit` / `translate_temporal_limit`.
 - **Wall-time (secondary).** A formula that passes the guard yet still translates
-  slowly is bounded by `spotrun.translate_timeout` and killed on overrun. This
-  needs a child process: an in-process Spot C++ call holds the GIL and cannot be
-  interrupted, so `timeout` set routes through the killable `ltl2tgba` binary
-  (via `aut2ltl.bounded`), while `timeout=None` keeps the fast in-process call.
+  slowly is bounded by `spotrun.translate_timeout` (default 3s, always on) and
+  killed on overrun. An in-process Spot C++ call holds the GIL and cannot be
+  interrupted, so the bounded translate runs as the killable `ltl2tgba` binary
+  (via `aut2ltl.bounded`), parsed back from its HOA output; a `0` budget reverts
+  to the in-process binding (the escape hatch).
 
 It sits below `Language` (no `Language` import, no cache of its own) and depends
 only on `spot`, `aut2ltl.bounded`, `aut2ltl.options`, and the leaf

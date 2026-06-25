@@ -206,12 +206,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         res = translator(lang)
     except UntranslatableLanguage as e:
         # The input — or an intermediate a translator tried to re-present — exceeds
-        # the ltl2tgba size bounds; the floor REFUSED rather than blow Spot up. That
-        # refusal is a BOTTOM result: a DECLINE carrying the limit as its diagnosis,
+        # the ltl2tgba size bounds, or its bounded translate overran the wall-time
+        # budget; the floor REFUSED rather than blow Spot up / hang the build. That
+        # refusal is a BOTTOM result: a DECLINE carrying the cause as its diagnosis,
         # handled by the declined path below (prints like any decline, exit 1).
         res = LTLResult.decline(
             f"{e}; raise KR_TRANSLATE_TREE_LIMIT / KR_TRANSLATE_TEMPORAL_LIMIT "
-            f"to attempt a larger translation")
+            f"or KR_TRANSLATE_TIMEOUT to attempt a larger/slower translation")
     dt = time.monotonic() - t0
 
     if res.not_ltl:
