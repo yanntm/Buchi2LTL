@@ -2095,3 +2095,34 @@ SUCCESS. WIRED state-index normalization `aut2ltl/ltl/canon.py` (used by Languag
 _base) — defensive/free, but does NOT fix this regression (cause is upstream in translate).
 The session's debug probes (KR_SPOTRUN_CMP/REPARSE/INPROC_RT/WARM/FRESHDICT + _debug_compare)
 were committed once then dropped — recover from history if more debugging is needed.
+
+## 2026-06-26 — deep_nobls_memo: memoize the no-bls assembly through one shared cache
+
+WHY: deep_nobls (the default) re-peels shared buchi-tower suffixes on every descent
+path — the no-bls return-labeler runs at ~DAG^2 cost, not DAG-size. New probe
+tests/probes/gate_count.py (monkeypatches spot.are_equivalent, drives a recipe in-proc
+on one HOA) quantified it on kinska counting_buchi_1ap_18: 1271 soundness-gate calls on
+only 78 distinct (input, candidate) pairs = 94% exact recomputes, one suffix re-validated
+240x. NB the gates themselves are cheap (~17ms of a 5.6s build): the cost is the
+surrounding peel work (partition / build_leave / candidate translate / child delegation),
+of which the gate is only the visible tip at the spot interface.
+
+WHAT: recipe deep_nobls_memo (registered, NOT default — sibling for A/B; recipes are free
+to keep). Inlines the nobls assembly and wraps every stage + the floor + the whole in a
+SINGLE shared memo m keyed on the interned Language (= BDD/HOA identity): the
+m(compose(m(a), m(b), ...)) shape. Sound by the combinator algebra (faithful-or-decline is
+closed): any OK answer cached for a language is language-equivalent to what another stage
+would produce, so the "dumb" stage-agnostic cache is never wrong (it can only over-decline,
+never mis-answer). The daisy recursion leaf is the memoized daisy fixpoint; recurse is
+untouched (knot hand-tied so the memo sits in it). WeakKeyDictionary, long-lived across
+deep_roundtrip nodes; declines cached too.
+
+RESULT (kinska counting_buchi_1ap_18): default backend 5.6s -> 4.0s, gates 1271 -> 195,
+same DAG 225 / validation TRUE. Forced in-proc translate (KR_TRANSLATE_INPROC_*_LIMIT
+high): 3.7s -> 2.1s, DAG 29 / TRUE. Two independent levers stack: memo kills the redundant
+peel work, in-proc translate kills the subprocess fork cost (the bigger ~2x here). The
+~195 gate floor is ~4 gates x 47 distinct sub-languages — each distinct language peeled
+once; the residual "redundant" pairs are gates fired during a first-time (uncached) peel,
+which a result-cache cannot dedup. On THIS input deep_nobls_memo does not beat a leaf-only
+memo placement; kept the full shared-cache shape as the principled form. Adoption gate
+(results/ corpora with --use deep_nobls_memo) run next.
