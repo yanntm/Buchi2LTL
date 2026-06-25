@@ -11,6 +11,5 @@ Root package (P-ARCH, 2026-06-14). Layering, acyclic:
       ↑
     cli / this __init__  (front-end)
 
-The public translate API is re-exported here once `portfolio` lands (campaign
-step 5). See bls/TODO.md "THE MOVE CAMPAIGN".
+The public translate API is re-exported here.
 """
