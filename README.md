@@ -3,9 +3,10 @@
 `aut2ltl` reconstructs a Linear Temporal Logic (LTL) formula from an
 [ω-automaton](https://en.wikipedia.org/wiki/%CF%89-automaton). Given an automaton in
 the [HOA format](https://adl.github.io/hoaf/), it produces an LTL formula defining the
-same ω-language, or determines that the language is not LTL-definable. An LTL or PSL
-formula may be supplied in place of an automaton, in which case it is translated to an
-automaton before reconstruction.
+same ω-language, or — when the language is not LTL-definable — decides so and returns a
+**checkable witness** of why no formula exists. An LTL or PSL formula may be supplied in
+place of an automaton, in which case it is translated to an automaton before
+reconstruction.
 
 ## Quick start
 
@@ -22,7 +23,9 @@ Then install the package itself:
 pip install -e .          # provides `python3 -m aut2ltl` and the `aut2ltl` console script
 ```
 
-### Example
+### Examples
+
+#### Round trip — a smaller formula
 
 A **round trip**, LTL → automaton → LTL. Take `F(X!a & ((b R a) W b))` and let Spot
 build its TGBA
@@ -50,6 +53,8 @@ equivalence (PSPACE-complete), so syntactic rewriters are necessarily incomplete
 `aut2ltl` reaches the simpler form by passing through the automaton — the semantic
 object — and reconstructing LTL from it.
 
+#### Round trip — recovering acceptance
+
 A second round trip, `GFa & FGb`
 ([`samples/fixtures/hoa/various/fairness_example.hoa`](samples/fixtures/hoa/various/fairness_example.hoa)),
 exercises the **acceptance handling**: recovering this fairness pattern means reading
@@ -76,9 +81,11 @@ the formula:
 python3 -m aut2ltl samples/fixtures/hoa/various/collapse_example.hoa -q | ltlfilt --simplify
 ```
 
-A **third kind of answer.** Not every ω-automaton has an LTL formula — ω-automata are
-strictly more expressive — and when the language lies outside LTL, `aut2ltl` **decides**
-so and returns a **checkable witness** of why. Take the mod-3 counter `L = a^{3k}·(!a)^ω`
+#### No LTL formula — a witness
+
+Not every ω-automaton has an LTL formula — ω-automata are strictly more expressive — and
+when the language lies outside LTL, `aut2ltl` **decides** so and returns a **checkable
+witness** of why. Take the mod-3 counter `L = a^{3k}·(!a)^ω`
 ([`samples/fixtures/hoa/various/mod3_a.hoa`](samples/fixtures/hoa/various/mod3_a.hoa)) —
 "an `a`-block whose length is a multiple of 3, then `!a` forever":
 
