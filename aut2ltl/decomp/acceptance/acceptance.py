@@ -15,7 +15,7 @@ from typing import List
 
 import spot
 
-from aut2ltl.decomp.decompose import decompose
+from aut2ltl.combinators.decompose import decompose
 
 _NAME = "acc"
 

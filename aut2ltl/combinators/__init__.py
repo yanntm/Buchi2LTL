@@ -21,6 +21,7 @@ from .best_of import best_of, Comparator, smaller, significantly_smaller
 from .compose import compose, identity
 from .recurse import recurse
 from .memo import Memo
+from .decompose import decompose, combine, Connective, Split
 
 __all__ = [
     "first_success",
@@ -28,4 +29,5 @@ __all__ = [
     "compose", "identity",
     "recurse",
     "Memo",
+    "decompose", "combine", "Connective", "Split",
 ]

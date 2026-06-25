@@ -13,7 +13,7 @@ from typing import List, TYPE_CHECKING
 
 import spot
 
-from aut2ltl.decomp.decompose import decompose
+from aut2ltl.combinators.decompose import decompose
 from .restrict import accepting_sccs, ensure_marked, restrict_marks
 
 if TYPE_CHECKING:
