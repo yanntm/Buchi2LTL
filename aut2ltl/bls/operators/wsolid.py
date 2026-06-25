@@ -16,7 +16,7 @@ import spot
 
 from . import wreach
 from .support import (
-    _memo_reach_helper, _combined_letters_at_level, _fuse_letters,
+    _memo_reach_helper, _combined_letters_at_level, _fuse_letters, _dedupe,
     TRACE_ON, _trace,
     _tt, _ff, _to_f, _And, _Or, _Not, _X, _simp_f, _short_f,
 )
@@ -90,18 +90,10 @@ def wsolid_plus(
 
     cls = _combined_letters_at_level(casc, level)
 
-    def _dedupe(triples):
-        seen = {}
-        for li, pre, arr in triples:
-            key = (li, pre[level + 1:])
-            if key not in seen:
-                seen[key] = (li, pre, arr)
-        return list(seen.values())
-
     stay_s = _dedupe([(li, pre, arr) for (li, pre, arr) in cls
-                      if pre[level] == s_val and arr[level] == s_val])
+                      if pre[level] == s_val and arr[level] == s_val], level)
     leave_s = _dedupe([(li, pre, arr) for (li, pre, arr) in cls
-                       if pre[level] == s_val and arr[level] != s_val])
+                       if pre[level] == s_val and arr[level] != s_val], level)
     last_steps = [(li, pre, arr) for (li, pre, arr) in stay_s if arr[level:] == T[level:]]
     bad_pre = []
     if B is not None:

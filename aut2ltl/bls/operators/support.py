@@ -14,7 +14,7 @@ the DAG floor beneath the recursive layer.
 """
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Tuple
+from typing import List, Tuple
 import functools
 import os
 
@@ -42,16 +42,12 @@ REACH_GUARD = int(os.getenv("KR_REACH_GUARD", "5000000"))
 
 # --- per-build memo decorator + tracing -------------------------------------
 def _memo_reach_helper(tag: str):
-    """Memoize a helper with the (S, B, beta, T, tau, casc, level) signature on
-    the CascadeHolder's `helper_memo` (per build; `casc` here is the holder).
-    beta/tau are normalized to hash-consed spot.formula BEFORE keying (str and
-    formula spellings of the same guard share an entry). A decorator so the
-    function BODY keeps its def-name and code shapes (the r4 audit greps bodies by
-    'def <name>('). The helpers re-run their whole combined-letter enumeration at
-    every call site (dashed lines (1)/(2)/(3) invoke solid/wsolid directly), so
-    without this memo (a U b)|Gc profiled at 437k raw reach calls / 91.5% hit
-    rate — pure fan-in overhead. One entry per distinct (helper, S, B, beta, T,
-    tau, level); fresh per holder."""
+    """Memoize a helper on the CascadeHolder's `helper_memo` (per build; `casc` is the
+    holder), keyed by `(tag, S, B, beta, T, tau, level)`. `beta`/`tau` are normalized to
+    hash-consed spot.formula before keying, so the `str` and `formula` spellings of a
+    guard share an entry. The helpers fan in heavily (the same subproblem is reached
+    along many call paths), so this memo is what keeps the mutually-recursive expansion a
+    DAG build rather than a tree blow-up. One entry per distinct key; fresh per holder."""
     def deco(fn):
         @functools.wraps(fn)
         def wrapper(S, B, beta, T, tau, casc, level=0):
@@ -93,6 +89,21 @@ def _combined_letters_at_level(casc: "Cascade", level: int) -> List[Tuple[int, T
                 continue
             out.append((li, pre, arr))
     return out
+
+
+def _dedupe(
+    triples: List[Tuple[int, Tuple[int, ...], Tuple[int, ...]]],
+    level: int,
+) -> List[Tuple[int, Tuple[int, ...], Tuple[int, ...]]]:
+    """Collapse triples by the paper's combined-letter identity `(letter, lower-config
+    suffix)` — the observable enumeration can present the same combined letter from
+    several configs; the first occurrence is the structural representative."""
+    seen: dict = {}
+    for li, pre, arr in triples:
+        key = (li, pre[level + 1:])
+        if key not in seen:
+            seen[key] = (li, pre, arr)
+    return list(seen.values())
 
 
 # Letter fusion (dag_folding.md counter-measure B): at every enumeration

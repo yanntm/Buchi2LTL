@@ -15,7 +15,7 @@ import spot
 
 from . import reach, solid, wsolid
 from .support import (
-    _memo_reach_helper, _combined_letters_at_level, _fuse_letters,
+    _memo_reach_helper, _combined_letters_at_level, _fuse_letters, _dedupe,
     TRACE_ON, _trace,
     _ff, _to_f, _And, _Or, _Not, _X, _simp_f, _short_f,
 )
@@ -60,24 +60,16 @@ def dashed(
 
     cls = _combined_letters_at_level(casc, level)
 
-    def _dedupe(triples):
-        seen = {}
-        for li, pre, arr in triples:
-            key = (li, pre[level + 1:])
-            if key not in seen:
-                seen[key] = (li, pre, arr)
-        return list(seen.values())
-
     # Enter(q): genuine resets to q — witnessed by a pre-config whose layer
     # state differs from q (identity/stay letters never qualify: Enter ⊆ Stay).
     enter_t = _dedupe([(li, pre, arr) for (li, pre, arr) in cls
-                       if pre[level] != t_val and arr[level] == t_val])
+                       if pre[level] != t_val and arr[level] == t_val], level)
     enter_b = []
     if B is not None:
         enter_b = _dedupe([(li, pre, arr) for (li, pre, arr) in cls
-                           if pre[level] != b_val and arr[level] == b_val])
+                           if pre[level] != b_val and arr[level] == b_val], level)
     leave_s = _dedupe([(li, pre, arr) for (li, pre, arr) in cls
-                       if pre[level] == s_val and arr[level] != s_val])
+                       if pre[level] == s_val and arr[level] != s_val], level)
 
     _trace(f"    dashed level={level}: #enter_t={len(enter_t)} "
            f"#enter_b={len(enter_b)} #leave_s={len(leave_s)}")

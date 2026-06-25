@@ -15,7 +15,7 @@ import spot
 
 from . import reach
 from .support import (
-    _memo_reach_helper, _combined_letters_at_level, _fuse_letters,
+    _memo_reach_helper, _combined_letters_at_level, _fuse_letters, _dedupe,
     TRACE_ON, _trace,
     _tt, _ff, _to_f, _And, _Or, _Not, _X, _simp_f, _short_f,
 )
@@ -93,17 +93,8 @@ def solid_plus(
     stay_s = [(li, pre, arr) for (li, pre, arr) in cls if pre[level] == s_val and arr[level] == s_val]
     leave_s = [(li, pre, arr) for (li, pre, arr) in cls if pre[level] == s_val and arr[level] != s_val]
 
-    # Dedupe by the paper's combined-letter identity (li, lower-config suffix).
-    def _dedupe(triples):
-        seen = {}
-        for li, pre, arr in triples:
-            key = (li, pre[level + 1:])
-            if key not in seen:
-                seen[key] = (li, pre, arr)
-        return list(seen.values())
-
-    stay_s = _dedupe(stay_s)
-    leave_s = _dedupe(leave_s)
+    stay_s = _dedupe(stay_s, level)
+    leave_s = _dedupe(leave_s, level)
 
     # Last-step candidates: ⟨σ,T'⟩ ∈ Stay(s) whose firing lands exactly on T (from `level` down).
     last_steps = [(li, pre, arr) for (li, pre, arr) in stay_s if arr[level:] == T[level:]]
