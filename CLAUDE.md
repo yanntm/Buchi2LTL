@@ -58,8 +58,8 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
 - Debug method: ground sub-terms against GT automata built from D's semiautomaton
   (`tests/bls/trace_fin_semantics.py` pattern), find the first diverging sub-term,
   fix against the construction reference.
-- Keep files roughly under 500 LOC (technical cores like the mutually-recursive
-  formula cluster or parsers may exceed).
+- Keep files roughly under 500 LOC (a technical core may occasionally exceed this
+  where a split would be artificial).
 
 ## Working style (how the user wants me to operate)
 - **Diagnostics self-bound, ≤15s PER EXAMPLE.** Hard cap on any test/diagnostic
