@@ -2126,3 +2126,39 @@ once; the residual "redundant" pairs are gates fired during a first-time (uncach
 which a result-cache cannot dedup. On THIS input deep_nobls_memo does not beat a leaf-only
 memo placement; kept the full shared-cache shape as the principled form. Adoption gate
 (results/ corpora with --use deep_nobls_memo) run next.
+
+## 2026-06-26 — sorted peel recipes, inv no-op pruning, language cache, diff rewrite
+
+LANDED. A session sparked by "try precise methods before heuristics" in the daisy
+family.
+
+- **peel / peel_decomp (portfolio/builder.py).** New sorted-peel combinators that
+  order the EXACT producers ahead of the gated heuristics: per descent Daisy ->
+  DaisystarDet (rejecting deterministic SCC) -> PartScc (accepting terminal SCC, now
+  PROMOTED out of the core floor) -> Daisy2 -> Daisystar -> floor. `peel(floor)` is
+  the plain peel; `peel_decomp(floor)` weaves inv->strength->acc->scc into every
+  descent. `decline` (the first_success unit) is the no-cascade floor; peel(bls) the
+  always-answers floor. Both are decorators taking the floor.
+- **deep_nobls_sort{,_decomp} recipes.** deep_nobls' two-engine deep_roundtrip over
+  the sorted peel: forward peel(bls) seed, return peel(decline) labeler (bls is
+  counterproductive on the return path). Registered; default pointer unchanged.
+  Sound on validation/benchmark/kinska/genaut (0 FAIL/CLASH). The _decomp variant
+  matches the default's coverage at a small size win; the plain variant regresses
+  coverage by 2 (needs the recursive decomp). KR_TRANSLATE_INPROC_TEMPORAL_LIMIT=0
+  counters the kinska size growth decisively (kinska DAG -87% vs limit-on) at the
+  cost of ~10 counting-automaton timeouts + ~2x build.
+- **inv no-op pruning (decomp/inv/invariant.py).** When Sigma != true but the
+  Coudert-Madre strip leaves the automaton unchanged, child.formula already entails
+  G(Sigma), so re-asserting it is pure bloat. Detect by Language identity (the
+  stripped automaton interns to the SAME object as the input) and pass through with
+  no inv credit, like the vacuous case. strip.py untouched. Does NOT cover
+  obligation.ltl:5 (its strip genuinely loosens guards, so its G is non-redundant
+  relative to the residual — left as-is: DAG size is a poor readability proxy, a
+  best_of guard rejected as too expensive).
+- **language intern LRU 512 -> 10000 (language.py).** 512 evicted/rebuilt languages
+  mid-run, defeating identity-keyed sharing (inv no-op test, deep_nobls_memo memo).
+- **survey.diff.results rewrite.** Was conflating "answered" with the LTL count,
+  hiding NOT_LTL and no-answer (the misread that started this). Now mirrors
+  report.summarize (resolved LTL/not-LTL, no-answer, validated over LTL only), adds
+  Sigma build_s runtime, a left->right technique-SHIFT diff, tail-anchored source
+  keys, compact --top default 3, opt-in --formulas.
