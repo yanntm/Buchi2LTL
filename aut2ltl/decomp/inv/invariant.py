@@ -48,12 +48,24 @@ class Invariant:
         if sig == buddy.bddtrue:
             return self._child(lang)
 
+        # No-op strip: if restricting every guard under Σ leaves the automaton
+        # unchanged (the stripped Language interns to the SAME object as the input
+        # automaton's — identity by normalized-HOA, see language._intern), then the
+        # child already sees the full language and `child.formula ⊨ G(Σ)`, so
+        # re-asserting `G(Σ)` is pure redundancy (the obligation.ltl:5 bloat). Pass
+        # through, no inv credit, as in the vacuous case — inv only earns its keep
+        # when the strip actually simplifies. (Fail-safe if interning is off: the
+        # `is` is then always False, so we keep the sound-but-redundant G.)
+        stripped = Language.of(strip(aut, sig))
+        if stripped is Language.of(aut):
+            return self._child(lang)
+
         # Build/accumulate idiom (see result.py): seed an OK accumulator crediting
         # ourselves, delegate the stripped language, and credit the child IN — so
         # all of its fields (technique, diagnosis, and any future step-trace /
         # profiling info) flow through the contract instead of being hand-copied.
         res = LTLResult.start(_NAME)
-        child = self._child(Language.of(strip(aut, sig)))
+        child = self._child(stripped)
         res.credit(child)
         if res.nok:
             return res                         # child declined / verdict: carried out
