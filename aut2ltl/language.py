@@ -89,12 +89,16 @@ CLEAN_LEVEL = OptionSpec(
     env="AUT2LTL_CLEAN_LEVEL")
 
 # Factory cache size. Separate Language.of/of_ltl calls with the same literal input
-# reuse one Language (and so its lazily-built representations + definability
-# verdict). Bounded LRU so it never hogs memory; 0 disables interning.
-_CACHE_SIZE = int(os.environ.get("AUT2LTL_LANG_CACHE_SIZE", "512"))
+# reuse one Language (and so its lazily-built representations + definability verdict,
+# AND its object identity — which identity-keyed sharing like `decomp/inv`'s no-op
+# test and `deep_nobls_memo`'s WeakKeyDictionary rely on). The prior 512 was far too
+# small: a deep survey churns through many more distinct sub-languages, so entries
+# were evicted and rebuilt as fresh objects mid-run, defeating that sharing. 10000
+# comfortably holds a whole run. Bounded LRU so it never hogs memory; 0 disables.
+_CACHE_SIZE = int(os.environ.get("AUT2LTL_LANG_CACHE_SIZE", "10000"))
 
 CACHE_SIZE = OptionSpec(
-    "language.cache_size", 512,
+    "language.cache_size", 10000,
     "max interned Language objects (bounded LRU over the literal of/of_ltl arg); "
     "0 disables interning",
     env="AUT2LTL_LANG_CACHE_SIZE")
