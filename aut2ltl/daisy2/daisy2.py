@@ -174,15 +174,18 @@ class Daisy2:
         petals, spokes, stems = parts
         m = aut.acc().num_sets()
 
-        # Delegate each stem to Λ; credit it in, bail on NOK (propagating reason).
+        # Delegate each stem to Λ; fold it in, bail on NOK (propagating reason).
+        # A NotLTL stem child has its witness lifted back to the hub by the single stem
+        # guard g — stems fire from h = q0 — i.e. `w[u ↦ g·u]`, daisy2 credited
+        # (algorithm.md).
         children: List["spot.formula"] = []
-        for _, dst in stems:
+        for g, dst in stems:
             sub = Language.of(reroot(aut, dst))
             if _TRACE:
                 print(f"[daisy2] delegating exit {dst} as language: "
                       + format_language(sub, sub.tgba()), file=sys.stderr)
             child = self._child(sub)
-            res.credit(child)
+            res.prefix(child, str(g), _NAME)
             if res.nok:
                 return _out(res)
             children.append(child.formula)
