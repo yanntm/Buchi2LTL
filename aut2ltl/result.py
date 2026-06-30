@@ -16,7 +16,9 @@ from "impossible").
 Results combine by two monoids:
   * composition — `credit` / `fuse`: fold a child's work in; the worst status wins
     (NOT_LTL ≻ DECLINED ≻ OK), techniques union, diagnoses accumulate, a NOT_LTL
-    child's witness rides up; OK is the unit.
+    child's witness rides up; OK is the unit. `prefix` is the *peeler's* variant of
+    `credit`: same fold, but it lifts the child's NOT_LTL witness back across a
+    consumed prefix and stamps the peeler's own technique in one move.
   * choice — `first` / `decline`: try translators in order, take the first non-declined
     result (NOT_LTL short-circuits); DECLINED falls through; `decline` is the unit.
 
@@ -173,11 +175,13 @@ class LTLResult:
 
     # --- composition monoid ----------------------------------------------------
     def credit(self, other: "LTLResult") -> "LTLResult":
-        """Fold a child result in (mutates and returns self). An OK child
-        contributes its techniques; a more-dominant NOK child flips this result to
-        that status (accumulating its diagnosis, clearing the formula)."""
+        """Fold a child result in (mutates and returns self). Every child
+        contributes its techniques (provenance accumulates regardless of status — a
+        NOT_LTL riding up keeps the chain of hosts it passed through); a
+        more-dominant NOK child additionally flips this result to that status
+        (accumulating its diagnosis, clearing the formula)."""
+        self._technique |= set(other.technique)
         if other.ok:
-            self._technique |= set(other.technique)
             return self
         # other is NOK: raise to the worse status (NOT_LTL ≻ DECLINED), clearing
         # the formula, and ACCUMULATE its diagnosis (a NOK fused with a NOK
@@ -190,6 +194,20 @@ class LTLResult:
         # a NOT_LTL child's witness rides up (first one wins; never clobbered)
         if self._witness is None and other.witness is not None:
             self._witness = other.witness
+        return self
+
+    def prefix(self, precursor: "LTLResult", word: str, *techniques: str) -> "LTLResult":
+        """Credit a `precursor` as a *peeler* does (mutates and returns self): first
+        re-anchor any NOT_LTL witness it carries by prepending `word` (the consumed
+        prefix, in Spot word syntax) to the family — the witness lifted back across the
+        peel — then `credit` it and stamp `techniques`, the peeler crediting itself for
+        the step it added. On an OK/DECLINED precursor `word` is inert (no witness to
+        lift). One move per delegated sub-result, so a peeling host never touches
+        witness internals itself."""
+        if precursor.witness is not None:
+            precursor.witness.prepend(word)
+        self.credit(precursor)
+        self._technique |= set(techniques)
         return self
 
     def fail(self, status: "Status", diagnosis: Optional[str] = None) -> "LTLResult":
