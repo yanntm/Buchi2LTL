@@ -17,12 +17,22 @@ from aut2ltl import bounded
 @dataclass
 class BuildResult:
     """Outcome of reconstructing one input. `rec` is the stdout formula (or the
-    `<unflattened ...>` placeholder) only when `status == "OK"`."""
+    `<unflattened ...>` placeholder) only when `status == "OK"`; `witness` is the
+    serialized NOT_LTL counting family (the stdout line) on a (probably-)not-LTL
+    verdict, or None when none was produced."""
     status: str            # OK / DECLINED / NOT_LTL / PROBABLY_NOT_LTL / BUILD_TIMEOUT>Ns / CRASH:...
     rec: Optional[str] = None
     technique: Optional[str] = None
     report: Dict[str, object] = field(default_factory=dict)
     build_s: Optional[str] = None
+    witness: Optional[str] = None
+
+
+def _strip_kind(stdout: str, kind: str) -> str:
+    """Drop the front end's `<kind>: ` result tag, leaving the bare payload (the
+    LTL formula, or the witness line). Tolerant if the tag is already absent."""
+    prefix = f"{kind}: "
+    return stdout[len(prefix):] if stdout.startswith(prefix) else stdout
 
 
 def _parse_report(stderr: str) -> Dict[str, object]:
@@ -86,11 +96,14 @@ def build(value: str, *, is_hoa: bool, technique: Optional[str],
                            build_s=build_s)
     if res.rc == 3 and "NOT_LTL" in stderr:
         status = "PROBABLY_NOT_LTL" if "PROBABLY_NOT_LTL" in stderr else "NOT_LTL"
+        # stdout is the kind-tagged witness line ("NOT_LTL: p=... v=[...] ..."); strip
+        # the tag to the bare payload, or None when the tool produced no witness.
+        witness = _strip_kind(stdout, "NOT_LTL") or None
         return BuildResult(status, technique=technique_out, report=report,
-                           build_s=build_s)
+                           build_s=build_s, witness=witness)
     if res.rc != 0 or not stdout:
         msg = (stderr or res.out or "no output").strip().splitlines()
         return BuildResult("CRASH:" + (msg[-1][:90] if msg else "no output"),
                            report=report, build_s=build_s)
-    return BuildResult("OK", rec=stdout, technique=technique_out, report=report,
-                       build_s=build_s)
+    return BuildResult("OK", rec=_strip_kind(stdout, "LTL"), technique=technique_out,
+                       report=report, build_s=build_s)
