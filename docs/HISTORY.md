@@ -2203,3 +2203,40 @@ the two backends produce structurally distinct (not merely differently-numbered)
 automata at the relevant sub-language; both sound. The trace now localizes the
 divergence to the `deep_nobls_arm` `identity` node (`a | (GF!b…)` vs `a | X(GF!b…)`)
 and the `relabel` crossing that translates each to an equivalent automaton.
+
+## 2026-06-30 — EU class rules (pass 5) + context-pass soundness fix
+
+LANDED. Two things in the ltl/simplify package this session.
+
+(1) New pass 5: `spot_EU_rules.py` (`eu_simplify`) — Spot's always-applied (≡)
+eventual/universal absorptions keyed on the cached `is_eventual`/`is_universal`
+node bits (F e≡e, G u≡u, X q≡q, f U e≡e, f R u≡u, u W g≡u∨g, e M g≡e∧g, and the
+suspendable X-rotations). Reads the bits straight off the hash-consed DAG — no
+BDD/automata — one memoised bottom-up walk, strictly O(DAG); monotone (no ≡
+inverse) so it can't ping-pong. Disjoint from rules 1-4: 14/16 fire-cases are
+left untouched by the existing pipeline. Wired into `simplify` after context and
+again after fold, gated by KR_SIMP_OWN_EU (default on). Catalogue (incl. the
+deferred n-ary / size-increasing rules that overlap fold's GF/FG cofactoring) in
+`algorithm_EU_rules.md`. Probe: tests/probes/ltl/simplify/test_eu_rules.py (22).
+Why/when: investigating whether Spot's EU rules buy us anything own-simplify
+lacks. Note for the record: Spot's `tl_simplifier::simplify` IS node-memoised
+(O(#DAG nodes) recursion) but NOT O(DAG)-complexity — boolean→BDD→ISOP,
+containment DNF/CNF, and regrouping rebuilds materialise off-DAG nodes; the X
+drop on `X(GF!b & F(...))` needs `-r3` containment (semantic, PSPACE), not the
+syntactic class rules, because the OR hides the FG tail from the class bits.
+
+(2) Soundness fix in `context_pass.py`. The And/Or context pass rewrote each
+child against the ORIGINAL form of all siblings (single snapshot) then replaced
+each sibling with its rewritten form, so two siblings could discharge each other:
+`a & b & (a M b) -> a` (atom b reduces (a M b) to ⊤ via now-eval while (a M b)'s
+opening erases that same b), dually `!a | !b | (!a W !b) -> !a`. Both sides,
+R/M and U/W alike (NOT an R/M adaptation failure — the U/W path had the identical
+latent defect; the old `!(b R (Gb & (b M Gb))) -> 0` witness is the same). Fixed
+by sequential conditional simplification: assume each sibling in the form it
+actually has at that step — finalized for already-processed siblings, original
+for the rest, openings only from finalized earlier siblings — so a sibling
+reduced to a constant contributes nothing and the cycle breaks. Single pass,
+order-sensitive (sound for any fixed order), still O(DAG); valuable openings
+survive when the opener stands (`b & (a M b) -> a M b`). random_equiv unchanged
+(21.9% smaller, ALL EQUIVALENT). Regression guards added to test_now_eval.py.
+The LTL now-eval forms credited to ITS-Tools (Bonneland = CTL core).
