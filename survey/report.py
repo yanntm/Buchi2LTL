@@ -16,7 +16,7 @@ from survey.build import BuildResult
 
 COLS: List[str] = ["input", "result", "technique", "build_s", "formula",
                    "dag", "temporals", "tree", "sharing", "md5", "validation",
-                   "source"]
+                   "check_s", "source"]
 FORMULA_SHOWN = 80
 
 
@@ -32,14 +32,16 @@ def _result_token(status: str) -> str:
 
 
 def row(display: str, br: BuildResult, validation: str,
-        source: str = "") -> Dict[str, object]:
+        source: str = "", check_s: str = "") -> Dict[str, object]:
     """Merge the aut2ltl result block (from a BuildResult) with the validation
-    token into one CSV row. Non-LTL rows leave the formula/size cells empty.
-    `display` is the readable label (basename / formula text, may collide);
-    `source` is the unique provenance key (relative path, file:line, --ltl:k)."""
+    token (+ its check wall-time) into one CSV row. Non-LTL rows leave the
+    formula/size cells empty. `display` is the readable label (basename / formula
+    text, may collide); `source` is the unique provenance key (relative path,
+    file:line, --ltl:k)."""
     r: Dict[str, object] = {c: "" for c in COLS}
     r["input"] = display
     r["source"] = source
+    r["check_s"] = check_s
     r["result"] = _result_token(br.status)
     r["technique"] = br.technique or ""
     r["build_s"] = br.build_s or ""
@@ -51,6 +53,10 @@ def row(display: str, br: BuildResult, validation: str,
                          ("md5", "md5")):
             if src in br.report:
                 r[dst] = br.report[src]
+    elif br.status in ("NOT_LTL", "PROBABLY_NOT_LTL") and br.witness:
+        # Carry the serialized counting family in the (otherwise empty) formula
+        # cell so the committed CSV row holds a re-checkable certificate.
+        r["formula"] = br.witness
     r["validation"] = validation
     return r
 
@@ -99,10 +105,12 @@ def summarize(rows: Sequence[Dict[str, object]], label: str) -> List[str]:
         f"crash {res.get('CRASH', 0)}",
     ]
     if val.get("TRUE", 0) or fails or not_checked:
-        lines.append(f"validation of {ltl} LTL: {val.get('TRUE', 0)} TRUE, "
+        # Validation spans both LTL rows (formula equivalence) and NOT_LTL rows
+        # (witness replay), in one TRUE/FAIL/not-checked vocabulary.
+        lines.append(f"validation: {val.get('TRUE', 0)} TRUE, "
                      f"{fails} FAIL, {not_checked} not checked (size/timeout/error)")
     elif val.get("OFF", 0):
-        lines.append(f"validation: OFF ({ltl} LTL unverified)")
+        lines.append(f"validation: OFF ({ltl} LTL + {not_ltl} not-LTL unverified)")
 
     dag = sum(int(_num(r.get("dag"))) for r in rows if r.get("result") == "LTL")
     temp = sum(int(_num(r.get("temporals"))) for r in rows if r.get("result") == "LTL")
