@@ -18,18 +18,21 @@ unminimized deterministic form otherwise. The gate then completes it before
 extraction; completion only adds a sink — an idempotent — so it cannot perturb
 aperiodicity.
 
-On a genuinely state-minimal deterministic automaton the states are the language's
-residual (right-congruence) classes, so its transition monoid is faithful to the
-**syntactic semigroup** and aperiodicity is a property of the language, not of an
-encoding. Minimization is best-effort and only attempted below a size threshold, so
-that faithfulness — and hence a conclusive verdict — holds only there (see
-Conclusiveness).
+The form is read so its transition monoid can be tested for aperiodicity. What that
+test does and does **not** prove about the *language* — the crux in the ω-setting — is
+the subject of **Soundness** below. Minimization is best-effort and only attempted
+below a size threshold, which the **Conclusiveness** rule keys on.
 
 ## The characterization it tests
 
 ```
 LTL  =  FO[<]  =  star-free  =  counter-free  =  transition monoid aperiodic
 ```
+
+These equalities are McNaughton–Papert / Schützenberger for finite words. They carry
+over to ω-words (Thomas; Perrin–Pin), with the **syntactic ω-semigroup** as the object
+required to be aperiodic and the transition-monoid test serving as the computable proxy
+— sound in one direction only (see Soundness).
 
 **Aperiodic = group-free**: no element `g` has a non-trivial cyclic orbit
 `g, g², …, gᵖ = 1` with `p > 1`. A non-trivial group in the monoid is exactly the
@@ -40,36 +43,73 @@ images, call GAP's `IsAperiodicSemigroup` — the cheap boolean, no holonomy). T
 package owns the policy around that call; the GAP script stays in `gap/`, the
 Spot→generators extraction in `extract.py` (both shared with the cascade's holonomy).
 
-## Why not the cascade's form (the sbacc trap)
+## Soundness (what the algebraic verdict proves)
 
-The cascade builds from a different representation, `det_parity_sbacc()`, which the
-gate must not reuse. Its forced state-based acceptance degeneralizes a
-generalized-Büchi condition (e.g. `Inf(0)&Inf(1)&Inf(2)` for `GFa & GFb & GFc`) into
-a "which mark am I waiting for" counter — a spurious cyclic group that reads as
-non-aperiodic on a language that is LTL. Reading the verdict there would reject
-definable languages. The generic-acceptance form carries no such counter, so its
-monoid reflects the language and not the encoding.
+The check reads the transition monoid `TM` — the transformations the letters induce on
+states — which depends only on the transition function, not the acceptance.
+
+*Finite words.* The states of a minimal DFA are exactly the right-congruence
+(Myhill–Nerode) classes `u⁻¹L`, and the minimal DFA's transition monoid is isomorphic to
+the syntactic monoid; aperiodicity is then a Schützenberger invariant of the language,
+independent of any encoding.
+
+*ω-words (our case).* This does not transfer cleanly. For any deterministic automaton
+recognizing `L`, words acting identically on all states are interchangeable in every
+context, so the syntactic ω-semigroup `S` is a **quotient** of `TM`. Aperiodicity passes
+through a quotient in one direction only, so the verdict is **one-way**:
+
+- **`TM` aperiodic ⟹ `L` is LTL.** `S`, a quotient of an aperiodic monoid, is aperiodic,
+  hence `L` is star-free = FO[<] = LTL. A proof, independent of the acceptance and of
+  state-minimality.
+- **`TM` not aperiodic ⇏ `L` is not LTL.** The group may live only in `TM` and collapse
+  in the quotient `S` — an artefact of the deterministic encoding. Unlike a minimal DFA,
+  a state-minimal ω-automaton can keep two states with *equal* residual ω-languages apart
+  because the acceptance condition needs the memory; a group permuting such states is
+  determinisation noise, not language counting. The generic form and SAT-minimization
+  remove *some* such artefacts (the sbacc counter below, redundant-state groups) but are
+  **not** known to remove all; we do not claim `TM` is faithful to `S`.
+
+So the gate is a sound **acceptor** of LTL and only a **filter** for non-LTL. A
+`not-aperiodic` reading is a *candidate* non-definability, promoted to a proof only by
+the sibling `witness/` package, which extracts the counting family `(u, v, x, p)` from
+the offending group and verifies it separates words **in `L`** itself. Absent that
+confirmation it is a hint, not a proof (see Conclusiveness).
+
+## Why generic acceptance, not the cascade's state-based form (`sbacc`)
+
+The cascade builds from `det_parity_sbacc()`, which the gate must not reuse. Forcing
+state-based acceptance degeneralizes a generalized-Büchi condition (e.g.
+`Inf(0)&Inf(1)&Inf(2)` for `GFa & GFb & GFc`) by adding a round-robin "which mark am I
+waiting for" index. That index is a cyclic group in the transition monoid — an artefact
+of the acceptance encoding, not of the language — so it reads as non-aperiodic even when
+the language is LTL. The generic-acceptance form carries no such counter; it removes
+*this* encoding artefact (though, per Soundness, not every determinisation artefact).
 
 ## Conclusiveness (the SAT-min rule)
 
-A `not-aperiodic` reading is a proof of non-definability only on a genuinely
-state-minimal form. `det_generic_minimal()` SAT-minimizes `D` only at or below a
-threshold (`SAT_MIN_STATES`); above it, the form may be non-minimal, and a group can
-act on redundant equivalent states the language does not actually see. So the
-decision returns a pair:
+`det_generic_minimal()` SAT-minimizes `D` only at or below a threshold
+(`SAT_MIN_STATES`); above it the form may be non-minimal, and a group can act on
+redundant equivalent states the language does not see. SAT-minimization removes *that*
+family of spurious groups — but, per **Soundness**, it does not by itself make a
+`not-aperiodic` reading a proof of non-definability: the ω quotient gap (equal-residual
+states the acceptance keeps apart) survives minimization. The authoritative proof of
+rejection is a **completed witness**, not the algebraic reading. The decision returns a
+pair:
 
 ```
 label_ltl_definable(L)  →  (definable, conclusive)
 ```
 
-- `definable` — the sbacc-free transition monoid is aperiodic.
-- `conclusive` — the verdict was read at/below the SAT-min threshold, so a
-  `not definable` reading is a proof; above it, it is only a strong hint (the
-  automaton may be non-minimal). `conclusive` is `n_min ≤ threshold`.
+- `definable` — the sbacc-free transition monoid is aperiodic. When true this *is* a
+  proof (`TM` aperiodic ⟹ LTL); the gate delegates to the cascade.
+- `conclusive` — `n_min ≤ threshold`: the cheap algebraic confidence that a group, if
+  present, is not merely a redundant-state artefact. It is *not* a standalone proof of
+  non-definability — that is the witness's job (`witness/algorithm.md`).
 
-The consumer (`aut2cas.py`) emits the non-definable reading as a `NOT_LTL`
-`LTLResult` before the holonomy build is ever called — a flat NOT_LTL when
-conclusive, a hedged "strong hint, may be non-minimal" otherwise.
+The consumer (`gate.py`) currently emits the non-definable reading as a `NOT_LTL`
+`LTLResult` keyed on `conclusive`, with the witness attached as a diagnosis complement.
+Conditioning the hard, absorbing `NOT_LTL` on an actually-*completed* witness (no `x` ⇒
+abstain, not reject) is a pending soundness item — see the root `TODO.md`.
 
 ## The verdict is absorbing
 
