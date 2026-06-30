@@ -27,6 +27,7 @@ import spot
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult, Status
+from aut2ltl.printer import format_language, format_result
 from .shape import Spoke, Stem, reroot, star_partition
 
 if TYPE_CHECKING:
@@ -37,15 +38,21 @@ _F = spot.formula
 
 # Dev trace of the Spot equivalence gate, mirroring the bls KR_TRACE convention
 # (an env-scoped module flag, not an Options knob — tracing is process-scoped, see
-# TODO.md "Deferred"). When DAISY2_TRACE is on, every gate REJECT prints the
+# TODO.md "Deferred"). When DAISY2_TRACE — or the global TRANSLATOR_TRACE_ON, which
+# lights every translator trace at once — is on, every gate REJECT prints the
 # rejected candidate and a containment witness in each direction, so the closed
 # form's incompleteness is visible in a run. To stderr: the formula is on stdout.
-_TRACE = os.getenv("DAISY2_TRACE", "0").lower() in ("1", "true", "yes", "on")
+# Every use guards with `if _TRACE:` BEFORE building its message, so a formula is
+# never flattened for a trace that will not be printed.
+_TRACE = (os.getenv("DAISY2_TRACE", "0").lower() in ("1", "true", "yes", "on")
+          or "TRANSLATOR_TRACE_ON" in os.environ)
 
 
-def _trace(msg: str) -> None:
+def _out(res: "LTLResult") -> "LTLResult":
+    """Trace the outgoing result (status / size), pass it through unchanged."""
     if _TRACE:
-        print("[daisy2] " + msg, file=sys.stderr)
+        print("[daisy2] out " + format_result(res), file=sys.stderr)
+    return res
 
 
 def _or(fs: List["spot.formula"]) -> "spot.formula":
@@ -115,9 +122,9 @@ def _trace_reject(aut: "spot.twa_graph", phi: "spot.formula",
         tight = aut.intersecting_word(spot.complement(cand))   # input \ cand
     except Exception as e:
         loose = tight = f"<witness error: {e}>"
-    _trace(f"gate REJECT: cand={phi}")
-    _trace(f"    too loose (cand\\input): {loose}")
-    _trace(f"    too tight (input\\cand): {tight}")
+    print(f"[daisy2] gate REJECT: cand={phi}", file=sys.stderr)
+    print(f"[daisy2]     too loose (cand\\input): {loose}", file=sys.stderr)
+    print(f"[daisy2]     too tight (input\\cand): {tight}", file=sys.stderr)
 
 
 def _validates(aut: "spot.twa_graph", phi: "spot.formula") -> bool:
@@ -128,12 +135,15 @@ def _validates(aut: "spot.twa_graph", phi: "spot.formula") -> bool:
     try:
         cand = phi.translate("GeneralizedBuchi", "Small", "High")
         if spot.are_equivalent(aut, cand):
+            if _TRACE:
+                print("[daisy2] gate PASS", file=sys.stderr)
             return True
         if _TRACE:
             _trace_reject(aut, phi, cand)
         return False
     except Exception as e:
-        _trace(f"gate ERROR on cand={phi}: {e}")
+        if _TRACE:
+            print(f"[daisy2] gate ERROR on cand={phi}: {e}", file=sys.stderr)
         return False
 
 
@@ -153,13 +163,15 @@ class Daisy2:
 
     def __call__(self, lang: "Language") -> "LTLResult":
         aut = lang.tgba()
+        if _TRACE:
+            print("[daisy2] in " + format_language(lang, aut), file=sys.stderr)
         h = aut.get_init_state_number()
         res = LTLResult.start(_NAME)                    # start OK, credit ourselves
 
         parts = star_partition(aut, h)
         if parts is None:
-            return res.fail(Status.DECLINED,
-                            "initial SCC is not a length-1 star hub")
+            return _out(res.fail(Status.DECLINED,
+                                 "initial SCC is not a length-1 star hub"))
         petals, spokes, stems = parts
         m = aut.acc().num_sets()
 
@@ -169,13 +181,13 @@ class Daisy2:
             child = self._child(Language.of(reroot(aut, dst)))
             res.credit(child)
             if res.nok:
-                return res
+                return _out(res)
             children.append(child.formula)
 
         phi = build_candidate(petals, spokes, stems, children, m)
         if not _validates(aut, phi):
-            return res.fail(Status.DECLINED,
-                            "candidate not language-equivalent "
-                            "(daisy2 closed form incomplete for this SCC)")
+            return _out(res.fail(Status.DECLINED,
+                                 "candidate not language-equivalent "
+                                 "(daisy2 closed form incomplete for this SCC)"))
         res.formula = phi
-        return res
+        return _out(res)
