@@ -72,13 +72,14 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   **Witness lift landed (the "travels up the chain" half).** A peeler now lifts a
   NOT_LTL child's witness back across its peel: `LTLResult.prefix` prepends the consumed
   prefix to the anchor `u` (`Witness.prepend`) and stamps the peeler's own technique on
-  the verdict. `daisy` (the stem guard) and `daisystardet` (a reaching word through the
-  SCC, `shape.exit_word`) are done; the kinska `counting/2ap` cluster — the former FAIL
-  target — now validates TRUE. **Remaining peelers** need the same lift: `daisy2` is next,
-  marked red-by-design by `samples/validation/hoa/prefix_nonltl_2.hoa` (the other fixture,
-  `prefix_nonltl_1.hoa`, exercises the daisystardet path). Still open here is the *other*
-  failure mode — an incomplete / spurious-group witness (no `x`) ⇒ **abstain**, not FAIL —
-  which is the `_distinguish` widening + completed-witness gating described above.
+  the verdict. `daisy` and `daisy2` (the single stem guard) and `daisystardet` (a reaching
+  word through the SCC, `shape.exit_word`) are done; the kinska `counting/2ap` cluster —
+  the former FAIL target — now validates TRUE, and both grafted fixtures
+  (`samples/validation/hoa/prefix_nonltl_{1,2}.hoa`) pass. **Remaining:** no other peeler
+  has been observed emitting a NOT_LTL witness; any that does gets the same lift. Still open
+  here is the *other* failure mode — an incomplete / spurious-group witness (no `x`) ⇒
+  **abstain**, not FAIL — which is the `_distinguish` widening + completed-witness gating
+  described above.
 - **Output size at scale (the live research front).** The construction is cheap; the
   flat form explodes and Spot hits its 32-acceptance-set wall. Representation/
   verification, not fidelity. Analysis: `docs/dag_folding.md`.
