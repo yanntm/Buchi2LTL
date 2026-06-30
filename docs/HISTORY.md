@@ -2285,3 +2285,32 @@ PEELING — the witness must travel up the translator chain and be completed the
 genuine spurious groups ⇒ abstain. Reference CSV regeneration (NOT_LTL rows now carry
 `validation` + `check_s`; check `survey.diff.results` for the new column) is a separate
 step. README/IO refresh held until stable (TODO).
+
+## 2026-07-01 — Peelers lift the non-LTL witness across their peel
+
+The non-LTL witness was emitted anchored at the NOT_LTL *core*, but a peeling
+translator reaches that core only after consuming a prefix off its input, so the
+witness `u` started in the wrong place — replayed against the source it produced the
+`1 0 0 0 …` non-toggle and the survey verifier marked it FAIL (the kinska `counting/2ap`
+cluster, 9 rows).
+
+Fix: the witness now **travels up the peel**. New result-algebra move
+`LTLResult.prefix(precursor, word, *techniques)` — the peeler's variant of `credit`:
+it lifts a NOT_LTL child's witness by prepending the consumed prefix to the anchor `u`
+(`Witness.prepend`, Spot word syntax; `v`/`x` untouched — a peel re-roots, it does not
+relabel), folds the child in, and stamps the peeler's own technique, in one call.
+`credit` now also unions techniques on its NOK branch, so provenance accumulates up a
+NOT_LTL path. `__main__` prints a `technique :` line on the NOT_LTL branch (it only did
+so on the OK branch), so the survey records which peeler produced the verdict.
+
+Wired into two peelers: `daisy` prepends the single stem guard `g` (`w[u ↦ g·u]`);
+`daisystardet` prepends a reaching word through the rejecting SCC ending in the exit
+guard (new `shape.exit_word`, a BFS `h ⟶* p →(g) dst`). After this the whole
+`counting/2ap` cluster validates TRUE (kinska 153→162 TRUE, 9→0 FAIL; validation gate
+still SUCCESS, DAG unchanged — the lift touches only NOT_LTL rows, which carry no
+formula). Each algorithm.md gained the three-valued `Label = Some φ | NotLTL(w) | ⊥` and
+the formal lift. Two regression fixtures grafting a reachable prefix onto the counting
+core: `prefix_nonltl_1.hoa` (daisystardet, spoke exit, TRUE) and `prefix_nonltl_2.hoa`
+(initial-state exit, currently routed to the not-yet-lifted `daisy2`, red-by-design),
+both in `samples/validation/hoa` and `samples/benchmark/inputs/core`. Next peeler:
+`daisy2`.
