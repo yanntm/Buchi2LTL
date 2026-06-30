@@ -19,12 +19,24 @@ a win large enough to trust it.
 """
 from __future__ import annotations
 
+import os
+import sys
 from typing import Callable, Generic, Optional, Sequence, TypeVar
 
 from aut2ltl.result import LTLResult
+from aut2ltl.printer import format_language, format_result
 from .comparators import Comparator, smaller
 
 _In = TypeVar("_In")
+
+# On when BEST_OF_TRACE or the global TRANSLATOR_TRACE_ON is set (presence). Built
+# only inside `if _TRACE:`. Shows the size choice: each candidate and whether a
+# challenger beats the incumbent.
+_TRACE = "BEST_OF_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
+
+
+def _stage_name(stage: object) -> str:
+    return getattr(stage, "name", type(stage).__name__)
 
 
 class _BestOf(Generic[_In]):
@@ -51,18 +63,39 @@ class _BestOf(Generic[_In]):
         self._beats = beats
 
     def __call__(self, x: _In) -> LTLResult:
+        if _TRACE:
+            if hasattr(x, "tgba"):                 # a Language input
+                print(f"[best_of:{self.name}] in " + format_language(x, x.tgba()),
+                      file=sys.stderr)
+            elif isinstance(x, LTLResult):         # a rewriter-mode input (a result to re-present)
+                print(f"[best_of:{self.name}] in " + format_result(x), file=sys.stderr)
         incumbent: Optional[LTLResult] = None
         for stage in self._stages:
             r = stage(x)
             if r.not_ltl:
+                if _TRACE:
+                    print(f"[best_of:{self.name}] out (NOT_LTL short-circuit via "
+                          f"{_stage_name(stage)}) " + format_result(r), file=sys.stderr)
                 return r                          # absorbing verdict: keep reason
             if r.declined:
                 continue                          # not this stage's case: move on
             if incumbent is None:
                 incumbent = r                     # the trusted first answer
+                if _TRACE:
+                    print(f"[best_of:{self.name}] {_stage_name(stage)} incumbent -> "
+                          + format_result(r), file=sys.stderr)
             elif self._beats(incumbent, r):
+                if _TRACE:
+                    print(f"[best_of:{self.name}] {_stage_name(stage)} WINS -> "
+                          + format_result(r), file=sys.stderr)
                 incumbent = r                     # a winning challenger takes over
-        return incumbent if incumbent is not None else LTLResult.decline()
+            elif _TRACE:
+                print(f"[best_of:{self.name}] {_stage_name(stage)} kept out -> "
+                      + format_result(r), file=sys.stderr)
+        result = incumbent if incumbent is not None else LTLResult.decline()
+        if _TRACE:
+            print(f"[best_of:{self.name}] out " + format_result(result), file=sys.stderr)
+        return result
 
 
 def best_of(
