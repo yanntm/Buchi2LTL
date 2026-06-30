@@ -87,5 +87,5 @@ def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator"
                     print(f"[{tag}] out " + format_result(res), file=sys.stderr)
                 return res
             return run
-        return recurse(step)
+        return recurse(step, name=tag)
     return builder
