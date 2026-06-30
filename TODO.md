@@ -69,11 +69,23 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   spurious-group example to use as the regression fixture. Full context + pointers:
   root `nonltl.md`. (Docs already corrected: `tester/algorithm.md` Soundness/
   Conclusiveness, `witness/algorithm.md` Scope.)
+  **Now surfaced:** the survey replays each NOT_LTL witness (`aut2ltl/verifier/`) and
+  marks an incomplete / non-toggling family FAIL. The kinska `counting/2ap` cluster — 9
+  rows (`counting_buchi_2ap_{05,07,08,09,10,20,21,22,23}`) — currently fails replay: the
+  concrete target set. Decide per case whether it is an incomplete witness to *complete*
+  (peeling carries the family up the translator chain — the witness must travel with it)
+  or a genuine spurious group ⇒ abstain.
 - **Output size at scale (the live research front).** The construction is cheap; the
   flat form explodes and Spot hits its 32-acceptance-set wall. Representation/
   verification, not fidelity. Analysis: `docs/dag_folding.md`.
 - **Flags manual.** The `--use` / `-O` reference doc the root README points to (add
   the `--use best` recipe and the recipe-vs-leaf distinction).
+- **README: stdout/output contract moved — refresh once stabilized.** stdout is now
+  kind-tagged (`LTL: <formula>` / `NOT_LTL: <witness>`), no longer a bare-formula
+  filter, so the `-q | ltlfilt` examples are stale (ltlfilt is a no-op on our massaged
+  output anyway). A bare/pipe mode may be retrofitted later. Also document the NOT_LTL
+  witness line + the `aut2ltl.verifier` package, and the survey CSV's new `check_s`
+  column (verify wall-time). Hold until the IO settles.
 
 ## Deferred (intentional — revisit only if needed)
 
