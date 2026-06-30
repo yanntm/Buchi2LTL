@@ -41,6 +41,23 @@ class Witness:
     def v_str(self) -> str:
         return " ; ".join(self.v)
 
+    def prepend(self, word: str) -> "Witness":
+        """Prepend a finite word (Spot syntax, `;`-separated letters) to `u`, the
+        anchor prefix, and return self.
+
+        The lift a *peeler* applies on the way up: a translator that consumed a
+        prefix before reaching the NOT_LTL core gets a child witness whose `u`
+        reaches the orbit from that core, not from the host's initial state.
+        Prefixing the consumed word re-anchors the family over the host's own input.
+        `v`/`x` are untouched — the peel re-roots, it does not relabel, so the period
+        and the discriminating tail stay valid over the same alphabet. A no-op on `u`
+        when the family is incomplete (`u is None`): there is no anchor to lift, and
+        the incompleteness stands on its own."""
+        if self.u is not None:
+            letters = [t.strip() for t in word.split(";") if t.strip()]
+            self.u = letters + self.u
+        return self
+
     @property
     def complete(self) -> bool:
         return self.u is not None and self.x_cycle is not None
