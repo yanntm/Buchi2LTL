@@ -15,11 +15,23 @@ composition.
 """
 from __future__ import annotations
 
+import os
+import sys
 from typing import Callable, Generic, Sequence, TypeVar
 
 from aut2ltl.result import LTLResult
+from aut2ltl.printer import format_result
 
 _In = TypeVar("_In")
+
+# On when FIRST_SUCCESS_TRACE or the global TRANSLATOR_TRACE_ON is set (presence).
+# Built only inside `if _TRACE:`. Shows the choice ladder: each stage tried, whether
+# it declined (and why) or won.
+_TRACE = "FIRST_SUCCESS_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
+
+
+def _stage_name(stage: object) -> str:
+    return getattr(stage, "name", type(stage).__name__)
 
 
 class _FirstSuccess(Generic[_In]):
@@ -47,7 +59,16 @@ class _FirstSuccess(Generic[_In]):
         for stage in self._stages:
             r = stage(x)
             if not r.declined:
+                if _TRACE:
+                    print(f"[first_success:{self.name}] {_stage_name(stage)} won -> "
+                          + format_result(r), file=sys.stderr)
                 return r
+            if _TRACE:
+                print(f"[first_success:{self.name}] {_stage_name(stage)} declined"
+                      + (f": {r.diagnosis}" if r.diagnosis else ""), file=sys.stderr)
+        if _TRACE:
+            print(f"[first_success:{self.name}] all {len(self._stages)} stage(s) declined",
+                  file=sys.stderr)
         return LTLResult.decline()
 
 
