@@ -19,7 +19,7 @@ The Translator/Label contract is unchanged; the translator is parameterized by t
 child `Λ` it delegates exit targets to:
 
 ```
-Label       =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ = decline
+Label       =  Some φ  |  NotLTL(w)  |  ⊥    -- φ an LTL formula; w a non-LTL witness; ⊥ = decline
 Translator  =  Language → Label
 ```
 
@@ -98,6 +98,19 @@ forever fairly*.
   daisy reachability case, `σ` the hub self-loop.
 - **A true accepting sink** as a target: `φ_dst = ⊤`, so `… ∧ X ⊤` drops its tail.
   `F(a & X b)` reads off as `1 U (a & X b) ≡ F(a & X b)` — the minimal form.
+
+## Non-LTL exit children (the witness lift)
+
+An exit child `φ_dst = Λ(of(A↓dst))` is three-valued, so it may come back `NotLTL(w)`:
+the residue `of(A↓dst)` is not LTL-definable, witnessed by a counting family
+`w = (u, v, x, p)` anchored at `dst`. daisystardet propagates the verdict (a non-LTL
+exit poisons the peel — absorbing, taken before a decline) and lifts `w` back to `L`'s
+initial state.
+
+The lift prepends to the anchor `u` a **reaching word** `w_dst`: one valid path from the
+hub `h` to a state `p` carrying an exit to `dst`, followed by that exit guard `g`. Such a
+path exists and leads to the suffix `of(A↓dst)`, so `w_dst` reaches `dst` from `h`, and
+`w[u ↦ w_dst·u]` re-anchors the family at `h` (`v`, `x`, `p` unchanged).
 
 ## Exactness
 
