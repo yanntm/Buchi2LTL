@@ -2314,3 +2314,13 @@ core: `prefix_nonltl_1.hoa` (daisystardet, spoke exit, TRUE) and `prefix_nonltl_
 (initial-state exit, currently routed to the not-yet-lifted `daisy2`, red-by-design),
 both in `samples/validation/hoa` and `samples/benchmark/inputs/core`. Next peeler:
 `daisy2`.
+
+## 2026-07-01 — daisy2 joins the lifted peelers
+
+daisy2's stems are hub exits (`shape.star_partition` collects them from `aut.out(h)`; a
+spoke edge to a third state declines the peel), so the reaching word is a single stem
+guard and the lift is daisy's, one line: `res.prefix(child, str(g), _NAME)`. The grafted
+`prefix_nonltl_2.hoa` (initial-state exit) now routes daisy2 → NOT_LTL → witness
+`u=[!c] …` and validates TRUE. algorithm.md gains the non-LTL stem child + guard lift.
+Three peelers now carry the lift (daisy, daisy2, daisystardet); no other peeler has been
+observed emitting a NOT_LTL witness yet.
