@@ -44,8 +44,7 @@ _F = spot.formula
 # form's incompleteness is visible in a run. To stderr: the formula is on stdout.
 # Every use guards with `if _TRACE:` BEFORE building its message, so a formula is
 # never flattened for a trace that will not be printed.
-_TRACE = (os.getenv("DAISY2_TRACE", "0").lower() in ("1", "true", "yes", "on")
-          or "TRANSLATOR_TRACE_ON" in os.environ)
+_TRACE = "DAISY2_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
 
 
 def _out(res: "LTLResult") -> "LTLResult":

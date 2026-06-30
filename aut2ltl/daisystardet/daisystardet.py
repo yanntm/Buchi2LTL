@@ -41,8 +41,7 @@ _F = spot.formula
 # DAISYSTARDET_TRACE, or the global TRANSLATOR_TRACE_ON which lights every
 # translator trace at once. Every use guards with `if _TRACE:` BEFORE building its
 # message, so a formula is never flattened for a trace that will not be printed.
-_TRACE = (os.getenv("DAISYSTARDET_TRACE", "0").lower() in ("1", "true", "yes", "on")
-          or "TRANSLATOR_TRACE_ON" in os.environ)
+_TRACE = "DAISYSTARDET_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
 
 
 def _or(fs: List["spot.formula"]) -> "spot.formula":

@@ -33,10 +33,10 @@ if TYPE_CHECKING:
 _NAME = "daisy"
 _F = spot.formula
 
-# Trace gated by DAISY_TRACE or presence of the global TRANSLATOR_TRACE_ON; every
-# message is built inside `if _TRACE:`, so nothing is computed when off.
-_TRACE = (os.getenv("DAISY_TRACE", "0").lower() in ("1", "true", "yes", "on")
-          or "TRANSLATOR_TRACE_ON" in os.environ)
+# On when either DAISY_TRACE or the global TRANSLATOR_TRACE_ON is set (presence;
+# value ignored). Every message is built inside `if _TRACE:`, so nothing is computed
+# when off.
+_TRACE = "DAISY_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
 
 
 def _out(res: "LTLResult") -> "LTLResult":
