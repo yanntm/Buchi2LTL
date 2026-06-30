@@ -13,10 +13,13 @@ It produces the material; checking it is a separate concern (the witness verifie
 ## The input
 
 The same representation the gate reads: `det_generic_minimal()`, completed, then
-`extract_generators` → `(gens, masks, valuations)`. The form is read for the same
-reason — on a state-minimal deterministic automaton the transition monoid is faithful
-to the **syntactic semigroup**, so the group it carries is the language's, not an
-encoding artifact. One difference: the witness variant keeps `masks` / `valuations`
+`extract_generators` → `(gens, masks, valuations)`. The form is read with the same
+caveat as the gate (see the gate's **Soundness** section): on a deterministic
+ω-automaton the transition monoid is **not** faithful to the syntactic ω-semigroup, so
+a group it carries is only a *candidate* counting obstruction — possibly a
+determinisation artefact. Turning that candidate into a proof, by completing a witness
+family that separates words in the language itself, is exactly this module's job (see
+Scope). One difference from the gate: the witness variant keeps `masks` / `valuations`
 (the gate discards them as `_`), because lifting a group element back to concrete
 letters needs the letter↔generator correspondence.
 
@@ -26,9 +29,11 @@ The only thing a non-aperiodic language can do that counter-free LTL cannot is
 **count modulo a period**, so non-definability is never exhibited by one ω-word that
 is in (or out of) the language: membership of any single word is consistent with
 some LTL formula. The obstruction is inherently a *family that toggles*. The
-algebraic root is a non-trivial group inside the syntactic structure: an element `g`
-of period `p > 1` (`g, g², …, gᵖ = 1` cycling). The language can tell `gⁿ` apart by
-`n mod p` — that is the counting LTL cannot express.
+algebraic root of a *genuine* obstruction is a non-trivial group inside the syntactic
+ω-semigroup: an element `g` of period `p > 1` (`g, g², …, gᵖ = 1` cycling). The
+language can tell `gⁿ` apart by `n mod p` — that is the counting LTL cannot express.
+(GAP finds such a group in the *transition monoid*; whether it descends to the
+syntactic ω-semigroup is what completing the family decides — see The input.)
 
 So a witness is a counting family `(u, v, x, p)` with period `p > 1`: finite words
 `u`, `v`, an ultimately-periodic tail `x`, such that membership of `u·vⁿ·x` toggles
@@ -72,12 +77,17 @@ From the automaton and `v`'s induced transformation:
 - `u` — a word reaching a state `q` on a non-trivial `v`-orbit (`q, v(q), …`
   distinct), found by search from the initial state.
 - `x` — an ultimately-periodic word separating two phases of the orbit (a tail in
-  the residual of one phase and not the other). Distinguishability on the minimal
-  form guarantees it exists. A real trap in constructing the family: the
-  distinguishing tail cannot be a power of `v`. If `x = vᵖ` (the idempotent anchor),
-  then `vⁿ·(vᵖ)^ω = v^ω` regardless of `n` and nothing toggles. The counting must
-  surface as the **entry phase** into a genuinely different, phase-discriminating
-  continuation.
+  the residual of one phase and not the other), found by `_distinguish` as a lasso
+  accepted from one phase and rejected from the other. **It is not guaranteed to
+  exist.** Unlike a minimal DFA, a state-minimal ω-automaton can keep two orbit states
+  with *equal* residual ω-languages apart because the acceptance needs the memory; when
+  the group is such a determinisation artefact the phases are residual-equivalent, no
+  `x` separates them, and the family does not complete. **That non-completion is the
+  sound signal that the group was spurious — not a bug or a timeout.** A second trap,
+  when `x` *does* exist: the distinguishing tail cannot be a power of `v`. If `x = vᵖ`
+  (the idempotent anchor), then `vⁿ·(vᵖ)^ω = v^ω` regardless of `n` and nothing toggles;
+  the counting must surface as the **entry phase** into a genuinely different,
+  phase-discriminating continuation.
 
 ## Scope
 
@@ -93,6 +103,18 @@ successful witness extraction upgrades a non-conclusive "hint" to a proof even a
 the SAT-min threshold — exactly the regime (larger automata) where minimization is
 unaffordable and conclusiveness is otherwise lost. The witness thus **extends the
 conclusive regime**, and its check is self-contained (no trust in the oracle).
+
+Conversely, **failure to complete** the family — no `p`-cycle anchor, or `_distinguish`
+finds the two phases residual-equivalent — means the group was a determinisation
+artefact (or, at least, the count did not surface at the phases checked). This is an
+*expected* outcome, not an error. Soundly, then, a non-aperiodic reading that yields no
+completed witness is only a hint and should not stand as an absorbing `NOT_LTL`;
+conditioning the hard verdict on a completed witness (no `x` ⇒ abstain) is tracked in
+the root `TODO.md`. One honest limit on completeness: `_distinguish` compares a phase
+only to its immediate successor `t[q]`, so a count that surfaces only between
+*non-adjacent* phases can be missed — sound (we never assert a false proof) but not
+complete (a genuine witness can go unfound). Closing that gap (compare all phase pairs)
+is part of the same TODO.
 
 ## Modules
 
