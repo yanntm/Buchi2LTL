@@ -20,35 +20,47 @@ from survey.techniques import resolve
 
 
 def _validation(ex: Example, br: "_build.BuildResult", *, verify: bool,
-                equiv_timeout: int) -> str:
-    """The single validation token for a row. Empty for non-LTL (ineligible);
-    OFF when verification is disabled; SIZE when the formula was too large to
-    send to spot; else the oracle verdict (TRUE / FAIL / TIMEOUT / ERROR)."""
+                equiv_timeout: int) -> Tuple[str, str]:
+    """The validation verdict and its check wall-time `(token, check_s)`, in one
+    vocabulary across LTL and NOT_LTL rows: OFF when verification is disabled; SIZE
+    when an LTL formula was too large to send to spot; else the oracle verdict
+    (TRUE / FAIL / TIMEOUT / ERROR). An LTL row checks formula equivalence; a
+    NOT_LTL row replays its witness (FAIL if the family does not toggle or is
+    incomplete/absent — an uncertified NOT_LTL claim is unsound). Other statuses are
+    ineligible (empty). `check_s` is empty when no oracle ran."""
+    if br.status in ("NOT_LTL", "PROBABLY_NOT_LTL"):
+        if not verify:
+            return ("OFF", "")
+        return _verify.verify_witness(ex.value, br.witness, is_hoa=ex.is_hoa,
+                                      timeout=equiv_timeout)
     if br.status != "OK":
-        return ""
+        return ("", "")
     if not verify:
-        return "OFF"
+        return ("OFF", "")
     rec = str(br.rec or "")
     if rec.startswith("<unflattened"):
-        return "SIZE"
-    eq = _verify.verify(ex.value, rec, is_hoa=ex.is_hoa, timeout=equiv_timeout).equiv
+        return ("SIZE", "")
+    vr = _verify.verify(ex.value, rec, is_hoa=ex.is_hoa, timeout=equiv_timeout)
+    eq = vr.equiv
     if eq is True:
-        return "TRUE"
-    if eq is False:
-        return "FAIL"
-    if eq == "SPOT_TIMEOUT":
-        return "TIMEOUT"
-    if isinstance(eq, str) and eq.startswith("SPOT_ERR"):
-        return "ERROR"
-    return str(eq)
+        tok = "TRUE"
+    elif eq is False:
+        tok = "FAIL"
+    elif eq == "SPOT_TIMEOUT":
+        tok = "TIMEOUT"
+    elif isinstance(eq, str) and eq.startswith("SPOT_ERR"):
+        tok = "ERROR"
+    else:
+        tok = str(eq)
+    return (tok, vr.check_s)
 
 
 def _record(ex: Example, technique: Optional[str], *, verify: bool,
             build_timeout: int, equiv_timeout: int) -> Dict[str, object]:
     br = _build.build(ex.value, is_hoa=ex.is_hoa, technique=technique,
                       timeout=build_timeout)
-    validation = _validation(ex, br, verify=verify, equiv_timeout=equiv_timeout)
-    return report.row(ex.display, br, validation, ex.source)
+    validation, check_s = _validation(ex, br, verify=verify, equiv_timeout=equiv_timeout)
+    return report.row(ex.display, br, validation, ex.source, check_s=check_s)
 
 
 def _trace_header() -> None:
