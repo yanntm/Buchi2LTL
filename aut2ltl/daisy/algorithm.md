@@ -15,7 +15,7 @@ A translator maps a language to a label; this one is parameterized by the child 
 it delegates exit targets to:
 
 ```
-Label       =  Some φ  |  ⊥                  -- φ an LTL formula; ⊥ = decline
+Label       =  Some φ  |  NotLTL(w)  |  ⊥    -- φ an LTL formula; w a non-LTL witness; ⊥ = decline
 Translator  =  Language → Label
 ```
 
@@ -94,13 +94,17 @@ daisy(Λ)(L) =
     if hasNonSelfIncoming(q) then ⊥                 -- not a daisy (local, N&S)
     else                                            -- q is a daisy
       let φ_j = Λ( of(A↓dst_j) )  for each stem (q, g_j, dst_j, _) ∈ EX(q)
-      in if any φ_j = ⊥ then ⊥                      -- a stem we cannot label poisons q
-         else Some( STAY∞(q) ∨ LEAVE(q, [φ_j]) )
+      in if every φ_j = Some ψ_j  then  Some( STAY∞(q) ∨ LEAVE(q, [ψ_j]) )
+         else, at the first failing stem k:           -- φ_k ≠ Some, in stem order
+              φ_k = ⊥          →  ⊥                    -- cannot label: poisons q
+              φ_k = NotLTL(w)  →  NotLTL( w[u ↦ g_k·u] )  -- residue not LTL: lift up the stem
 ```
 
-It never inspects a child `φ_j` — each exit target is an opaque sub-label plugged
-in. That is what makes it **context-free**: one local production combining `q`'s own
-petals with its children's labels. A single declined child poisons `q`.
+It never inspects a child's formula `ψ_j` nor its witness `w` — each exit target is an
+opaque sub-label, and the lift `w[u ↦ g_k·u]` prepends one fixed letter without reading
+`w`. That is what makes it **context-free**: one local production combining `q`'s own
+petals with its children's labels. The first failing stem decides `q`: a decline poisons
+it, a non-LTL residue makes it non-LTL.
 
 ## Soundness
 
@@ -111,6 +115,14 @@ through it, resolved in closed form by the stay/leave `U`; the language from `q`
 then `Final(q)` exactly, given correct child labels. Off the fragment a target sits
 in a genuine multi-state SCC, the child declines there, and the poisoning propagates
 the `⊥` up.
+
+The non-LTL lift is sound for the same reason: the residue `of(A↓dst_j)` is the left
+quotient `g_j⁻¹·L` (the stem letter `g_j` is the run's only continuation past `q`), and
+star-free `=` LTL is closed under left quotient, so a non-LTL residue forces a non-LTL
+`L`. The lifted family certifies it: `g_k·u` reaches from `q` the orbit `u` reached from
+`dst_k`, while `v`, `x`, `p` carry over unchanged (re-rooting relocates, it does not
+relabel — `Σ = 2^AP` is shared), so `(g_k·u)·vⁿ·x` toggles in `L` exactly as `u·vⁿ·x`
+toggles in the residue.
 
 Guards (`σ`, `σ_i`) are symbolic: **no `2^AP` enumeration, no determinization**. Work
 and output size scale with states and edges, not the alphabet.
