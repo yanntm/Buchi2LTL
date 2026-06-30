@@ -1,6 +1,5 @@
-CSV: logs/rerun/benchmark/survey_20260625_130401.csv
-survey: 334 inputs  (--use default)
-aut2ltl: 266 LTL, 64 not-LTL  |  declined 0, timeout 4, crash 0
-validation of 266 LTL: 266 TRUE, 0 FAIL, 0 not checked (size/timeout/error)
-totals: DAG=2938 temporals=465 build=220.075s
+survey: 336 inputs  (--use default)
+aut2ltl: 266 LTL, 66 not-LTL  |  declined 0, timeout 4, crash 0
+validation: 332 TRUE, 0 FAIL, 0 not checked (size/timeout/error)
+totals: DAG=2931 temporals=461 build=223.792s
 SUCCESS

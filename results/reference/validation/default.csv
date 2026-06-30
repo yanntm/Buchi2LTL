@@ -1,82 +1,84 @@
-input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,source
-bottom_l4.hoa,LTL,daisy,0.071,1,1,0,1,1.0,e20f564d992f,TRUE,samples/validation/hoa/bottom_l4.hoa
-bottom_l5.hoa,LTL,daisy,0.068,0,1,0,1,1.0,256b0f7a8d39,TRUE,samples/validation/hoa/bottom_l5.hoa
-guarantee_l10.hoa,LTL,daisy,0.071,a U b,3,1,3,1.0,e9cb1530bc11,TRUE,samples/validation/hoa/guarantee_l10.hoa
-guarantee_l11.hoa,LTL,daisy,0.072,F(a & b),4,1,4,1.0,4fbaa5729c10,TRUE,samples/validation/hoa/guarantee_l11.hoa
-guarantee_l12.hoa,LTL,daisy+daisystardet,0.070,F(a & Xb),5,1,5,1.0,e89790c3f84f,TRUE,samples/validation/hoa/guarantee_l12.hoa
-guarantee_l13.hoa,LTL,daisy,0.074,a | Xb,4,0,4,1.0,3840ffe91dba,TRUE,samples/validation/hoa/guarantee_l13.hoa
-guarantee_l4.hoa,LTL,daisy,0.078,a,1,0,1,1.0,883cb92c9ed3,TRUE,samples/validation/hoa/guarantee_l4.hoa
-guarantee_l5.hoa,LTL,daisy,0.071,Xa,2,0,2,1.0,8df019677a82,TRUE,samples/validation/hoa/guarantee_l5.hoa
-guarantee_l6.hoa,LTL,daisy,0.071,XXa,3,0,3,1.0,dbac6abde320,TRUE,samples/validation/hoa/guarantee_l6.hoa
-guarantee_l7.hoa,LTL,daisy,0.071,XXXa,4,0,4,1.0,52a3027c7f30,TRUE,samples/validation/hoa/guarantee_l7.hoa
-guarantee_l8.hoa,LTL,daisy,0.073,X(a & Xa),4,0,5,1.2,b5fe8e2abbd7,TRUE,samples/validation/hoa/guarantee_l8.hoa
-guarantee_l9.hoa,LTL,daisy,0.073,Fa,2,1,2,1.0,ff08d8efb425,TRUE,samples/validation/hoa/guarantee_l9.hoa
-mod3_a.hoa,NOT_LTL,,1.170,,,,,,,,samples/validation/hoa/mod3_a.hoa
-obligation_l4.hoa,LTL,daisy+strength2,0.072,G(!a & b) | Fa,7,2,8,1.1,d85e49d72752,TRUE,samples/validation/hoa/obligation_l4.hoa
-obligation_l5.hoa,LTL,daisy,0.076,(a & b) W ((!a & Gb) | (!b & Ga)),11,3,15,1.4,0ce39766168c,TRUE,samples/validation/hoa/obligation_l5.hoa
-obligation_l6.hoa,LTL,daisy+inv,0.070,Gb & Fa,5,2,5,1.0,af9fb0b27c73,TRUE,samples/validation/hoa/obligation_l6.hoa
-obligation_l7.hoa,LTL,daisy+strength2,0.077,((a & !b & c) W (!a & !b & Gc)) | (a U b),11,3,17,1.5,3dd1537270e7,TRUE,samples/validation/hoa/obligation_l7.hoa
-obligation_l8.hoa,LTL,daisy+strength2,0.073,G(a & !b) | Fb,7,2,8,1.1,3b549ba0ab04,TRUE,samples/validation/hoa/obligation_l8.hoa
-persistence_l4.hoa,LTL,daisy,0.070,FGa,3,2,3,1.0,7ef5ce8004f6,TRUE,samples/validation/hoa/persistence_l4.hoa
-persistence_l5.hoa,LTL,daisy,0.071,F(a & Gb),5,2,5,1.0,c23a62f0dcd5,TRUE,samples/validation/hoa/persistence_l5.hoa
-persistence_l6.hoa,LTL,daisy,0.076,F(Ga | Gb),6,3,6,1.0,9df96bd5ae7f,TRUE,samples/validation/hoa/persistence_l6.hoa
-reactivity_l4.hoa,LTL,daisy+strength2,0.073,F(G!a | (b & GFb)),9,4,10,1.1,de843168fd3f,TRUE,samples/validation/hoa/reactivity_l4.hoa
-reactivity_l5.hoa,LTL,acc2+daisy,0.075,G(Fa & FGb),7,4,7,1.0,90d435469cfe,TRUE,samples/validation/hoa/reactivity_l5.hoa
-recurrence_l10.hoa,LTL,daisy2,0.075,G(!a | (b U c)),7,2,7,1.0,e7f5efbed04c,TRUE,samples/validation/hoa/recurrence_l10.hoa
-recurrence_l11.hoa,LTL,daisy2,0.075,G(F(a & X!a) & (!a | X!a)),8,2,14,1.8,6f34ddebf89a,TRUE,samples/validation/hoa/recurrence_l11.hoa
-recurrence_l12.hoa,LTL,partscc,0.075,G((!a | Xb) & Fa),8,2,9,1.1,7e710bef5a65,TRUE,samples/validation/hoa/recurrence_l12.hoa
-recurrence_l13.hoa,LTL,acc2+daisy2,0.106,G(F(a & X!a) & (!a | X!a) & F((a & X(!a & b)) | (b & (!a | X!a)))),15,3,31,2.1,eabda56f98db,TRUE,samples/validation/hoa/recurrence_l13.hoa
-recurrence_l4.hoa,LTL,daisy,0.069,GFa,3,2,3,1.0,0cdf120f1aa3,TRUE,samples/validation/hoa/recurrence_l4.hoa
-recurrence_l5.hoa,LTL,daisy2,0.073,G(!a | Fb),6,2,6,1.0,206242f3ff9b,TRUE,samples/validation/hoa/recurrence_l5.hoa
-recurrence_l6.hoa,LTL,daisy2,0.073,G(a | Fb),5,2,5,1.0,6450d5fc4c9b,TRUE,samples/validation/hoa/recurrence_l6.hoa
-recurrence_l7.hoa,LTL,acc2+daisy,0.075,G(Fa & Fb),6,3,6,1.0,7df3e34fa122,TRUE,samples/validation/hoa/recurrence_l7.hoa
-recurrence_l8.hoa,LTL,acc3+daisy,0.080,G(Fa & Fb & Fc),8,4,8,1.0,84a036ea1e4b,TRUE,samples/validation/hoa/recurrence_l8.hoa
-recurrence_l9.hoa,LTL,acc2+daisy2,0.299,G((!a | Fb) & (!c | Fd)),12,3,12,1.0,4ad86b45743c,TRUE,samples/validation/hoa/recurrence_l9.hoa
-safety_l10.hoa,LTL,daisy+deep_roundtrip+partscc,0.086,G((!a | X!a) & (a | Xa)),8,1,12,1.5,eec084a4ddcd,TRUE,samples/validation/hoa/safety_l10.hoa
-safety_l11.hoa,LTL,daisy+partscc,0.084,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b)))),17,1,37,2.2,d1d206b5189e,TRUE,samples/validation/hoa/safety_l11.hoa
-safety_l4.hoa,LTL,daisy,0.070,Ga,2,1,2,1.0,79182d6e45ae,TRUE,samples/validation/hoa/safety_l4.hoa
-safety_l5.hoa,LTL,daisy,0.070,G(a | b),4,1,4,1.0,819653eda7ec,TRUE,samples/validation/hoa/safety_l5.hoa
-safety_l6.hoa,LTL,partscc,0.073,G(!a | Xb),6,1,6,1.0,e6569e60c540,TRUE,samples/validation/hoa/safety_l6.hoa
-safety_l7.hoa,LTL,daisy,0.069,a & Xa,3,0,4,1.3,0ffaccaeafd1,TRUE,samples/validation/hoa/safety_l7.hoa
-safety_l8.hoa,LTL,daisy,0.072,!a W Ga,4,2,5,1.2,78f701294965,TRUE,samples/validation/hoa/safety_l8.hoa
-safety_l9.hoa,LTL,daisy,0.068,Ga,2,1,2,1.0,79182d6e45ae,TRUE,samples/validation/hoa/safety_l9.hoa
-true,LTL,daisy,0.070,1,1,0,1,1.0,e20f564d992f,TRUE,samples/validation/ltl/bottom.ltl:4
-false,LTL,daisy,0.070,0,1,0,1,1.0,256b0f7a8d39,TRUE,samples/validation/ltl/bottom.ltl:5
-a,LTL,daisy,0.069,a,1,0,1,1.0,883cb92c9ed3,TRUE,samples/validation/ltl/guarantee.ltl:4
-X a,LTL,daisy,0.070,Xa,2,0,2,1.0,8df019677a82,TRUE,samples/validation/ltl/guarantee.ltl:5
-X X a,LTL,daisy,0.072,XXa,3,0,3,1.0,dbac6abde320,TRUE,samples/validation/ltl/guarantee.ltl:6
-X X X a,LTL,daisy,0.070,XXXa,4,0,4,1.0,52a3027c7f30,TRUE,samples/validation/ltl/guarantee.ltl:7
-X(a & X a),LTL,daisy,0.071,X(a & Xa),4,0,5,1.2,b5fe8e2abbd7,TRUE,samples/validation/ltl/guarantee.ltl:8
-Fa,LTL,daisy,0.070,Fa,2,1,2,1.0,ff08d8efb425,TRUE,samples/validation/ltl/guarantee.ltl:9
-a U b,LTL,daisy,0.072,a U b,3,1,3,1.0,e9cb1530bc11,TRUE,samples/validation/ltl/guarantee.ltl:10
-F(a & b),LTL,daisy,0.070,F(a & b),4,1,4,1.0,4fbaa5729c10,TRUE,samples/validation/ltl/guarantee.ltl:11
-F(a & X b),LTL,daisy+daisystardet,0.070,F(a & Xb),5,1,5,1.0,e89790c3f84f,TRUE,samples/validation/ltl/guarantee.ltl:12
-a | X b,LTL,daisy,0.071,a | Xb,4,0,4,1.0,3840ffe91dba,TRUE,samples/validation/ltl/guarantee.ltl:13
-Fa | Gb,LTL,daisy+strength2,0.072,Fa | G(!a & b),7,2,8,1.1,d311799a485d,TRUE,samples/validation/ltl/obligation.ltl:4
-Ga | Gb,LTL,daisy,0.077,(a & b) W ((!a & Gb) | (!b & Ga)),11,3,15,1.4,0ce39766168c,TRUE,samples/validation/ltl/obligation.ltl:5
-Fa & Gb,LTL,daisy+inv,0.071,Fa & Gb,5,2,5,1.0,e153d0c1be25,TRUE,samples/validation/ltl/obligation.ltl:6
-(a U b) | Gc,LTL,daisy+strength2,0.073,(a U b) | ((a & !b & c) W (!a & !b & Gc)),11,3,17,1.5,1d4738f3c476,TRUE,samples/validation/ltl/obligation.ltl:7
-Ga | Fb,LTL,daisy+strength2,0.074,Fb | G(a & !b),7,2,8,1.1,163242b6ca5a,TRUE,samples/validation/ltl/obligation.ltl:8
-FGa,LTL,daisy,0.069,FGa,3,2,3,1.0,7ef5ce8004f6,TRUE,samples/validation/ltl/persistence.ltl:4
-F(a & G b),LTL,daisy,0.071,F(a & Gb),5,2,5,1.0,c23a62f0dcd5,TRUE,samples/validation/ltl/persistence.ltl:5
-FGa | FGb,LTL,daisy,0.076,F(Ga | Gb),6,3,6,1.0,9df96bd5ae7f,TRUE,samples/validation/ltl/persistence.ltl:6
-GFa -> GFb,LTL,daisy+strength2,0.075,F(G!a | (b & GFb)),9,4,10,1.1,de843168fd3f,TRUE,samples/validation/ltl/reactivity.ltl:4
-GFa & FGb,LTL,acc2+daisy,0.075,G(Fa & FGb),7,4,7,1.0,90d435469cfe,TRUE,samples/validation/ltl/reactivity.ltl:5
-GFa,LTL,daisy,0.072,GFa,3,2,3,1.0,0cdf120f1aa3,TRUE,samples/validation/ltl/recurrence.ltl:4
-G(a -> F b),LTL,daisy2,0.074,G(!a | Fb),6,2,6,1.0,206242f3ff9b,TRUE,samples/validation/ltl/recurrence.ltl:5
-G(a | F b),LTL,daisy2,0.072,G(a | Fb),5,2,5,1.0,6450d5fc4c9b,TRUE,samples/validation/ltl/recurrence.ltl:6
-GFa & GFb,LTL,acc2+daisy,0.072,G(Fa & Fb),6,3,6,1.0,7df3e34fa122,TRUE,samples/validation/ltl/recurrence.ltl:7
-GFa & GFb & GFc,LTL,acc3+daisy,0.079,G(Fa & Fb & Fc),8,4,8,1.0,84a036ea1e4b,TRUE,samples/validation/ltl/recurrence.ltl:8
-G(a -> F b) & G(c -> F d),LTL,acc2+daisy2,0.294,G((!a | Fb) & (!c | Fd)),12,3,12,1.0,4ad86b45743c,TRUE,samples/validation/ltl/recurrence.ltl:9
-G(a -> (b U c)),LTL,daisy2,0.074,G(!a | (b U c)),7,2,7,1.0,e7f5efbed04c,TRUE,samples/validation/ltl/recurrence.ltl:10
-GFa & G(a -> X !a),LTL,daisy2,0.074,G((!a | X!a) & F(a & X!a)),8,2,14,1.8,b653310e454e,TRUE,samples/validation/ltl/recurrence.ltl:11
-G(a -> X b) & GFa,LTL,partscc,0.078,G(Fa & (!a | Xb)),8,2,9,1.1,d3754fae5443,TRUE,samples/validation/ltl/recurrence.ltl:12
-GFa & GFb & G(a -> X !a),LTL,acc2+daisy2,0.100,G((!a | X!a) & F(a & X!a) & F((a & X(!a & b)) | (b & (!a | X!a)))),15,3,31,2.1,9a537536b5ad,TRUE,samples/validation/ltl/recurrence.ltl:13
-Ga,LTL,daisy,0.069,Ga,2,1,2,1.0,79182d6e45ae,TRUE,samples/validation/ltl/safety.ltl:4
-G(a | b),LTL,daisy,0.070,G(a | b),4,1,4,1.0,819653eda7ec,TRUE,samples/validation/ltl/safety.ltl:5
-G(a -> X b),LTL,partscc,0.071,G(!a | Xb),6,1,6,1.0,e6569e60c540,TRUE,samples/validation/ltl/safety.ltl:6
-a & X a,LTL,daisy,0.073,a & Xa,3,0,4,1.3,0ffaccaeafd1,TRUE,samples/validation/ltl/safety.ltl:7
-G(a -> X a),LTL,daisy,0.071,!a W Ga,4,2,5,1.2,78f701294965,TRUE,samples/validation/ltl/safety.ltl:8
-G(a & X a),LTL,daisy,0.071,Ga,2,1,2,1.0,79182d6e45ae,TRUE,samples/validation/ltl/safety.ltl:9
-G((!a & X a) | (a & X !a)),LTL,daisy+deep_roundtrip+partscc,0.082,G((a | Xa) & (!a | X!a)),8,1,12,1.5,7f20614661fa,TRUE,samples/validation/ltl/safety.ltl:10
-G(a <-> X b),LTL,daisy+partscc,0.085,(a & X(b & G((!a | Xb) & (a | X!b)))) | (!a & X(!b & G((!a | Xb) & (a | X!b)))),17,1,37,2.2,d1d206b5189e,TRUE,samples/validation/ltl/safety.ltl:11
+input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,check_s,source
+bottom_l4.hoa,LTL,daisy,0.072,1,1,0,1,1.0,e20f564d992f,TRUE,0.048,samples/validation/hoa/bottom_l4.hoa
+bottom_l5.hoa,LTL,daisy,0.071,0,1,0,1,1.0,256b0f7a8d39,TRUE,0.043,samples/validation/hoa/bottom_l5.hoa
+guarantee_l10.hoa,LTL,daisy,0.071,a U b,3,1,3,1.0,e9cb1530bc11,TRUE,0.043,samples/validation/hoa/guarantee_l10.hoa
+guarantee_l11.hoa,LTL,daisy,0.072,F(a & b),4,1,4,1.0,4fbaa5729c10,TRUE,0.043,samples/validation/hoa/guarantee_l11.hoa
+guarantee_l12.hoa,LTL,daisy+daisystardet,0.074,F(a & Xb),5,1,5,1.0,e89790c3f84f,TRUE,0.044,samples/validation/hoa/guarantee_l12.hoa
+guarantee_l13.hoa,LTL,daisy,0.073,a | Xb,4,0,4,1.0,3840ffe91dba,TRUE,0.045,samples/validation/hoa/guarantee_l13.hoa
+guarantee_l4.hoa,LTL,daisy,0.069,a,1,0,1,1.0,883cb92c9ed3,TRUE,0.045,samples/validation/hoa/guarantee_l4.hoa
+guarantee_l5.hoa,LTL,daisy,0.072,Xa,2,0,2,1.0,8df019677a82,TRUE,0.041,samples/validation/hoa/guarantee_l5.hoa
+guarantee_l6.hoa,LTL,daisy,0.077,XXa,3,0,3,1.0,dbac6abde320,TRUE,0.046,samples/validation/hoa/guarantee_l6.hoa
+guarantee_l7.hoa,LTL,daisy,0.074,XXXa,4,0,4,1.0,52a3027c7f30,TRUE,0.044,samples/validation/hoa/guarantee_l7.hoa
+guarantee_l8.hoa,LTL,daisy,0.073,X(a & Xa),4,0,5,1.2,b5fe8e2abbd7,TRUE,0.046,samples/validation/hoa/guarantee_l8.hoa
+guarantee_l9.hoa,LTL,daisy,0.071,Fa,2,1,2,1.0,ff08d8efb425,TRUE,0.045,samples/validation/hoa/guarantee_l9.hoa
+mod3_a.hoa,NOT_LTL,-,1.196,p=3 u=[] v=[a; a] x=[cycle{!a}],,,,,,TRUE,0.058,samples/validation/hoa/mod3_a.hoa
+obligation_l4.hoa,LTL,daisy+strength2,0.075,G(!a & b) | Fa,7,2,8,1.1,d85e49d72752,TRUE,0.044,samples/validation/hoa/obligation_l4.hoa
+obligation_l5.hoa,LTL,daisy,0.079,(a & b) W ((!a & Gb) | (!b & Ga)),11,3,15,1.4,0ce39766168c,TRUE,0.042,samples/validation/hoa/obligation_l5.hoa
+obligation_l6.hoa,LTL,daisy+inv,0.078,Gb & Fa,5,2,5,1.0,af9fb0b27c73,TRUE,0.042,samples/validation/hoa/obligation_l6.hoa
+obligation_l7.hoa,LTL,daisy+strength2,0.083,((a & !b & c) W (!a & !b & Gc)) | (a U b),11,3,17,1.5,3dd1537270e7,TRUE,0.040,samples/validation/hoa/obligation_l7.hoa
+obligation_l8.hoa,LTL,daisy+strength2,0.076,G(a & !b) | Fb,7,2,8,1.1,3b549ba0ab04,TRUE,0.045,samples/validation/hoa/obligation_l8.hoa
+persistence_l4.hoa,LTL,daisy,0.077,FGa,3,2,3,1.0,7ef5ce8004f6,TRUE,0.042,samples/validation/hoa/persistence_l4.hoa
+persistence_l5.hoa,LTL,daisy,0.075,F(a & Gb),5,2,5,1.0,c23a62f0dcd5,TRUE,0.040,samples/validation/hoa/persistence_l5.hoa
+persistence_l6.hoa,LTL,daisy,0.079,F(Ga | Gb),6,3,6,1.0,9df96bd5ae7f,TRUE,0.044,samples/validation/hoa/persistence_l6.hoa
+prefix_nonltl_1.hoa,NOT_LTL,daisystardet,1.237,p=2 u=[c; c] v=[a & !b] x=[cycle{!a & b}],,,,,,TRUE,0.055,samples/validation/hoa/prefix_nonltl_1.hoa
+prefix_nonltl_2.hoa,NOT_LTL,daisy2,1.232,p=2 u=[!c] v=[a & !b] x=[cycle{!a & b}],,,,,,TRUE,0.058,samples/validation/hoa/prefix_nonltl_2.hoa
+reactivity_l4.hoa,LTL,daisy+strength2,0.080,F(G!a | (b & GFb)),9,4,10,1.1,de843168fd3f,TRUE,0.046,samples/validation/hoa/reactivity_l4.hoa
+reactivity_l5.hoa,LTL,acc2+daisy,0.077,G(Fa & FGb),7,4,7,1.0,90d435469cfe,TRUE,0.046,samples/validation/hoa/reactivity_l5.hoa
+recurrence_l10.hoa,LTL,daisy2,0.079,G(!a | (b U c)),7,2,7,1.0,e7f5efbed04c,TRUE,0.042,samples/validation/hoa/recurrence_l10.hoa
+recurrence_l11.hoa,LTL,daisy2,0.078,G(F(a & X!a) & (!a | X!a)),8,2,14,1.8,6f34ddebf89a,TRUE,0.043,samples/validation/hoa/recurrence_l11.hoa
+recurrence_l12.hoa,LTL,partscc,0.078,G((!a | Xb) & Fa),8,2,9,1.1,7e710bef5a65,TRUE,0.044,samples/validation/hoa/recurrence_l12.hoa
+recurrence_l13.hoa,LTL,acc2+daisy2,0.112,G(F(a & X!a) & (!a | X!a) & F((a & X(!a & b)) | (b & (!a | X!a)))),15,3,31,2.1,eabda56f98db,TRUE,0.044,samples/validation/hoa/recurrence_l13.hoa
+recurrence_l4.hoa,LTL,daisy,0.072,GFa,3,2,3,1.0,0cdf120f1aa3,TRUE,0.043,samples/validation/hoa/recurrence_l4.hoa
+recurrence_l5.hoa,LTL,daisy2,0.075,G(!a | Fb),6,2,6,1.0,206242f3ff9b,TRUE,0.042,samples/validation/hoa/recurrence_l5.hoa
+recurrence_l6.hoa,LTL,daisy2,0.074,G(a | Fb),5,2,5,1.0,6450d5fc4c9b,TRUE,0.041,samples/validation/hoa/recurrence_l6.hoa
+recurrence_l7.hoa,LTL,acc2+daisy,0.074,G(Fa & Fb),6,3,6,1.0,7df3e34fa122,TRUE,0.042,samples/validation/hoa/recurrence_l7.hoa
+recurrence_l8.hoa,LTL,acc3+daisy,0.084,G(Fa & Fb & Fc),8,4,8,1.0,84a036ea1e4b,TRUE,0.043,samples/validation/hoa/recurrence_l8.hoa
+recurrence_l9.hoa,LTL,acc2+daisy2,0.334,G((!a | Fb) & (!c | Fd)),12,3,12,1.0,4ad86b45743c,TRUE,0.042,samples/validation/hoa/recurrence_l9.hoa
+safety_l10.hoa,LTL,daisy+deep_roundtrip+partscc,0.084,G((a | Xa) & (!a | X!a)),8,1,12,1.5,7f20614661fa,TRUE,0.045,samples/validation/hoa/safety_l10.hoa
+safety_l11.hoa,LTL,daisy+partscc,0.089,(!a & X(!b & G((a | X!b) & (!a | Xb)))) | (a & X(b & G((a | X!b) & (!a | Xb)))),17,1,37,2.2,124a5fd74125,TRUE,0.040,samples/validation/hoa/safety_l11.hoa
+safety_l4.hoa,LTL,daisy,0.073,Ga,2,1,2,1.0,79182d6e45ae,TRUE,0.045,samples/validation/hoa/safety_l4.hoa
+safety_l5.hoa,LTL,daisy,0.072,G(a | b),4,1,4,1.0,819653eda7ec,TRUE,0.042,samples/validation/hoa/safety_l5.hoa
+safety_l6.hoa,LTL,partscc,0.078,G(!a | Xb),6,1,6,1.0,e6569e60c540,TRUE,0.046,samples/validation/hoa/safety_l6.hoa
+safety_l7.hoa,LTL,daisy,0.072,a & Xa,3,0,4,1.3,0ffaccaeafd1,TRUE,0.043,samples/validation/hoa/safety_l7.hoa
+safety_l8.hoa,LTL,daisy,0.073,!a W Ga,4,2,5,1.2,78f701294965,TRUE,0.044,samples/validation/hoa/safety_l8.hoa
+safety_l9.hoa,LTL,daisy,0.071,Ga,2,1,2,1.0,79182d6e45ae,TRUE,0.041,samples/validation/hoa/safety_l9.hoa
+true,LTL,daisy,0.071,1,1,0,1,1.0,e20f564d992f,TRUE,0.046,samples/validation/ltl/bottom.ltl:4
+false,LTL,daisy,0.070,0,1,0,1,1.0,256b0f7a8d39,TRUE,0.044,samples/validation/ltl/bottom.ltl:5
+a,LTL,daisy,0.071,a,1,0,1,1.0,883cb92c9ed3,TRUE,0.044,samples/validation/ltl/guarantee.ltl:4
+X a,LTL,daisy,0.075,Xa,2,0,2,1.0,8df019677a82,TRUE,0.046,samples/validation/ltl/guarantee.ltl:5
+X X a,LTL,daisy,0.073,XXa,3,0,3,1.0,dbac6abde320,TRUE,0.045,samples/validation/ltl/guarantee.ltl:6
+X X X a,LTL,daisy,0.075,XXXa,4,0,4,1.0,52a3027c7f30,TRUE,0.043,samples/validation/ltl/guarantee.ltl:7
+X(a & X a),LTL,daisy,0.076,X(a & Xa),4,0,5,1.2,b5fe8e2abbd7,TRUE,0.045,samples/validation/ltl/guarantee.ltl:8
+Fa,LTL,daisy,0.072,Fa,2,1,2,1.0,ff08d8efb425,TRUE,0.046,samples/validation/ltl/guarantee.ltl:9
+a U b,LTL,daisy,0.075,a U b,3,1,3,1.0,e9cb1530bc11,TRUE,0.045,samples/validation/ltl/guarantee.ltl:10
+F(a & b),LTL,daisy,0.075,F(a & b),4,1,4,1.0,4fbaa5729c10,TRUE,0.043,samples/validation/ltl/guarantee.ltl:11
+F(a & X b),LTL,daisy+daisystardet,0.074,F(a & Xb),5,1,5,1.0,e89790c3f84f,TRUE,0.045,samples/validation/ltl/guarantee.ltl:12
+a | X b,LTL,daisy,0.075,a | Xb,4,0,4,1.0,3840ffe91dba,TRUE,0.044,samples/validation/ltl/guarantee.ltl:13
+Fa | Gb,LTL,daisy+strength2,0.076,Fa | G(!a & b),7,2,8,1.1,d311799a485d,TRUE,0.044,samples/validation/ltl/obligation.ltl:4
+Ga | Gb,LTL,daisy,0.082,(a & b) W ((!a & Gb) | (!b & Ga)),11,3,15,1.4,0ce39766168c,TRUE,0.045,samples/validation/ltl/obligation.ltl:5
+Fa & Gb,LTL,daisy+inv,0.071,Fa & Gb,5,2,5,1.0,e153d0c1be25,TRUE,0.045,samples/validation/ltl/obligation.ltl:6
+(a U b) | Gc,LTL,daisy+strength2,0.080,(a U b) | ((a & !b & c) W (!a & !b & Gc)),11,3,17,1.5,1d4738f3c476,TRUE,0.040,samples/validation/ltl/obligation.ltl:7
+Ga | Fb,LTL,daisy+strength2,0.074,Fb | G(a & !b),7,2,8,1.1,163242b6ca5a,TRUE,0.042,samples/validation/ltl/obligation.ltl:8
+FGa,LTL,daisy,0.072,FGa,3,2,3,1.0,7ef5ce8004f6,TRUE,0.045,samples/validation/ltl/persistence.ltl:4
+F(a & G b),LTL,daisy,0.074,F(a & Gb),5,2,5,1.0,c23a62f0dcd5,TRUE,0.040,samples/validation/ltl/persistence.ltl:5
+FGa | FGb,LTL,daisy,0.078,F(Ga | Gb),6,3,6,1.0,9df96bd5ae7f,TRUE,0.042,samples/validation/ltl/persistence.ltl:6
+GFa -> GFb,LTL,daisy+strength2,0.074,F(G!a | (b & GFb)),9,4,10,1.1,de843168fd3f,TRUE,0.044,samples/validation/ltl/reactivity.ltl:4
+GFa & FGb,LTL,acc2+daisy,0.078,G(Fa & FGb),7,4,7,1.0,90d435469cfe,TRUE,0.045,samples/validation/ltl/reactivity.ltl:5
+GFa,LTL,daisy,0.072,GFa,3,2,3,1.0,0cdf120f1aa3,TRUE,0.043,samples/validation/ltl/recurrence.ltl:4
+G(a -> F b),LTL,daisy2,0.078,G(!a | Fb),6,2,6,1.0,206242f3ff9b,TRUE,0.046,samples/validation/ltl/recurrence.ltl:5
+G(a | F b),LTL,daisy2,0.076,G(a | Fb),5,2,5,1.0,6450d5fc4c9b,TRUE,0.045,samples/validation/ltl/recurrence.ltl:6
+GFa & GFb,LTL,acc2+daisy,0.076,G(Fa & Fb),6,3,6,1.0,7df3e34fa122,TRUE,0.045,samples/validation/ltl/recurrence.ltl:7
+GFa & GFb & GFc,LTL,acc3+daisy,0.092,G(Fa & Fb & Fc),8,4,8,1.0,84a036ea1e4b,TRUE,0.046,samples/validation/ltl/recurrence.ltl:8
+G(a -> F b) & G(c -> F d),LTL,acc2+daisy2,0.332,G((!a | Fb) & (!c | Fd)),12,3,12,1.0,4ad86b45743c,TRUE,0.045,samples/validation/ltl/recurrence.ltl:9
+G(a -> (b U c)),LTL,daisy2,0.080,G(!a | (b U c)),7,2,7,1.0,e7f5efbed04c,TRUE,0.041,samples/validation/ltl/recurrence.ltl:10
+GFa & G(a -> X !a),LTL,daisy2,0.078,G((!a | X!a) & F(a & X!a)),8,2,14,1.8,b653310e454e,TRUE,0.043,samples/validation/ltl/recurrence.ltl:11
+G(a -> X b) & GFa,LTL,partscc,0.078,G(Fa & (!a | Xb)),8,2,9,1.1,d3754fae5443,TRUE,0.040,samples/validation/ltl/recurrence.ltl:12
+GFa & GFb & G(a -> X !a),LTL,acc2+daisy2,0.106,G((!a | X!a) & F(a & X!a) & F((a & X(!a & b)) | (b & (!a | X!a)))),15,3,31,2.1,9a537536b5ad,TRUE,0.047,samples/validation/ltl/recurrence.ltl:13
+Ga,LTL,daisy,0.071,Ga,2,1,2,1.0,79182d6e45ae,TRUE,0.042,samples/validation/ltl/safety.ltl:4
+G(a | b),LTL,daisy,0.075,G(a | b),4,1,4,1.0,819653eda7ec,TRUE,0.045,samples/validation/ltl/safety.ltl:5
+G(a -> X b),LTL,partscc,0.080,G(!a | Xb),6,1,6,1.0,e6569e60c540,TRUE,0.043,samples/validation/ltl/safety.ltl:6
+a & X a,LTL,daisy,0.070,a & Xa,3,0,4,1.3,0ffaccaeafd1,TRUE,0.045,samples/validation/ltl/safety.ltl:7
+G(a -> X a),LTL,daisy,0.073,!a W Ga,4,2,5,1.2,78f701294965,TRUE,0.046,samples/validation/ltl/safety.ltl:8
+G(a & X a),LTL,daisy,0.074,Ga,2,1,2,1.0,79182d6e45ae,TRUE,0.045,samples/validation/ltl/safety.ltl:9
+G((!a & X a) | (a & X !a)),LTL,daisy+deep_roundtrip+partscc,0.083,G((a | Xa) & (!a | X!a)),8,1,12,1.5,7f20614661fa,TRUE,0.039,samples/validation/ltl/safety.ltl:10
+G(a <-> X b),LTL,daisy+partscc,0.091,(!a & X(!b & G((a | X!b) & (!a | Xb)))) | (a & X(b & G((a | X!b) & (!a | Xb)))),17,1,37,2.2,124a5fd74125,TRUE,0.044,samples/validation/ltl/safety.ltl:11
