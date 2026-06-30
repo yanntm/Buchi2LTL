@@ -14,9 +14,16 @@ as a machine-readable line on stdout (`NOT_LTL: p=… u=… v=… x=…`, kind-t
 `LTL: <formula>`), a standalone `aut2ltl/verifier/` package replays it against the
 input automaton (membership only — acceptance-agnostic), and the survey runs that
 verifier to fill the `validation` cell of every NOT_LTL row (same TRUE/FAIL/TIMEOUT
-vocabulary as LTL; a new `check_s` column times it). **Open:** witnesses that arrive
-incomplete through peeling replay as FAIL — the kinska `counting/2ap` cluster (9 rows)
-is the current target set; see `TODO.md` and `nonltl.md`.
+vocabulary as LTL; a new `check_s` column times it).
+
+A **peeler now lifts the witness back across its peel**: when a decomposer consumes a
+prefix before reaching the NOT_LTL core, it prepends the consumed word to the witness
+anchor `u` (`LTLResult.prefix` + `Witness.prepend`) and stamps its own technique on the
+verdict. `daisy` (one stem guard) and `daisystardet` (a reaching word through the SCC)
+are lifted; the kinska `counting/2ap` cluster — the former FAIL target — now validates
+TRUE. **Open:** the remaining peelers still need the same lift — `daisy2` is next,
+marked by the red-by-design fixture `samples/validation/hoa/prefix_nonltl_2.hoa`; see
+`TODO.md` and `nonltl.md`.
 
 ## How to work in it
 
