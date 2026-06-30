@@ -157,24 +157,34 @@ def context_simplify(f: "spot.formula", now_hook=None, bool_hook=None) -> "spot.
             for ki, k in enumerate(kids):
                 add_pos, add_neg = set(), set()
                 for oi, o in enumerate(kids):
-                    if oi == ki or _is_bool_node(o):
+                    if oi == ki:
                         continue
-                    # the sibling itself (true at And, false at Or):
-                    # bidirectional — support cycles are impossible by DAG
-                    # acyclicity (a node cannot be its own subterm).
-                    if o._is(spot.op_Not):
-                        (add_neg if is_and else add_pos).add(o[0])
+                    # Sequential conditional simplification: assume each
+                    # sibling in the form it ACTUALLY has in the conjunction at
+                    # this step — the FINALIZED form for already-processed
+                    # siblings (oi < ki), the ORIGINAL for the rest. This is the
+                    # only sound reading: a sibling rewritten to a constant then
+                    # contributes nothing, so two siblings can no longer discharge
+                    # each other. Reading the ORIGINAL form for all (the old
+                    # "single snapshot" relaxation) let the atom b reduce (a M b)
+                    # to true while (a M b)'s opening erased that same b — the
+                    # circular-support bug `a & b & (a M b) -> a` (and its U/W
+                    # dual `!a | !b | (!a W !b) -> !a`).
+                    cur = res_kids[oi] if oi < ki else o
+                    if _is_bool_node(cur) or cur.is_tt() or cur.is_ff():
+                        continue
+                    # the sibling itself (true at And, false at Or)
+                    if cur._is(spot.op_Not):
+                        (add_neg if is_and else add_pos).add(cur[0])
                     else:
-                        (add_pos if is_and else add_neg).add(o)
-                    # opened now-knowledge: ONE-WAY (earlier siblings only).
-                    # Two siblings can derive the same fact, so bidirectional
-                    # opening builds circular support: in a & b & (a M b) the
-                    # derived b erased the sibling b while the M consumed it
-                    # (fuzz witness !(b R (Gb & (b M Gb))) -> 0). One-way flow
-                    # is sound by sequential replacement: child i is rewritten
-                    # in the presence of the ORIGINAL siblings j < i.
+                        (add_pos if is_and else add_neg).add(cur)
+                    # opened now-knowledge, ONE-WAY (already-finalized earlier
+                    # siblings only): Gφ ⇒ φ@0, f R/M g ⇒ g@0 at And (dually,
+                    # ¬Fφ/¬(f U/W g) ⇒ ¬·@0 at Or). Taken from the finalized
+                    # form `cur`, so a consumed opener (now a constant) opens
+                    # nothing — what makes the one-way flow actually sound.
                     if oi < ki:
-                        for d in _now_facts(o, is_and):
+                        for d in _now_facts(cur, is_and):
                             if d._is(spot.op_Not):
                                 (add_neg if is_and else add_pos).add(d[0])
                             else:
