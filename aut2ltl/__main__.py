@@ -225,6 +225,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             msg += f"\n  ({res.diagnosis})"
         if res.witness is not None:
             msg += f"\n  {res.witness.summary()}"
+        # Provenance line, same `key : value` shape the OK report uses, so the survey
+        # parser records which (peeled) technique produced the verdict — empty on a
+        # bare top-gate rejection, a peeler's tag (e.g. daisy) when one lifted it up.
+        msg += f"\ntechnique : {res.technique_str()}"
         print(msg, file=sys.stderr)
         # The machine-readable witness goes to stdout, kind-tagged like the LTL
         # branch: `NOT_LTL: <witness>` (the answer slot, empty on a NOT_LTL verdict
