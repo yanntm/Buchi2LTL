@@ -31,6 +31,7 @@ import spot
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult, Status
+from aut2ltl.printer import format_language
 from .shape import init_scc_states, scc_data, is_deterministic, reroot
 
 if TYPE_CHECKING:
@@ -132,7 +133,11 @@ class DaisystarDet:
         dsts: List[int] = [dst for p in C for _, dst in exits[p]]
         phi: Dict[int, "spot.formula"] = {}
         for dst in dict.fromkeys(dsts):
-            child = self._child(Language.of(reroot(aut, dst)))
+            sub = Language.of(reroot(aut, dst))
+            if _TRACE:
+                print(f"[daisystardet] delegating exit {dst} as language: "
+                      + format_language(sub, sub.tgba()), file=sys.stderr)
+            child = self._child(sub)
             res.credit(child)
             if res.nok:
                 return res

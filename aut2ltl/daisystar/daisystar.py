@@ -27,6 +27,7 @@ import spot
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult, Status
+from aut2ltl.printer import format_language
 from .shape import Spoke, Stem, star_partition, reroot
 
 if TYPE_CHECKING:
@@ -157,7 +158,11 @@ class Daisystar:
         dsts += [dst for sp in spokes for _, dst in sp.stems]
         child_of: Dict[int, "spot.formula"] = {}
         for dst in dict.fromkeys(dsts):                 # unique, order-preserving
-            child = self._child(Language.of(reroot(aut, dst)))
+            sub = Language.of(reroot(aut, dst))
+            if _TRACE:
+                print(f"[daisystar] delegating exit {dst} as language: "
+                      + format_language(sub, sub.tgba()), file=sys.stderr)
+            child = self._child(sub)
             res.credit(child)
             if res.nok:
                 return res

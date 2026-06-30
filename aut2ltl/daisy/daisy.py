@@ -86,7 +86,11 @@ class Daisy:
         # Delegate each stem to Λ; credit it in, bail on NOK (propagating reason).
         children: List["spot.formula"] = []
         for _, dst in stems:
-            child = self._child(Language.of(reroot(aut, dst)))
+            sub = Language.of(reroot(aut, dst))
+            if _TRACE:
+                print(f"[daisy] delegating exit {dst} as language: "
+                      + format_language(sub, sub.tgba()), file=sys.stderr)
+            child = self._child(sub)
             res.credit(child)
             if res.nok:
                 return _out(res)
