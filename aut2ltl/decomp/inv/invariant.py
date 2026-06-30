@@ -12,6 +12,8 @@ boundary around the same `child` call, so `child` always receives a self-consist
 language no matter what it does with it.
 """
 
+import os
+import sys
 from typing import TYPE_CHECKING
 
 import spot
@@ -19,6 +21,7 @@ import buddy
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult
+from aut2ltl.printer import format_language, format_result
 from .strip import sigma, strip
 
 if TYPE_CHECKING:
@@ -26,6 +29,17 @@ if TYPE_CHECKING:
 
 _NAME = "inv"
 _F = spot.formula
+
+# On when INV_TRACE or the global TRANSLATOR_TRACE_ON is set (presence). Built only
+# inside `if _TRACE:`.
+_TRACE = "INV_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
+
+
+def _out(res: "LTLResult") -> "LTLResult":
+    """Trace the outgoing result (status / size), pass it through unchanged."""
+    if _TRACE:
+        print("[inv] out " + format_result(res), file=sys.stderr)
+    return res
 
 
 class Invariant:
@@ -41,11 +55,15 @@ class Invariant:
 
     def __call__(self, lang: "Language") -> "LTLResult":
         aut = lang.tgba()
+        if _TRACE:
+            print("[inv] in " + format_language(lang, aut), file=sys.stderr)
         sig = sigma(aut)
 
         # Vacuous (Σ ≡ true): G(true) carries nothing — pass the child's result
         # through unchanged, with no inv credit (inv did not act).
         if sig == buddy.bddtrue:
+            if _TRACE:
+                print("[inv] Σ vacuous (true) -> pass through", file=sys.stderr)
             return self._child(lang)
 
         # No-op strip: if restricting every guard under Σ leaves the automaton
@@ -58,6 +76,8 @@ class Invariant:
         # `is` is then always False, so we keep the sound-but-redundant G.)
         stripped = Language.of(strip(aut, sig))
         if stripped is Language.of(aut):
+            if _TRACE:
+                print("[inv] no-op strip -> pass through", file=sys.stderr)
             return self._child(lang)
 
         # Build/accumulate idiom (see result.py): seed an OK accumulator crediting
@@ -65,12 +85,16 @@ class Invariant:
         # all of its fields (technique, diagnosis, and any future step-trace /
         # profiling info) flow through the contract instead of being hand-copied.
         res = LTLResult.start(_NAME)
+        if _TRACE:
+            sig_f = spot.bdd_to_formula(sig, aut.get_dict())
+            print(f"[inv] factor G(Σ), Σ={sig_f}; delegating stripped language: "
+                  + format_language(stripped, stripped.tgba()), file=sys.stderr)
         child = self._child(stripped)
         res.credit(child)
         if res.nok:
-            return res                         # child declined / verdict: carried out
+            return _out(res)                   # child declined / verdict: carried out
 
         # OK: re-assert the invariant on the child's formula (no re-instantiation).
         sig_f = spot.bdd_to_formula(sig, aut.get_dict())
         res.formula = _F.And([child.formula, _F.G(sig_f)])
-        return res
+        return _out(res)
