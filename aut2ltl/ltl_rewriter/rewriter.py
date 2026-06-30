@@ -38,7 +38,15 @@ class Rewriter(Protocol):
     def __call__(self, res: "LTLResult") -> "LTLResult": ...
 
 
-def identity(res: "LTLResult") -> "LTLResult":
-    """The unit Rewriter: return the result unchanged. Faithful, never declines —
-    the never-regress floor for `best_of(identity, R)`."""
-    return res
+class Identity:
+    """The unit Rewriter: returns its input result unchanged. Faithful, never
+    declines. A named functor."""
+
+    name = "identity"
+
+    def __call__(self, res: "LTLResult") -> "LTLResult":
+        return res
+
+
+#: The singleton unit Rewriter.
+identity: "Rewriter" = Identity()
