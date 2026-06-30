@@ -36,18 +36,24 @@ _NAME = "deep_roundtrip"
 _TRACE = "DEEP_ROUNDTRIP_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
 
 
-def deep_roundtrip(rewrite: "Rewriter", *, name: str = _NAME) -> "Rewriter":
-    """Build a Rewriter re-presenting the whole DAG bottom-up with `rewrite`, memoized
-    on node identity (one re-presentation per distinct node). The memo is one per-call
-    `dict` keyed on the `spot.formula` itself — correctness is free from the single
-    hash-consed DAG (equal structure ⇒ same object ⇒ one key). An all-no-op pass returns
-    the input verbatim, uncredited (the ltl_rewriter attribution rule)."""
-    def run(res: LTLResult) -> LTLResult:
+class DeepRoundtrip:
+    """A Rewriter re-presenting the whole formula DAG bottom-up with a child Rewriter,
+    memoized on node identity (one re-presentation per distinct node). The memo is a
+    per-call dict keyed on the `spot.formula` itself (equal structure ⇒ same object ⇒
+    one key). An all-no-op pass returns the input verbatim, uncredited. A named
+    functor."""
+
+    def __init__(self, rewrite: "Rewriter", name: str = _NAME) -> None:
+        self._rewrite = rewrite
+        self.name = name
+
+    def __call__(self, res: LTLResult) -> LTLResult:
+        rewrite = self._rewrite
         formula = res.formula
         if _TRACE:
             print("[deep_roundtrip] in " + format_result(res), file=sys.stderr)
         memo: Dict["spot.formula", "spot.formula"] = {}
-        out = LTLResult.start(name)
+        out = LTLResult.start(self.name)
         out.credit(res)
 
         def go(n: "spot.formula") -> "spot.formula":
@@ -78,4 +84,8 @@ def deep_roundtrip(rewrite: "Rewriter", *, name: str = _NAME) -> "Rewriter":
         if _TRACE:
             print("[deep_roundtrip] out " + format_result(out), file=sys.stderr)
         return out
-    return run
+
+
+def deep_roundtrip(rewrite: "Rewriter", *, name: str = _NAME) -> "Rewriter":
+    """The `DeepRoundtrip` functor over `rewrite`."""
+    return DeepRoundtrip(rewrite, name)
