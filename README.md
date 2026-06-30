@@ -138,6 +138,22 @@ period 3 as claimed. This is a **membership** check (a lasso-intersection per sa
 it is acceptance-agnostic): it corroborates the witness against the language rather than
 proving non-definability from the algebra alone.
 
+The prefix `u` need not be empty. Here the family opens with a two-letter prefix
+`u = c; c` before the period-2 counting, and the verifier checks it the same way:
+
+```console
+$ python3 -m aut2ltl samples/validation/hoa/prefix_nonltl_1.hoa
+…
+NOT_LTL: p=2 u=[c; c] v=[a & !b] x=[cycle{!a & b}]
+
+$ python3 -m aut2ltl.verifier samples/validation/hoa/prefix_nonltl_1.hoa \
+      "NOT_LTL: p=2 u=[c; c] v=[a & !b] x=[cycle{!a & b}]"
+VERIFY: ok pattern=10101
+```
+
+`10101` is membership of `u·vⁿ·x` for `n = 0…4` — in `L` at even `n`, period 2 — once
+the `c; c` prefix is read.
+
 `aut2ltl` is also run over an exhaustive census of small ω-automata of a fixed
 shape, as a broad coverage and correctness check. The committed results are in
 [`genaut/logs/`](genaut/logs/).
