@@ -220,12 +220,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         # decline: the language is not LTL-definable, so no formula exists. The
         # diagnosis states whether this is a proof or a strong hint. Distinct exit
         # code (3) so callers can tell it from DECLINED (1).
-        msg = "aut2ltl: NOT_LTL — the language is not LTL-definable"
+        msg = "aut2ltl: NOT_LTL -- the language is not LTL-definable"
         if res.diagnosis:
             msg += f"\n  ({res.diagnosis})"
         if res.witness is not None:
             msg += f"\n  {res.witness.summary()}"
         print(msg, file=sys.stderr)
+        # The machine-readable witness goes to stdout, kind-tagged like the LTL
+        # branch: `NOT_LTL: <witness>` (the answer slot, empty on a NOT_LTL verdict
+        # otherwise) so a downstream verifier can replay it; the prose report stays
+        # on stderr. No witness -> stdout stays empty.
+        if res.witness is not None:
+            print(f"NOT_LTL: {res.witness.serialize()}")
         return 3
 
     if not res.ok:
@@ -237,7 +243,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     limit = options.get(FLATTEN_TREE_LIMIT)
     text = to_dot(res.formula) if args.dag else format_gated(res.formula, limit)
-    print(text)
+    # stdout carries the kind-tagged result, homogeneous with the NOT_LTL branch:
+    # `LTL: <formula>`. The graphviz DAG export and the `-o` file artifact stay
+    # bare (a tag would corrupt the dot / the saved formula).
+    print(text if args.dag else f"LTL: {text}")
 
     if args.output:
         Path(args.output).write_text(text + "\n", encoding="utf-8")
