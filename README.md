@@ -43,7 +43,7 @@ temporals : 1
 tree nodes: 6
 sharing   : 1.0x
 build time: 0.002s
-F(b & X!a)
+LTL: F(b & X!a)
 ```
 
 `F(b & X!a)` is far smaller than the formula we started from — and no LTL
@@ -70,15 +70,17 @@ temporals : 4
 tree nodes: 7
 sharing   : 1.0x
 build time: 0.002s
-G(Fa & FGb)
+LTL: G(Fa & FGb)
 ```
 
-The **formula** is printed on stdout; the **report** above it (the methods used, the
-formula's size, build time) goes to stderr. In a pipeline you therefore receive only
-the formula:
+The **result** is printed on stdout, **tagged by kind** — `LTL: <formula>` when a
+defining formula exists, `NOT_LTL: <witness>` when the language is not LTL-definable
+(with exit code `3`); the **report** above it (the methods used, the formula's size,
+build time) goes to stderr and is silenced by `-q`:
 
-```bash
-python3 -m aut2ltl samples/fixtures/hoa/various/collapse_example.hoa -q | ltlfilt --simplify
+```console
+$ python3 -m aut2ltl samples/fixtures/hoa/various/collapse_example.hoa -q
+LTL: F(b & X!a)
 ```
 
 #### No LTL formula — a witness
@@ -93,16 +95,48 @@ witness** of why. Take the mod-3 counter `L = a^{3k}·(!a)^ω`
 
 ```console
 $ python3 -m aut2ltl samples/fixtures/hoa/various/mod3_a.hoa
-aut2ltl: NOT_LTL — the language is not LTL-definable
+aut2ltl: NOT_LTL -- the language is not LTL-definable
   (the deterministic transition monoid is non-aperiodic (carries a non-trivial
    group), so the language is not star-free / counter-free and no LTL formula exists)
-  witness: counting family, period p=3 — u·vⁿ·x flips membership with n mod 3
-    u = ε ;  v = a ; a ;  x = (!a)ω
+  witness: counting family, period p=3 -- u.v^n.x flips membership with n mod 3
+    u = [] ;  v = a ; a ;  x = (!a)^w
+NOT_LTL: p=3 u=[] v=[a; a] x=[cycle{!a}]
 ```
 
 The witness is a **counting family**: `u·vⁿ·x = a^{2n}·(!a)^ω` is in `L` exactly when
 `n ≡ 0 (mod 3)`, so its membership toggles with period 3 — the modular counting no
 counter-free LTL formula can express, checkable against the automaton by hand.
+
+#### The non-LTL witness format
+
+The prose explanation and a human rendering of the family go to **stderr**; **stdout**
+carries one compact, machine-readable line (and the verdict sets a distinct **exit code
+3**, vs. `0` for an LTL formula):
+
+```
+NOT_LTL: p=3 u=[] v=[a; a] x=[cycle{!a}]
+```
+
+- `p` — the period (`> 1`): membership of `u·vⁿ·x` toggles with `n mod p`.
+- `u`, `v` — finite words in Spot word syntax (a `;`-separated letter list; `[]` is
+  the empty word).
+- `x` — the ultimately-periodic tail as a Spot lasso `[prefix; cycle{...}]` (here the
+  bare cycle `(!a)ω`).
+
+That line is everything a checker needs. The bundled **verifier** replays it against the
+input automaton — sampling membership of `u·vⁿ·x` and confirming it toggles with period
+`p`:
+
+```console
+$ python3 -m aut2ltl.verifier samples/fixtures/hoa/various/mod3_a.hoa \
+      "NOT_LTL: p=3 u=[] v=[a; a] x=[cycle{!a}]"
+VERIFY: ok pattern=1001001
+```
+
+`1001001` is the membership of `u·vⁿ·x` for `n = 0…6` — in `L` exactly at `n ∈ {0, 3, 6}`,
+period 3 as claimed. This is a **membership** check (a lasso-intersection per sample, so
+it is acceptance-agnostic): it corroborates the witness against the language rather than
+proving non-definability from the algebra alone.
 
 `aut2ltl` is also run over an exhaustive census of small ω-automata of a fixed
 shape, as a broad coverage and correctness check. The committed results are in
