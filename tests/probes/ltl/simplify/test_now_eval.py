@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-bls/simplify/testing/test_now_eval.py
+tests/probes/ltl/simplify/test_now_eval.py
 
 Validation for Rule 2 (now-evaluation) via the combined `simplify`
 pipeline (context pass + now hook). Same harness contract as
@@ -9,7 +9,7 @@ Spot-verified language equivalence; expected shapes checked when given;
 MUST-NOT-CHANGE cases assert boundary safety.
 
 Run from project root:
-    python3 bls/simplify/testing/test_now_eval.py
+    python3 tests/probes/ltl/simplify/test_now_eval.py
 """
 
 import sys
@@ -32,6 +32,12 @@ CASES = [
     ("b & (b R c)", "b & c", "R left arm true -> right arm"),
     ("a & (c R !a)", "0", "R right arm refuted now"),
     ("a & b & (a M b)", "a & b", "M satisfied now"),
+    # circular-support guards: the opener (R/M at And, U/W at Or) must not
+    # discharge a sibling it was itself reduced by — all four once gave the
+    # unsound drop (a & b & (a M b) -> a ; !a | !b | (!a W !b) -> !a)
+    ("a & b & (a R b)", "a & b", "R opener not self-discharging"),
+    ("!a | !b | (!a W !b)", "!a | !b", "W dual opener not self-discharging"),
+    ("!a | !b | (!a U !b)", "!a | !b", "U dual opener not self-discharging"),
     # BDD-backed propositional entailment (beyond identity)
     ("(a & b) & G(!a | !b)", "0", "G body refuted via BDD"),
     ("a & b & F(a | c)", "a & b", "F body entailed via BDD"),
