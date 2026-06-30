@@ -47,6 +47,12 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
 - **Retire the transitional shim** `aut2ltl/contract.py` once importers repoint.
 - **`fuse2` is unwired** (`heur/fuse2`). Decision: leave it out; let fuzzing measure
   whether its absence costs `best` before deciding to wire it.
+- **Improve `bls/operators/` tracing: only compute a trace string when it will be
+  printed.** The `_trace(f"… {_short_f(…)} …")` call sites (solid/reach/fin/wsolid/
+  dashed, via `support.py`) build the message — flattening formulas — *before* the
+  `_TRACE` guard runs, so the cost is paid even when tracing is off. Convert them to
+  inlined `if _TRACE:` guards (and honor the global `TRANSLATOR_TRACE_ON` knob), as
+  done for the daisy* translators.
 
 ## Open
 
