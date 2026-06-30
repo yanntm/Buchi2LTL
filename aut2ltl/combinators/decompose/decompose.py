@@ -12,6 +12,8 @@ Each decomposer is then a one-liner over its own `split`. (`inv` is the clean
 """
 from __future__ import annotations
 
+import os
+import sys
 from typing import Callable, List, TYPE_CHECKING
 
 import spot
@@ -19,10 +21,17 @@ import spot
 from aut2ltl.language import Language
 from aut2ltl.combinators.recurse import recurse
 from aut2ltl.result import LTLResult, fuse
+from aut2ltl.printer import format_language, format_result
 from aut2ltl.ltl.builders import own_simplify
 
 if TYPE_CHECKING:
     from aut2ltl.translator import Translator, Decorator
+
+# On when either DECOMP_TRACE or the global TRANSLATOR_TRACE_ON is set (presence;
+# value ignored). Built only inside `if _TRACE:`, so nothing is computed when off.
+# Makes the split and the per-operand dispatch (input language, each operand, its
+# result) visible — one flag for all three decomposers (they share this combinator).
+_TRACE = "DECOMP_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
 
 # Fold a list of formulas into one (e.g. `spot.formula.Or` / `spot.formula.And`).
 Connective = Callable[[List["spot.formula"]], "spot.formula"]
@@ -55,8 +64,28 @@ def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator"
             def run(lang: "Language") -> "LTLResult":
                 pieces = split(lang)
                 if not pieces:
+                    if _TRACE:
+                        print(f"[{tag}] in {format_language(lang, lang.tgba())}"
+                              " -> no split, delegate to leaf", file=sys.stderr)
                     return leaf(lang)
-                return combine(connective, tag, [self(Language.of(p)) for p in pieces])
+                if _TRACE:
+                    print(f"[{tag}] in {format_language(lang, lang.tgba())}"
+                          f" -> split into {len(pieces)} operands", file=sys.stderr)
+                parts: List["LTLResult"] = []
+                for k, p in enumerate(pieces):
+                    sub = Language.of(p)
+                    if _TRACE:
+                        print(f"[{tag}]   operand {k + 1}/{len(pieces)} "
+                              + format_language(sub, sub.tgba()), file=sys.stderr)
+                    r = self(sub)
+                    if _TRACE:
+                        print(f"[{tag}]   operand {k + 1}/{len(pieces)} -> "
+                              + format_result(r), file=sys.stderr)
+                    parts.append(r)
+                res = combine(connective, tag, parts)
+                if _TRACE:
+                    print(f"[{tag}] out " + format_result(res), file=sys.stderr)
+                return res
             return run
         return recurse(step)
     return builder
