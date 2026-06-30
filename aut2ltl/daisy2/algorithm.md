@@ -148,6 +148,16 @@ along the same `move_s` blocks (no detour may be left mid-excursion — the stro
 `U` inside `move_s` already forces each started excursion to complete before the
 next choice).
 
+### Non-LTL stem children (the witness lift)
+
+A stem child `φ_j = Λ(of(A↓dst_j))` may come back `NotLTL(w)`: the residue past the
+stem is not LTL-definable, witnessed by a counting family `w = (u, v, x, p)` anchored at
+`dst_j`. Then the language is not LTL either, and daisy2 propagates the verdict (a
+non-LTL stem poisons the peel — absorbing, taken before a decline), lifting `w` back to
+the hub. A stem fires from `h = q0` itself (stems are hub exits, `EX(h)`), so the lift
+prepends a single letter — the stem guard `g_j` — to the anchor: `w[u ↦ g_j·u]`. `v`,
+`x`, `p` are unchanged.
+
 ### `STAY∞` (stay in C forever, revisiting h, accepting)
 
 ```
