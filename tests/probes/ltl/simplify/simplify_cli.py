@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-bls/simplify/testing/simplify_cli.py
+tests/probes/ltl/simplify/simplify_cli.py
 
 One-formula CLI: show what each stage produces for an argv formula —
-the bls/simplify package alone (rules 1+2+3), and the full in-pipeline
+the ltl/simplify package alone (rules 1+2+3), and the full in-pipeline
 node simplification (`kr.ltl_builders._simp_f` = Spot pass + own rules +
 bounded Spot closing pass), with an equivalence verdict.
 
 Run from project root:
-    python3 bls/simplify/testing/simplify_cli.py "<formula>"
+    python3 -m tests.probes.ltl.simplify.simplify_cli "<formula>"
 """
 
 import sys
