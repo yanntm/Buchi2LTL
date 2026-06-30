@@ -56,6 +56,19 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
 
 ## Open
 
+- **Condition the hard NOT_LTL verdict on an actually-completed witness (soundness).**
+  `bls/definability/gate.py` currently emits an absorbing, "proof"-labelled `NOT_LTL`
+  keyed on `label_ltl_definable` (aperiodicity + SAT-min) alone; the witness is
+  decorative (`gate.py:85`). But in the ω-setting `TM`-aperiodic ⟹ LTL is the only sound
+  direction — a group in `TM` may be a determinisation artefact, so `not-aperiodic` is a
+  *hint*, not a proof. The proof is a **completed** `(u,v,x)` family (minimality-
+  independent). Fix: only the completed witness yields an absorbing `NOT_LTL`; no `x`
+  found ⇒ abstain (non-absorbing decline, never build), not reject. Caveat to resolve
+  first: `_distinguish` only compares adjacent phases (`witness.py:123`), so it is sound
+  but not complete — widen to all phase pairs before flipping behaviour, and find a
+  spurious-group example to use as the regression fixture. Full context + pointers:
+  root `nonltl.md`. (Docs already corrected: `tester/algorithm.md` Soundness/
+  Conclusiveness, `witness/algorithm.md` Scope.)
 - **Output size at scale (the live research front).** The construction is cheap; the
   flat form explodes and Spot hits its 32-acceptance-set wall. Representation/
   verification, not fidelity. Analysis: `docs/dag_folding.md`.
