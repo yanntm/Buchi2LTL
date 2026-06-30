@@ -16,12 +16,15 @@ child. It does not recurse and owns no global concern (termination, well-founded
 of the child) — those belong to the assembly that wires the child. See algorithm.md.
 """
 
+import os
+import sys
 from typing import List, TYPE_CHECKING
 
 import spot
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult, Status
+from aut2ltl.printer import format_language, format_result
 from .shape import is_daisy, reroot, split
 
 if TYPE_CHECKING:
@@ -29,6 +32,18 @@ if TYPE_CHECKING:
 
 _NAME = "daisy"
 _F = spot.formula
+
+# Trace gated by DAISY_TRACE or presence of the global TRANSLATOR_TRACE_ON; every
+# message is built inside `if _TRACE:`, so nothing is computed when off.
+_TRACE = (os.getenv("DAISY_TRACE", "0").lower() in ("1", "true", "yes", "on")
+          or "TRANSLATOR_TRACE_ON" in os.environ)
+
+
+def _out(res: "LTLResult") -> "LTLResult":
+    """Trace the outgoing result (status / size), pass it through unchanged."""
+    if _TRACE:
+        print("[daisy] out " + format_result(res), file=sys.stderr)
+    return res
 
 
 def _or(fs: List["spot.formula"]) -> "spot.formula":
@@ -56,12 +71,14 @@ class Daisy:
 
     def __call__(self, lang: "Language") -> "LTLResult":
         aut = lang.tgba()
+        if _TRACE:
+            print("[daisy] in " + format_language(lang, aut), file=sys.stderr)
         q = aut.get_init_state_number()
         res = LTLResult.start(_NAME)                   # start OK, credit ourselves
 
         # Accept iff q is a daisy (only self-loops come back to it).
         if not is_daisy(aut, q):
-            return res.fail(Status.DECLINED, "initial state is not a daisy")
+            return _out(res.fail(Status.DECLINED, "initial state is not a daisy"))
 
         m = aut.acc().num_sets()
         petals, stems = split(aut, q)
@@ -72,7 +89,7 @@ class Daisy:
             child = self._child(Language.of(reroot(aut, dst)))
             res.credit(child)
             if res.nok:
-                return res
+                return _out(res)
             children.append(child.formula)
 
         sigma = _or([g for g, _ in petals])
@@ -86,4 +103,4 @@ class Daisy:
         leave = _F.U(sigma, eps)
 
         res.formula = _F.Or([stay, leave])             # finish: fill the formula
-        return res
+        return _out(res)
