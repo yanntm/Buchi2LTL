@@ -83,15 +83,18 @@ class Daisy:
         m = aut.acc().num_sets()
         petals, stems = split(aut, q)
 
-        # Delegate each stem to Λ; credit it in, bail on NOK (propagating reason).
+        # Delegate each stem to Λ; fold it in, bail on NOK (propagating reason).
+        # A NotLTL child certifies the residue past the stem non-LTL, hence L too (the
+        # residue is the left quotient g⁻¹L); `prefix` lifts its witness back up the
+        # stem by the guard g — `w[u ↦ g·u]` — and credits daisy (algorithm.md).
         children: List["spot.formula"] = []
-        for _, dst in stems:
+        for g, dst in stems:
             sub = Language.of(reroot(aut, dst))
             if _TRACE:
                 print(f"[daisy] delegating exit {dst} as language: "
                       + format_language(sub, sub.tgba()), file=sys.stderr)
             child = self._child(sub)
-            res.credit(child)
+            res.prefix(child, str(g), _NAME)
             if res.nok:
                 return _out(res)
             children.append(child.formula)
