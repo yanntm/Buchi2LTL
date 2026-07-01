@@ -33,18 +33,33 @@ deciding which sites point at the same `Memo`.
 
 ## How it keys, and why it releases
 
-`Language` has no `__eq__` / `__hash__` override (it keys by identity) and is
-**interned** (same source -> same object), so identity is the cache key — no
-separate signature.
+The cache is keyed on `(operation, Language)`. `Language` has no `__eq__` /
+`__hash__` override (it keys by identity) and is **interned** (same source ->
+same object), so identity is the operand key — no separate signature. The
+operation key is `id(child)`, a constant-time value that is stable for the
+wrapper's lifetime (children are built once and outlive every translation, so the
+id is never reused underneath us).
+
+That operation dimension is what lets **one** cache hold **many** operations
+without collision. Pass a shared `store` (from `Memo.new_store()`) to several
+`Memo`s and they become a single BDD-style compute table `(op, operand) -> result`
+— a language resolved by one operation never shadows another, so e.g. a memoized
+simplifier and a memoized decomposer coexist under `(L, simplify)` and
+`(L, decompose)`. Omit `store` and each `Memo` gets its own, keyed on its single
+op — which degenerates to a plain per-`Language` cache (the shared
+`m = Memo(child)` feeding `best_of([m, Roundtrip(m)])` above). Without the op key,
+sharing one store across stages would make the first stage to resolve a language
+an undisplaceable "king" that answers for every other stage.
 
 The memo follows the house `.get` / insert-on-miss shape (`bls` `reach_memo` /
 `helper_memo`, `ltl.builders._simp_memo`, `simplify._node_memo`), with one
 difference forced by lifetime: those are *per-build* memos that die with their
 holder, naturally bounded. A `Memo` instance is **long-lived** — it outlives a
 single translation, across many inputs — so a plain dict would grow without
-bound. The cache is therefore a `weakref.WeakKeyDictionary`: an entry is released
-exactly when its `Language` is, and it never pins one alive against the intern
-LRU in `language.py`.
+bound. The store is therefore a two-level `weakref.WeakKeyDictionary[Language,
+{op-id: result}]`: the outer weak key releases a `Language`'s whole bucket (all
+its operations) exactly when that `Language` is collected, and it never pins one
+alive against the intern LRU in `language.py`.
 
 ## Soundness
 
