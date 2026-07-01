@@ -23,7 +23,7 @@ from aut2ltl.combinators.recurse import recurse
 from aut2ltl.result import LTLResult, fuse
 from aut2ltl.printer import format_language, format_result
 from aut2ltl.ltl.builders import own_simplify
-from aut2ltl.verifier import revalidated
+from aut2ltl.verifier import revalidated_by_parts
 
 if TYPE_CHECKING:
     from aut2ltl.translator import Translator, Decorator
@@ -60,6 +60,10 @@ def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator"
     the knot (each piece is labelled the same way); termination rests on `split` handing
     back strictly-smaller pieces. Sound by construction (every part is faithful-or-NOK).
     Adds `<tag><k>` to the technique and forwards the parts' techniques (via `combine`)."""
+    # The empty fold identifies the connective (`And([]) = tt`, `Or([]) = ff`) —
+    # which is also how the parts-replay combines memberships (∧ → all, ∨ → any).
+    conjunctive = bool(connective([]).is_tt())
+
     def builder(leaf: "Translator") -> "Translator":
         def step(self: "Translator") -> "Translator":
             def run(lang: "Language") -> "LTLResult":
@@ -72,9 +76,11 @@ def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator"
                 if _TRACE:
                     print(f"[{tag}] in {format_language(lang, lang.tgba())}"
                           f" -> split into {len(pieces)} operands", file=sys.stderr)
+                subs: List["Language"] = []
                 parts: List["LTLResult"] = []
                 for k, p in enumerate(pieces):
                     sub = Language.of(p)
+                    subs.append(sub)
                     if _TRACE:
                         print(f"[{tag}]   operand {k + 1}/{len(pieces)} "
                               + format_language(sub, sub.tgba()), file=sys.stderr)
@@ -85,9 +91,12 @@ def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator"
                     parts.append(r)
                 # A part's NOT_LTL is a verdict about the PART's language, and
                 # non-LTL-ness survives neither connective: keep it only if its
-                # family replays against THIS level's language, else degrade to a
-                # non-absorbing decline (see algorithm.md, The NOT_LTL crossing).
-                res = revalidated(combine(connective, tag, parts), lang)
+                # family replays against THIS level's language — queried through
+                # the parts, whose connective the host's membership IS (the split
+                # is faithful) — else degrade to a non-absorbing decline (see
+                # algorithm.md, The NOT_LTL crossing).
+                res = revalidated_by_parts(combine(connective, tag, parts),
+                                           subs, conjunctive)
                 if _TRACE:
                     print(f"[{tag}] out " + format_result(res), file=sys.stderr)
                 return res
