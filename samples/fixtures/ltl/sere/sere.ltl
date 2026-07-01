@@ -1,0 +1,32 @@
+# SERE/PSL fixtures — SERE (the regular-expression sublanguage of PSL) mixed
+# with LTL operators, fed in as formulas and reconstructed back to LTL.
+# One formula per line; `#` section comments. The hoa/ side is generated later
+# by ltl2tgba over this list (see ../../README.md).
+
+# bounded SERE
+{a;b;c}
+{a;b;c}[]->Xc
+{a[+]}|->b
+
+# SERE under an LTL temporal context
+F({a;a}|->b)
+{a[*];b}|->Fc
+
+# SERE fusion / boolean operators meeting LTL
+{a:b:c}|->d
+{a;b}|->(c U d)
+
+# GF/FG over short SEREs — recurrence/persistence of a small pattern
+GF{a;b}
+GF{a;a}
+FG{a;b}
+GF{a[*];b}
+G({a;a}|->Fb)
+
+# modular counting — not LTL-definable
+{(a;a)[*]}|->b
+{(a;a;a)[*]}|->b
+
+# a single dense recurrent SCC — the G closes the pattern into one monolithic SCC
+G({a;b;c}|->Xd)
+G(c -> {a;b}|->Xd)

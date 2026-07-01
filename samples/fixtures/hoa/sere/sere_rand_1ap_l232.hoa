@@ -1,0 +1,35 @@
+HOA: v1
+States: 10
+Start: 8
+AP: 1 "a"
+acc-name: all
+Acceptance: 0 t
+properties: trans-labels explicit-labels state-acc deterministic
+properties: terminal very-weak
+--BODY--
+State: 0
+[0] 9
+State: 1
+[!0] 0
+[0] 9
+State: 2
+[!0] 1
+[0] 9
+State: 3
+[!0] 2
+[0] 9
+State: 4
+[!0] 3
+[0] 9
+State: 5
+[!0] 4
+[0] 9
+State: 6
+[t] 5
+State: 7
+[t] 6
+State: 8
+[t] 7
+State: 9
+[t] 9
+--END--
