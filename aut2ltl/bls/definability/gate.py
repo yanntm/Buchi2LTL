@@ -23,6 +23,12 @@ The gate has THREE outcomes, not two (see README.md; the algebra is one-sided �
     cascade stays fenced), but every other translator — each sound by construction —
     remains free to answer. A wrong absorbing rejection is thereby impossible.
 
+The oracle failing to run at all (`definable=None`: extraction/GAP failure) takes
+the same fence — a non-absorbing decline, `inner` never called — with its own
+reason and no `PROBABLY_NOT_LTL` marker, since no group was read and no suspicion
+exists. One behavior for everything the gate cannot certify: soundness holds by
+construction, not by trusting that the cascade shares the oracle's failure mode.
+
 With the witness knob off (`kr.produce_witness=0`) nothing can certify, so a group
 reading always takes the decline branch: disabling witnesses disables absorbing
 rejections, never soundness.
@@ -155,6 +161,15 @@ def definability_gate(
         )
         if definable:
             return inner(lang)
+        if definable is None:
+            # The oracle could not run: nothing was read in either direction, so
+            # the gate cannot vouch for the cascade — same fence as an uncertified
+            # suspicion, but no suspicion is asserted (no group was read).
+            return LTLResult.decline(
+                "the definability oracle could not run (extraction or GAP "
+                "failure), so definability is uncertified and the cascade is "
+                "fenced; other translators may still answer", "gate",
+            )
         witness, certified, reason = _certified_witness(
             lang, gap_cmd=gap_cmd, timeout=timeout, max_aps=max_aps
         )
