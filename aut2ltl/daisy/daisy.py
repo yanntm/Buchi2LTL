@@ -23,6 +23,7 @@ from typing import List, TYPE_CHECKING
 import spot
 
 from aut2ltl.language import Language
+from aut2ltl.verifier import revalidated
 from aut2ltl.result import LTLResult, Status
 from aut2ltl.printer import format_language, format_result
 from .shape import is_daisy, reroot, split
@@ -96,7 +97,10 @@ class Daisy:
             child = self._child(sub)
             res.prefix(child, str(g), _NAME)
             if res.nok:
-                return _out(res)
+                # A lifted NOT_LTL is kept only if its family replays against THIS
+                # language (the quotient lift needs exactness the guard may lack);
+                # else it degrades to a decline (witness/algorithm.md, Lifting).
+                return _out(revalidated(res, lang))
             children.append(child.formula)
 
         sigma = _or([g for g, _ in petals])
