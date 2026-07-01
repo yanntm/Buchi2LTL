@@ -1,6 +1,6 @@
-CSV: genaut/logs/rerun/1state3ap0acc/survey_20260625_161110.csv
+CSV: genaut/logs/rerun/1state3ap0acc/survey_20260701_210511.csv
 survey: 52 inputs  (--use default)
 aut2ltl: 52 LTL, 0 not-LTL  |  declined 0, timeout 0, crash 0
-validation of 52 LTL: 52 TRUE, 0 FAIL, 0 not checked (size/timeout/error)
-totals: DAG=505 temporals=50 build=3.802s
+validation: 52 TRUE, 0 FAIL, 0 not checked (size/timeout/error)
+totals: DAG=505 temporals=50 build=4.060s
 SUCCESS

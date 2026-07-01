@@ -1,31 +1,31 @@
-input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,source
-2state1ap0acc_000.hoa,LTL,daisy,0.066,0,1,0,1,1.0,256b0f7a8d39,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_000.hoa
-2state1ap0acc_017.hoa,LTL,daisy,0.071,G!a,3,1,3,1.0,6d2bdb385b7a,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_017.hoa
-2state1ap0acc_018.hoa,LTL,daisy,0.068,!a & XGa,5,1,6,1.2,65541f1a02fa,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_018.hoa
-2state1ap0acc_019.hoa,LTL,daisy,0.068,!a,2,0,2,1.0,dffef08b04a5,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_019.hoa
-2state1ap0acc_022.hoa,NOT_LTL,,1.109,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_022.hoa
-2state1ap0acc_024.hoa,LTL,partscc,0.076,!a & G((!a | X!a) & (a | Xa)),9,1,15,1.7,307ad4ea6833,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_024.hoa
-2state1ap0acc_025.hoa,LTL,partscc,0.073,!a & G(!a | X!a),6,1,10,1.7,c502b80fd986,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_025.hoa
-2state1ap0acc_026.hoa,LTL,buchi+daisy+daisy2+deep_roundtrip+partscc+strength2,1.157,!a & G(a | Xa),6,1,8,1.3,3930fb35808c,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_026.hoa
-2state1ap0acc_028.hoa,NOT_LTL,,1.106,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_028.hoa
-2state1ap0acc_029.hoa,LTL,partscc,0.072,!a & G(!a | X!a),6,1,10,1.7,c502b80fd986,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_029.hoa
-2state1ap0acc_030.hoa,NOT_LTL,,1.122,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_030.hoa
-2state1ap0acc_033.hoa,LTL,daisy,0.073,a & XG!a,5,1,6,1.2,af6c1ac2c6d1,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_033.hoa
-2state1ap0acc_036.hoa,LTL,partscc,0.073,a & G((a | Xa) & (!a | X!a)),9,1,14,1.6,053bcb772803,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_036.hoa
-2state1ap0acc_049.hoa,LTL,daisy,0.071,XG!a,4,1,4,1.0,491b2a4dbf74,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_049.hoa
-2state1ap0acc_051.hoa,LTL,daisy,0.070,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_051.hoa
-2state1ap0acc_052.hoa,NOT_LTL,,1.155,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_052.hoa
-2state1ap0acc_053.hoa,LTL,buchi+daisy+daisy2+deep_roundtrip+partscc+strength2,1.233,X(!a & G(!a | X!a)),7,1,11,1.6,3d7651ff18ca,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_053.hoa
-2state1ap0acc_082.hoa,LTL,daisy+inv+scc2,0.073,!a & X(!a W Ga),6,2,9,1.5,6150053ca964,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_082.hoa
-2state1ap0acc_086.hoa,TIMEOUT,,15.345,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_086.hoa
-2state1ap0acc_097.hoa,LTL,daisy,0.072,!a W (a & XG!a),6,2,9,1.5,da6533fa952b,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_097.hoa
-2state1ap0acc_098.hoa,LTL,daisy,0.073,!a W Ga,4,2,5,1.2,78f701294965,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_098.hoa
-2state1ap0acc_100.hoa,LTL,daisy2,0.070,G(!a | X!a),5,1,7,1.4,edb0cccf0efd,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_100.hoa
-2state1ap0acc_101.hoa,LTL,daisy2,0.070,G(!a | X!a),5,1,7,1.4,edb0cccf0efd,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_101.hoa
-2state1ap0acc_104.hoa,NOT_LTL,,1.115,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_104.hoa
-2state1ap0acc_106.hoa,TIMEOUT,,15.599,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_106.hoa
-2state1ap0acc_113.hoa,LTL,daisy,0.072,!a W (a & XG!a),6,2,9,1.5,da6533fa952b,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_113.hoa
-2state1ap0acc_114.hoa,LTL,daisy,0.068,!a W Ga,4,2,5,1.2,78f701294965,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_114.hoa
-2state1ap0acc_120.hoa,NOT_LTL,,1.107,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_120.hoa
-2state1ap0acc_122.hoa,LTL,acc,1.114,!a | Xa,4,0,5,1.2,869626ca5ecb,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_122.hoa
-2state1ap0acc_192.hoa,LTL,daisy,0.069,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/2state1ap0acc/2state1ap0acc_192.hoa
+input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,check_s,source
+2state1ap0acc_000.hoa,LTL,daisy,0.073,0,1,0,1,1.0,256b0f7a8d39,TRUE,0.041,genaut/corpus/2state1ap0acc/2state1ap0acc_000.hoa
+2state1ap0acc_017.hoa,LTL,daisy,0.075,G!a,3,1,3,1.0,6d2bdb385b7a,TRUE,0.047,genaut/corpus/2state1ap0acc/2state1ap0acc_017.hoa
+2state1ap0acc_018.hoa,LTL,daisy,0.076,!a & XGa,5,1,6,1.2,65541f1a02fa,TRUE,0.044,genaut/corpus/2state1ap0acc/2state1ap0acc_018.hoa
+2state1ap0acc_019.hoa,LTL,daisy,0.073,!a,2,0,2,1.0,dffef08b04a5,TRUE,0.043,genaut/corpus/2state1ap0acc/2state1ap0acc_019.hoa
+2state1ap0acc_022.hoa,NOT_LTL,-,1.195,p=2 u=[!a] v=[!a] x=[cycle{a}],,,,,,TRUE,0.054,genaut/corpus/2state1ap0acc/2state1ap0acc_022.hoa
+2state1ap0acc_024.hoa,LTL,partscc,0.081,!a & G((!a | X!a) & (a | Xa)),9,1,15,1.7,307ad4ea6833,TRUE,0.044,genaut/corpus/2state1ap0acc/2state1ap0acc_024.hoa
+2state1ap0acc_025.hoa,LTL,partscc,0.078,!a & G(!a | X!a),6,1,10,1.7,c502b80fd986,TRUE,0.043,genaut/corpus/2state1ap0acc/2state1ap0acc_025.hoa
+2state1ap0acc_026.hoa,LTL,buchi+daisy+daisy2+deep_roundtrip+partscc+strength2,1.227,!a & X(a & G(a | Xa)),8,1,11,1.4,b6212c30b2ab,TRUE,0.043,genaut/corpus/2state1ap0acc/2state1ap0acc_026.hoa
+2state1ap0acc_028.hoa,NOT_LTL,-,1.187,p=2 u=[!a] v=[!a] x=[a; cycle{!a}],,,,,,TRUE,0.059,genaut/corpus/2state1ap0acc/2state1ap0acc_028.hoa
+2state1ap0acc_029.hoa,LTL,partscc,0.078,!a & G(!a | X!a),6,1,10,1.7,c502b80fd986,TRUE,0.043,genaut/corpus/2state1ap0acc/2state1ap0acc_029.hoa
+2state1ap0acc_030.hoa,NOT_LTL,-,1.198,p=2 u=[] v=[!a] x=[!a; cycle{a}],,,,,,TRUE,0.060,genaut/corpus/2state1ap0acc/2state1ap0acc_030.hoa
+2state1ap0acc_033.hoa,LTL,daisy,0.077,a & XG!a,5,1,6,1.2,af6c1ac2c6d1,TRUE,0.044,genaut/corpus/2state1ap0acc/2state1ap0acc_033.hoa
+2state1ap0acc_036.hoa,LTL,partscc,0.078,a & G((a | Xa) & (!a | X!a)),9,1,14,1.6,053bcb772803,TRUE,0.041,genaut/corpus/2state1ap0acc/2state1ap0acc_036.hoa
+2state1ap0acc_049.hoa,LTL,daisy,0.076,XG!a,4,1,4,1.0,491b2a4dbf74,TRUE,0.045,genaut/corpus/2state1ap0acc/2state1ap0acc_049.hoa
+2state1ap0acc_051.hoa,LTL,daisy,0.068,1,1,0,1,1.0,e20f564d992f,TRUE,0.043,genaut/corpus/2state1ap0acc/2state1ap0acc_051.hoa
+2state1ap0acc_052.hoa,NOT_LTL,-,1.216,p=2 u=[] v=[!a] x=[a; cycle{!a}],,,,,,TRUE,0.057,genaut/corpus/2state1ap0acc/2state1ap0acc_052.hoa
+2state1ap0acc_053.hoa,LTL,buchi+daisy+daisy2+deep_roundtrip+partscc+strength2,1.273,X(!a & G(!a | X!a)),7,1,11,1.6,3d7651ff18ca,TRUE,0.048,genaut/corpus/2state1ap0acc/2state1ap0acc_053.hoa
+2state1ap0acc_082.hoa,LTL,daisy+inv+scc2,0.082,!a & X(!a W Ga),6,2,9,1.5,6150053ca964,TRUE,0.048,genaut/corpus/2state1ap0acc/2state1ap0acc_082.hoa
+2state1ap0acc_086.hoa,TIMEOUT,,16.007,,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_086.hoa
+2state1ap0acc_097.hoa,LTL,daisy,0.077,!a W (a & XG!a),6,2,9,1.5,da6533fa952b,TRUE,0.045,genaut/corpus/2state1ap0acc/2state1ap0acc_097.hoa
+2state1ap0acc_098.hoa,LTL,daisy,0.076,!a W Ga,4,2,5,1.2,78f701294965,TRUE,0.044,genaut/corpus/2state1ap0acc/2state1ap0acc_098.hoa
+2state1ap0acc_100.hoa,LTL,daisy2,0.076,G(!a | X!a),5,1,7,1.4,edb0cccf0efd,TRUE,0.047,genaut/corpus/2state1ap0acc/2state1ap0acc_100.hoa
+2state1ap0acc_101.hoa,LTL,daisy2,0.078,G(!a | X!a),5,1,7,1.4,edb0cccf0efd,TRUE,0.046,genaut/corpus/2state1ap0acc/2state1ap0acc_101.hoa
+2state1ap0acc_104.hoa,NOT_LTL,-,1.196,p=2 u=[] v=[a] x=[cycle{!a}],,,,,,TRUE,0.057,genaut/corpus/2state1ap0acc/2state1ap0acc_104.hoa
+2state1ap0acc_106.hoa,TIMEOUT,,16.007,,,,,,,,,genaut/corpus/2state1ap0acc/2state1ap0acc_106.hoa
+2state1ap0acc_113.hoa,LTL,daisy,0.075,!a W (a & XG!a),6,2,9,1.5,da6533fa952b,TRUE,0.045,genaut/corpus/2state1ap0acc/2state1ap0acc_113.hoa
+2state1ap0acc_114.hoa,LTL,daisy,0.075,!a W Ga,4,2,5,1.2,78f701294965,TRUE,0.045,genaut/corpus/2state1ap0acc/2state1ap0acc_114.hoa
+2state1ap0acc_120.hoa,NOT_LTL,-,1.193,p=2 u=[a] v=[a] x=[a; cycle{!a}],,,,,,TRUE,0.056,genaut/corpus/2state1ap0acc/2state1ap0acc_120.hoa
+2state1ap0acc_122.hoa,LTL,acc,1.197,!a | Xa,4,0,5,1.2,869626ca5ecb,TRUE,0.046,genaut/corpus/2state1ap0acc/2state1ap0acc_122.hoa
+2state1ap0acc_192.hoa,LTL,daisy,0.073,1,1,0,1,1.0,e20f564d992f,TRUE,0.043,genaut/corpus/2state1ap0acc/2state1ap0acc_192.hoa

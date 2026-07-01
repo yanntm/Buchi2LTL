@@ -1,4 +1,4 @@
-input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,source
-1state1ap0acc_0.hoa,LTL,daisy,0.071,0,1,0,1,1.0,256b0f7a8d39,TRUE,genaut/corpus/1state1ap0acc/1state1ap0acc_0.hoa
-1state1ap0acc_1.hoa,LTL,daisy,0.072,G!a,3,1,3,1.0,6d2bdb385b7a,TRUE,genaut/corpus/1state1ap0acc/1state1ap0acc_1.hoa
-1state1ap0acc_3.hoa,LTL,daisy,0.071,1,1,0,1,1.0,e20f564d992f,TRUE,genaut/corpus/1state1ap0acc/1state1ap0acc_3.hoa
+input,result,technique,build_s,formula,dag,temporals,tree,sharing,md5,validation,check_s,source
+1state1ap0acc_0.hoa,LTL,daisy,0.070,0,1,0,1,1.0,256b0f7a8d39,TRUE,0.042,genaut/corpus/1state1ap0acc/1state1ap0acc_0.hoa
+1state1ap0acc_1.hoa,LTL,daisy,0.074,G!a,3,1,3,1.0,6d2bdb385b7a,TRUE,0.042,genaut/corpus/1state1ap0acc/1state1ap0acc_1.hoa
+1state1ap0acc_3.hoa,LTL,daisy,0.070,1,1,0,1,1.0,e20f564d992f,TRUE,0.047,genaut/corpus/1state1ap0acc/1state1ap0acc_3.hoa
