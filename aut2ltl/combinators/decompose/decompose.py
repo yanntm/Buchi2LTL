@@ -23,6 +23,7 @@ from aut2ltl.combinators.recurse import recurse
 from aut2ltl.result import LTLResult, fuse
 from aut2ltl.printer import format_language, format_result
 from aut2ltl.ltl.builders import own_simplify
+from aut2ltl.verifier import revalidated
 
 if TYPE_CHECKING:
     from aut2ltl.translator import Translator, Decorator
@@ -82,7 +83,11 @@ def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator"
                         print(f"[{tag}]   operand {k + 1}/{len(pieces)} -> "
                               + format_result(r), file=sys.stderr)
                     parts.append(r)
-                res = combine(connective, tag, parts)
+                # A part's NOT_LTL is a verdict about the PART's language, and
+                # non-LTL-ness survives neither connective: keep it only if its
+                # family replays against THIS level's language, else degrade to a
+                # non-absorbing decline (see algorithm.md, The NOT_LTL crossing).
+                res = revalidated(combine(connective, tag, parts), lang)
                 if _TRACE:
                     print(f"[{tag}] out " + format_result(res), file=sys.stderr)
                 return res
