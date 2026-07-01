@@ -2439,3 +2439,16 @@ WHY/WHAT landed this session:
   certified lifted witnesses; mod3_a / gf_aa_parity unchanged; evenblocks stays the
   honest DECLINED (recovery = parent completion seeded by the child v, TODO).
   Validation SUCCESS 83/83 TRUE.
+
+## 2026-07-02 — plan item 2: the reseed recovery (evenblocks certified end-to-end)
+
+- LANDED (docs first): witness/algorithm.md "Reseeding a crossed verdict" +
+  decompose/algorithm.md crossing recovery step; `witness/reseed.py`
+  (re-express the crossed v over the host's det form, run linear-then-omega-power
+  completion — no GAP); `revalidated_by_parts(..., host, reseed)` hook (verifier
+  stays engine-free, the callable injected); wired in acceptance/scc/strength.
+- Payoff: evenblocks_nonltl is again a CERTIFIED NOT_LTL end-to-end
+  (p=2 u=[] v=[a] y=[a; !a], reseeded at the acc2 crossing, replayed through the
+  split parts; single clean diagnosis). prefix_nonltl_{1,2}, mod3_a, gf_aa_parity
+  unchanged. Full validation survey on this exact state deferred to next session
+  (fixture battery green; the previous two states each passed 83/83 TRUE).
