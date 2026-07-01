@@ -2380,3 +2380,29 @@ WHY/WHAT landed this session:
 - Findings, theory (quotient argument invalid — positive direction stands via Thomas;
   minimization not decisive; linear-shape blindness) and the fix list: root
   `witness3.md` (scratch). Session logs: `logs/nonltl_fixtures/`.
+
+## 2026-07-01 — definability fail-safe + both witness shapes (phase-3 fixes 1-3)
+
+- LANDED (docs first, per procedure): overhauled `tester/algorithm.md`,
+  `witness/algorithm.md`, `definability/README.md` — the one-sided soundness
+  argument (Thomas 1979 replaces the invalid quotient sketch), the three-outcome
+  gate contract, the two family shapes with joint completeness (Arnold) and the
+  prefix-independence blindness lemma.
+- LANDED: fail-safe gate (`gate.py`) — absorbing NOT_LTL only on a witness
+  certified by in-process replay; uncertified suspicion = non-absorbing
+  PROBABLY_NOT_LTL decline, inner fenced; oracle-could-not-run (`definable=None`,
+  tester+language) takes the same fence with its own reason. Kills the live
+  false reject on gf_aa_parity (GF(a & Xa) run-parity form; validation SUCCESS
+  83/83 TRUE, 0 regressions, NOT_LTL rows gain the 'gate' technique tag).
+- LANDED: exhaustive linear completion (`witness/linear.py` — all closed cycles
+  >= 2 x all phase pairs, pattern read-back period) and the omega-power shape
+  end-to-end (`witness/{enriched,omega}.py`, `Witness.y`, `verifier.verify_omega`,
+  serialization `y=[...]`). Payoff: evenblocks_nonltl certifies at the top gate
+  (p=2 u=[] v=[a] y=[a; !a], VERIFY ok 01010) where the linear shape is provably
+  blind; gf_aa_parity declines after exhausting BOTH shapes.
+- Fixtures grouped under `samples/fixtures/hoa/definability/` (+ gf_aa, sixap).
+- OPEN (fix 4): a child gate's certified verdict crosses decomposers
+  unrevalidated (`credit` keeps the first witness; acc2 intersection propagation
+  unsound in principle) — evenblocks default run still surfaces the child's stale
+  linear family over the top gate's correct omega-power one. Plan: root
+  `witness3.md`.
