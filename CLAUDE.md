@@ -37,6 +37,10 @@ leaf) + `aut2ltl/heur` (extracted heuristics, e.g. `fuse2`) + `aut2ltl/decomp`
 - Remember that git operations like `git mv` or `git rm` already populate the
   index. So always follow them with a commit *before* attempting to add any
   modified file to index.
+- **Never rewrite history** — no reset/rebase/amend, even on unpushed commits.
+  A garbled commit message stands; fix forward with a new commit. (To avoid
+  mangled messages: don't put backticks in a double-quoted `-m`; use `-F` with
+  a quoted heredoc file.)
 - Commit directly to `master` (we do not branch). Never run branch / cross-branch
   diagnostics.
 - `docs/HISTORY.md` is APPEND-ONLY via shell (`cat >>` / `printf >>`) and is
