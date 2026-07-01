@@ -126,13 +126,12 @@ shared), so `(g_k·u)·vⁿ·x` toggles in `L` exactly as `u·vⁿ·x` toggles i
 When the exactness fails — **nondeterministic overlapping exits**: the lifted letter
 also keeps a petal or a sibling stem alive — the residue is a strict member of a union
 and non-LTL-ness does not survive union: neither the verdict nor the family lifts.
-daisy does not check exactness locally; instead the lifted result is **revalidated**
-against daisy's own input (`aut2ltl.verifier.revalidated` at the lift return): the
-family replays → the verdict stands, certified here; it does not → the result degrades
-to a non-absorbing decline. A cheaper local restoration is known but not implemented:
-restrict the prepended guard to `g_k ∧ ¬σ ∧ ⋀_{j≠k}¬g_j` (drop the petals and sibling
-stems — BDD-only, no replay); an empty restriction means no exactly-quotienting letter
-exists and the lift must degrade. Tracked in the root `TODO.md`.
+daisy therefore restores exactness locally, BDD-only, no replay: the prepended letter
+is the **restricted guard** `g_k ∧ ¬σ ∧ ⋀¬g_j` over the stems to *other* targets
+(parallel edges to the same target are harmless — finite-prefix marks never touch an
+inf-set). Non-empty → the lift is sound by the quotient argument, absorbing; empty →
+no exactly-quotienting letter exists, the verdict does not lift and the peel degrades
+to a non-absorbing `PROBABLY_NOT_LTL` decline.
 
 Guards (`σ`, `σ_i`) are symbolic: **no `2^AP` enumeration, no determinization**. Work
 and output size scale with states and edges, not the alphabet.
