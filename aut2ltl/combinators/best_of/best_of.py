@@ -70,31 +70,35 @@ class _BestOf(Generic[_In]):
             elif isinstance(x, LTLResult):         # a rewriter-mode input (a result to re-present)
                 print(f"[best_of:{self.name}] in " + format_result(x), file=sys.stderr)
         incumbent: Optional[LTLResult] = None
+        winner: Optional[str] = None
         for stage in self._stages:
-            r = stage(x)
+            name = _stage_name(stage)
+            r = stage(x)                          # the delegation
             if r.not_ltl:
                 if _TRACE:
-                    print(f"[best_of:{self.name}] out (NOT_LTL short-circuit via "
-                          f"{_stage_name(stage)}) " + format_result(r), file=sys.stderr)
+                    print(f"[best_of:{self.name}] {name} -> NOT_LTL (short-circuit) "
+                          + format_result(r), file=sys.stderr)
                 return r                          # absorbing verdict: keep reason
             if r.declined:
+                if _TRACE:
+                    print(f"[best_of:{self.name}] {name} -> declined "
+                          + format_result(r), file=sys.stderr)
                 continue                          # not this stage's case: move on
             if incumbent is None:
-                incumbent = r                     # the trusted first answer
-                if _TRACE:
-                    print(f"[best_of:{self.name}] {_stage_name(stage)} incumbent -> "
-                          + format_result(r), file=sys.stderr)
+                incumbent, winner = r, name       # the trusted first answer
+                verb = "incumbent"
             elif self._beats(incumbent, r):
-                if _TRACE:
-                    print(f"[best_of:{self.name}] {_stage_name(stage)} WINS -> "
-                          + format_result(r), file=sys.stderr)
-                incumbent = r                     # a winning challenger takes over
-            elif _TRACE:
-                print(f"[best_of:{self.name}] {_stage_name(stage)} kept out -> "
-                      + format_result(r), file=sys.stderr)
+                incumbent, winner = r, name       # a winning challenger takes over
+                verb = "WINS"
+            else:
+                verb = "kept out"                 # challenger not better: incumbent stands
+            if _TRACE:
+                print(f"[best_of:{self.name}] {name} -> {verb} " + format_result(r),
+                      file=sys.stderr)
         result = incumbent if incumbent is not None else LTLResult.decline()
         if _TRACE:
-            print(f"[best_of:{self.name}] out " + format_result(result), file=sys.stderr)
+            print(f"[best_of:{self.name}] out (winner={winner or 'none'}) "
+                  + format_result(result), file=sys.stderr)
         return result
 
 
