@@ -18,12 +18,12 @@ of the child) — those belong to the assembly that wires the child. See algorit
 
 import os
 import sys
-from typing import List, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
+import buddy
 import spot
 
 from aut2ltl.language import Language
-from aut2ltl.verifier import revalidated
 from aut2ltl.result import LTLResult, Status
 from aut2ltl.printer import format_language, format_result
 from .shape import is_daisy, reroot, split
@@ -57,6 +57,18 @@ def _and(fs: List["spot.formula"]) -> "spot.formula":
     return _F.And(fs) if fs else _F.tt()
 
 
+def _exact_guard(
+    g: "spot.formula", others: List["spot.formula"], aut: "spot.twa_graph"
+) -> Optional[str]:
+    """The sub-guard of `g` whose letters enable nothing in `others` — the letters
+    for which the peeled residue IS the exact left quotient — as a letter string,
+    or `None` when no such letter exists (the guard fully overlaps)."""
+    f = _F.And([g] + [_F.Not(o) for o in others])
+    if spot.formula_to_bdd(f, aut.get_dict(), aut) == buddy.bddfalse:
+        return None
+    return str(f)
+
+
 class Daisy:
     """The pure daisy combinator `daisy(Λ)` as a `Translator` (`Language →
     LTLResult`).
@@ -83,11 +95,16 @@ class Daisy:
 
         m = aut.acc().num_sets()
         petals, stems = split(aut, q)
+        sigma = _or([g for g, _ in petals])
 
         # Delegate each stem to Λ; fold it in, bail on NOK (propagating reason).
-        # A NotLTL child certifies the residue past the stem non-LTL, hence L too (the
-        # residue is the left quotient g⁻¹L); `prefix` lifts its witness back up the
-        # stem by the guard g — `w[u ↦ g·u]` — and credits daisy (algorithm.md).
+        # A NotLTL child certifies the residue past the stem non-LTL; the verdict
+        # lifts iff some stem letter realizes the left quotient EXACTLY — enabling
+        # no petal and no stem to a different target (parallel edges to the same
+        # target are harmless: finite-prefix marks never touch an inf-set). The
+        # lift prepends that restricted letter to the witness anchor; when no such
+        # letter exists the verdict does not lift and the peel degrades
+        # (algorithm.md, Soundness).
         children: List["spot.formula"] = []
         for g, dst in stems:
             sub = Language.of(reroot(aut, dst))
@@ -95,15 +112,21 @@ class Daisy:
                 print(f"[daisy] delegating exit {dst} as language: "
                       + format_language(sub, sub.tgba()), file=sys.stderr)
             child = self._child(sub)
+            if child.not_ltl:
+                exact = _exact_guard(
+                    g, [sigma] + [gj for gj, dj in stems if dj != dst], aut)
+                if exact is None:
+                    return _out(res.fail(Status.DECLINED,
+                        "PROBABLY_NOT_LTL -- a non-LTL residue does not lift: "
+                        "every letter of the stem guard also enables a petal or "
+                        "a stem to another target (no exact left quotient), so "
+                        "no verdict is asserted"))
+                res.prefix(child, exact, _NAME)
+                return _out(res)
             res.prefix(child, str(g), _NAME)
             if res.nok:
-                # A lifted NOT_LTL is kept only if its family replays against THIS
-                # language (the quotient lift needs exactness the guard may lack);
-                # else it degrades to a decline (witness/algorithm.md, Lifting).
-                return _out(revalidated(res, lang))
+                return _out(res)
             children.append(child.formula)
-
-        sigma = _or([g for g, _ in petals])
 
         # STAY∞(q) = G(σ) ∧ ⋀_{i<m} GF(σ_i)
         gfs = [_F.G(_F.F(_or([g for g, acc in petals if i in acc]))) for i in range(m)]
