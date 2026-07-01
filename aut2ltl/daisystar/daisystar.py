@@ -27,7 +27,7 @@ import spot
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult, Status
-from aut2ltl.printer import format_language
+from aut2ltl.printer import format_language, format_result
 from .shape import Spoke, Stem, star_partition, reroot
 
 if TYPE_CHECKING:
@@ -35,6 +35,13 @@ if TYPE_CHECKING:
 
 _NAME = "daisystar"
 _F = spot.formula
+
+
+def _out(res: "LTLResult") -> "LTLResult":
+    """Trace the outgoing result (status / size / formula), pass it through unchanged."""
+    if _TRACE:
+        print("[daisystar] out " + format_result(res), file=sys.stderr)
+    return res
 
 # Dev trace of the Spot equivalence gate, mirroring daisy2's DAISY2_TRACE; the
 # global TRANSLATOR_TRACE_ON lights it (and every translator trace) at once. Every
@@ -136,6 +143,8 @@ class Daisystar:
 
     def __call__(self, lang: "Language") -> "LTLResult":
         aut = lang.tgba()
+        if _TRACE:
+            print("[daisystar] in " + format_language(lang, aut), file=sys.stderr)
         h = aut.get_init_state_number()
         res = LTLResult.start(_NAME)                    # start OK, credit ourselves
 
@@ -143,13 +152,13 @@ class Daisystar:
         # cycle stays inside it), which makes STAY∞ = false sound. Spot tags it.
         si = spot.scc_info(aut)
         if not si.is_rejecting_scc(si.scc_of(h)):
-            return res.fail(Status.DECLINED,
-                            "initial SCC is not rejecting (not the reachability regime)")
+            return _out(res.fail(Status.DECLINED,
+                            "initial SCC is not rejecting (not the reachability regime)"))
 
         parts = star_partition(aut, h)
         if parts is None:
-            return res.fail(Status.DECLINED,
-                            "initial SCC is not a length-1 star hub")
+            return _out(res.fail(Status.DECLINED,
+                            "initial SCC is not a length-1 star hub"))
         petals, spokes, hub_stems = parts
 
         # Delegate every exit target (hub-stems and spoke-stems) to Λ once per
@@ -165,13 +174,13 @@ class Daisystar:
             child = self._child(sub)
             res.credit(child)
             if res.nok:
-                return res
+                return _out(res)
             child_of[dst] = child.formula
 
         phi = build_leave(petals, spokes, hub_stems, child_of)
         if not _validates(aut, phi):
-            return res.fail(Status.DECLINED,
+            return _out(res.fail(Status.DECLINED,
                             "candidate not language-equivalent "
-                            "(daisystar LEAVE form incomplete for this SCC)")
+                            "(daisystar LEAVE form incomplete for this SCC)"))
         res.formula = phi
-        return res
+        return _out(res)
