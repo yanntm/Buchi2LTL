@@ -112,6 +112,16 @@ hub `h` to a state `p` carrying an exit to `dst`, followed by that exit guard `g
 path exists and leads to the suffix `of(A↓dst)`, so `w_dst` reaches `dst` from `h`, and
 `w[u ↦ w_dst·u]` re-anchors the family at `h` (`v`, `x`, `p` unchanged).
 
+The lift is exact only if `w_dst⁻¹·L` **is** the residue — the deterministic
+L-partition makes the walk inside `C` unique, but the final exit letter may still
+overlap another edge (an overlapping exit), leaving the quotient a strict union in
+which non-LTL-ness need not survive. Exactness is therefore not assumed: the lifted
+result is **revalidated** against daisystardet's own input
+(`aut2ltl.verifier.revalidated` at the lift return) — replays → the verdict stands;
+fails → degrades to a non-absorbing decline. The local guard-restriction refinement
+(subtract the overlapping edges from `g`, BDD-only) is known but not implemented —
+root `TODO.md`.
+
 ## Exactness
 
 For a deterministic L-partition the read-off is **exact** (`L(A) = LEAVE`), with no

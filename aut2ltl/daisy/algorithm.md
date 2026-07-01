@@ -116,13 +116,23 @@ then `Final(q)` exactly, given correct child labels. Off the fragment a target s
 in a genuine multi-state SCC, the child declines there, and the poisoning propagates
 the `⊥` up.
 
-The non-LTL lift is sound for the same reason: the residue `of(A↓dst_j)` is the left
-quotient `g_j⁻¹·L` (the stem letter `g_j` is the run's only continuation past `q`), and
-star-free `=` LTL is closed under left quotient, so a non-LTL residue forces a non-LTL
-`L`. The lifted family certifies it: `g_k·u` reaches from `q` the orbit `u` reached from
-`dst_k`, while `v`, `x`, `p` carry over unchanged (re-rooting relocates, it does not
-relabel — `Σ = 2^AP` is shared), so `(g_k·u)·vⁿ·x` toggles in `L` exactly as `u·vⁿ·x`
-toggles in the residue.
+The non-LTL lift is sound **under an exactness condition**: the residue `of(A↓dst_j)`
+equals the left quotient `g_j⁻¹·L` only when a letter satisfying `g_j` enables nothing
+else from `q` — no petal, no sibling stem. Then, star-free `=` LTL being closed under
+left quotient, a non-LTL residue forces a non-LTL `L`, and the lifted family certifies
+it: `g_k·u` reaches from `q` the orbit `u` reached from `dst_k`, while `v`, `x`, `p`
+carry over unchanged (re-rooting relocates, it does not relabel — `Σ = 2^AP` is
+shared), so `(g_k·u)·vⁿ·x` toggles in `L` exactly as `u·vⁿ·x` toggles in the residue.
+When the exactness fails — **nondeterministic overlapping exits**: the lifted letter
+also keeps a petal or a sibling stem alive — the residue is a strict member of a union
+and non-LTL-ness does not survive union: neither the verdict nor the family lifts.
+daisy does not check exactness locally; instead the lifted result is **revalidated**
+against daisy's own input (`aut2ltl.verifier.revalidated` at the lift return): the
+family replays → the verdict stands, certified here; it does not → the result degrades
+to a non-absorbing decline. A cheaper local restoration is known but not implemented:
+restrict the prepended guard to `g_k ∧ ¬σ ∧ ⋀_{j≠k}¬g_j` (drop the petals and sibling
+stems — BDD-only, no replay); an empty restriction means no exactly-quotienting letter
+exists and the lift must degrade. Tracked in the root `TODO.md`.
 
 Guards (`σ`, `σ_i`) are symbolic: **no `2^AP` enumeration, no determinization**. Work
 and output size scale with states and edges, not the alphabet.
