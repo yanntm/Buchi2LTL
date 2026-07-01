@@ -1,0 +1,15 @@
+HOA: v1
+name: "six APs -- blocks the generator extraction (max_aps=5)"
+States: 2
+Start: 0
+AP: 6 "a" "b" "c" "d" "e" "f"
+acc-name: Buchi
+Acceptance: 1 Inf(0)
+properties: trans-labels explicit-labels trans-acc complete deterministic
+--BODY--
+State: 0
+[0&1&2&3&4&5] 1
+[!(0&1&2&3&4&5)] 0
+State: 1
+[t] 1 {0}
+--END--
