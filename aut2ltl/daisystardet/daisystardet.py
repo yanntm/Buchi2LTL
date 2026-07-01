@@ -31,7 +31,7 @@ import spot
 
 from aut2ltl.language import Language
 from aut2ltl.result import LTLResult, Status
-from aut2ltl.printer import format_language
+from aut2ltl.printer import format_language, format_result
 from .shape import init_scc_states, scc_data, is_deterministic, exit_word, reroot
 
 if TYPE_CHECKING:
@@ -43,6 +43,13 @@ _F = spot.formula
 # translator trace at once. Every use guards with `if _TRACE:` BEFORE building its
 # message, so a formula is never flattened for a trace that will not be printed.
 _TRACE = "DAISYSTARDET_TRACE" in os.environ or "TRANSLATOR_TRACE_ON" in os.environ
+
+
+def _out(res: "LTLResult") -> "LTLResult":
+    """Trace the outgoing result (status / size / formula), pass it through unchanged."""
+    if _TRACE:
+        print("[daisystardet] out " + format_result(res), file=sys.stderr)
+    return res
 
 
 def _or(fs: List["spot.formula"]) -> "spot.formula":
@@ -115,19 +122,21 @@ class DaisystarDet:
 
     def __call__(self, lang: "Language") -> "LTLResult":
         aut = lang.tgba()
+        if _TRACE:
+            print("[daisystardet] in " + format_language(lang, aut), file=sys.stderr)
         h = aut.get_init_state_number()
         res = LTLResult.start(_NAME)
 
         si = spot.scc_info(aut)
         if not si.is_rejecting_scc(si.scc_of(h)):
-            return res.fail(Status.DECLINED, "initial SCC is not rejecting")
+            return _out(res.fail(Status.DECLINED, "initial SCC is not rejecting"))
 
         C = init_scc_states(aut, h)
         L, O, exits = scc_data(aut, C, h)
         if not any(exits[p] for p in C):
-            return res.fail(Status.DECLINED, "rejecting SCC with no exit (not reachability)")
+            return _out(res.fail(Status.DECLINED, "rejecting SCC with no exit (not reachability)"))
         if not is_deterministic(L, h):
-            return res.fail(Status.DECLINED, "L-partition is not deterministic")
+            return _out(res.fail(Status.DECLINED, "L-partition is not deterministic"))
 
         # Delegate each distinct exit target to Λ; credit, bail on NOK.
         dsts: List[int] = [dst for p in C for _, dst in exits[p]]
@@ -143,13 +152,13 @@ class DaisystarDet:
             # daisystardet credited (algorithm.md).
             res.prefix(child, "; ".join(exit_word(aut, C, h, dst)), _NAME)
             if res.nok:
-                return res
+                return _out(res)
             phi[dst] = child.formula
 
         cand = build_det_candidate(aut, C, h, L, O, exits, phi)
         if not _validates(aut, cand):
-            return res.fail(Status.DECLINED,
+            return _out(res.fail(Status.DECLINED,
                             "candidate not language-equivalent "
-                            "(daisystardet read-off rejected by gate)")
+                            "(daisystardet read-off rejected by gate)"))
         res.formula = cand
-        return res
+        return _out(res)
