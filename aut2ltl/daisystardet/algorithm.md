@@ -113,14 +113,16 @@ path exists and leads to the suffix `of(A↓dst)`, so `w_dst` reaches `dst` from
 `w[u ↦ w_dst·u]` re-anchors the family at `h` (`v`, `x`, `p` unchanged).
 
 The lift is exact only if `w_dst⁻¹·L` **is** the residue — the deterministic
-L-partition makes the walk inside `C` unique, but the final exit letter may still
-overlap another edge (an overlapping exit), leaving the quotient a strict union in
-which non-LTL-ness need not survive. Exactness is therefore not assumed: the lifted
-result is **revalidated** against daisystardet's own input
-(`aut2ltl.verifier.revalidated` at the lift return) — replays → the verdict stands;
-fails → degrades to a non-absorbing decline. The local guard-restriction refinement
-(subtract the overlapping edges from `g`, BDD-only) is known but not implemented —
-root `TODO.md`.
+L-partition makes the walk inside `C` unique, but any step's letter may still overlap
+an edge to a *different* target (an exit en route, or the final exit overlapping a
+sibling), leaving the quotient a strict union in which non-LTL-ness need not survive.
+`exit_word` therefore restores exactness per step, BDD-only, no replay: **every
+step's guard is restricted to the letters enabling no edge to another target** from
+its source (parallel edges to the same target are harmless — finite-prefix marks
+never touch an inf-set), so the word has a single continuation at each step and the
+quotient argument is sound. A route whose restriction empties is skipped; no exact
+route at all → the verdict does not lift and the peel degrades to a non-absorbing
+`PROBABLY_NOT_LTL` decline.
 
 ## Exactness
 
