@@ -182,7 +182,10 @@ the lifting translator:
   of the whole (the acceptance-split case: a sub-automaton family constant on
   the intersection) is caught here and degrades the result to
   `PROBABLY_NOT_LTL`. Replay-after-lift is not optional; it is what makes the
-  lift rule enforceable rather than trusted.
+  lift rule enforceable rather than trusted. Enforcement is
+  `aut2ltl.verifier.revalidated`, applied at every boundary a `NOT_LTL` can
+  cross: the `decompose` combine (strength / acceptance / scc) and each peeler's
+  `prefix()` lift (daisy / daisy2 / daisystardet).
 
 ## Scope
 
