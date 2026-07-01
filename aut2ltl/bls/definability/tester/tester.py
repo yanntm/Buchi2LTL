@@ -26,7 +26,7 @@ Translator, so it composes into the cascade gate without a cycle.
 from __future__ import annotations
 
 import os
-from typing import Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 
 import spot
 
@@ -51,19 +51,23 @@ def label_ltl_definable(
     gap_cmd: str = "gap",
     timeout: int = 30,
     max_aps: int = 5,
-) -> Tuple[bool, bool]:
+) -> Tuple[Optional[bool], bool]:
     """Decide and cache `(definable, conclusive)` for `lang` (idempotent: returns
     the cached tag if already set).
 
-    `definable` — an LTL formula exists (the sbacc-free transition monoid is
-    aperiodic). `conclusive` — the verdict was read on a genuinely state-minimal
-    automaton (≤ the SAT-min threshold), so a `not definable` reading is a proof
-    rather than a strong hint.
+    `definable` is three-valued:
+      * `True`  — the sbacc-free transition monoid is aperiodic: an LTL formula
+        exists (a proof — see algorithm.md, Soundness).
+      * `False` — the monoid carries a group: a SUSPICION of non-definability,
+        never a proof; certification belongs to the witness.
+      * `None`  — the oracle COULD NOT RUN (an extraction or GAP failure: too
+        many APs, a GAP error/timeout). Nothing was read in either direction; the
+        consumer must treat the language as it treats an uncertified suspicion —
+        fence the cascade, assert nothing — rather than trust that downstream
+        machinery will fail the same way.
 
-    Abstain when the oracle CANNOT RUN: on an extraction or GAP failure (too many
-    APs, a GAP error) return `(True, False)` instead of fabricating a non-definable
-    verdict, so a possibly-definable language is built rather than rejected unseen.
-    A genuine non-aperiodic reading returns `(False, conclusive)`.
+    `conclusive` — the form was genuinely state-minimal (≤ the SAT-min
+    threshold). It grades diagnosis prose only.
     """
     cached = lang.ltl_definable
     if cached is not None:
@@ -72,6 +76,7 @@ def label_ltl_definable(
     det = lang.det_generic_minimal()
     n_min = det.num_states()
     conclusive = n_min <= _sat_min_threshold()
+    definable: Optional[bool]
     try:
         # extract_generators needs a complete deterministic automaton; completing
         # only adds a sink (an idempotent — no group), so it cannot perturb the
@@ -80,7 +85,7 @@ def label_ltl_definable(
         gens, _, _ = extract_generators(aut, max_aps=max_aps)
         definable = is_aperiodic_gens(gens, gap_cmd=gap_cmd, timeout=timeout)
     except Exception:
-        definable, conclusive = True, False  # abstain: oracle could not run (see docstring)
+        definable, conclusive = None, False  # oracle could not run (see docstring)
 
     lang.set_ltl_definable(definable, conclusive=conclusive)
     return (definable, conclusive)
