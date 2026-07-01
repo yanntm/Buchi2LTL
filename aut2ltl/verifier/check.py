@@ -20,7 +20,7 @@ residual-equivalence upgrade that would make this a proof is deferred.
 """
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import spot
 
@@ -113,19 +113,38 @@ def verify_omega(
     return (_decide(pattern, p), pattern)
 
 
-def verify(aut: "spot.twa_graph", w: Witness) -> Tuple[Optional[bool], List[bool]]:
-    """Check a `Witness` against `aut` by membership, dispatching on its shape
-    (linear `u.v^n.x` or ω-power `u.(v^n.y)^w`). Returns `(ok, pattern)`;
-    `(None, [])` when the family is incomplete (nothing to replay), which the
-    caller reads as "no checkable witness", not a failure."""
+def samples(w: Witness) -> Optional[List[str]]:
+    """The sampled words of a complete `Witness` for n = 0..2p, per its shape —
+    linear `u.v^n.x` or ω-power `u.(v^n.y)^w` — as lasso strings; `None` when the
+    family is incomplete (nothing to replay)."""
     if not w.complete:
-        return (None, [])
+        return None
     if w.omega_power:
-        return verify_omega(aut, u=w.u or [], v=w.v, y=w.y or [], p=w.p)
-    return verify_suggestive(
-        aut, u=w.u or [], v=w.v,
-        x_prefix=w.x_prefix or [], x_cycle=w.x_cycle or [], p=w.p,
-    )
+        return [_sample_word_omega(w.u or [], w.v, n, w.y or [])
+                for n in range(2 * w.p + 1)]
+    return [_sample_word(w.u or [], w.v, n, w.x_prefix or [], w.x_cycle or [])
+            for n in range(2 * w.p + 1)]
+
+
+def verify_with(
+    member_of: "Callable[[str], bool]", w: Witness
+) -> Tuple[Optional[bool], List[bool]]:
+    """Check a `Witness` through an arbitrary membership predicate (one lasso
+    string in, its membership out). Lets a caller replay against a language it
+    can only query compositionally (e.g. the connective of a split's parts).
+    Returns `(ok, pattern)`; `(None, [])` on an incomplete family."""
+    words = samples(w)
+    if words is None:
+        return (None, [])
+    pattern = [member_of(word) for word in words]
+    return (_decide(pattern, w.p), pattern)
+
+
+def verify(aut: "spot.twa_graph", w: Witness) -> Tuple[Optional[bool], List[bool]]:
+    """Check a `Witness` against `aut` by membership, dispatching on its shape.
+    Returns `(ok, pattern)`; `(None, [])` when the family is incomplete, which the
+    caller reads as "no checkable witness", not a failure."""
+    return verify_with(lambda word: member(aut, word), w)
 
 
 __all__ = ["member", "verify_suggestive", "verify_omega", "verify"]
