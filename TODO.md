@@ -6,6 +6,16 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
 
 ## Corpora / test harness
 
+- **`counting_buchi_1ap_07`: investigate the r3-simplify runtime degradation; try to
+  bound it.** After moving to the stronger (r3-containment) `tl_simplifier`, this one
+  kinska/counting input went from a 10 s build (DAG 47) to a **90 s** build (DAG 48) —
+  it pays the full r3 cost for *no* size gain, unlike the rest of the counting family
+  (whose DAGs roughly halved). Not a hang and not a validation failure: it completes,
+  but blows the survey's per-example budget so the reference CSV records `TIMEOUT`.
+  Profile which simplify/containment call spends the ~80 s and see if it can be bounded
+  (time/effort cap on r3 containment) without losing the corpus-wide wins. Until then
+  this is an **accepted new Pareto point** (size ↓ across the family, runtime ↑ on this
+  one), and the reference runs reflect it.
 - **Finer per-Spot-call control (decouple construction-translate from verify).**
   Surfaced by the `deep_nobls` @1000 genaut run (research_notes/roundtrip_log.md): the
   round trip's `ltl2tgba` calls are guarded only by a *flat-size* proxy
