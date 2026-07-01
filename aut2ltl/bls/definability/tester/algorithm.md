@@ -93,7 +93,7 @@ deterministic Büchi recognizers: the *last-letter* encoding (aperiodic) and the
 `TM`). The two mark different transition sets on every run yet agree in the
 limit — modular counts collapse to thresholds at infinity (`Σ⌊kᵢ/2⌋ = ∞ ⟺
 kᵢ ≥ 2 infinitely often`). Fixtures:
-`samples/fixtures/hoa/various/gf_aa.hoa` / `gf_aa_parity.hoa`.
+`samples/fixtures/hoa/definability/gf_aa.hoa` / `gf_aa_parity.hoa`.
 
 Hence a non-aperiodic reading is a **suspicion at any size**, minimal or not.
 Promoting it to a verdict is the witness's job.
@@ -101,7 +101,7 @@ Promoting it to a verdict is the witness's job.
 ## The verdict pair
 
 ```
-label_ltl_definable(L)  →  (definable, conclusive)
+label_ltl_definable(L)  →  (definable, conclusive)        definable ∈ {True, False, None}
 ```
 
 - `definable = True` — `TM(D)` is aperiodic. **A proof** that `L` is LTL
@@ -116,6 +116,15 @@ label_ltl_definable(L)  →  (definable, conclusive)
     construction, faithful-or-decline — remain free to answer. A wrong absorbing
     rejection is thereby impossible; the cost of a spurious group is bounded by
     the loss of the cascade on that input.
+- `definable = None` — the oracle **could not run** (too many APs for a
+  tractable letter set, a GAP error/timeout). Nothing was read in either
+  direction. The gate treats it exactly as an uncertified suspicion — a
+  non-absorbing decline, the cascade never built — with its own reason and no
+  `PROBABLY_NOT_LTL` marker (no group was read, so no suspicion is asserted).
+  One fence for everything the gate cannot certify: the cascade builds **only**
+  behind a proved-aperiodic reading, by construction — never on the hope that
+  whatever blocked the oracle would block the cascade too (the two share
+  machinery today, but soundness must not rest on an implementation quirk).
 - `conclusive` — whether the form was actually SAT-minimized (`n ≤` the
   threshold). It grades the *diagnosis prose* only. It is **not** proof-grade
   for rejection — see the negative direction: the `GF(a ∧ Xa)` run-parity form
@@ -132,22 +141,15 @@ language — so it reads as non-aperiodic even when the language is LTL. The
 generic-acceptance form carries no such counter; it removes *this* artefact
 (though, per the negative direction, not every encoding artefact).
 
-## When the oracle cannot run (the tester abstains)
+## When the oracle cannot run
 
 When the oracle cannot run at all — too many APs to extract a tractable letter
-set, or a GAP error/timeout — the tester returns `(definable=True,
-conclusive=False)`: it neither rejects a possibly definable language over an
-extraction limit nor asserts definability as fact, so the cascade is attempted
-rather than the language rejected unseen. This abstention preserves soundness:
-the tester and the cascade share the same machinery (`extract_generators`, GAP),
-so a failure that blocks the cheap aperiodicity check also blocks the cascade's
-holonomy, which runs the same extraction and a larger GAP job — on such inputs
-the cascade declines rather than building, and no wrong formula can result.
-
-Note the two abstentions are distinct and must not be conflated: *oracle-cannot-
-run* lets the cascade try (the failure will repeat there, harmlessly);
-*suspicion-uncertified* (`PROBABLY_NOT_LTL`, decided at the gate) forbids the
-cascade and lets only the other translators try.
+set, or a GAP error/timeout — the tester returns `(definable=None,
+conclusive=False)`: it fabricates neither a rejection nor a definability claim.
+The gate's fence is then the same as for an uncertified suspicion (decline,
+never build), differing only in the stated reason. The invariant this buys is
+simple and implementation-independent: **the cascade builds only behind a
+proved-aperiodic reading** — there is no path on which it runs unvouched-for.
 
 ## Caching
 
