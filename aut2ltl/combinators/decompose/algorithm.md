@@ -34,9 +34,11 @@ falls back), and otherwise the part-formulas are joined by `∧`/`∨`.
 A part's `NOT_LTL` is a verdict about the **part's** language, and non-LTL-ness
 survives *neither* connective: a non-LTL part intersected or unioned with another can
 yield an LTL whole (the counting can be erased by the other part). So a `NOT_LTL`
-crossing the combine must not be trusted — it is **revalidated against `L` itself**
-(`aut2ltl.verifier.revalidated`): the carried counting family is replayed by
-membership on this level's input.
+crossing the combine must not be trusted — it is **revalidated against `L` itself**,
+queried through the parts (`aut2ltl.verifier.revalidated_by_parts`): faithfulness
+means membership of any word in `L` IS the connective of its memberships in the
+parts, so the replay runs part-sized queries only — no product or determinization of
+`L` is ever built (the empty fold identifies the connective: `∧([]) = tt`).
 
 - **replays** — the family toggles on `L` directly, so the verdict is valid *here*,
   minimality- and composition-independent: keep the absorbing `NOT_LTL` (now
