@@ -43,10 +43,15 @@ parts, so the replay runs part-sized queries only — no product or determinizat
 - **replays** — the family toggles on `L` directly, so the verdict is valid *here*,
   minimality- and composition-independent: keep the absorbing `NOT_LTL` (now
   certified at this level).
-- **does not replay** (or no complete family) — degrade to a **non-absorbing
-  decline** carrying a `PROBABLY_NOT_LTL` diagnosis: no verdict is asserted, the
-  recipe falls back, and another arm (e.g. the gate on `L` itself) may still certify
-  or answer.
+- **does not replay** (or no complete family) — try the **reseed** (an injected
+  callable, engine-side: `bls/definability/witness/reseed.py`): re-complete a
+  family for `L` itself, seeded by the crossed family's group element `v` — no
+  GAP, the host's cached deterministic form plus the bounded two-shape completion.
+  A reseeded family is replayed through the parts like any other before being
+  asserted as this level's certified `NOT_LTL`.
+- **nothing certifies** — degrade to a **non-absorbing decline** carrying a
+  `PROBABLY_NOT_LTL` diagnosis: no verdict is asserted, the recipe falls back, and
+  another arm (e.g. the gate on `L` itself) may still certify or answer.
 
 This is the enforcement of the lift rule in
 `bls/definability/witness/algorithm.md` (Lifting): a certificate is only ever

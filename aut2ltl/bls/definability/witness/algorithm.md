@@ -187,6 +187,23 @@ the lifting translator:
   cross: the `decompose` combine (strength / acceptance / scc) and each peeler's
   `prefix()` lift (daisy / daisy2 / daisystardet).
 
+## Reseeding a crossed verdict (recovery without GAP)
+
+When a boundary filter rejects a crossed family, the *verdict* may still hold for
+the host — the composition merely masked the certificate's toggle (both parts of an
+intersection can be genuinely non-LTL while neither family survives whole). The
+recovery re-runs completion **on the host's own form, seeded by the crossed
+family's group element**: GAP's only contribution was the period word `v`, and `v`
+survives the crossing as concrete letters. The host re-expresses `v` over its
+`det_generic_minimal()` letter generators (one consistent concretization per cube)
+and runs the same linear-then-ω-power completion there (`reseed.py`). A family
+found this way is a first-class host certificate — same concrete closure, same
+replay obligation — and it is replayed at the boundary before being asserted;
+nothing found leaves the degraded decline standing. No GAP call and no holonomy:
+the cost is the host's (cached) deterministic form plus the bounded completion
+search. The decompose brick receives the reseed as an **injected callable**, so
+the combinator floor stays free of engine imports.
+
 ## Scope
 
 The family is the readable narration of an underlying proof object — the closed
