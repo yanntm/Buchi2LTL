@@ -13,7 +13,8 @@ family replays against `lang`), and the CLI (`python3 -m aut2ltl.verifier INPUT
 """
 from __future__ import annotations
 
-from .check import member, verify, verify_omega, verify_suggestive
-from .revalidate import revalidated
+from .check import member, verify, verify_omega, verify_suggestive, verify_with
+from .revalidate import revalidated, revalidated_by_parts
 
-__all__ = ["member", "verify", "verify_omega", "verify_suggestive", "revalidated"]
+__all__ = ["member", "verify", "verify_omega", "verify_suggestive", "verify_with",
+           "revalidated", "revalidated_by_parts"]
