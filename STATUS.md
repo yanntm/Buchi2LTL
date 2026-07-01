@@ -9,22 +9,21 @@ The project **works**: it does what the [root README](README.md) claims — read
 and giving a checkable witness when the language is not LTL-definable. Sound on the
 correctness gate.
 
-The non-LTL **witness is now a first-class, checked result**: the front end emits it
-as a machine-readable line on stdout (`NOT_LTL: p=… u=… v=… x=…`, kind-tagged like
-`LTL: <formula>`), a standalone `aut2ltl/verifier/` package replays it against the
-input automaton (membership only — acceptance-agnostic), and the survey runs that
-verifier to fill the `validation` cell of every NOT_LTL row (same TRUE/FAIL/TIMEOUT
-vocabulary as LTL; a new `check_s` column times it).
-
-A **peeler now lifts the witness back across its peel**: when a decomposer consumes a
-prefix before reaching the NOT_LTL core, it prepends the consumed word to the witness
-anchor `u` (`LTLResult.prefix` + `Witness.prepend`) and stamps its own technique on the
-verdict. `daisy`, `daisy2` (a single stem guard) and `daisystardet` (a reaching word
-through the SCC) are lifted; the kinska `counting/2ap` cluster — the former FAIL target —
-now validates TRUE, and both grafted fixtures
-(`samples/validation/hoa/prefix_nonltl_{1,2}.hoa`) pass. **Open:** no other peeler has
-been observed emitting a NOT_LTL witness; any that does gets the same lift; see `TODO.md`
-and `nonltl.md`.
+The **NOT_LTL verdict is now fail-safe and certified** (phase 3, 2026-07-01/02): the
+definability gate absorbs only on a counting family it has replayed in-process against
+its input; anything less (spurious group, unrunnable oracle) is a non-absorbing decline
+that fences the cascade and lets other translators answer — a wrong absorbing rejection
+is impossible by construction. The witness comes in **two shapes** — linear `u·vⁿ·x`
+and ω-power `u·(vⁿ·y)^ω` (required for prefix-independent languages, where every
+linear family is provably constant) — completed exhaustively (all orbits × all phase
+pairs; enriched-monoid candidates) and serialized/replayed by `aut2ltl/verifier/`,
+which the survey runs on every NOT_LTL row. A NOT_LTL crossing a language boundary
+(the `decompose` combine, a daisy-family peel) is **revalidated against the host
+language** or degraded to a decline. Key fixtures:
+`samples/fixtures/hoa/definability/` (`gf_aa_parity` — the spurious-group false
+reject, now declined; `evenblocks_nonltl` — ω-power-only counting). Remaining fronts
+(seam refinements, parent completion without GAP, cascade self-fence, counter-free
+sibling search): `TODO.md` and root `witness3.md`.
 
 ## How to work in it
 
