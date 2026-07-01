@@ -54,7 +54,7 @@ prefix-independent (`σw ∈ L ⟺ w ∈ L` for every finite `σ`), then
 have residual exactly `L`, so no tail can separate any two of them.
 Prefix-independent non-LTL languages exist — e.g. *"infinitely many `¬a` and
 eventually every `a`-block has even length"*
-(`samples/fixtures/hoa/various/evenblocks_nonltl.hoa`), whose count is exhibited
+(`samples/fixtures/hoa/definability/evenblocks_nonltl.hoa`), whose count is exhibited
 by the ω-power family `(aⁿ·¬a)^ω` and by no linear one. The ω-power shape is a
 requirement, not an optimization.
 
