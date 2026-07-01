@@ -14,13 +14,18 @@ Everything that is not a `NOT_LTL` passes through untouched.
 """
 from __future__ import annotations
 
-from typing import Callable, List, TYPE_CHECKING
+from typing import Callable, List, Optional, TYPE_CHECKING
 
 from aut2ltl.result import LTLResult
 from .check import member, verify_with
 
 if TYPE_CHECKING:
     from aut2ltl.language import Language
+    from aut2ltl.witness import Witness
+
+# Engine-side recovery hook: complete a fresh family for the host from a crossed
+# family's group element (see bls/definability/witness/reseed.py).
+Reseed = Callable[["Witness", "Language"], "Optional[Witness]"]
 
 
 def _degraded(res: "LTLResult") -> "LTLResult":
@@ -63,18 +68,49 @@ def revalidated(res: "LTLResult", lang: "Language") -> "LTLResult":
 
 
 def revalidated_by_parts(
-    res: "LTLResult", parts: List["Language"], conjunctive: bool
+    res: "LTLResult",
+    parts: List["Language"],
+    conjunctive: bool,
+    *,
+    host: "Optional[Language]" = None,
+    reseed: "Optional[Reseed]" = None,
 ) -> "LTLResult":
     """`revalidated` for a host whose language is the conjunction (`∧`) or
     disjunction (`∨`) of `parts` — a faithful split, so membership of any word in
     the host IS the connective of its memberships in the parts. The replay runs
-    part-sized queries only; no host product or determinization is ever built."""
+    part-sized queries only; no host product or determinization is ever built.
+
+    Optional recovery: when the crossed family fails and a `reseed` callable is
+    injected (engine-side, `reseed(witness, host) -> Optional[Witness]`), a fresh
+    family completed for `host` from the crossed group element is tried and — if
+    it replays through the same parts — asserted as this level's certified
+    `NOT_LTL` (provenance kept). Nothing certifies ⇒ the degraded decline."""
+    if not res.not_ltl:
+        return res
     combine = all if conjunctive else any
 
     def member_of(word: str) -> bool:
         return combine(member(p.tgba(), word) for p in parts)
 
-    return _filtered(res, member_of)
+    kept = _filtered(res, member_of)
+    if kept.not_ltl or reseed is None or host is None or res.witness is None:
+        return kept
+    try:
+        w2 = reseed(res.witness, host)
+        if w2 is not None and w2.complete:
+            ok, _pattern = verify_with(member_of, w2)
+            if ok:
+                return LTLResult.not_definable(
+                    f"the language counts modulo {w2.p}: a counting family "
+                    "reseeded from a crossed verdict's group element, certified "
+                    "by replay through the split parts — no counter-free LTL "
+                    "formula can express this, so the language is not "
+                    "LTL-definable",
+                    *res.technique, witness=w2,
+                )
+    except Exception:
+        pass
+    return kept
 
 
 __all__ = ["revalidated", "revalidated_by_parts"]
