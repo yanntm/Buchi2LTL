@@ -88,7 +88,31 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
 
 ## Open
 
-- **Condition the hard NOT_LTL verdict on an actually-completed witness (soundness).**
+- **Non-LTL phase 3 — remaining fronts** (fixes 1–4 landed 2026-07-01/02: fail-safe
+  gate with certified-or-decline + oracle fence; exhaustive linear completion; the
+  ω-power witness shape; boundary revalidation at decompose + the daisy peels — see
+  `docs/HISTORY.md` and root `witness3.md` for the full state):
+  - **Seam refinements**: decompose revalidation via the parts algebra (membership
+    per child + connective — no parent-sized product); daisy petal-drop exactness
+    lift (restrict the lifted guard to `g ∧ ¬σ ∧ ⋀¬g_sib`, BDD-only, no replay).
+  - **Parent completion seeded by the child's `v`** (no GAP on the whole): when the
+    parts algebra fails at a decomposer, re-run linear/ω-power completion on the
+    parent's det form with the child-provided group element — recovers certified
+    rejections for evenblocks-class inputs (both children non-LTL, families masked
+    by the intersection).
+  - **Cascade self-fence**: decline on a group component inside the holonomy parse
+    (today it is misread as a reset). Makes bls sound on ANY form by construction;
+    the gate becomes an optimization; closes the generic-vs-sbacc form gap.
+  - **Route B (completeness on spurious groups)**: exhibit a counter-free recognizer
+    (SAT search with an aperiodicity constraint / alternate determinizations) — a
+    definitive "is LTL" for the abstain zone (the `gf_aa_parity` / genaut `00332`
+    class), and the form that re-enables the cascade there.
+  - **Housekeeping**: rerun genaut `2state1ap1acc` clean (the 2026-07-01 background
+    run mixed two code states); refresh the validation/kinska/benchmark references
+    (NOT_LTL rows changed technique and some verdicts became declines); fold the
+    durable conclusions of `witness3.md` into the algorithm docs.
+- **(superseded — kept for context) Condition the hard NOT_LTL verdict on an
+  actually-completed witness (soundness).**
   `bls/definability/gate.py` currently emits an absorbing, "proof"-labelled `NOT_LTL`
   keyed on `label_ltl_definable` (aperiodicity + SAT-min) alone; the witness is
   decorative (`gate.py:85`). But in the ω-setting `TM`-aperiodic ⟹ LTL is the only sound
