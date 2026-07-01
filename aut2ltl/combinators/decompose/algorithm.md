@@ -19,7 +19,7 @@ splits (strength, acceptance, scc) live in `aut2ltl/decomp/` and supply them.
 
 ```
 decompose(split, connective, tag)(child) = Λ
-  where  Λ(L) =  combine(connective, tag, [ child(Lᵢ)  for Lᵢ in split(L) ])
+  where  Λ(L) =  revalidate( combine(connective, tag, [ child(Lᵢ)  for Lᵢ in split(L) ]), L )
 
 combine(connective, tag, parts):
     if any part declined            → ⊥        -- the whole decomposition declines
@@ -28,6 +28,27 @@ combine(connective, tag, parts):
 
 So a part that the child cannot label collapses the decomposition to `⊥` (the recipe
 falls back), and otherwise the part-formulas are joined by `∧`/`∨`.
+
+## The NOT_LTL crossing (revalidate-or-degrade)
+
+A part's `NOT_LTL` is a verdict about the **part's** language, and non-LTL-ness
+survives *neither* connective: a non-LTL part intersected or unioned with another can
+yield an LTL whole (the counting can be erased by the other part). So a `NOT_LTL`
+crossing the combine must not be trusted — it is **revalidated against `L` itself**
+(`aut2ltl.verifier.revalidated`): the carried counting family is replayed by
+membership on this level's input.
+
+- **replays** — the family toggles on `L` directly, so the verdict is valid *here*,
+  minimality- and composition-independent: keep the absorbing `NOT_LTL` (now
+  certified at this level).
+- **does not replay** (or no complete family) — degrade to a **non-absorbing
+  decline** carrying a `PROBABLY_NOT_LTL` diagnosis: no verdict is asserted, the
+  recipe falls back, and another arm (e.g. the gate on `L` itself) may still certify
+  or answer.
+
+This is the enforcement of the lift rule in
+`bls/definability/witness/algorithm.md` (Lifting): a certificate is only ever
+asserted against the language it was replayed on.
 
 ## Faithfulness
 
