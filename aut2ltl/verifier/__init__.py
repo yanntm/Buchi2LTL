@@ -12,6 +12,6 @@ INPUT "NOT_LTL p=3 u=[] v=[a; a] x=[cycle{!a}]"`).
 """
 from __future__ import annotations
 
-from .check import member, verify, verify_suggestive
+from .check import member, verify, verify_omega, verify_suggestive
 
-__all__ = ["member", "verify", "verify_suggestive"]
+__all__ = ["member", "verify", "verify_omega", "verify_suggestive"]
