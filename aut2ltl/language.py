@@ -180,11 +180,12 @@ class Language:
         self._source_formula: Optional["spot.formula"] = formula
         self._id: Optional[str] = lid          # browsable id, stamped by of/of_ltl
         self._cache: dict = {}
-        # LTL-definability verdict (definable, conclusive), or None until decided.
+        # LTL-definability reading (definable, conclusive), or None until decided
+        # (`definable` itself is Optional: None = the oracle could not run).
         # A PROPERTY of the language, but derived by the kr LtlTester (the GAP
         # aperiodicity oracle lives above this floor); Language only HOLDS the
         # tag — see `ltl_definable` / `set_ltl_definable`.
-        self._ltl_definable: Optional[Tuple[bool, bool]] = None
+        self._ltl_definable: Optional[Tuple[Optional[bool], bool]] = None
 
     # --- constructors (the only entry points) ---
 
@@ -335,19 +336,22 @@ class Language:
     #     not derived here — the GAP aperiodicity oracle lives above this floor) ---
 
     @property
-    def ltl_definable(self) -> Optional[Tuple[bool, bool]]:
-        """The cached LTL-definability verdict as `(definable, conclusive)`, or
+    def ltl_definable(self) -> Optional[Tuple[Optional[bool], bool]]:
+        """The cached LTL-definability reading as `(definable, conclusive)`, or
         `None` if not yet decided. `definable` is True iff an LTL formula exists
-        for this language (its syntactic monoid is aperiodic / counter-free);
-        `conclusive` is True iff the verdict is a proof (decided on a genuinely
-        state-minimal automaton) rather than a strong hint. Filled by the kr
-        LtlTester via `set_ltl_definable`; Language never computes it itself
-        (that would invert the floor -> kr layering)."""
+        for this language (the transition monoid of a deterministic form is
+        aperiodic — a proof), False iff that monoid carries a group (a suspicion,
+        not a proof — see the definability package), and None when the oracle
+        could not run at all (extraction/GAP failure): unable to certify either
+        way. `conclusive` records whether the form was genuinely state-minimal.
+        Filled by the kr LtlTester via `set_ltl_definable`; Language never
+        computes it itself (that would invert the floor -> kr layering)."""
         return self._ltl_definable
 
-    def set_ltl_definable(self, definable: bool, *, conclusive: bool) -> None:
-        """Record the LTL-definability verdict for this language (idempotent
-        memo). Called by the kr LtlTester after the aperiodicity oracle runs."""
+    def set_ltl_definable(self, definable: Optional[bool], *, conclusive: bool) -> None:
+        """Record the LTL-definability reading for this language (idempotent
+        memo; `definable=None` = the oracle could not run). Called by the kr
+        LtlTester after the aperiodicity oracle runs."""
         self._ltl_definable = (definable, conclusive)
 
 
