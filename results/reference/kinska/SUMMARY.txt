@@ -1,5 +1,6 @@
+CSV: logs/rerun/kinska/survey_20260701_193835.csv
 survey: 165 inputs  (--use default)
-aut2ltl: 99 LTL, 63 not-LTL  |  declined 0, timeout 3, crash 0
-validation: 162 TRUE, 0 FAIL, 0 not checked (size/timeout/error)
-totals: DAG=572 temporals=93 build=187.995s
+aut2ltl: 98 LTL, 63 not-LTL  |  declined 0, timeout 4, crash 0
+validation: 161 TRUE, 0 FAIL, 0 not checked (size/timeout/error)
+totals: DAG=444 temporals=74 build=172.273s
 SUCCESS
