@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Callable, List, TYPE_CHECKING
+from typing import Callable, List, Optional, TYPE_CHECKING
 
 import spot
 
@@ -24,6 +24,7 @@ from aut2ltl.result import LTLResult, fuse
 from aut2ltl.printer import format_language, format_result
 from aut2ltl.ltl.builders import own_simplify
 from aut2ltl.verifier import revalidated_by_parts
+from aut2ltl.verifier.revalidate import Reseed
 
 if TYPE_CHECKING:
     from aut2ltl.translator import Translator, Decorator
@@ -53,13 +54,18 @@ def combine(connective: "Connective", tag: str, parts: List["LTLResult"]) -> "LT
     return res
 
 
-def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator":
+def decompose(
+    split: "Split", connective: "Connective", tag: str,
+    reseed: "Optional[Reseed]" = None,
+) -> "Decorator":
     """The shared decomposition shape as a `Decorator` (`leaf -> Translator`): split the
     language; if it splits, recurse on each strictly-smaller piece and `combine` the
     parts under `connective`; else delegate the whole language to `leaf`. `recurse` ties
     the knot (each piece is labelled the same way); termination rests on `split` handing
     back strictly-smaller pieces. Sound by construction (every part is faithful-or-NOK).
-    Adds `<tag><k>` to the technique and forwards the parts' techniques (via `combine`)."""
+    Adds `<tag><k>` to the technique and forwards the parts' techniques (via `combine`).
+    An optional engine-side `reseed` recovers a crossed NOT_LTL whose family the parts
+    replay rejects (see algorithm.md, The NOT_LTL crossing)."""
     # The empty fold identifies the connective (`And([]) = tt`, `Or([]) = ff`) —
     # which is also how the parts-replay combines memberships (∧ → all, ∨ → any).
     conjunctive = bool(connective([]).is_tt())
@@ -96,7 +102,8 @@ def decompose(split: "Split", connective: "Connective", tag: str) -> "Decorator"
                 # is faithful) — else degrade to a non-absorbing decline (see
                 # algorithm.md, The NOT_LTL crossing).
                 res = revalidated_by_parts(combine(connective, tag, parts),
-                                           subs, conjunctive)
+                                           subs, conjunctive,
+                                           host=lang, reseed=reseed)
                 if _TRACE:
                     print(f"[{tag}] out " + format_result(res), file=sys.stderr)
                 return res
