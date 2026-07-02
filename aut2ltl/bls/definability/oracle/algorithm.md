@@ -247,18 +247,73 @@ directly. Nothing in the congruence or the extraction depends on elements
 being enumerated explicitly — only on (a) closure, (b) the per-element seed,
 (c) split bookkeeping.
 
-## Modules (design)
+## Architecture (design)
 
-- `congruence.py` — the residual classes `≃`, the profiles `Aprof`, the
-  right-refinement with split records, and the retrieval of a separating
-  `(q, b, base difference)` triple for a given element pair.
-- `oracle.py` — the entry: pull and complete the form, run the screen,
-  materialize `EM` under the cap, seed, refine, power-iterate; on a group,
-  assemble the family from the split chain, replay, and return the
-  three-outcome verdict.
+One module per role, each small and autonomous: it owns one algorithmic step
+and one data shape, consumes value objects from the modules above it, and can
+be exercised alone. The entry point owns **no algorithm** — only sequencing,
+caps, and the three-outcome verdict; caps are policy and live there alone, so
+every worker is a pure, total function of what it is handed.
 
-The enriched monoid (elements, composition, shortest-representative BFS) is a
-shared primitive of the `definability` package.
+```
+                 D  (the completed deterministic form)
+                      │
+       ┌──────────────┴────────────────┐
+  residuals.py                     closure.py
+  the ~lin base                    the recognizer
+       │                               │
+       │                          profile.py
+       │                          the ~ω seed
+       └──────────────┬────────────────┘
+                  refine.py
+                  the congruence
+                      │
+                 quotient.py
+                  the algebra
+                      │
+                  family.py
+                 the certificate
+                      │
+                  oracle.py ──► aut2ltl/verifier (replay)
+                  the entry
+```
+
+- **`enriched.py`** — *the element*: the `(st, mk)` vector value, composition,
+  the letter elements, the identity, hashing. A shared primitive of the
+  `definability` package rather than of this module.
+- **`closure.py`** — *the recognizer*: BFS from the letter generators under
+  the size budget it is handed; yields the element set, one shortest
+  representative per element, and the right-multiplication-by-letter images
+  the refiner consumes.
+- **`residuals.py`** — *the `~lin` base*: the state equivalence `≃` (eager:
+  `|Q|²` bounded product checks, once, no monoid involved) and on-demand
+  separator extraction — the ultimately-periodic word distinguishing two
+  inequivalent states is computed only for the one pair extraction ends on,
+  never precomputed.
+- **`profile.py`** — *the `~ω` seed*: the `A(q, c)` walk (orbit, cycle marks,
+  condition evaluation) and the per-element profile, memoized along orbits.
+- **`refine.py`** — *the congruence*: the seed partition (`≃`-vector,
+  `Aprof`), right-letter splitting to fixpoint, and the split records. Its
+  second face is retrieval: chase the records for a given element pair down
+  to a concrete `(q, b, base difference)`.
+- **`quotient.py`** — *the algebra*: the classes as a semigroup
+  (multiplication through representatives), power-iteration, the aperiodicity
+  verdict — and on failure, a group class with its period.
+- **`family.py`** — *the certificate*: from `(v, p, q, b, base difference)` to
+  a floor `Witness` of the matching shape — reach word, separator tail or
+  return word, index absorption, declared period. It knows nothing of
+  partitions or monoids beyond the words it is given.
+- **`oracle.py`** — *the entry*, and the only impure module: pull and complete
+  the form, run the screen (the transition-monoid reading, reused from the
+  package), sequence the pipeline, own every cap and timeout, map each
+  failure to its INCONCLUSIVE reason, hand the family to replay, return the
+  verdict.
+
+The data flowing between modules is a handful of small value objects — the
+element, the closed monoid, the state classes, the profile table, the
+partition with its records, the group class, the `Witness` — so each seam is
+a typed contract and each module is testable against fixtures without the
+ones above it.
 
 ## Layering
 
