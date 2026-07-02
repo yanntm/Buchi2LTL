@@ -32,11 +32,11 @@ State-based acceptance is the setting this transcription can read: it identifies
 the state is occupied, including across a self-loop stretch — transcribe directly,
 whereas transition-level marks on self-loops leave no letter-visible trace.
 
-anchor applies at the SCC `C` of the initial state `h = q0`. Being initial, `C`
-has no incoming edge from outside: every reachable state descends from `h`, so an
-edge back into `C` would enlarge the component. Runs therefore *start* in `C` and
-each run leaves it at most once — an SCC, once left, is never re-entered. No size
-is assumed: a single-state `C` is a border case that falls into line below.
+anchor applies at the SCC `C` of the initial state `q0`. Being initial, `C` has no
+incoming edge from outside: every reachable state descends from `q0`, so an edge
+back into `C` would enlarge the component. Runs therefore *start* in `C` and each
+run leaves it at most once — an SCC, once left, is never re-entered. No size is
+assumed: a single-state `C` is a border case that falls into line below.
 
 ## The labels
 
@@ -65,10 +65,16 @@ moves, anchors, or other exits. Nondeterminism *toward an exit* is absorbed by
 disjunction — each exit is one more way to accept, never a constraint on the
 others.
 
-## Step 1 — the loop-free read-off
+The construction is presented in three layers, each relaxing the previous one —
+first a closed, loop-free component, then exits, then loops — and each layer's
+formula survives verbatim as a degenerate case of the next, so every part can be
+audited on its own.
 
-Assume first that `C` has **no self-loops**: `L(s) = false`, so `I(s) = A(s)` and
-every letter read inside `C` moves the run. Require one test:
+## Step 1 — the loop-free, exit-free read-off
+
+Assume first that `C` is the whole automaton and moves are all there is: no exits
+(`E(s) = ∅`) and no self-loops (`L(s) = false`, so `I(s) = A(s)`). Every run lives
+in `C` forever and every letter moves the run. Require one test:
 
 - **P1 — anchors partition.** The `A(s)` are pairwise disjoint:
   `A(s) ∧ A(t) = false` for `s ≠ t`.
@@ -78,44 +84,61 @@ the run names its destination uniquely. LTL, which has no state, can now track t
 run — each letter *promises* the next step:
 
 ```
-step      =  ⋀_{s ∈ C} ( A(s) → X M(s) )                 -- the transition law, per position
-fair_i    =  GF( ⋁_{s ∈ F_i} A(s) )                      -- F_i is entered infinitely often
+step    =  ⋀_{s ∈ C} ( A(s) → X M(s) )                 -- the transition law, per position
+fair_i  =  GF( ⋁_{s ∈ F_i} A(s) )                      -- F_i is entered infinitely often
 
-STAY∞     =  M(h)  ∧  G step  ∧  ⋀_{i=1..m} fair_i
-
-leave(s)  =  ⋁_{(g,d) ∈ E(s)} ( g ∧ X φ_d )              -- take an exit, child continues
-LEAVE     =  leave(h)  ∨  ( M(h) ∧ ( step U ⋁_{s ∈ C} ( A(s) ∧ X leave(s) ) ) )
-
-Final     =  STAY∞ ∨ LEAVE
+STAY∞   =  M(q0)  ∧  G step  ∧  ⋀_{i=1..m} fair_i
 ```
 
-with `φ_d = Λ(of(A↓d))` the child label of exit target `d` (`A↓d` the
-sub-automaton rooted at `d`, rewrapped as a `Language` by `of(·)`).
-
-- **The anchor at position 0.** Position 0 has no incoming letter; the input
-  itself fixes the phase to `h`, so the first letter must be a move available at
-  `h` — `M(h)` in `STAY∞`, an exit or `M(h)` in `LEAVE`.
+- **The steady regime, and the start.** `G step` describes the *steady* regime:
+  each state's constraint is triggered by the anchor that just entered it. But
+  `q0` itself is never entered — position 0 has no incoming letter — so nothing
+  anchors the start, and the steady law alone would over-approximate the
+  language. The conjunct `M(q0)` supplies the missing anchoring: the *input*
+  places the run at `q0`, and the first letter must be a move actually available
+  there.
 - **The law chains itself.** A letter in `M(s)` lies on an actual edge `s → t`,
   hence in `A(t)` for that `t` — unique by P1 — whose own implication in `step`
   takes over. Legality comes from the consequence (`X M(s)` constrains the next
   letter to a real edge of the occupied state); identification comes from the
   trigger (P1 makes the trigger fire exactly at its target).
-- **`G` versus `U`.** `step` is the *per-position* law. `STAY∞` runs it forever;
-  `LEAVE` runs it only up to the final anchor — the `U` both iterates the law and
-  marks where it stops applying, so the exit letter is never constrained by a law
-  it is about to escape. `LEAVE`'s first disjunct is the run that exits straight
-  from `h` at position 0.
 - **Fairness transcribes visits.** "The run is at `s` at position `i ≥ 1`" ⟺
   "letter `i−1` fired `A(s)`"; `GF` being shift-invariant, "visit `F_i`
   infinitely often" is `GF(⋁_{s∈F_i} A(s))`.
 
-## Step 2 — layering the loops
+## Step 2 — relaxing E: exits
+
+Reinstate the exits (still loop-free). A run now either stays in `C` forever —
+`STAY∞` above, unchanged: its anchors and moves are in-`C` by construction, so it
+still confines the run — or leaves `C` exactly once, through some exit edge. The
+leaving runs get their own branch, with `φ_d = Λ(of(A↓d))` the child label of
+exit target `d` (`A↓d` the sub-automaton rooted at `d`, rewrapped as a `Language`
+by `of(·)`):
+
+```
+leave(s)  =  ⋁_{(g,d) ∈ E(s)} ( g ∧ X φ_d )            -- take an exit, child continues
+
+LEAVE     =  leave(q0)  ∨  ( M(q0) ∧ ( step U ⋁_{s ∈ C} ( A(s) ∧ X leave(s) ) ) )
+
+Final     =  STAY∞ ∨ LEAVE
+```
+
+- **`G` versus `U`.** `step` is the *per-position* law. `STAY∞` runs it forever;
+  `LEAVE` runs it only up to the final anchor — the `U` both iterates the law and
+  marks where it stops applying, so the exit letter is never constrained by a law
+  it is about to escape.
+- **Two ways out.** The first disjunct exits straight from `q0` at position 0
+  (again the start needs its own case: no anchor precedes it); the second
+  traverses — the `M(q0)` anchoring, the law until a *last* anchor into the
+  exiting state, then that state's exit.
+
+## Step 3 — relaxing L: layering the loops
 
 Now reinstate the self-loops. A letter in `L(s)` read at `s` does not move the
 run, so the phase is no longer a function of the last letter — but it *is* a
 function of the **last anchor**: the state entered by the last moving letter,
 unchanged by the loop letters read since. That recovery needs one test beyond P1
-(which now constrains only the anchors, not the full inputs):
+(which constrains only the anchors, not the full inputs):
 
 - **P2 — loop letters never fake an anchor elsewhere.**
   `L(s) ∧ A(t) = false` for `s ≠ t`. A letter that loops somewhere is not an
@@ -143,15 +166,15 @@ Several facts are *derived*, not assumed:
   (A letter on an edge `u → t` that also loops at an unrelated `s` leaves each
   machine step deterministic, yet is ambiguous to the observer; P2 rules exactly
   this out.)
-- **Step 1's condition is strictly subsumed.** If the full inputs `I(s)` are
-  pairwise disjoint, P1 and P2 hold a fortiori. The converse fails on any
+- **The loop-free condition is strictly subsumed.** If the full inputs `I(s)`
+  are pairwise disjoint, P1 and P2 hold a fortiori. The converse fails on any
   component with a shared idle letter (see the worked example).
 
 **The phase lemma.** Under P1 + P2, at every position of a word whose run has
 stayed in `C`, the occupied state is the target of the last anchor letter read,
 and every letter since that anchor is a loop letter of that state. (Positions
-before any anchor behave as if a *virtual anchor into `h`* were read at position
-−1 — the input places the run at `h` without consuming a letter.) In past
+before any anchor behave as if a *virtual anchor into `q0`* were read at position
+−1 — the input places the run at `q0` without consuming a letter.) In past
 temporal logic the phase is `L(s) S A(s)`; pure-future LTL transcribes the same
 information forward: each anchor promises the **stretch** that follows it, and an
 unbounded stretch of loop letters is compressed by a single `W`/`U` — bounded
@@ -164,8 +187,8 @@ edge at some position. `STAY∞` transcribes the unique in-`C` run being infinit
 and accepting; `LEAVE` transcribes some branch exiting into an accepting
 continuation. Their union is everything an accepting run can do.
 
-Each Step 1 piece generalizes by absorbing a stretch: the promised next move
-`X M(s)` becomes a promised *sojourn* `X( L(s) W M(s) )`; the immediate exit
+Each piece of Steps 1–2 generalizes by absorbing a stretch: the promised next
+move `X M(s)` becomes a promised *sojourn* `X( L(s) W M(s) )`; the immediate exit
 becomes loop-then-exit; fairness gains the runs that eventually stop moving.
 
 ## The label
@@ -174,19 +197,22 @@ becomes loop-then-exit; fairness gains the runs that eventually stop moving.
 sojourn(s)  =  L(s) W M(s)                                -- loop at s, then move on (or park)
 step        =  ⋀_{s ∈ C} ( A(s) → X sojourn(s) )          -- the anchored transition law
 park(s)     =  A(s) ∧ XG L(s)                             -- a final anchor into s, then loop forever
-F_∩         =  ⋂_{i=1..m} F_i                             -- the states where parking accepts
+F_all       =  { s : s ∈ F_i for every i }                -- the states where parking accepts
 
 fair        =  ⋀_{i=1..m} GF( ⋁_{s ∈ F_i} A(s) )          -- every color anchored infinitely often,
-            ∨  ⋁_{s ∈ F_∩ ∩ C} F park(s)                  --   or park on a state carrying every color,
-            ∨  G L(h)               (when h ∈ F_∩)        --   or park on h from position 0
+            ∨  ⋁_{s ∈ F_all ∩ C} F park(s)                --   or park on a state carrying every color,
+            ∨  [ q0 ∈ F_all ] ∧ G L(q0)                   --   or park on q0 from position 0
 
-STAY∞       =  sojourn(h)  ∧  G step  ∧  fair
+STAY∞       =  sojourn(q0)  ∧  G step  ∧  fair
 
 leave(s)    =  L(s) U ⋁_{(g,d) ∈ E(s)} ( g ∧ X φ_d )      -- loop at s, then take an exit
-LEAVE       =  leave(h)  ∨  ( sojourn(h) ∧ ( step U ⋁_{s ∈ C} ( A(s) ∧ X leave(s) ) ) )
+LEAVE       =  leave(q0)  ∨  ( sojourn(q0) ∧ ( step U ⋁_{s ∈ C} ( A(s) ∧ X leave(s) ) ) )
 
 Final       =  STAY∞ ∨ LEAVE
 ```
+
+`[ q0 ∈ F_all ]` is a construction-time test, not a temporal subformula: when
+`q0` carries every color the disjunct is `G L(q0)`, otherwise it is dropped.
 
 ### The moves
 
@@ -203,17 +229,16 @@ Final       =  STAY∞ ∨ LEAVE
   finite and opened by an anchor, so "visit `F_i` infinitely often" is "anchor
   into `F_i` infinitely often" — for *every* color at once, the first disjunct.
   If it parks at `s`, the colors it visits infinitely often are exactly the
-  colors of `s` — accepting iff `s` carries **every** color, i.e. `s ∈ F_∩`. So
-  only `F_∩`-states need a park term; a run parking anywhere else is simply not
+  colors of `s` — accepting iff `s` carries **every** color, i.e. `s ∈ F_all`. So
+  only `F_all`-states need a park term; a run parking anywhere else is simply not
   accepting, and needs no formula to say so. `park(s)` is letter-exact: after
   `A(s)`, letters in `G L(s)` can fire no foreign anchor (P2), so the run
-  provably never moves again. The third disjunct is `park(h)` for the virtual
-  anchor — the run that never moves at all.
+  provably never moves again. The third disjunct is `park(q0)` under the virtual
+  anchor — the run that never moves at all, fair only when `q0` itself carries
+  every color.
 - **Leave.** `leave(s)` looks finitely many loop letters ahead (strong `U`), then
-  asserts an exit guard now and the child label next. `LEAVE`'s first disjunct
-  exits straight out of the hub's initial stretch, never anchoring; the second
-  traverses — hub sojourn, law until a *last* anchor into the exiting state, then
-  `leave` there.
+  asserts an exit guard now and the child label next, exactly as in Step 2 with
+  the stretch absorbed.
 
 The two branches share everything but the wrapper — one component read twice, as
 a place to *live* (`G` + fairness) and as a place to *cross* (`U` to an exit).
@@ -225,12 +250,12 @@ size scale with the states and edges of `C`, not with the alphabet.
 The one equation covers every regime; no dispatch precedes it.
 
 - **No self-loops**: `sojourn(s)` collapses to `M(s)`, `leave(s)` to the
-  immediate exit, `park` and `G L(h)` to `false` — Step 1 verbatim.
+  immediate exit, the park terms to `false` — Steps 1–2 verbatim.
 - **`C` rejecting.** For state-based generalized Büchi inside one SCC, rejecting
   means some color misses `C` entirely (`F_i ∩ C = ∅` — a strongly connected
   component can cycle through any states it owns, so it accepts iff it owns a
   state of every color). Then the first `fair` disjunct contains `GF(false)` and
-  `F_∩ ∩ C = ∅` empties the park terms: `fair = false`, `STAY∞ = false`, and
+  `F_all ∩ C = ∅` empties the park terms: `fair = false`, `STAY∞ = false`, and
   `Final = LEAVE` — the traversal regime, with no rejecting-SCC test anywhere.
 - **`C` terminal** (no exits): every `E(s)` is empty, `leave(s) = false`, so
   `LEAVE = false` and `Final = STAY∞` — the steady-state regime, with no
@@ -239,10 +264,10 @@ The one equation covers every regime; no dispatch precedes it.
   language is empty.
 - **`C` accepting *and* exiting**: nothing to do — both branches live, the
   component shared between them rather than split upstream and duplicated.
-- **`|C| = 1`**: anchors and moves are empty, so `sojourn(h) = G L(h)`,
+- **`|C| = 1`**: anchors and moves are empty, so `sojourn(q0) = G L(q0)`,
   `step = true`, the `U` in `LEAVE`'s second disjunct has a `false` right arm,
-  and `Final = ( G L(h) when h ∈ F_∩ ) ∨ leave(h)` — loop forever on a state
-  carrying every color, or loop then exit. The border case falls into line.
+  and `Final = ( G L(q0) when q0 ∈ F_all ) ∨ leave(q0)` — loop forever on a
+  state carrying every color, or loop then exit. The border case falls into line.
 - **`m = 0`**: the first `fair` disjunct is an empty conjunction, `fair = true`;
   `STAY∞` is the bare anchored safety skeleton.
 
@@ -257,9 +282,9 @@ State 0 {F_1}:   [!a | b] → 0     [a & !b] → 1
 State 1:         [!b]     → 1     [b]      → 0
 ```
 
-One terminal SCC, `h = 0`. The full inputs **overlap**: `I(0) = !a | b` and
+One terminal SCC, `q0 = 0`. The full inputs **overlap**: `I(0) = !a | b` and
 `I(1) = !b` share the idle letter `!a & !b` — both states wait on it — so the
-Step 1 read-off declines. The anchor split:
+loop-free read-off declines. The anchor split:
 
 ```
 L(0) = !a | b     A(0) = b          M(0) = a & !b     E(0) = ∅
@@ -270,10 +295,10 @@ P1: `A(0) ∧ A(1) = b ∧ (a & !b) = false`. P2: `L(0) ∧ A(1) = false`,
 `L(1) ∧ A(0) = false`. (The exempt overlap even occurs: `L(1) ∧ A(1) = a & !b ≠
 false` — read at 1 it loops at 1, read at 0 it moves to 1; either way the run is
 at 1 next.) The component is terminal, so `LEAVE = false`; with `F_1 = {0}`,
-`F_∩ = {0}`, the read-off is
+`F_all = {0}`, the read-off is
 
 ```
-Final =  ( (!a | b) W (a & !b) )                          -- hub sojourn
+Final =  ( (!a | b) W (a & !b) )                          -- q0's sojourn
       ∧  G( b → X( (!a | b) W (a & !b) ) )                -- the only live step (sojourn(1) ≡ true)
       ∧  ( GF b  ∨  F( b ∧ XG(!a | b) )  ∨  G(!a | b) )   -- fair: anchor 0 i.o., or park on 0
 ```
@@ -291,25 +316,26 @@ with no oracle. The three legs:
 - **Uniqueness.** The phase lemma: within `C` a word has at most one run, and
   every run of the word is that walk or a branch of it through an exit edge.
 - **Completeness.** An accepting run either stays in `C` forever or leaves it
-  exactly once. Staying: its anchors and stretches satisfy `sojourn(h)` and every
-  `step` trigger (a stretch letter can fire only its own state's anchor, by P2;
-  an anchor letter fires exactly its target's, by P1), and its color visits fall
-  into the moving-forever / parked dichotomy that `fair` transcribes. Leaving
-  from the hub stretch: `leave(h)`. Leaving after at least one anchor: the prefix
-  walk satisfies `step` up to the final anchor (strictly earlier sojourns end in
-  genuine moves), and the final anchor-plus-`leave` is the `U`'s witness.
+  exactly once. Staying: its anchors and stretches satisfy `sojourn(q0)` and
+  every `step` trigger (a stretch letter can fire only its own state's anchor, by
+  P2; an anchor letter fires exactly its target's, by P1), and its color visits
+  fall into the moving-forever / parked dichotomy that `fair` transcribes.
+  Leaving from `q0`'s stretch: `leave(q0)`. Leaving after at least one anchor:
+  the prefix walk satisfies `step` up to the final anchor (strictly earlier
+  sojourns end in genuine moves), and the final anchor-plus-`leave` is the `U`'s
+  witness.
 - **Soundness.** Conversely, the formula *forces* a run, by induction along the
-  word. `sojourn(h)` (the virtual anchor's stretch) starts the run at `h`; each
+  word. `sojourn(q0)` (the virtual anchor's stretch) starts the run at `q0`; each
   active sojourn confines the next letter to `L` of the current state (an actual
   self-loop) or `M` (an actual out-edge, entering the unique state whose anchor
   it fires, where `step`'s next trigger takes over). In `STAY∞`, each `fair`
   disjunct certifies the acceptance of *that* run: an anchor firing puts the run
   at its target, so the first disjunct yields real visits to every color when the
   run keeps moving — and if it parks at `s`, only `A(s)` can fire past the park
-  (P2), so all colors anchored infinitely often forces `s ∈ F_∩`, accepting
-  again; a park term pins the run on its `F_∩`-state forever. In `LEAVE`, the law
-  holds strictly before the `U`'s witness position, so the final anchor is still
-  constrained by the last active sojourn (it must be a legal move), and
+  (P2), so all colors anchored infinitely often forces `s ∈ F_all`, accepting
+  again; a park term pins the run on its `F_all`-state forever. In `LEAVE`, the
+  law holds strictly before the `U`'s witness position, so the final anchor is
+  still constrained by the last active sojourn (it must be a legal move), and
   `leave(s)` walks actual self-loops to an actual exit edge, after which `φ_d`
   asserts the continuation lies in `L(A↓d)`. Every step is an edge of `A`; the
   assembled path *is* a run.
@@ -327,7 +353,7 @@ context-free production composes; anchor never inspects a child's formula.
 An exit child may return `NotLTL(w)`: the residue `of(A↓d)` is not LTL-definable,
 witnessed by a counting family `w` anchored at `d`. anchor propagates the verdict
 (absorbing, taken before any decline) and lifts `w` to `L`'s initial state by
-prepending a **reaching word** to the family's `u`: one path `h ⟶* s ⟶(g) d`
+prepending a **reaching word** to the family's `u`: one path `q0 ⟶* s ⟶(g) d`
 through `C`, each step's guard **restricted to the letters enabling no edge to a
 different target** from its source — so the word has a single continuation at
 every step and its left quotient *is* the residue (star-free, hence LTL, is
@@ -365,7 +391,7 @@ state-preserving stutter that LTL absorbs with a single `W`/`U` per stretch.
 Where a local (or 1-definite — Perles, Rabin & Shamir 1963) automaton's phase is
 a function of the last *letter*, anchor's is a function of the last *anchor* —
 "definite modulo stuttering". The read-off itself is the local-language
-characterization transcribed to ω-words: allowed first letters (the hub sojourn),
+characterization transcribed to ω-words: allowed first letters (`q0`'s sojourn),
 allowed digrams (`step`), and, in place of allowed final letters, the fairness of
 what recurs forever.
 
