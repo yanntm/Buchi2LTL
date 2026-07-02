@@ -10,3 +10,8 @@ folders, these are not generated from an `ltl/` list.
 - `gafb_response.hoa` — the minimal DBA of `G(a → Fb)`; terminal SCC whose two
   states share the idle letter `!a & !b` on their self-loops. The `algorithm.md`
   worked example.
+- `park_drop.hoa` — three-state terminal SCC where the park-subsumption drop
+  fires: the sole accepting state has `L = A = a & b`, so its `F park` term is
+  redundant and the built `fair` is the bare `GF(a & b)`; states 0 and 1 share
+  the idle letter `!a & !b`, keeping the loop-free read-off out. (`gafb`'s park
+  is the non-droppable contrast: `L(0) = !a | b ⊄ A(0) = b`.)
