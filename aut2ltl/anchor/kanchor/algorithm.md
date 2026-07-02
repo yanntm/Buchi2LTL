@@ -7,9 +7,10 @@ recovers the phase from the **last letter that moved the run**; k-anchor
 recovers it from the last **k adjacent letters**, still modulo stuttering —
 "k-definite modulo stuttering". This document is the k = 2 construction;
 general k is a mechanical iteration noted at the end. The package is a
-submodule of `aut2ltl/anchor/` — the concepts are kept separate until the
-pair version demonstrably subsumes the letter version without added
-complexity.
+submodule of `aut2ltl/anchor/`; the section *k as a parameter* shows the
+letter version to be the k = 1 level of this same construction — one
+graded brick, anchor's label being the level where the truncated sets
+fall off.
 
 The design avoids one trap. "The last k *anchors*, with loop stretches
 between them" does not work: the stretches are unbounded, so the trigger
@@ -42,12 +43,17 @@ as separate one-letter guards under `X`.
   `s ≠ t`.
 - **P2² — staying pairs never fake an entry elsewhere.**
   `Stay₂(s) ∧ Enter₂(t) = false` for `s ≠ t`.
-- **P0² — the start is 0-step-anchored.** `q0`'s out-edges toward distinct
-  targets have pairwise disjoint guards. Position 0 has no predecessor
-  letter, so no pair exists there: the entry into the component is governed
-  by the guard alone — a **0-step anchor**, the input playing the virtual
-  source. This is the whole start policy of this version: the run enters
-  the transcription only at position 0, only through a 0-step anchor.
+- **P0² — the start is 0-step-anchored.** `q0`'s **in-`C`** out-edges
+  toward distinct targets have pairwise disjoint guards. The self-loop
+  counts as a target (a loop/move overlap at position 0 is machine
+  nondeterminism, which no window can recover); exit edges do **not** —
+  exit nondeterminism is absorbed by disjunction here as everywhere,
+  `start` never ranges over exits, and a word exiting at position 0 is
+  `leave(q0)`'s business. Position 0 has no predecessor letter, so no pair
+  exists there: the entry into the component is governed by the guard
+  alone — a **0-step anchor**, the input playing the virtual source. This
+  is the whole start policy of this version: the run enters the
+  transcription only at position 0, only through a 0-step anchor.
 
 `Stay₂(s) ∧ Stay₂(t) ≠ false` is allowed — that overlap *is* the stuttering
 tolerance (two states waiting on shared idle pairs), resolved below by the
@@ -57,10 +63,10 @@ like k=1's `L(s) ∧ A(s)`: either reading lands the run at `s`.
 **k = 1 implies k = 2.** P1/P2 give P1²/P2² componentwise on the second
 coordinate (`Enter₂(s) ⊆ Σ × A(s)`, `Stay₂(s) ⊆ Σ × L(s)`), and P0²
 follows from P1 (guards into distinct targets sit in disjoint anchors) plus
-P2 (loop vs. move at `q0`). So the k hierarchy is monotone: try k
-incrementally and keep the smallest that passes — the k=1 label is tighter
-(per-state conjuncts, one `X` less), so anchor remains the preferred
-producer and kanchor fires only where it declines.
+P2 (loop vs. move at `q0`). So the k hierarchy is monotone and the ladder
+well-founded: the brick adopts the smallest level whose tests pass — every
+level's label is exact, so first-fit needs no gate (see *k as a parameter*
+below).
 
 ## Derived facts (the k=1 mechanism, one level up)
 
@@ -94,7 +100,15 @@ The lemma has a corollary the label leans on: a `step₂` trigger may fire on
 a *spurious* source (`w_i ∈ I(v)` while the run sits elsewhere), but the
 promise it makes is then true anyway — the pair is in `Enter₂(s)`, so the
 run is at `s` regardless of which edge the trigger named. Spurious firings
-are harmless, not forbidden.
+are harmless, not forbidden. The corollary is stronger than a convenience:
+it is the **license for the only law LTL can state**. A trigger cannot be
+conditioned on "the run is at `v`" — the phase is what the formula is
+*transcribing*, not something it can consult — so any per-edge law is
+necessarily eager, firing on every pair that merely looks like the edge.
+P1² and P2² are exactly the price of that eagerness: they force every
+look-alike pair to tell the same truth about the next state, so the eager
+law is not an over-approximation that happens to be tolerable — it *is*
+the transcription, and no tighter law exists to compare it against.
 
 ## The label
 
@@ -167,16 +181,50 @@ what makes it one. A one-line BDD test in the builder. At k=1 this is why
 `!b W b` survives in the gafb label; at k=2 it is what lets the worked
 example below emit no law at all.
 
+## k as a parameter — one graded construction
+
+The letter and pair constructions are one production graded by the window
+width `k`; nothing in the label is hand-matched between levels.
+
+- **Windows.** An entry at position `p` has `p` letters of history.
+  Positions `p ≥ k` use **full windows**: `k` adjacent letters,
+  `I`-weakened context components, the entering guard last. Positions
+  `0 < p < k` use **truncated windows rooted at `q0`**: actual paths of
+  length `p` out of `q0`, the certainty of being at `q0` at time 0
+  standing in for the missing context letters. `p = 0` is the run that
+  never entered anything — `sojourn(q0)` and the `G L(q0)` park, present
+  at every level.
+- **The trigger table.** Each window class contributes entries
+  `(trigger, offset, target)`. Full windows generate the `G`-wrapped law
+  (`trigger → X^offset sojourn(target)`), the `GF` fairness disjuncts, the
+  park terms (`trigger ∧ X^offset G L(target)`) and the `LEAVE` witnesses
+  (`trigger ∧ X^offset leave(target)`); truncated windows generate the
+  same four shapes one-shot — `start`, the truncated park disjuncts, the
+  truncated leave disjuncts — instead of `G`-wrapped. The label above is
+  this table written out at k = 2.
+- **k = 1 is the level where the truncation falls off.** The range
+  `0 < p < 1` is empty — no `start`, no truncated park or leave; full
+  triggers carry no context component, so they group per target state
+  (`⋁ g = A(s)`) at offset 1, and what remains is
+  [anchor's label](../algorithm.md), clause for clause. The letter
+  version is not a special case bolted underneath; it is this construction
+  at k = 1, reached because the truncated sets are empty, not because a
+  branch tests for it.
+- **Graded preconditions.** P1ᵏ/P2ᵏ on the full windows, one partition
+  test per truncated class (P0² is the single k = 2 instance); level k
+  passing implies level k + 1 passing. The brick tries k = 1, 2, … to a
+  small cap and adopts the first level that passes; the park drop is the
+  same test (`Stay_k ⊆ Enter_k`) at every level.
+
 ## Degenerate cases
 
 anchor's regime analysis carries over verbatim — rejecting `C` empties
 `fair₂`, terminal `C` empties `LEAVE`, `m = 0` trivializes the `GF`
 conjunction, and no dispatch precedes the equation. Two cases are specific:
 
-- **k = 1 passes:** the pair label is also exact but strictly larger
-  (per-edge conjuncts, one more `X`); the portfolio takes anchor's label
-  and kanchor is never consulted. By monotonicity this includes `|C| = 1`
-  (no pairs, no start — the border case never reaches us).
+- **k = 1 passes:** the truncated sets are empty and the trigger table
+  degenerates to anchor's — the label is the k = 1 read-off verbatim (see
+  *k as a parameter*). By monotonicity this includes `|C| = 1`.
 - **No self-loops:** every `Stay₂` is empty, `I(s) = A(s)`, and the
   construction is the plain 2-definite (local-on-digrams) read-off, the
   loop-free layer of the k=1 document lifted one letter.
@@ -270,8 +318,9 @@ stutter abstraction that keeps the window rigid over unbounded sojourns.
   daisy-style peel can reabsorb) would dissolve P0² and `start` into the
   general case. An automaton surgery, secondary to the main point of
   multi-step anchors; noted, not taken.
-- **Subsumption of anchor** (whether the pair label ever beats the letter
-  label where both apply, and whether the packages merge) is a portfolio
-  A/B question, not this production's.
+- **Measurement.** Corpus behavior — label sizes, which levels fire in
+  practice, whether a higher level ever simplifies better where a lower
+  one also passes — is another session's concern; this construction is
+  validated on crafted fixtures.
 - **Form dependence**, exactly as at k=1: the tests run on one automaton
   form; which forms to try is the portfolio's decision.
