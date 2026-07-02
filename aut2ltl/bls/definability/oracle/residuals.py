@@ -2,11 +2,12 @@
 bls/definability/oracle/residuals.py — the `~lin` base: residual classes of states.
 
 Two states of a deterministic ω-automaton are residual-equivalent when they
-accept the same ω-language. The equivalence is computed eagerly (one
-language-equivalence check per state × existing class, on the small
-deterministic form); the *separator* — an ultimately-periodic word accepted
-from exactly one of two inequivalent states — is extracted on demand only,
-for the single pair a certificate ends on.
+accept the same ω-language. The equivalence is computed eagerly by Spot's
+`language_map` — the exact primitive: one dualized complement per state
+(cheap on a deterministic form), pairwise on-the-fly intersection checks
+against one representative per class. The *separator* — an ultimately-periodic
+word accepted from exactly one of two inequivalent states — is extracted on
+demand only, for the single pair a certificate ends on.
 """
 from __future__ import annotations
 
@@ -17,32 +18,12 @@ import spot
 from ..witness.support import copy_with_init
 
 
-def _equivalent(a: "spot.twa_graph", b: "spot.twa_graph") -> bool:
-    """Language equality of two automata (both containments)."""
-    if hasattr(spot, "are_equivalent"):
-        return bool(spot.are_equivalent(a, b))
-    return bool(spot.contains(a, b)) and bool(spot.contains(b, a))
-
-
 def state_classes(aut: "spot.twa_graph") -> List[int]:
     """The residual class of every state: `out[q] == out[q']` iff the languages
-    accepted from `q` and `q'` are equal. Class ids are dense, in order of
-    first appearance."""
-    n = aut.num_states()
-    rooted = [copy_with_init(aut, q) for q in range(n)]
-    classes: List[int] = []
-    reps: List[int] = []  # one state per class, in class-id order
-    for q in range(n):
-        hit: Optional[int] = None
-        for cid, r in enumerate(reps):
-            if _equivalent(rooted[q], rooted[r]):
-                hit = cid
-                break
-        if hit is None:
-            hit = len(reps)
-            reps.append(q)
-        classes.append(hit)
-    return classes
+    accepted from `q` and `q'` are equal (`spot.language_map`; the class id is
+    the smallest state index recognizing the language — stable labels, not
+    dense ones)."""
+    return list(spot.language_map(aut))
 
 
 def separator(
