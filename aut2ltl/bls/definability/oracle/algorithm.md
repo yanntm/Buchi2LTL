@@ -205,8 +205,9 @@ right-multiplication.
    `element × letter → element` as a by-product. Blowing the cap is
    **INCONCLUSIVE**.
 2. **Residual classes.** Compute `≃` on `Q` — `q ≃ q′` iff `L(q) = L(q′)` —
-   one language-equivalence check per state × existing class (products on the
-   small deterministic form), once, before any monoid-sized work. The `~lin`
+   once, before any monoid-sized work. Spot ships the exact primitive
+   (`language_map`, deterministic input): one dualized complement per state,
+   one on-the-fly intersection check per state × existing class. The `~lin`
    class of an element is then read directly off its vector — the tuple
    `(q ↦ [st_e(q)]_≃)` — with no refinement on this side. The *separator*
    between two inequivalent states (an ultimately-periodic word accepted from
@@ -474,7 +475,7 @@ every worker is a pure, total function of what it is handed.
 - **`closure.py`** — *the recognizer* (layer 6.1): BFS under the size budget
   it is handed; the element set, shortest representatives, the right table.
 - **`residuals.py`** — *the `~lin` base* (layer 6.2): the state equivalence
-  `≃` eagerly, the separator on demand.
+  `≃` eagerly (delegated to `spot.language_map`), the separator on demand.
 - **`profile.py`** — *the `~ω` seed* (layer 6.3): the `A(q, c)` walk and the
   per-element profile.
 - **`refine.py`** — *the congruence* (layer 6.4): seed partition,
