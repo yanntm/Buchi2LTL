@@ -115,10 +115,13 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   - **Cascade self-fence**: decline on a group component inside the holonomy parse
     (today it is misread as a reset). Makes bls sound on ANY form by construction;
     the gate becomes an optimization; closes the generic-vs-sbacc form gap.
-  - **Route B (completeness on spurious groups)**: exhibit a counter-free recognizer
-    (SAT search with an aperiodicity constraint / alternate determinizations) — a
-    definitive "is LTL" for the abstain zone (the `gf_aa_parity` / genaut `00332`
-    class), and the form that re-enables the cascade there.
+  - **Route B (completeness on spurious groups) — SUPERSEDED by the exact oracle**
+    (`bls/definability/oracle/`, landed 2026-07-02): the syntactic-ω-semigroup
+    quotient decides the abstain zone exactly (`gf_aa_parity` → definitive LTL, no
+    SAT search needed). **Remaining: wire the oracle into the gate** — replace the
+    `PROBABLY_NOT_LTL` decline branch with a `decide()` call (tester screen stays
+    the fast path), pick the `em_cap` policy, then refresh the reference CSVs
+    (declines become verdicts on both sides).
   - **Housekeeping**: rerun genaut `2state1ap1acc` clean (the 2026-07-01 background
     run mixed two code states); refresh the validation/kinska/benchmark references
     (NOT_LTL rows changed technique and some verdicts became declines); fold the
