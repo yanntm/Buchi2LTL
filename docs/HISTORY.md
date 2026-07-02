@@ -2452,3 +2452,40 @@ WHY/WHAT landed this session:
   split parts; single clean diagnosis). prefix_nonltl_{1,2}, mod3_a, gf_aa_parity
   unchanged. Full validation survey on this exact state deferred to next session
   (fixture battery green; the previous two states each passed 83/83 TRUE).
+
+## 2026-07-02 — the anchor algorithm: designed, documented, implemented, wired
+
+Session outcome: a new exact translator, `aut2ltl/anchor`, fusing `partscc`
+(terminal input-deterministic SCC) and `daisystardet` (rejecting exiting one)
+into ONE equation `Final = STAY∞ ∨ LEAVE` and strictly extending them: the
+input-determinism precondition weakens to ANCHORED recoverability (P1 anchors
+partition, P2 loop letters fake no foreign anchor), so shared idle letters on
+self-loops — the response-formula shape, `G(a→Fb)` — stop killing the read-off.
+Phase = target of the last anchor; stretches compressed by W/U; fairness
+restructured around parking via `F_all` (only states carrying every color get a
+park term). Rejecting/terminal/accepting-with-exits/singleton all fall out as
+degeneracies, no dispatch, no equivalence gate (exact by construction).
+
+- DOCS-FIRST: `aut2ltl/anchor/algorithm.md` written and reviewed over three
+  rounds (standalone presentation, L/A/M/E labels, three-layer construction:
+  loop-free+exit-free → relax E → relax L; q0 anchoring motivated; F_all with
+  the construction-time `[q0 ∈ F_all]` guard). Fixture set
+  `samples/fixtures/hoa/anchor/` (gafb_response.hoa, the motivator: anchored
+  but NOT input-deterministic).
+- CODE: `anchor/{shape,formula,lift,anchor}.py` (+ probe
+  `tests/probes/anchor_probe.py`, child = the self-fixpoint Λ = Anchor(Λ)).
+  Spot-verified equivalent on gafb, t2 l3/l6, fairness_example,
+  collapse_example; mod3_a correctly declines on P1.
+- RECIPES: `deep_memo` (the deep_nobls_memo TODO wiring gap FIXED: cakedsdet
+  seed inlined and depth-wrapped on the ONE store; rich arm ≡ nobls so the
+  seed's rich arm and the deep arm are one shared instance — measurement still
+  open) and `deep_anchor` (the A/B copy: Daisy → Simplify(Anchor,hi) → Daisy2
+  → Daisystar, PartScc floors gone, incumbent floors on bare bls). Validation
+  gate SUCCESS (83 TRUE). Apples-to-apples on gafb: anchor 17 tree nodes/9ms
+  vs bls 26/1.04s; daisy2's gated form is smaller (6) — ordering data for the
+  A/B, plus first own-rule candidate F(p ∧ X(p U q)) ≡ F(p ∧ Xq) (TODO'd).
+- Fairness trichotomy is irredundant in general (separating words per term);
+  BDD-checkable drop condition noted: park(s) is subsumed by the GF term when
+  L(s) ⊆ A(s) (every loop letter of s also anchors s).
+- NEXT: A/B deep_memo vs deep_anchor on the corpora; memo hit-rate
+  measurement; own-simplify rules; then retire `partscc/` + `daisystardet/`.
