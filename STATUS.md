@@ -25,6 +25,14 @@ reject, now declined; `evenblocks_nonltl` — ω-power-only counting). Remaining
 (seam refinements, parent completion without GAP, cascade self-fence, counter-free
 sibling search): `TODO.md` and root `witness3.md`.
 
+The **exact definability oracle** landed (2026-07-02,
+`aut2ltl/bls/definability/oracle/` — read its `algorithm.md`): it computes the
+syntactic ω-semigroup as a quotient of the acceptance-enriched monoid and decides
+*both* directions — `gf_aa_parity` (the spurious-group abstain class) now gets a
+definitive **LTL**, and NOT_LTL families fall out of the quotient constructively
+(no search). Standalone component, validated on the definability fixtures; **not
+yet wired into the gate**.
+
 ## How to work in it
 
 - The project is **large**. You will be pointed at the part in play — stay there;
