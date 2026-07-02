@@ -30,7 +30,8 @@ formula ──context(+now hook +ctx_subsume)──▶ fold ──▶ factor ─
   BDD→ISOP), gated by `KR_SIMP_OWN_FACTOR` (the one census-non-monotone pass).
 - **`fold_pass.py`** — Rule 4: unroll-inverse folding (the expansion laws backwards,
   the `W`/`M`/`R`/`U` quartet, G/F absorption, sibling-subsumption, `_gffg_cofactor`,
-  the arm rules) + `ctx_subsume`. Gated by `KR_SIMP_OWN_FOLD`.
+  the arm rules, slide-to-last `F(h ∧ X(p U q)) → F(h ∧ Xq)` + dual) + `ctx_subsume`.
+  Gated by `KR_SIMP_OWN_FOLD`.
 - **`__init__.py`** — the combined `simplify(f)` pipeline and the memoized per-node
   fixpoint `simplify_node(f)` the construction calls (`_simp_f`).
 
@@ -46,7 +47,7 @@ Wired into the construction pipeline since 2026-06-12: `_simp_f` calls `simplify
 per DAG node (`KR_SIMP_OWN`, size cap `KR_SIMP_OWN_LIMIT`); `KR_SIMP_OWN_FOLD=0` /
 `KR_SIMP_OWN_FACTOR=0` disable rules 4 / 3.
 
-## Testing (`tests/bls/simplify/`)
+## Testing (`tests/probes/ltl/simplify/`)
 
 Placed scripts, run from project root, under timeout. Every firing validates **language
 equivalence** of input vs output via Spot (`spot.are_equivalent` / both containments) on
@@ -54,6 +55,6 @@ top of any expected-shape check — a rule that fires is PASS only if the rewrit
 equivalence. `test_random_equiv.py` fuzzes it (`[N] [seed] [n_aps] [tree_size]`).
 
 ```
-python3 tests/bls/simplify/test_context_pass.py
-python3 tests/bls/simplify/test_random_equiv.py
+python3 tests/probes/ltl/simplify/test_context_pass.py
+python3 tests/probes/ltl/simplify/test_random_equiv.py
 ```
