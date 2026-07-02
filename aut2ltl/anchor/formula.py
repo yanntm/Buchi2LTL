@@ -81,13 +81,21 @@ def build_final(
     f_all = [s for s in states if len(colors[s]) == m]
     fair_parts = [every_color]
     if m > 0:                                   # m = 0: every_color is already true
+        def park_redundant(s: int) -> bool:
+            # L(s) ⊆ A(s): every letter of a park at s fires s's own anchor, so
+            # the every_color disjunct already covers the parked run. Sound only
+            # because s ∈ F_all — A(s) then witnesses every color's GF at once.
+            return (L[s] & buddy.bdd_not(A[s])) == buddy.bddfalse
+
         fair_parts += [
             _F.And([f(A[s]), _F.X(_F.G(f(L[s])))])       # F park(s) below
             for s in f_all
             if A[s] != buddy.bddfalse and L[s] != buddy.bddfalse
+            and not park_redundant(s)
         ]
         fair_parts = [fair_parts[0]] + [_F.F(p) for p in fair_parts[1:]]
-        if q0 in f_all and L[q0] != buddy.bddfalse:      # [ q0 ∈ F_all ] ∧ G L(q0)
+        if q0 in f_all and L[q0] != buddy.bddfalse \
+                and not park_redundant(q0):              # [ q0 ∈ F_all ] ∧ G L(q0)
             fair_parts.append(_F.G(f(L[q0])))
     fair = _or(fair_parts)
 
