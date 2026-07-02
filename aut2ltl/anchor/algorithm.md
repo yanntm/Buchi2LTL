@@ -214,6 +214,16 @@ Final       =  STAY∞ ∨ LEAVE
 `[ q0 ∈ F_all ]` is a construction-time test, not a temporal subformula: when
 `q0` carries every color the disjunct is `G L(q0)`, otherwise it is dropped.
 
+A park term is also dropped when it is subsumed — another construction-time BDD
+test, no temporal reasoning: if `L(s) ∧ ¬A(s) = false` (every loop letter of
+`s` fires `s`'s own anchor), a run parked at `s` anchors into `s` at every
+position of the park, so the first `fair` disjunct already accepts it — `s ∈
+F_all` carries every color, and `GF A(s)` witnesses each color's `GF` at once.
+The `F park(s)` term for such an `s` is omitted, and the `G L(q0)` disjunct
+likewise when the test holds at `q0` (the parked-at-start run fires `A(q0)`
+from position 0 on). The test is only meaningful on `F_all` states — parking
+elsewhere is not accepting and never had a term.
+
 ### The moves
 
 - **Sojourn** (`L(s) W M(s)`). Having just anchored into `s`, the run loops on
