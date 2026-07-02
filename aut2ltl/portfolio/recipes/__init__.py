@@ -25,6 +25,8 @@ from .cake import cake
 from .cakeds import cakeds
 from .cakedsdet import cakedsdet
 from .nobls import nobls
+from .deep_anchor import deep_anchor
+from .deep_memo import deep_memo
 from .deep_nobls import deep_nobls
 from .deep_nobls_memo import deep_nobls_memo
 from .deep_nobls_sort import deep_nobls_sort
@@ -44,6 +46,8 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
     "cakeds": cakeds,
     "cakedsdet": cakedsdet,
     "nobls": nobls,
+    "deep_anchor": deep_anchor,
+    "deep_memo": deep_memo,
     "deep_nobls": deep_nobls,
     "deep_nobls_memo": deep_nobls_memo,
     "deep_nobls_sort": deep_nobls_sort,
@@ -61,6 +65,7 @@ RECIPES: Dict[str, Callable[[Optional[Options]], Translator]] = {
 RECIPES["default"] = RECIPES["deep_nobls"]
 
 __all__ = ["RECIPES", "best", "best_daisy2", "best_inv", "best_inv_loop",
-           "best_inv_all", "cake", "cakeds", "cakedsdet", "nobls", "deep_nobls",
-           "deep_nobls_memo", "deep_nobls_sort", "deep_nobls_sort_decomp",
-           "roundtrip", "roundtrip_best_recipe", "roundtrip_decomp_recipe"]
+           "best_inv_all", "cake", "cakeds", "cakedsdet", "nobls", "deep_anchor",
+           "deep_memo", "deep_nobls", "deep_nobls_memo", "deep_nobls_sort",
+           "deep_nobls_sort_decomp", "roundtrip", "roundtrip_best_recipe",
+           "roundtrip_decomp_recipe"]
