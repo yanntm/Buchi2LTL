@@ -1,13 +1,14 @@
 # The k-anchor algorithm (k = 2)
 
-A combinator translator extending [anchor](../algorithm.md) — **read that first**:
+A combinator translator extending [anchor](../anchor/algorithm.md) — **read that first**:
 its setting, the L/A/M/E labels, the child/exit machinery, and the proof
 structure are all inherited, and only what changes is stated here. anchor
 recovers the phase from the **last letter that moved the run**; k-anchor
 recovers it from the last **k adjacent letters**, still modulo stuttering —
 "k-definite modulo stuttering". This document is the k = 2 construction;
 general k is a mechanical iteration noted at the end. The package is a
-submodule of `aut2ltl/anchor/`; the section *k as a parameter* shows the
+peer of `aut2ltl/anchor/`, developed on a working copy of its code while
+the incumbent stays frozen; the section *k as a parameter* shows the
 letter version to be the k = 1 level of this same construction — one
 graded brick, anchor's label being the level where the truncated sets
 fall off.
@@ -206,7 +207,7 @@ width `k`; nothing in the label is hand-matched between levels.
   `0 < p < 1` is empty — no `start`, no truncated park or leave; full
   triggers carry no context component, so they group per target state
   (`⋁ g = A(s)`) at offset 1, and what remains is
-  [anchor's label](../algorithm.md), clause for clause. The letter
+  [anchor's label](../anchor/algorithm.md), clause for clause. The letter
   version is not a special case bolted underneath; it is this construction
   at k = 1, reached because the truncated sets are empty, not because a
   branch tests for it.
