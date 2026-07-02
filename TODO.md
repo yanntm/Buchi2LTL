@@ -38,6 +38,11 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   sub-languages (different, uncached instances). To make the memo actually save calls the
   seed must be inlined and depth-wrapped on the same store, like `nobls` (cakedsdet is a
   cake/bls engine, so its primitives differ from the arm's).
+  **Candidate fix landed (2026-07-02, unmeasured): `recipes/deep_memo.py`** — the whole
+  pipeline inlined on one store, and the seed's rich arm and the deep arm are ONE
+  instance (rich ≡ nobls, so they now share entries). The instrumentation/measurement
+  half of this item is still open: run `gate_count.py` / the counting inputs against
+  `--use deep_memo` and read the hit rates.
 - **Finer per-Spot-call control (decouple construction-translate from verify).**
   Surfaced by the `deep_nobls` @1000 genaut run (research_notes/roundtrip_log.md): the
   round trip's `ltl2tgba` calls are guarded only by a *flat-size* proxy
@@ -56,6 +61,13 @@ and the `kr → bls` engine reorg all landed — see HISTORY 2026-06-17.)
   experiments. (Deferred from the survey/tests refactor — see HISTORY 2026-06-23.)
 
 ## Portfolio / combinators
+
+- **Own-simplify rules for anchor-shaped output.** The anchored read-off
+  (`aut2ltl/anchor`, wired in `recipes/deep_anchor.py`) emits machine-shaped
+  patterns Spot's simplifier does not reduce; add targeted O(DAG) own rules.
+  First confirmed candidate: `F(p ∧ X(p U q)) ≡ F(p ∧ X q)` (slide to the last
+  `p` of the block — seen as `F(b & X(b U !a))` vs the default's `F(b & X!a)` on
+  `collapse_example`). Collect more from the deep_memo/deep_anchor A/B diffs.
 
 - **daisystar (non-deterministic case): close the flat `LEAVE`.** For a
   *non-deterministic* rejecting star the flat `daisystar` `LEAVE` reuses daisy2's
